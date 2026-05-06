@@ -772,33 +772,50 @@ OpenClawManager/
 
 ## 9. Plán vývoje (fázový)
 
-### Fáze 1 — v0.1 "Skeleton + Cleaning Tool light" (cíl: ~1.5 týdne)
+### Fáze 1 — v0.1 "Skeleton" — DOKONČENO
+**Datum dokončení:** 5. května 2026
+
+Implementováno:
 - Inicializace projektu (`dotnet new wpf`)
 - Hlavní okno s layoutem (levý panel + pravý placeholder + status bar)
-- Status bar s metrikami (RAM/VRAM/CPU/Gateway)
-- Detekce běžícího Gateway (CIM)
+- Status bar s živými metrikami (RAM/VRAM/CPU/Gateway)
+- Detekce běžícího Gateway (CIM/WMI)
 - Tlačítka Start / Stop / Restart Gateway (externí PowerShell okno)
-- Tlačítko SPUSTIT TUI (Restart Gateway + spustit TUI v externím okně)
-- Tlačítko `doctor --fix` (externí okno)
-- Měření latence (parsing Gateway logu)
-- Settings okno (jen čtení/zápis cest, žádné pokročilé funkce)
-- **Cleaning Tool — light verze** (kroky 1-5, bez sessions.json a bez scheduled task)
-- Token Manager: pouze placeholder ("Coming in v0.4")
+- Tlačítko `doctor --fix`
+- Settings okno (cesty, persistence v %APPDATA%)
+- Menu Otevřít: OpenClaw složku, Temp složku, Gateway log (s submenu pro počet řádků), PowerShell
+- Architektura: Models / Services / Views
 
-**Akceptační kritéria v0.1:**
-- Aplikace se spustí, layout je správný
-- Gateway lze přes aplikaci spustit, zastavit, restartovat
-- Klik SPUSTIT TUI správně provede sekvenci stop → start → tui
-- Status bar zobrazuje aktuální metriky
-- Latence se měří a zobrazují
-- Settings se ukládají a načítají
-- Cleaning Tool umí kroky 1-5 (logy, zálohy, stability, browser cache, locky)
-- Cleaning Tool má dry-run a live log
+Odloženo do v0.2:
+- SPUSTIT TUI sekvence
+- Měření latence
+- Cleaning Tool
 
-### Fáze 2 — v0.2 "Cleaning Tool full"
-- Krok 6 v Cleaning Tool (sessions.json parser, backup + rollback)
+### Fáze 2 — v0.2 "Layout + TUI + Cleaning Tool full"
+Velký rozsah — sloučení co zbylo z v0.1 + plný Cleaning Tool:
+
+**Vizuální změny:**
+- Změna layoutu — sekce "Akce" přesunuta nahoru místo "Gateway"
+- Tlačítko "SPUSTIT OpenClaw TUI (restart Gateway)" — primární akce na vrcholu
+- Sekce "Otevřít" s tlačítky PowerShell + Gateway log v levém panelu
+- Status bar rozšířen o PID a uptime Gateway (info ze zrušené Gateway sekce)
+- Menu "Soubor" přejmenováno na "Otevřít" (zkrácené texty položek)
+- Tlačítka mají Unicode emoji ikony (později nahrazeny vlastními)
+
+**Logika:**
+- LogMonitor service (polling Gateway logu, společný základ pro TUI sequence i měření latencí)
+- SPUSTIT TUI sekvence (Stop Gateway → Start Gateway → čekat na "gateway ready" v logu → spustit TUI v externím okně)
+- Měření latencí (parsing `res` záznamů z Gateway logu, klouzavý průměr 10×)
+
+**Cleaning Tool — kompletní:**
+- Modální okno se 6 checkboxy + slider pro Keep Sessions
+- Implementace kroků 1-5 (mazání souborů)
+- Krok 6 (sessions.json parser, backup + rollback)
 - Scheduled Task management (vypnutí/zapnutí před/po cleanupem)
 - Detekce admin práv + nabídka restartu s admin
+- Dry-run vs. Spustit
+- Live log v okně
+- Detekce běžícího Gateway před cleanupem + dialog
 
 ### Fáze 3 — v0.3 "Embedded TUI"
 - EasyWindowsTerminalControl integrace
