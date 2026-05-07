@@ -9,7 +9,6 @@
 
     <DockPanel Margin="8">
 
-        <!-- Horní panel: info + ovládací prvky -->
         <Grid DockPanel.Dock="Top" Margin="0,0,0,8">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
@@ -22,7 +21,6 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
 
-            <!-- Cesta k logu (info) -->
             <TextBlock Grid.Row="0" Grid.ColumnSpan="4"
                        x:Name="TxtLogPath"
                        FontFamily="Consolas" FontSize="11"
@@ -30,18 +28,17 @@
                        TextWrapping="Wrap"
                        Margin="0,0,0,4" />
 
-            <!-- Volba kolik řádků -->
             <TextBlock Grid.Row="1" Grid.Column="0"
                        Text="Zobrazit:"
                        VerticalAlignment="Center" />
 
             <ComboBox Grid.Row="1" Grid.Column="1"
                       x:Name="CmbLineCount"
-                      Width="140" Height="24"
+                      Width="160" Height="24"
                       VerticalContentAlignment="Center"
                       Margin="8,0">
                 <ComboBoxItem Content="Posledních 10 řádků" Tag="10" />
-                <ComboBoxItem Content="Posledních 20 řádků" Tag="20" IsSelected="True" />
+                <ComboBoxItem Content="Posledních 20 řádků" Tag="20" />
                 <ComboBoxItem Content="Posledních 30 řádků" Tag="30" />
                 <ComboBoxItem Content="Posledních 50 řádků" Tag="50" />
                 <ComboBoxItem Content="Posledních 100 řádků" Tag="100" />
@@ -61,14 +58,12 @@
                     Margin="4,0" />
         </Grid>
 
-        <!-- Status bar -->
         <StatusBar DockPanel.Dock="Bottom" Height="22">
             <StatusBarItem>
                 <TextBlock x:Name="TxtStatus" Text="Připraveno." />
             </StatusBarItem>
         </StatusBar>
 
-        <!-- Hlavní textová oblast -->
         <Border BorderBrush="Gray" BorderThickness="1">
             <TextBox x:Name="TxtLogContent"
                      IsReadOnly="True"

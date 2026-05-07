@@ -7,29 +7,31 @@ namespace OpenClawManager.Views;
 
 /// <summary>
 /// Dialog pro úpravu nastavení aplikace.
-/// Otevírá se přes ShowDialog() z MainWindow (modální).
 /// Po Save vrací DialogResult = true, jinak false.
+///
+/// Při Save se nastavení uloží přes SettingsService.Save() — to automaticky
+/// aktualizuje SettingsService.Current a vyvolá event SettingsChanged.
 /// </summary>
 public partial class SettingsWindow : Window
 {
     private AppSettings _settings;
 
-    public SettingsWindow(AppSettings currentSettings)
+    public SettingsWindow()
     {
         InitializeComponent();
 
         // Klon aktuálních nastavení (uživatel pak může Cancel bez změny originálu)
+        var current = SettingsService.Current;
         _settings = new AppSettings
         {
-            OpenClawPath = currentSettings.OpenClawPath,
-            TempPath = currentSettings.TempPath,
-            OpenClawCommand = currentSettings.OpenClawCommand,
-            PowerShellWorkingDir = currentSettings.PowerShellWorkingDir
+            OpenClawPath = current.OpenClawPath,
+            TempPath = current.TempPath,
+            OpenClawCommand = current.OpenClawCommand,
+            PowerShellWorkingDir = current.PowerShellWorkingDir
         };
 
         LoadToUi();
 
-        // Napojení tlačítek
         BtnSave.Click += BtnSave_Click;
         BtnReset.Click += BtnReset_Click;
         BtnCancel.Click += (_, _) => { DialogResult = false; Close(); };
@@ -38,13 +40,9 @@ public partial class SettingsWindow : Window
         BtnBrowseTemp.Click += (_, _) => BrowseFolder(TxtTempPath);
         BtnBrowsePowerShell.Click += (_, _) => BrowseFolder(TxtPowerShellWorkingDir);
 
-        // Cesta k settings souboru pro info
         TxtSettingsPath.Text = SettingsService.SettingsFilePath;
     }
 
-    /// <summary>
-    /// Načte hodnoty z _settings do textových polí.
-    /// </summary>
     private void LoadToUi()
     {
         TxtOpenClawPath.Text = _settings.OpenClawPath;
@@ -53,9 +51,6 @@ public partial class SettingsWindow : Window
         TxtPowerShellWorkingDir.Text = _settings.PowerShellWorkingDir;
     }
 
-    /// <summary>
-    /// Načte hodnoty z textových polí do _settings (validace).
-    /// </summary>
     private void ReadFromUi()
     {
         _settings.OpenClawPath = TxtOpenClawPath.Text.Trim();
@@ -76,8 +71,6 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        // Vrátíme uložené nastavení do MainWindow přes property
-        SavedSettings = _settings;
         DialogResult = true;
         Close();
     }
@@ -92,16 +85,12 @@ public partial class SettingsWindow : Window
 
         if (result != MessageBoxResult.Yes) return;
 
-        _settings = new AppSettings(); // čerstvá instance s defaulty
+        _settings = new AppSettings();
         LoadToUi();
     }
 
-    /// <summary>
-    /// Zobrazí Folder Picker dialog a vyplní zvolenou cestu do daného textového pole.
-    /// </summary>
     private void BrowseFolder(System.Windows.Controls.TextBox target)
     {
-        // OpenFolderDialog je dostupný od .NET 8
         var dialog = new OpenFolderDialog
         {
             Title = "Vyber složku",
@@ -113,10 +102,4 @@ public partial class SettingsWindow : Window
             target.Text = dialog.FolderName;
         }
     }
-
-    /// <summary>
-    /// Po Save je tady uložené nastavení (nullable — pokud uživatel zrušil, je null).
-    /// MainWindow si po ShowDialog() přečte tuto property pokud DialogResult == true.
-    /// </summary>
-    public AppSettings? SavedSettings { get; private set; }
 }

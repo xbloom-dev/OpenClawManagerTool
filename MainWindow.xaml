@@ -10,10 +10,10 @@
 
         <!-- ===== HORNÍ MENU ===== -->
         <Menu DockPanel.Dock="Top">
-            <MenuItem Header="_Soubor">
-                <MenuItem x:Name="MnuOpenOpenClawFolder" Header="Otevřít _OpenClaw složku" />
-                <MenuItem x:Name="MnuOpenTempFolder" Header="Otevřít _Temp složku (Gateway logy)" />
-                <MenuItem Header="Otevřít _Gateway log">
+            <MenuItem Header="_Otevřít">
+                <MenuItem x:Name="MnuOpenOpenClawFolder" Header="_OpenClaw složku" />
+                <MenuItem x:Name="MnuOpenTempFolder" Header="_Temp složku (Gateway logy)" />
+                <MenuItem Header="_Gateway log">
                     <MenuItem x:Name="MnuOpenLog10" Header="Posledních 10 řádků" Tag="10" />
                     <MenuItem x:Name="MnuOpenLog20" Header="Posledních 20 řádků" Tag="20" />
                     <MenuItem x:Name="MnuOpenLog30" Header="Posledních 30 řádků" Tag="30" />
@@ -22,7 +22,7 @@
                     <Separator />
                     <MenuItem x:Name="MnuOpenLogAll" Header="Celý log" Tag="0" />
                 </MenuItem>
-                <MenuItem x:Name="MnuOpenPowerShell" Header="Otevřít _PowerShell" />
+                <MenuItem x:Name="MnuOpenPowerShell" Header="_PowerShell" />
                 <Separator />
                 <MenuItem x:Name="MnuExit" Header="_Konec" InputGestureText="Alt+F4" />
             </MenuItem>
@@ -35,8 +35,25 @@
             </MenuItem>
         </Menu>
 
-        <!-- ===== SPODNÍ STATUS BAR ===== -->
+        <!-- ===== SPODNÍ STATUS BAR — Gateway nalevo, zdroje napravo ===== -->
         <StatusBar DockPanel.Dock="Bottom" Height="24">
+            <StatusBarItem>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="Gateway: " />
+                    <Ellipse x:Name="StatusGatewayDot" Width="10" Height="10"
+                             Fill="Gray" Margin="2,0,4,0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="StatusGatewayText" Text="neběží" />
+                </StackPanel>
+            </StatusBarItem>
+            <Separator x:Name="StatusGatewayDetailsSep" Visibility="Collapsed" />
+            <StatusBarItem x:Name="StatusGatewayPidItem" Visibility="Collapsed">
+                <TextBlock x:Name="StatusGatewayPid" Text="PID: —" />
+            </StatusBarItem>
+            <Separator x:Name="StatusGatewayUptimeSep" Visibility="Collapsed" />
+            <StatusBarItem x:Name="StatusGatewayUptimeItem" Visibility="Collapsed">
+                <TextBlock x:Name="StatusGatewayUptime" Text="uptime: —" />
+            </StatusBarItem>
+            <Separator />
             <StatusBarItem>
                 <TextBlock x:Name="StatusRam" Text="RAM: —" />
             </StatusBarItem>
@@ -48,17 +65,8 @@
             <StatusBarItem>
                 <TextBlock x:Name="StatusCpu" Text="CPU: —" />
             </StatusBarItem>
-            <Separator />
-            <StatusBarItem>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Gateway: " />
-                    <Ellipse x:Name="StatusGatewayDot" Width="10" Height="10"
-                             Fill="Gray" Margin="2,0,4,0" VerticalAlignment="Center" />
-                    <TextBlock x:Name="StatusGatewayText" Text="neběží" />
-                </StackPanel>
-            </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="v0.1" Foreground="Gray" />
+                <TextBlock Text="v0.2" Foreground="Gray" />
             </StatusBarItem>
         </StatusBar>
 
@@ -70,152 +78,184 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- ===== LEVÝ PANEL (ovládání) ===== -->
-            <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
-                <StackPanel Margin="8">
+            <!-- Levý panel — bez ScrollVieweru, sekce mají vlastní layout -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-                    <!-- Sekce: Gateway status -->
-                    <GroupBox Header="Gateway" Margin="0,0,0,8" Padding="8">
-                        <StackPanel>
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                                <Ellipse x:Name="GatewayDot" Width="14" Height="14"
-                                         Fill="Gray" VerticalAlignment="Center" />
-                                <TextBlock x:Name="GatewayStatusText"
-                                           Text="Neběží"
-                                           Margin="6,0,0,0"
-                                           FontWeight="Bold"
-                                           VerticalAlignment="Center" />
-                            </StackPanel>
-                            <Grid x:Name="GatewayDetails" Visibility="Collapsed">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="60" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition />
-                                    <RowDefinition />
-                                </Grid.RowDefinitions>
-                                <TextBlock Grid.Row="0" Grid.Column="0" Text="PID:" />
-                                <TextBlock Grid.Row="0" Grid.Column="1" x:Name="GatewayPid" Text="—" />
-                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Uptime:" />
-                                <TextBlock Grid.Row="1" Grid.Column="1" x:Name="GatewayUptime" Text="—" />
-                            </Grid>
-                        </StackPanel>
-                    </GroupBox>
+                <!-- Sekce: Akce -->
+                <GroupBox Grid.Row="0" Header="Akce" Margin="8,8,8,4" Padding="8">
+                    <StackPanel>
 
-                    <!-- Sekce: Akce -->
-                    <GroupBox Header="Akce" Margin="0,0,0,8" Padding="8">
-                        <StackPanel>
-
-                            <!-- Primární tlačítko SPUSTIT TUI -->
-                            <Button x:Name="BtnStartTui"
-                                    Height="48"
-                                    FontWeight="Bold"
-                                    FontSize="13"
-                                    Margin="0,0,0,8"
-                                    ToolTip="Zastaví Gateway, znovu ho spustí, pak otevře TUI. Použij když je něco rozbité.">
-                                <StackPanel>
-                                    <TextBlock Text="▶  SPUSTIT TUI" HorizontalAlignment="Center" />
-                                    <TextBlock Text="(restart Gateway)"
-                                               HorizontalAlignment="Center"
-                                               FontSize="10"
-                                               FontWeight="Normal"
-                                               Foreground="Gray" />
+                        <!-- Primární tlačítko: OpenClaw TUI -->
+                        <Button x:Name="BtnStartTui"
+                                Height="48"
+                                FontWeight="Bold"
+                                FontSize="13"
+                                Margin="0,0,0,8"
+                                ToolTip="Zastaví Gateway, znovu ho spustí, pak otevře TUI. Použij když je něco rozbité.">
+                            <StackPanel Orientation="Vertical">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="▶"
+                                               Foreground="Green"
+                                               FontWeight="Bold"
+                                               FontSize="16"
+                                               VerticalAlignment="Center"
+                                               Margin="0,0,8,0" />
+                                    <TextBlock Text="OpenClaw TUI" VerticalAlignment="Center" />
                                 </StackPanel>
-                            </Button>
+                                <TextBlock Text="(restart Gateway)"
+                                           HorizontalAlignment="Center"
+                                           FontSize="10"
+                                           FontWeight="Normal"
+                                           Foreground="Gray" />
+                            </StackPanel>
+                        </Button>
 
-                            <!-- Gateway tlačítka -->
-                            <TextBlock Text="Gateway:" FontWeight="Bold" Margin="0,4,0,4" />
-                            <Grid Margin="0,0,0,4">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="4" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Button x:Name="BtnGatewayStart" Grid.Column="0" Content="Start"
-                                        Height="28"
-                                        ToolTip="Spustí openclaw gateway v novém okně" />
-                                <Button x:Name="BtnGatewayStop" Grid.Column="2" Content="Stop"
-                                        Height="28"
-                                        IsEnabled="False"
-                                        ToolTip="Korektně zastaví běžící Gateway" />
-                            </Grid>
-                            <Button x:Name="BtnGatewayRestart" Content="Restart"
-                                    Height="28"
-                                    Margin="0,0,0,8"
-                                    IsEnabled="False"
-                                    ToolTip="Stop + Start Gateway" />
-
-                            <!-- Nástroje -->
-                            <TextBlock Text="Nástroje:" FontWeight="Bold" Margin="0,4,0,4" />
-                            <Button x:Name="BtnCleaningTool" Content="Cleaning Tool"
-                                    Height="28"
-                                    Margin="0,0,0,4"
-                                    ToolTip="Otevře nástroj pro čištění starých logů, sessions, cache" />
-                            <Button x:Name="BtnTokenManager" Content="Token Manager"
-                                    Height="28"
-                                    Margin="0,0,0,8"
-                                    IsEnabled="False"
-                                    ToolTip="Coming in v0.4 — Správa API klíčů a redakce konfiguračních souborů" />
-
-                            <!-- Údržba -->
-                            <TextBlock Text="Údržba:" FontWeight="Bold" Margin="0,4,0,4" />
-                            <Button x:Name="BtnDoctorFix" Content="doctor --fix"
-                                    Height="28"
-                                    ToolTip="Spustí openclaw doctor --fix pro opravu konfigurace" />
-
-                        </StackPanel>
-                    </GroupBox>
-
-                    <!-- Sekce: Měření latence -->
-                    <GroupBox Header="Měření latence" Margin="0,0,0,8" Padding="8"
-                              ToolTip="Měřeno z Gateway logu (res záznamy). Resetuje se při restartu Gateway.">
-                        <Grid>
+                        <!-- Gateway tlačítka — barevné symboly -->
+                        <TextBlock Text="Gateway:" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="4" />
+                                <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                                <RowDefinition />
-                            </Grid.RowDefinitions>
-
-                            <TextBlock Grid.Row="0" Grid.Column="0" Text="Poslední:" />
-                            <TextBlock Grid.Row="0" Grid.Column="1" x:Name="LatencyLast" Text="—" />
-
-                            <TextBlock Grid.Row="1" Grid.Column="0" Text="Průměr 10×:" />
-                            <TextBlock Grid.Row="1" Grid.Column="1" x:Name="LatencyAvg" Text="—" />
-
-                            <TextBlock Grid.Row="2" Grid.Column="0" Text="Maximum:" />
-                            <TextBlock Grid.Row="2" Grid.Column="1" x:Name="LatencyMax" Text="—" />
-
-                            <TextBlock Grid.Row="3" Grid.Column="0" Text="Requestů:" />
-                            <TextBlock Grid.Row="3" Grid.Column="1" x:Name="LatencyCount" Text="—" />
+                            <Button x:Name="BtnGatewayStart" Grid.Column="0"
+                                    Height="28"
+                                    ToolTip="Spustí openclaw gateway v novém okně">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="▶" Foreground="Green" FontWeight="Bold" Margin="0,0,6,0" />
+                                    <TextBlock Text="Start" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="BtnGatewayStop" Grid.Column="2"
+                                    Height="28"
+                                    IsEnabled="False"
+                                    ToolTip="Korektně zastaví běžící Gateway">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="■" Foreground="Red" FontWeight="Bold" Margin="0,0,6,0" />
+                                    <TextBlock Text="Stop" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
                         </Grid>
-                    </GroupBox>
+                        <Button x:Name="BtnGatewayRestart"
+                                Height="28"
+                                Margin="0,0,0,8"
+                                IsEnabled="False"
+                                ToolTip="Stop + Start Gateway">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <TextBlock Text="↻" Foreground="Orange" FontWeight="Bold" FontSize="14" Margin="0,0,6,0" />
+                                <TextBlock Text="Restart" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
 
-                    <!-- Sekce: Log aplikace -->
-                    <GroupBox Header="Log aplikace" Padding="8" MinHeight="120">
-                        <ListBox x:Name="AppLog"
-                                 FontFamily="Consolas"
-                                 FontSize="11"
-                                 BorderThickness="0"
-                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" />
-                    </GroupBox>
+                        <!-- Otevřít — emoji jako vlastní TextBlock -->
+                        <TextBlock Text="Otevřít:" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Button x:Name="BtnOpenPowerShell"
+                                Height="28"
+                                Margin="0,0,0,4"
+                                ToolTip="Otevře nový PowerShell ve složce z Nastavení">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="⚡" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="PowerShell" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="BtnOpenGatewayLog"
+                                Height="28"
+                                Margin="0,0,0,8"
+                                ToolTip="Otevře viewer Gateway logu (default: posledních 20 řádků)">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📄" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Gateway log" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
 
-                </StackPanel>
-            </ScrollViewer>
+                        <!-- Nástroje -->
+                        <TextBlock Text="Nástroje:" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Button x:Name="BtnCleaningTool"
+                                Height="28"
+                                Margin="0,0,0,4"
+                                ToolTip="Otevře nástroj pro čištění starých logů, sessions, cache">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🧹" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Cleaning Tool" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="BtnTokenManager"
+                                Height="28"
+                                Margin="0,0,0,8"
+                                IsEnabled="False"
+                                ToolTip="Coming in v0.4 — Správa API klíčů a redakce konfiguračních souborů">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔑" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="Token Manager" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
 
-            <!-- ===== SPLITTER ===== -->
+                        <!-- Údržba -->
+                        <TextBlock Text="Údržba:" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Button x:Name="BtnDoctorFix"
+                                Height="28"
+                                ToolTip="Spustí openclaw doctor --fix pro opravu konfigurace">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🩺" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
+                                <TextBlock Text="doctor --fix" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Sekce: Měření latence -->
+                <GroupBox Grid.Row="1" Header="Měření latence" Margin="8,4,8,4" Padding="8"
+                          ToolTip="Měřeno z Gateway logu (res záznamy). Resetuje se při restartu Gateway.">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Poslední:" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="LatencyLast" Text="—" />
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Průměr 10×:" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="LatencyAvg" Text="—" />
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Maximum:" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="LatencyMax" Text="—" />
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="Requestů:" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" x:Name="LatencyCount" Text="—" />
+                    </Grid>
+                </GroupBox>
+
+                <!-- Sekce: Log aplikace s vlastním scrollem -->
+                <GroupBox Grid.Row="2" Header="Log aplikace" Margin="8,4,8,8" Padding="8">
+                    <ListBox x:Name="AppLog"
+                             FontFamily="Consolas"
+                             FontSize="11"
+                             BorderThickness="0"
+                             ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto" />
+                </GroupBox>
+
+            </Grid>
+
             <GridSplitter Grid.Column="1"
                           Width="5"
                           HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
                           Background="LightGray" />
 
-            <!-- ===== PRAVÝ PANEL (terminál placeholder) ===== -->
             <Border Grid.Column="2"
                     Background="#1E1E1E"
                     Margin="0">
@@ -230,7 +270,7 @@
                                Foreground="#666666"
                                FontSize="11"
                                HorizontalAlignment="Center" />
-                    <TextBlock Text="Klikni „SPUSTIT TUI&quot; pro otevření."
+                    <TextBlock Text="Klikni „OpenClaw TUI&quot; pro otevření."
                                Foreground="#666666"
                                FontSize="11"
                                HorizontalAlignment="Center" />
