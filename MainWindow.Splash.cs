@@ -126,10 +126,15 @@ public partial class MainWindow
         _splashProgressTimer?.Stop();
         SplashProgress.Value = 1.0;
 
-        // Freeze na prvním snímku
-        SplashMedia.Stop();
-        SplashMedia.Position = TimeSpan.FromMilliseconds(1);
-        SplashMedia.Pause();
+        // Video doběhlo — po krátké pauze (500ms) skrýt overlay a zobrazit TUI.
+        // Nezamrazovat na prvním snímku — to způsobovalo černý overlay překrývající terminál.
+        var endTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
+        endTimer.Tick += (_, _) =>
+        {
+            endTimer.Stop();
+            DisposeSplash();
+        };
+        endTimer.Start();
     }
 
     // ── Dispose splash (první věc v BtnStartTui_Click) ────────────────────────
