@@ -1,0 +1,43 @@
+<UserControl x:Class="OpenClawManager.Views.TerminalControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+             Background="#1E1E1E">
+
+    <Grid>
+        <!-- Splashscreen / status před načtením TUI -->
+        <Border x:Name="SplashBorder"
+                Background="#1E1E1E"
+                Panel.ZIndex="1">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock x:Name="SplashLogo"
+                           FontFamily="Consolas, Courier New, monospace"
+                           FontSize="11"
+                           Foreground="#4EC9B0"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,16"
+                           Text="                                                            &#x0a;     ██████╗ ██████╗ ███████╗███╗   ██╗ ██████╗██╗      █████╗ ██╗    ██╗&#x0a;    ██╔═══██╗██╔══██╗██╔════╝████╗  ██║██╔════╝██║     ██╔══██╗██║    ██║&#x0a;    ██║   ██║██████╔╝█████╗  ██╔██╗ ██║██║     ██║     ███████║██║ █╗ ██║&#x0a;    ██║   ██║██╔═══╝ ██╔══╝  ██║╚██╗██║██║     ██║     ██╔══██║██║███╗██║&#x0a;    ╚██████╔╝██║     ███████╗██║ ╚████║╚██████╗███████╗██║  ██║╚███╔███╔╝&#x0a;     ╚═════╝ ╚═╝     ╚══════╝╚═╝  ╚═══╝ ╚═════╝╚══════╝╚═╝  ╚═╝ ╚══╝╚══╝ &#x0a;                                                                          " />
+                <TextBlock x:Name="SplashSubtitle"
+                           Text="Manager Tool by Bloom"
+                           Foreground="#888888"
+                           FontSize="14"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,24" />
+                <TextBlock x:Name="StatusText"
+                           Text="Inicializuji WebView2..."
+                           Foreground="#666666"
+                           FontSize="11"
+                           FontStyle="Italic"
+                           HorizontalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <!-- WebView2 — vyplňuje celý dostupný prostor pravého panelu.
+             Velikost terminálu je řízena cols/rows v xterm.js (120×35),
+             a WebView2 viewport se zarovná podle CSS uvnitř HTML. -->
+        <wv2:WebView2 x:Name="WebView"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Visibility="Hidden" />
+    </Grid>
+</UserControl>

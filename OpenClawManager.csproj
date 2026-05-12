@@ -6,14 +6,40 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>0.2.0.0</AssemblyVersion>
-    <FileVersion>0.2.0.0</FileVersion>
-    <Version>0.2.0</Version>
+    <AssemblyVersion>0.5.0.0</AssemblyVersion>
+    <FileVersion>0.5.0.0</FileVersion>
+    <Version>0.5.0</Version>
+    <ApplicationIcon>Resources\app-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- WMI/CIM dotazy pro detekci procesů -->
     <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ikona EXE souboru — Průzkumník, zástupce na ploše (jednodušší design) -->
+    <Resource Include="Resources\app-icon.ico" />
+
+    <!-- v0.5: Favicon okna — záhlaví (title bar), Taskbar, Alt+Tab (detailnější design) -->
+    <Resource Include="Resources\app-favicon.ico" />
+
+    <!-- Jazykové soubory — ResourceDictionary -->
+    <Resource Include="Resources\Lang\Strings.en.xaml" />
+    <Resource Include="Resources\Lang\Strings.cs.xaml" />
+
+    <!-- SVG logo pro dialog O aplikaci — zkopírovat vedle EXE při buildu -->
+    <None Include="Resources\app-logo.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <!-- v0.5: Splash PNG fallback — embedded resource (graceful degradation když chybí .mp4) -->
+    <Resource Include="Resources\splash.png" />
+
+    <!-- v0.5: Splash video — vedle EXE (WMF/MediaElement potřebuje file path) -->
+    <None Include="Resources\splash.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

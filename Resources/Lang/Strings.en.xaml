@@ -1,0 +1,113 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Hlavní okno — Akce -->
+    <sys:String x:Key="Str_BtnStartTui_Label">OpenClaw TUI</sys:String>
+    <sys:String x:Key="Str_BtnStartTui_Stop">Stop OpenClaw TUI</sys:String>
+    <sys:String x:Key="Str_BtnStartTui_Sub_Restart">(restart Gateway)</sys:String>
+    <sys:String x:Key="Str_BtnStartTui_Sub_Running">(Gateway running)</sys:String>
+    <sys:String x:Key="Str_BtnStartTui_Sub_Stop">(Gateway stays)</sys:String>
+    <sys:String x:Key="Str_BtnGatewayStart">Start</sys:String>
+    <sys:String x:Key="Str_BtnGatewayStop">Stop</sys:String>
+    <sys:String x:Key="Str_BtnGatewayRestart">Restart</sys:String>
+    <sys:String x:Key="Str_Section_Open">Open:</sys:String>
+    <sys:String x:Key="Str_BtnPowerShell">PowerShell</sys:String>
+    <sys:String x:Key="Str_BtnGatewayLog">Gateway log</sys:String>
+    <sys:String x:Key="Str_Section_Tools">Tools:</sys:String>
+    <sys:String x:Key="Str_BtnCleaningTool">Cleaning Tool</sys:String>
+    <sys:String x:Key="Str_BtnTokenManager">Token Manager</sys:String>
+    <sys:String x:Key="Str_Section_Maintenance">Maintenance:</sys:String>
+    <sys:String x:Key="Str_BtnDoctorFix">doctor --fix</sys:String>
+    <sys:String x:Key="Str_Gateway_Label">Gateway:</sys:String>
+
+    <!-- Hlavní okno — Sekce -->
+    <sys:String x:Key="Str_Group_Actions">Actions</sys:String>
+    <sys:String x:Key="Str_Group_Latency">Latency</sys:String>
+    <sys:String x:Key="Str_Group_AppLog">Application Log</sys:String>
+    <sys:String x:Key="Str_Latency_Last">Last:</sys:String>
+    <sys:String x:Key="Str_Latency_Avg">Avg 10×:</sys:String>
+    <sys:String x:Key="Str_Latency_Max">Maximum:</sys:String>
+    <sys:String x:Key="Str_Latency_Count">Requests:</sys:String>
+
+    <!-- Tooltipy hlavního okna -->
+    <sys:String x:Key="Str_Tip_StartTui">Button has 3 modes:&#x0a;1. Gateway not running → starts full sequence (Gateway + TUI)&#x0a;2. Gateway running → starts only TUI&#x0a;3. TUI running → stops TUI (Gateway stays)&#x0a;&#x0a;Shortcut: Ctrl+T</sys:String>
+    <sys:String x:Key="Str_Tip_GatewayStart">Starts openclaw gateway in background.&#x0a;Shortcut: Ctrl+G</sys:String>
+    <sys:String x:Key="Str_Tip_GatewayStop">Stops running Gateway. Active sessions will be interrupted.&#x0a;Shortcut: Ctrl+G</sys:String>
+    <sys:String x:Key="Str_Tip_GatewayRestart">Stops and restarts Gateway. TUI will disconnect.&#x0a;Shortcut: Ctrl+R</sys:String>
+    <sys:String x:Key="Str_Tip_PowerShell">Opens PowerShell in working directory from Settings.</sys:String>
+    <sys:String x:Key="Str_Tip_GatewayLog">Shows last 20 lines of Gateway log.</sys:String>
+    <sys:String x:Key="Str_Tip_CleaningTool">Removes old logs, cache and session files.&#x0a;Shortcut: Ctrl+Shift+C</sys:String>
+    <sys:String x:Key="Str_Tip_TokenManager">API keys management and config file redaction. Available in v0.5.</sys:String>
+    <sys:String x:Key="Str_Tip_DoctorFix">Runs openclaw "doctor --fix" to repair configuration.</sys:String>
+
+    <!-- Cleaning Tool -->
+    <sys:String x:Key="Str_BtnDryRun">Dry-RUN</sys:String>
+    <sys:String x:Key="Str_BtnRun">Run</sys:String>
+    <sys:String x:Key="Str_BtnClose">Close</sys:String>
+    <sys:String x:Key="Str_Tip_DryRun">Shows what would be deleted, deletes nothing.</sys:String>
+    <sys:String x:Key="Str_Tip_Run">Permanently deletes selected files. Action cannot be undone.</sys:String>
+    <sys:String x:Key="Str_Tip_CleaningClose">Closes Cleaning Tool.</sys:String>
+
+    <!-- Settings -->
+    <sys:String x:Key="Str_BtnSave">Save</sys:String>
+    <sys:String x:Key="Str_BtnReset">Reset to defaults</sys:String>
+    <sys:String x:Key="Str_BtnCancel">Cancel</sys:String>
+    <sys:String x:Key="Str_BtnBrowse">Browse...</sys:String>
+    <sys:String x:Key="Str_Tip_Save">Saves settings and closes dialog.</sys:String>
+    <sys:String x:Key="Str_Tip_Reset">Restores all values to defaults.</sys:String>
+    <sys:String x:Key="Str_Tip_Cancel">Closes without saving.</sys:String>
+    <sys:String x:Key="Str_Tip_Browse">Selects folder from filesystem.</sys:String>
+
+    <!-- About -->
+    <sys:String x:Key="Str_Tip_AboutClose">Closes dialog.</sys:String>
+
+    <!-- Gateway log dialog -->
+    <sys:String x:Key="Str_BtnCopy">Copy</sys:String>
+    <sys:String x:Key="Str_BtnCopied">Copied</sys:String>
+    <sys:String x:Key="Str_Tip_Copy">Copies displayed log to clipboard.</sys:String>
+
+    <!-- Menu -->
+    <sys:String x:Key="Str_Menu_Open">_Open</sys:String>
+    <sys:String x:Key="Str_Menu_OpenOpenClawFolder">_OpenClaw folder</sys:String>
+    <sys:String x:Key="Str_Menu_OpenTempFolder">_Temp folder (Gateway logs)</sys:String>
+    <sys:String x:Key="Str_Menu_OpenGatewayLog">_Gateway log</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog10">Last 10 lines</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog20">Last 20 lines</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog30">Last 30 lines</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog50">Last 50 lines</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog100">Last 100 lines</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLogAll">Entire log</sys:String>
+    <sys:String x:Key="Str_Menu_OpenPowerShell">_PowerShell</sys:String>
+    <sys:String x:Key="Str_Menu_Settings">_Settings</sys:String>
+    <sys:String x:Key="Str_Menu_Help">_Help</sys:String>
+    <sys:String x:Key="Str_Menu_About">_About...</sys:String>
+    <sys:String x:Key="Str_Menu_OpenSettings">Open _Settings...</sys:String>
+    <sys:String x:Key="Str_Menu_OpenClawWeb">Open OpenClaw website</sys:String>
+    <sys:String x:Key="Str_Menu_Exit">E_xit</sys:String>
+
+    <!-- Status bar -->
+    <sys:String x:Key="Str_Status_Running">running</sys:String>
+    <sys:String x:Key="Str_Status_Starting">starting...</sys:String>
+    <sys:String x:Key="Str_Status_Failed">failed</sys:String>
+    <sys:String x:Key="Str_Status_Stopped">stopped</sys:String>
+
+    <!-- Log zprávy -->
+    <sys:String x:Key="Str_Log_AppStarted">Application started (v0.4).</sys:String>
+    <sys:String x:Key="Str_Log_GatewayStarting">Starting Gateway...</sys:String>
+    <sys:String x:Key="Str_Log_GatewayReady">Gateway ready.</sys:String>
+    <sys:String x:Key="Str_Log_GatewayStopping">Stopping Gateway...</sys:String>
+    <sys:String x:Key="Str_Log_GatewayStopped">Gateway stopped.</sys:String>
+    <sys:String x:Key="Str_Log_TuiStarting">Starting TUI in embedded terminal...</sys:String>
+    <sys:String x:Key="Str_Log_TuiStopping">Stopping TUI...</sys:String>
+    <sys:String x:Key="Str_Log_OpeningCleaningTool">Opening Cleaning Tool.</sys:String>
+    <sys:String x:Key="Str_Log_ClosedCleaningTool">Cleaning Tool closed.</sys:String>
+    <sys:String x:Key="Str_Log_DoctorFix">Running openclaw "doctor --fix"...</sys:String>
+    <sys:String x:Key="Str_Log_SettingsSaved">Settings saved.</sys:String>
+    <sys:String x:Key="Str_Log_WaitingGatewayReady">Waiting for Gateway ready (max 180s)...</sys:String>
+    <sys:String x:Key="Str_Log_GatewayTimeout">ERROR: Gateway ready timeout after</sys:String>
+    <sys:String x:Key="Str_Log_GatewayReadyIn">Gateway ready in</sys:String>
+    <sys:String x:Key="Str_Log_DeletingLog">Deleting old Gateway log...</sys:String>
+    <sys:String x:Key="Str_Log_StoppingGatewayTui">Stopping Gateway and closing all OpenClaw windows...</sys:String>
+
+</ResourceDictionary>

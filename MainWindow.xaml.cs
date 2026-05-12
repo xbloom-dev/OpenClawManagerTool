@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using OpenClawManager.Models;
@@ -18,14 +19,12 @@ public partial class MainWindow : Window
 
     private enum GatewayUiState { Stopped, Starting, Running, Failed }
     private GatewayUiState _gatewayState = GatewayUiState.Stopped;
-
-    /// <summary>
-    /// Když jsme právě spustili Gateway (přes Start nebo TUI sekvenci),
-    /// čekáme na "gateway ready" v logu než přepneme na Running.
-    /// Pokud false, přepneme na Running hned jak detekujeme proces
-    /// (např. aplikace se spustila a Gateway už běžel).
-    /// </summary>
     private bool _waitingForGatewayReady = false;
+
+    private static readonly SolidColorBrush BrushStartGreen =
+        new(Color.FromRgb(0xD0, 0xFF, 0xD0));
+    private static readonly SolidColorBrush BrushStopRed =
+        new(Color.FromRgb(0xFF, 0xD0, 0xD0));
 
     public MainWindow()
     {
@@ -36,33 +35,146 @@ public partial class MainWindow : Window
         BtnGatewayStop.Click += BtnGatewayStop_Click;
         BtnGatewayRestart.Click += BtnGatewayRestart_Click;
         BtnCleaningTool.Click += BtnCleaningTool_Click;
+        BtnTokenManager.Click += BtnTokenManager_Click;
         BtnDoctorFix.Click += BtnDoctorFix_Click;
-
         BtnOpenPowerShell.Click += (_, _) => OpenPowerShell();
         BtnOpenGatewayLog.Click += (_, _) => OpenGatewayLog(20);
+
+        Terminal.TuiStateChanged += OnTuiStateChanged;
 
         MnuOpenOpenClawFolder.Click += (_, _) => OpenInExplorer(SettingsService.Current.OpenClawPath);
         MnuOpenTempFolder.Click += (_, _) => OpenInExplorer(SettingsService.Current.TempPath);
         MnuOpenPowerShell.Click += (_, _) => OpenPowerShell();
         MnuExit.Click += (_, _) => Close();
-
         MnuOpenLog10.Click += OpenLogMenuItem_Click;
         MnuOpenLog20.Click += OpenLogMenuItem_Click;
         MnuOpenLog30.Click += OpenLogMenuItem_Click;
         MnuOpenLog50.Click += OpenLogMenuItem_Click;
         MnuOpenLog100.Click += OpenLogMenuItem_Click;
         MnuOpenLogAll.Click += OpenLogMenuItem_Click;
-
         MnuSettings.Click += (_, _) => OpenSettings();
         MnuAbout.Click += (_, _) => ShowAbout();
         MnuOpenClawWeb.Click += (_, _) => OpenUrl("https://docs.openclaw.ai/");
+
+        PreviewKeyDown += MainWindow_PreviewKeyDown;
 
         _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
         _statusTimer.Tick += StatusTimer_Tick;
         _statusTimer.Start();
 
+        ApplyLocalization();
         UpdateStatus();
-        Log("Aplikace spuštěna.");
+        Log(L10n.Get("Str_Log_AppStarted"));
+
+        // v0.5: splash screen
+        InitSplash();
+    }
+
+    // ==================== LOKALIZACE ====================
+
+    public void ApplyLocalization()
+    {
+        // Sekce headers
+        GrpActions.Header = L10n.Get("Str_Group_Actions");
+        GrpLatency.Header = L10n.Get("Str_Group_Latency");
+        GrpAppLog.Header = L10n.Get("Str_Group_AppLog");
+
+        // Latency labels
+        TxtLatencyLast.Text = L10n.Get("Str_Latency_Last");
+        TxtLatencyAvg.Text = L10n.Get("Str_Latency_Avg");
+        TxtLatencyMax.Text = L10n.Get("Str_Latency_Max");
+        TxtLatencyCount.Text = L10n.Get("Str_Latency_Count");
+
+        // Sekce labels
+        TxtGatewayLabel.Text = L10n.Get("Str_Gateway_Label");
+        TxtSectionOpen.Text = L10n.Get("Str_Section_Open");
+        TxtSectionTools.Text = L10n.Get("Str_Section_Tools");
+        TxtSectionMaintenance.Text = L10n.Get("Str_Section_Maintenance");
+
+        // Tlačítka — popisky
+        BtnGatewayStartLabel.Text = L10n.Get("Str_BtnGatewayStart");
+        BtnGatewayStopLabel.Text = L10n.Get("Str_BtnGatewayStop");
+        BtnGatewayRestartLabel.Text = L10n.Get("Str_BtnGatewayRestart");
+        BtnPowerShellLabel.Text = L10n.Get("Str_BtnPowerShell");
+        BtnGatewayLogLabel.Text = L10n.Get("Str_BtnGatewayLog");
+        BtnCleaningToolLabel.Text = L10n.Get("Str_BtnCleaningTool");
+        BtnTokenManagerLabel.Text = L10n.Get("Str_BtnTokenManager");
+        BtnDoctorFixLabel.Text = L10n.Get("Str_BtnDoctorFix");
+
+        // Tlačítka — tooltipy
+        BtnGatewayStart.ToolTip = L10n.Get("Str_Tip_GatewayStart");
+        BtnGatewayStop.ToolTip = L10n.Get("Str_Tip_GatewayStop");
+        BtnGatewayRestart.ToolTip = L10n.Get("Str_Tip_GatewayRestart");
+        BtnOpenPowerShell.ToolTip = L10n.Get("Str_Tip_PowerShell");
+        BtnOpenGatewayLog.ToolTip = L10n.Get("Str_Tip_GatewayLog");
+        BtnCleaningTool.ToolTip = L10n.Get("Str_Tip_CleaningTool");
+        BtnTokenManager.ToolTip = L10n.Get("Str_Tip_TokenManager");
+        BtnDoctorFix.ToolTip = L10n.Get("Str_Tip_DoctorFix");
+
+        // Menu — headers
+        MnuMenuOpen.Header = L10n.Get("Str_Menu_Open");
+        MnuOpenOpenClawFolder.Header = L10n.Get("Str_Menu_OpenOpenClawFolder");
+        MnuOpenTempFolder.Header = L10n.Get("Str_Menu_OpenTempFolder");
+        MnuOpenGatewayLog.Header = L10n.Get("Str_Menu_OpenGatewayLog");
+        MnuOpenLog10.Header = L10n.Get("Str_Menu_OpenLog10");
+        MnuOpenLog20.Header = L10n.Get("Str_Menu_OpenLog20");
+        MnuOpenLog30.Header = L10n.Get("Str_Menu_OpenLog30");
+        MnuOpenLog50.Header = L10n.Get("Str_Menu_OpenLog50");
+        MnuOpenLog100.Header = L10n.Get("Str_Menu_OpenLog100");
+        MnuOpenLogAll.Header = L10n.Get("Str_Menu_OpenLogAll");
+        MnuOpenPowerShell.Header = L10n.Get("Str_Menu_OpenPowerShell");
+        MnuExit.Header = L10n.Get("Str_Menu_Exit");
+        MnuMenuSettings.Header = L10n.Get("Str_Menu_Settings");
+        MnuSettings.Header = L10n.Get("Str_Menu_OpenSettings");
+        MnuMenuHelp.Header = L10n.Get("Str_Menu_Help");
+        MnuAbout.Header = L10n.Get("Str_Menu_About");
+        MnuOpenClawWeb.Header = L10n.Get("Str_Menu_OpenClawWeb");
+
+        // Latency section tooltip
+        bool cs = L10n.Current == L10n.Language.CS;
+        GrpLatency.ToolTip = cs
+            ? "Měřeno z Gateway logu (res záznamy). Resetuje se při restartu Gateway."
+            : "Measured from Gateway log (res entries). Resets on Gateway restart.";
+
+        // TUI tlačítko — popisek + tooltip (volá UpdateStartTuiButton)
+        UpdateStartTuiButton(Terminal.IsTuiRunning);
+    }
+
+    // ==================== KLÁVESOVÉ ZKRATKY ====================
+
+    private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+    {
+        if (FocusManager.GetFocusedElement(this) is TextBox) return;
+
+        bool ctrl = (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control;
+        bool shift = (Keyboard.Modifiers & ModifierKeys.Shift) == ModifierKeys.Shift;
+
+        if (e.Key == Key.F1 && !ctrl && !shift)
+        {
+            ShowAbout(); e.Handled = true; return;
+        }
+        if (!ctrl) return;
+
+        switch (e.Key)
+        {
+            case Key.T:
+                BtnStartTui_Click(this, new RoutedEventArgs()); e.Handled = true; break;
+            case Key.G:
+                if (_gatewayState == GatewayUiState.Running)
+                    BtnGatewayStop_Click(this, new RoutedEventArgs());
+                else if (_gatewayState == GatewayUiState.Stopped || _gatewayState == GatewayUiState.Failed)
+                    BtnGatewayStart_Click(this, new RoutedEventArgs());
+                e.Handled = true; break;
+            case Key.R:
+                if (_gatewayState == GatewayUiState.Running)
+                    BtnGatewayRestart_Click(this, new RoutedEventArgs());
+                e.Handled = true; break;
+            case Key.C:
+                if (shift) { BtnCleaningTool_Click(this, new RoutedEventArgs()); e.Handled = true; }
+                break;
+            case Key.OemComma:
+                OpenSettings(); e.Handled = true; break;
+        }
     }
 
     // ==================== STATUS UPDATE ====================
@@ -75,9 +187,9 @@ public partial class MainWindow : Window
         StatusRam.Text = $"RAM: {snap.RamUsedGb:F1}/{snap.RamTotalGb:F1} GB";
         StatusCpu.Text = $"CPU: {snap.CpuPercent}%";
 
-        if (snap.VramUsedGb.HasValue && snap.VramTotalGb.HasValue)
+        if (snap.VramUsedGb.HasValue)
         {
-            StatusVram.Text = $"VRAM: {snap.VramUsedGb.Value:F1}/{snap.VramTotalGb.Value:F1} GB";
+            StatusVram.Text = $"VRAM: {snap.VramUsedGb.Value:F1}/{snap.VramTotalGb!.Value:F1} GB";
             StatusVram.Visibility = Visibility.Visible;
         }
         else
@@ -95,7 +207,6 @@ public partial class MainWindow : Window
 
         if (gateway != null)
         {
-            // Proces detekován
             if (_lastKnownGatewayPid != gateway.Id)
             {
                 _lastKnownGatewayPid = gateway.Id;
@@ -103,34 +214,26 @@ public partial class MainWindow : Window
                 catch { _gatewayStartTime = DateTime.Now; }
             }
 
-            // Pokud čekáme na "gateway ready" (my jsme ho spustili),
-            // nepřepínáme na Running ještě — sekvence to udělá sama po WaitForGatewayReady.
-            // Jinak (Gateway detekován při startu aplikace nebo z externího zdroje) → Running hned.
             if (!_waitingForGatewayReady)
-            {
                 SetGatewayUiState(GatewayUiState.Running, gateway);
-            }
-            // else: zůstáváme v Starting (oranžová) — BtnStartTui nebo BtnGatewayStart to vyřeší
         }
         else
         {
             _lastKnownGatewayPid = null;
             _gatewayStartTime = null;
 
-            if (_gatewayState != GatewayUiState.Starting &&
-                _gatewayState != GatewayUiState.Failed)
-            {
+            if (_gatewayState != GatewayUiState.Starting && _gatewayState != GatewayUiState.Failed)
                 SetGatewayUiState(GatewayUiState.Stopped, null);
-            }
             else
-            {
                 SetGatewayUiButtons(_gatewayState);
-            }
         }
     }
 
     private void UpdateLatencyStats()
     {
+        var logPath = SettingsService.Current.GetTodayGatewayLogPath();
+        LatencyTracker.Poll(logPath);
+
         var stats = LatencyTracker.GetStats();
 
         if (stats.Count == 0)
@@ -139,7 +242,7 @@ public partial class MainWindow : Window
             LatencyAvg.Text = "—";
             LatencyMax.Text = "—";
             LatencyCount.Text = "—";
-            LatencyLast.Foreground = Brushes.Black;
+            LatencyLast.Foreground = SystemColors.ControlTextBrush;
             return;
         }
 
@@ -152,7 +255,7 @@ public partial class MainWindow : Window
         {
             LatencyLast.Foreground = stats.LastMs > 5000 ? Brushes.Red
                                    : stats.LastMs < 1000 ? Brushes.Green
-                                   : Brushes.Black;
+                                   : SystemColors.ControlTextBrush;
         }
     }
 
@@ -164,20 +267,17 @@ public partial class MainWindow : Window
         {
             case GatewayUiState.Running:
                 StatusGatewayDot.Fill = Brushes.LimeGreen;
-                StatusGatewayText.Text = "běží";
-
+                StatusGatewayText.Text = L10n.Get("Str_Status_Running");
                 if (gateway != null)
                 {
                     StatusGatewayPid.Text = $"PID: {gateway.Id}";
                     StatusGatewayPidItem.Visibility = Visibility.Visible;
                     StatusGatewayDetailsSep.Visibility = Visibility.Visible;
                 }
-
                 if (_gatewayStartTime.HasValue)
                 {
-                    var uptime = DateTime.Now - _gatewayStartTime.Value;
-                    StatusGatewayUptime.Text =
-                        $"uptime: {(int)uptime.TotalHours}:{uptime.Minutes:D2}:{uptime.Seconds:D2}";
+                    var up = DateTime.Now - _gatewayStartTime.Value;
+                    StatusGatewayUptime.Text = $"uptime: {(int)up.TotalHours}:{up.Minutes:D2}:{up.Seconds:D2}";
                     StatusGatewayUptimeItem.Visibility = Visibility.Visible;
                     StatusGatewayUptimeSep.Visibility = Visibility.Visible;
                 }
@@ -185,24 +285,25 @@ public partial class MainWindow : Window
 
             case GatewayUiState.Starting:
                 StatusGatewayDot.Fill = Brushes.Orange;
-                StatusGatewayText.Text = "spouští se...";
+                StatusGatewayText.Text = L10n.Get("Str_Status_Starting");
                 HideGatewayDetails();
                 break;
 
             case GatewayUiState.Failed:
                 StatusGatewayDot.Fill = Brushes.Red;
-                StatusGatewayText.Text = "selhalo";
+                StatusGatewayText.Text = L10n.Get("Str_Status_Failed");
                 HideGatewayDetails();
                 break;
 
             default:
                 StatusGatewayDot.Fill = Brushes.Gray;
-                StatusGatewayText.Text = "neběží";
+                StatusGatewayText.Text = L10n.Get("Str_Status_Stopped");
                 HideGatewayDetails();
                 break;
         }
 
         SetGatewayUiButtons(newState);
+        UpdateStartTuiButton(Terminal.IsTuiRunning);
     }
 
     private void HideGatewayDetails()
@@ -235,26 +336,14 @@ public partial class MainWindow : Window
         }
     }
 
-    // ==================== TLAČÍTKA — Gateway ====================
+    // ==================== Gateway tlačítka ====================
 
     private void BtnGatewayStart_Click(object? sender, RoutedEventArgs e)
     {
-        Log("Spouštím Gateway...");
+        Log(L10n.Get("Str_Log_GatewayStarting"));
         _waitingForGatewayReady = true;
         SetGatewayUiState(GatewayUiState.Starting, null);
-
-        var proc = GatewayService.Start();
-        if (proc == null)
-        {
-            _waitingForGatewayReady = false;
-            Log("[CHYBA] Gateway nebylo možné spustit.");
-            SetGatewayUiState(GatewayUiState.Failed, null);
-            MessageBox.Show("Gateway nebylo možné spustit.", "Chyba",
-                MessageBoxButton.OK, MessageBoxImage.Error);
-            return;
-        }
-
-        // Čekáme na "gateway ready" na pozadí
+        GatewayService.Start();
         _ = WatchForGatewayReady();
     }
 
@@ -264,38 +353,36 @@ public partial class MainWindow : Window
         if (dialog.ShowDialog() != true) return;
 
         _waitingForGatewayReady = false;
+        Terminal.StopTui();
+        LatencyTracker.Reset();
 
         if (dialog.CloseTui)
         {
-            Log("Zastavuji Gateway a zavírám TUI okna...");
-            var ok = GatewayService.StopAndCloseTui();
-            Log(ok ? "Gateway zastaven, TUI okna zavřena." : "[CHYBA] Stop selhal.");
+            Log(L10n.Get("Str_Log_StoppingGatewayTui"));
+            GatewayService.StopAndCloseTui();
         }
         else
         {
-            Log("Zastavuji Gateway...");
-            var ok = GatewayService.Stop();
-            Log(ok ? "Gateway zastaven." : "[CHYBA] Stop selhal.");
+            Log(L10n.Get("Str_Log_GatewayStopping"));
+            GatewayService.Stop();
         }
+        Log(L10n.Get("Str_Log_GatewayStopped"));
     }
 
     private async void BtnGatewayRestart_Click(object? sender, RoutedEventArgs e)
     {
         BtnGatewayRestart.IsEnabled = false;
         _waitingForGatewayReady = true;
+        Terminal.StopTui();
+        LatencyTracker.Reset();
         Log("Restart Gateway...");
 
         try
         {
-            Log("  → Stop...");
             GatewayService.Stop();
             await Task.Delay(2500);
-
-            Log("  → Start...");
             SetGatewayUiState(GatewayUiState.Starting, null);
             GatewayService.Start();
-
-            // Čekáme na "gateway ready" na pozadí
             _ = WatchForGatewayReady();
         }
         catch (Exception ex)
@@ -305,61 +392,70 @@ public partial class MainWindow : Window
         }
     }
 
-    /// <summary>
-    /// Sleduje Gateway log a přepne status na Running jakmile detekuje "gateway ready".
-    /// Voláno po každém Start nebo Restart.
-    /// Timeout 180s — pokud nenajde ready, přepne na Failed.
-    /// </summary>
     private async Task WatchForGatewayReady()
     {
         var logPath = SettingsService.Current.GetTodayGatewayLogPath();
-
         try
         {
-            var ready = await LogMonitor.WaitForGatewayReady(logPath, timeoutSeconds: 180);
-
+            var ready = await LogMonitor.WaitForGatewayReady(logPath, 180);
             _waitingForGatewayReady = false;
 
             if (ready)
             {
-                Log("Gateway ready.");
+                Log(L10n.Get("Str_Log_GatewayReady"));
                 var gw = ProcessDetector.FindGatewayProcess();
                 SetGatewayUiState(GatewayUiState.Running, gw);
+                Log(L10n.Get("Str_Log_TuiStarting"));
+                Terminal.StartTui();
             }
             else
             {
-                Log("[CHYBA] Gateway ready timeout.");
+                Log(L10n.Get("Str_Log_GatewayTimeout") + " 180s.");
                 SetGatewayUiState(GatewayUiState.Failed, null);
             }
         }
-        catch
-        {
-            _waitingForGatewayReady = false;
-        }
+        catch { _waitingForGatewayReady = false; }
     }
 
-    // ==================== TLAČÍTKO SPUSTIT TUI — sekvence ====================
+    // ==================== TUI tlačítko ====================
 
     private async void BtnStartTui_Click(object? sender, RoutedEventArgs e)
     {
-        BtnStartTui.IsEnabled = false;
-        _waitingForGatewayReady = true;
+        // v0.5: uvolnit splash overlay před spuštěním TUI
+        DisposeSplash();
 
+        BtnStartTui.IsEnabled = false;
         try
         {
+            if (Terminal.IsTuiRunning)
+            {
+                Log(L10n.Get("Str_Log_TuiStopping"));
+                Terminal.StopTui();
+                return;
+            }
+
+            if (_gatewayState == GatewayUiState.Running)
+            {
+                Log(L10n.Get("Str_Log_TuiStarting"));
+                Terminal.StartTui();
+                return;
+            }
+
+            _waitingForGatewayReady = true;
             var logPath = SettingsService.Current.GetTodayGatewayLogPath();
 
-            Log("Mažu starý Gateway log...");
+            Log(L10n.Get("Str_Log_DeletingLog"));
             LogMonitor.DeleteLogIfExists(logPath);
+            LatencyTracker.Reset();
 
             if (ProcessDetector.IsGatewayRunning())
             {
-                Log("Zastavuji Gateway...");
+                Log(L10n.Get("Str_Log_GatewayStopping"));
                 GatewayService.Stop();
                 await Task.Delay(2000);
             }
 
-            Log("Spouštím Gateway...");
+            Log(L10n.Get("Str_Log_GatewayStarting"));
             SetGatewayUiState(GatewayUiState.Starting, null);
             var proc = GatewayService.Start();
             if (proc == null)
@@ -367,47 +463,33 @@ public partial class MainWindow : Window
                 _waitingForGatewayReady = false;
                 Log("[CHYBA] Gateway nebylo možné spustit.");
                 SetGatewayUiState(GatewayUiState.Failed, null);
-                MessageBox.Show("Gateway nebylo možné spustit.", "Chyba",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            Log("Čekám na Gateway ready (max 180s)...");
+            Log(L10n.Get("Str_Log_WaitingGatewayReady"));
             var startTime = DateTime.Now;
-            var ready = await LogMonitor.WaitForGatewayReady(logPath, timeoutSeconds: 180);
+            var ready = await LogMonitor.WaitForGatewayReady(logPath, 180);
             var elapsed = (DateTime.Now - startTime).TotalSeconds;
-
             _waitingForGatewayReady = false;
 
             if (!ready)
             {
-                Log($"[CHYBA] Gateway ready timeout po {elapsed:F1}s.");
+                Log($"{L10n.Get("Str_Log_GatewayTimeout")} {elapsed:F1}s.");
                 SetGatewayUiState(GatewayUiState.Failed, null);
-                MessageBox.Show("Gateway nestihl naběhnout do 180 sekund.",
-                    "Timeout", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            Log($"Gateway ready za {elapsed:F1}s.");
+            Log($"{L10n.Get("Str_Log_GatewayReadyIn")} {elapsed:F1}s.");
             var gw = ProcessDetector.FindGatewayProcess();
             SetGatewayUiState(GatewayUiState.Running, gw);
 
-            Log("Spouštím OpenClaw TUI...");
-            var tuiProc = GatewayService.StartTui();
-            if (tuiProc == null)
-            {
-                Log("[CHYBA] TUI nebylo možné spustit.");
-                MessageBox.Show("TUI nebylo možné spustit.", "Chyba",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            Log("TUI spuštěn.");
+            Log(L10n.Get("Str_Log_TuiStarting"));
+            Terminal.StartTui();
         }
         catch (Exception ex)
         {
             _waitingForGatewayReady = false;
-            Log($"[CHYBA] SPUSTIT TUI selhal: {ex.Message}");
+            Log($"[CHYBA] {ex.Message}");
         }
         finally
         {
@@ -415,136 +497,159 @@ public partial class MainWindow : Window
         }
     }
 
-    // ==================== CLEANING / DOCTOR ====================
+    private void OnTuiStateChanged(bool isRunning)
+    {
+        Dispatcher.BeginInvoke(new Action(() => UpdateStartTuiButton(isRunning)));
+    }
+
+    private void UpdateStartTuiButton(bool tuiRunning)
+    {
+        BtnStartTui.ToolTip = L10n.Get("Str_Tip_StartTui");
+
+        if (tuiRunning)
+        {
+            BtnStartTuiSymbol.Text = "■";
+            BtnStartTuiSymbol.Foreground = Brushes.Red;
+            BtnStartTuiLabel.Text = L10n.Get("Str_BtnStartTui_Stop");
+            BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Stop");
+            BtnStartTui.Background = BrushStopRed;
+        }
+        else if (_gatewayState == GatewayUiState.Running)
+        {
+            BtnStartTuiSymbol.Text = "▶";
+            BtnStartTuiSymbol.Foreground = Brushes.Green;
+            BtnStartTuiLabel.Text = L10n.Get("Str_BtnStartTui_Label");
+            BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Running");
+            BtnStartTui.Background = BrushStartGreen;
+        }
+        else
+        {
+            BtnStartTuiSymbol.Text = "▶";
+            BtnStartTuiSymbol.Foreground = Brushes.Green;
+            BtnStartTuiLabel.Text = L10n.Get("Str_BtnStartTui_Label");
+            BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Restart");
+            BtnStartTui.Background = BrushStartGreen;
+        }
+    }
+
+    // ==================== Ostatní tlačítka ====================
 
     private void BtnCleaningTool_Click(object? sender, RoutedEventArgs e)
     {
+        Log(L10n.Get("Str_Log_OpeningCleaningTool"));
         var dialog = new CleaningWindow { Owner = this };
-        Log("Otevírám Cleaning Tool.");
         dialog.ShowDialog();
-        Log("Cleaning Tool zavřen.");
+        Log(L10n.Get("Str_Log_ClosedCleaningTool"));
+    }
+
+    private void BtnTokenManager_Click(object? sender, RoutedEventArgs e)
+    {
+        bool cs = L10n.Current == L10n.Language.CS;
+        MessageBox.Show(
+            cs ? "Správce API klíčů bude dostupný ve verzi v0.5."
+               : "Token Manager will be available in v0.5.",
+            cs ? "Připravujeme" : "Coming soon",
+            MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void BtnDoctorFix_Click(object? sender, RoutedEventArgs e)
     {
-        Log("Spouštím openclaw doctor --fix...");
-        var proc = GatewayService.RunDoctorFix();
-        if (proc == null)
-            Log("[CHYBA] doctor --fix nebylo možné spustit.");
+        Log(L10n.Get("Str_Log_DoctorFix"));
+        GatewayService.RunDoctorFix();
     }
-
-    // ==================== OTEVÍRACÍ AKCE ====================
 
     private void OpenInExplorer(string path)
     {
-        if (!Directory.Exists(path))
-        {
-            Log($"[CHYBA] Složka neexistuje: {path}");
-            MessageBox.Show($"Složka neexistuje:\n{path}\n\nMůžeš upravit cestu v Nastavení.",
-                "Chyba", MessageBoxButton.OK, MessageBoxImage.Warning);
-            return;
-        }
-
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "explorer.exe",
-                Arguments = $"\"{path}\"",
-                UseShellExecute = true
-            });
-            Log($"Otevřena složka: {path}");
-        }
-        catch (Exception ex)
-        {
-            Log($"[CHYBA] Průzkumník selhalo: {ex.Message}");
-        }
+        if (!Directory.Exists(path)) { Log($"[CHYBA] Složka neexistuje: {path}"); return; }
+        try { Process.Start(new ProcessStartInfo { FileName = "explorer.exe", Arguments = $"\"{path}\"", UseShellExecute = true }); }
+        catch (Exception ex) { Log($"[CHYBA] {ex.Message}"); }
     }
 
     private void OpenPowerShell()
     {
-        var workingDir = SettingsService.Current.PowerShellWorkingDir;
-
-        if (!Directory.Exists(workingDir))
-        {
-            workingDir = "";
-        }
-
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "powershell.exe",
-                Arguments = "-NoExit -NoProfile",
-                UseShellExecute = true,
-                WorkingDirectory = workingDir
-            });
-            Log($"Otevřen PowerShell ({(string.IsNullOrEmpty(workingDir) ? "default dir" : workingDir)})");
-        }
-        catch (Exception ex)
-        {
-            Log($"[CHYBA] PowerShell selhalo: {ex.Message}");
-        }
+        var workDir = SettingsService.Current.PowerShellWorkingDir;
+        if (!Directory.Exists(workDir)) workDir = "";
+        try { Process.Start(new ProcessStartInfo { FileName = "powershell.exe", Arguments = "-NoExit -NoProfile", UseShellExecute = true, WorkingDirectory = workDir }); }
+        catch (Exception ex) { Log($"[CHYBA] {ex.Message}"); }
     }
 
-    private void OpenGatewayLog(int defaultLineCount)
+    private void OpenGatewayLog(int lines)
     {
         var logPath = SettingsService.Current.GetTodayGatewayLogPath();
-        var dialog = new GatewayLogWindow(logPath, defaultLineCount) { Owner = this };
-        Log($"Otevírám Gateway log viewer ({(defaultLineCount == 0 ? "celý log" : defaultLineCount + " řádků")}).");
+        var dialog = new GatewayLogWindow(logPath, lines) { Owner = this };
         dialog.ShowDialog();
     }
 
     private void OpenLogMenuItem_Click(object? sender, RoutedEventArgs e)
     {
-        int lineCount = 20;
-        if (sender is MenuItem item && item.Tag is string tagStr &&
-            int.TryParse(tagStr, out var parsed))
-        {
-            lineCount = parsed;
-        }
-        OpenGatewayLog(lineCount);
+        int n = 20;
+        if (sender is MenuItem mi && mi.Tag is string s && int.TryParse(s, out var p)) n = p;
+        OpenGatewayLog(n);
     }
 
     private void OpenSettings()
     {
         var dialog = new SettingsWindow { Owner = this };
         if (dialog.ShowDialog() == true)
-            Log("Nastavení uloženo.");
+        {
+            var lang = SettingsService.Current.Language == "EN"
+                ? L10n.Language.EN : L10n.Language.CS;
+            L10n.Apply(lang);
+            ApplyLocalization();
+            Log(L10n.Get("Str_Log_SettingsSaved"));
+        }
     }
 
     private void ShowAbout()
     {
-        MessageBox.Show(
-            "OpenClaw Manager Tool by Bloom\nVerze: v0.2\n\n" +
-            "Diagnostický a údržbový nástroj pro OpenClaw setup.\n\n" +
-            "Postaveno v C# / WPF / .NET 8.",
-            "O aplikaci", MessageBoxButton.OK, MessageBoxImage.Information);
+        var dialog = new AboutWindow { Owner = this };
+        dialog.ShowDialog();
     }
 
     private void OpenUrl(string url)
     {
-        try
-        {
-            Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
-        }
-        catch (Exception ex)
-        {
-            Log($"[CHYBA] URL selhalo: {ex.Message}");
-        }
+        try { Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true }); }
+        catch { }
     }
-
-    // ==================== LOG ====================
 
     private void Log(string message)
     {
         var ts = DateTime.Now.ToString("HH:mm:ss");
         AppLog.Items.Add($"[{ts}] {message}");
+        while (AppLog.Items.Count > 100) AppLog.Items.RemoveAt(0);
+        if (AppLog.Items.Count > 0) AppLog.ScrollIntoView(AppLog.Items[AppLog.Items.Count - 1]);
+    }
 
-        while (AppLog.Items.Count > 100)
-            AppLog.Items.RemoveAt(0);
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        if (ProcessDetector.IsGatewayRunning())
+        {
+            bool cs = L10n.Current == L10n.Language.CS;
+            var result = MessageBox.Show(
+                cs ? "OpenClaw Gateway stále běží.\n\nAno = Zastavit Gateway a zavřít\nNe = Zavřít a nechat Gateway běžet\nZrušit = Zpět do aplikace"
+                   : "OpenClaw Gateway is still running.\n\nYes = Stop Gateway and close\nNo = Close and leave Gateway running\nCancel = Return to application",
+                cs ? "Gateway běží" : "Gateway running",
+                MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
 
-        if (AppLog.Items.Count > 0)
-            AppLog.ScrollIntoView(AppLog.Items[AppLog.Items.Count - 1]);
+            switch (result)
+            {
+                case MessageBoxResult.Yes:
+                    Terminal.StopTui();
+                    GatewayService.StopAndCloseTui();
+                    break;
+                case MessageBoxResult.No:
+                    Terminal.StopTui();
+                    break;
+                case MessageBoxResult.Cancel:
+                    e.Cancel = true;
+                    return;
+            }
+        }
+        else
+        {
+            Terminal.StopTui();
+        }
+
+        base.OnClosing(e);
     }
 }

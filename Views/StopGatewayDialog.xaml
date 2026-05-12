@@ -28,7 +28,8 @@
 
         <CheckBox Grid.Row="2"
                   x:Name="ChkCloseTui"
-                  Content="Zavřít také TUI okna (PowerShell wrappery)"
+                  Content="Zavřít všechna OpenClaw okna"
+                  IsChecked="True"
                   Margin="0,0,0,8"
                   VerticalAlignment="Top" />
 

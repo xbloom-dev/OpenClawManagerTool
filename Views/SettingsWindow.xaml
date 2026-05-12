@@ -2,8 +2,8 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="OpenClaw Manager — Nastavení"
-        Height="450" Width="700"
-        MinHeight="400" MinWidth="600"
+        Height="640" Width="700"
+        MinHeight="540" MinWidth="600"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize">
 
@@ -15,18 +15,72 @@
                     HorizontalAlignment="Right"
                     Margin="0,16,0,0">
             <Button x:Name="BtnSave" Content="Uložit"
-                    Width="100" Height="28" Margin="4,0" />
+                    Width="100" Height="28" Margin="4,0" IsDefault="True"
+                    ToolTip="Uloží nastavení a zavře dialog." />
             <Button x:Name="BtnReset" Content="Reset na výchozí"
-                    Width="140" Height="28" Margin="4,0" />
+                    Width="140" Height="28" Margin="4,0"
+                    ToolTip="Obnoví všechny hodnoty na výchozí." />
             <Button x:Name="BtnCancel" Content="Zrušit"
                     Width="100" Height="28" Margin="4,0"
-                    IsCancel="True" />
+                    IsCancel="True"
+                    ToolTip="Zavře bez uložení." />
         </StackPanel>
 
         <!-- Formulář -->
         <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel>
 
+                <!-- ===== JAZYK ===== -->
+                <TextBlock Text="Jazyk / Language"
+                           FontSize="14" FontWeight="Bold"
+                           Margin="0,0,0,8" />
+
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <RadioButton x:Name="RbLangCS" Content="Čeština"
+                                 GroupName="Language" Margin="0,0,16,0"
+                                 VerticalContentAlignment="Center" />
+                    <RadioButton x:Name="RbLangEN" Content="English"
+                                 GroupName="Language"
+                                 VerticalContentAlignment="Center" />
+                </StackPanel>
+                <TextBlock Text="Změna jazyka se projeví po uložení nastavení."
+                           FontStyle="Italic" Foreground="Gray" FontSize="11"
+                           Margin="0,0,0,16" />
+
+                <Separator Margin="0,0,0,16" />
+
+                <!-- ===== VZHLED (v0.5) ===== -->
+                <TextBlock Text="Vzhled / Appearance"
+                           FontSize="14" FontWeight="Bold"
+                           Margin="0,0,0,8" />
+
+                <TextBlock Text="Téma aplikace:" Margin="0,4,0,4" />
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <RadioButton x:Name="RbThemeLegacy" Content="Legacy"
+                                 GroupName="Theme" Margin="0,0,16,0"
+                                 VerticalContentAlignment="Center"
+                                 ToolTip="Původní vzhled s ASCII ART splashem (v0.4)." />
+                    <RadioButton x:Name="RbThemeModern" Content="Modern"
+                                 GroupName="Theme"
+                                 VerticalContentAlignment="Center"
+                                 ToolTip="Světlé téma (Light Modern) s video/PNG splashem." />
+                </StackPanel>
+                <TextBlock Text="Změna tématu se projeví po restartu aplikace."
+                           FontStyle="Italic" Foreground="Gray" FontSize="11"
+                           Margin="0,0,0,8" />
+
+                <CheckBox x:Name="ChkUseSplashVideo"
+                          Content="Přehrát splash screen video při startu"
+                          Margin="0,4,0,2"
+                          VerticalContentAlignment="Center"
+                          ToolTip="Vyžaduje splash.mp4 vedle EXE. Pokud chybí, zobrazí se statický obrázek." />
+                <TextBlock Text="(aktivní pouze v Modern tématu; bez videa se zobrazí splash.png)"
+                           FontStyle="Italic" Foreground="Gray" FontSize="11"
+                           Margin="0,0,0,16" />
+
+                <Separator Margin="0,0,0,16" />
+
+                <!-- ===== CESTY ===== -->
                 <TextBlock Text="Cesty"
                            FontSize="14" FontWeight="Bold"
                            Margin="0,0,0,8" />
@@ -43,7 +97,8 @@
                              Padding="4,0" />
                     <Button x:Name="BtnBrowseOpenClaw" Grid.Column="1"
                             Content="Procházet..." Width="100" Height="24"
-                            Margin="4,0,0,0" />
+                            Margin="4,0,0,0"
+                            ToolTip="Vybere složku ze systému." />
                 </Grid>
 
                 <!-- Temp složka -->
@@ -58,7 +113,8 @@
                              Padding="4,0" />
                     <Button x:Name="BtnBrowseTemp" Grid.Column="1"
                             Content="Procházet..." Width="100" Height="24"
-                            Margin="4,0,0,0" />
+                            Margin="4,0,0,0"
+                            ToolTip="Vybere složku ze systému." />
                 </Grid>
 
                 <!-- openclaw příkaz -->
@@ -82,9 +138,10 @@
                              Padding="4,0" />
                     <Button x:Name="BtnBrowsePowerShell" Grid.Column="1"
                             Content="Procházet..." Width="100" Height="24"
-                            Margin="4,0,0,0" />
+                            Margin="4,0,0,0"
+                            ToolTip="Vybere složku ze systému." />
                 </Grid>
-                <TextBlock Text="(adresář ve kterém se otevře PowerShell přes menu Soubor)"
+                <TextBlock Text="(adresář ve kterém se otevře PowerShell přes menu Otevřít)"
                            FontStyle="Italic" Foreground="Gray" FontSize="11"
                            Margin="0,0,0,12" />
 

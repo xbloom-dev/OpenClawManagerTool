@@ -1,0 +1,113 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Hlavní okno — Akce -->
+    <sys:String x:Key="Str_BtnStartTui_Label">OpenClaw TUI</sys:String>
+    <sys:String x:Key="Str_BtnStartTui_Stop">Zastavit OpenClaw TUI</sys:String>
+    <sys:String x:Key="Str_BtnStartTui_Sub_Restart">(restart Gateway)</sys:String>
+    <sys:String x:Key="Str_BtnStartTui_Sub_Running">(Gateway běží)</sys:String>
+    <sys:String x:Key="Str_BtnStartTui_Sub_Stop">(Gateway zůstane)</sys:String>
+    <sys:String x:Key="Str_BtnGatewayStart">Start</sys:String>
+    <sys:String x:Key="Str_BtnGatewayStop">Stop</sys:String>
+    <sys:String x:Key="Str_BtnGatewayRestart">Restart</sys:String>
+    <sys:String x:Key="Str_Section_Open">Otevřít:</sys:String>
+    <sys:String x:Key="Str_BtnPowerShell">PowerShell</sys:String>
+    <sys:String x:Key="Str_BtnGatewayLog">Gateway log</sys:String>
+    <sys:String x:Key="Str_Section_Tools">Nástroje:</sys:String>
+    <sys:String x:Key="Str_BtnCleaningTool">Vyčistit soubory</sys:String>
+    <sys:String x:Key="Str_BtnTokenManager">Správce API klíčů</sys:String>
+    <sys:String x:Key="Str_Section_Maintenance">Údržba:</sys:String>
+    <sys:String x:Key="Str_BtnDoctorFix">Opravit konfiguraci</sys:String>
+    <sys:String x:Key="Str_Gateway_Label">Gateway:</sys:String>
+
+    <!-- Hlavní okno — Sekce -->
+    <sys:String x:Key="Str_Group_Actions">Akce</sys:String>
+    <sys:String x:Key="Str_Group_Latency">Měření latence</sys:String>
+    <sys:String x:Key="Str_Group_AppLog">Log aplikace</sys:String>
+    <sys:String x:Key="Str_Latency_Last">Poslední:</sys:String>
+    <sys:String x:Key="Str_Latency_Avg">Průměr 10×:</sys:String>
+    <sys:String x:Key="Str_Latency_Max">Maximum:</sys:String>
+    <sys:String x:Key="Str_Latency_Count">Requestů:</sys:String>
+
+    <!-- Tooltipy hlavního okna -->
+    <sys:String x:Key="Str_Tip_StartTui">Tlačítko má 3 režimy:&#x0a;1. Gateway neběží → spustí celou sekvenci (Gateway + TUI)&#x0a;2. Gateway běží → spustí jen TUI&#x0a;3. TUI běží → zastaví TUI (Gateway zůstane)&#x0a;&#x0a;Zkratka: Ctrl+T</sys:String>
+    <sys:String x:Key="Str_Tip_GatewayStart">Spustí openclaw gateway na pozadí.&#x0a;Zkratka: Ctrl+G</sys:String>
+    <sys:String x:Key="Str_Tip_GatewayStop">Zastaví běžící Gateway. Aktivní sessions budou přerušeny.&#x0a;Zkratka: Ctrl+G</sys:String>
+    <sys:String x:Key="Str_Tip_GatewayRestart">Zastaví a znovu spustí Gateway. TUI se odpojí.&#x0a;Zkratka: Ctrl+R</sys:String>
+    <sys:String x:Key="Str_Tip_PowerShell">Otevře PowerShell v pracovním adresáři z Nastavení.</sys:String>
+    <sys:String x:Key="Str_Tip_GatewayLog">Zobrazí posledních 20 řádků Gateway logu.</sys:String>
+    <sys:String x:Key="Str_Tip_CleaningTool">Odstraní staré logy, cache a session soubory.&#x0a;Zkratka: Ctrl+Shift+C</sys:String>
+    <sys:String x:Key="Str_Tip_TokenManager">Správa API klíčů a redakce konfiguračních souborů. Dostupné v v0.5.</sys:String>
+    <sys:String x:Key="Str_Tip_DoctorFix">Spustí openclaw "doctor --fix" pro opravu konfigurace.</sys:String>
+
+    <!-- Cleaning Tool -->
+    <sys:String x:Key="Str_BtnDryRun">Náhled</sys:String>
+    <sys:String x:Key="Str_BtnRun">Spustit</sys:String>
+    <sys:String x:Key="Str_BtnClose">Zavřít</sys:String>
+    <sys:String x:Key="Str_Tip_DryRun">Zobrazí co by se smazalo, nic nemaže.</sys:String>
+    <sys:String x:Key="Str_Tip_Run">Trvale smaže vybrané soubory. Akci nelze vrátit.</sys:String>
+    <sys:String x:Key="Str_Tip_CleaningClose">Zavře Cleaning Tool.</sys:String>
+
+    <!-- Settings -->
+    <sys:String x:Key="Str_BtnSave">Uložit</sys:String>
+    <sys:String x:Key="Str_BtnReset">Reset na výchozí</sys:String>
+    <sys:String x:Key="Str_BtnCancel">Zrušit</sys:String>
+    <sys:String x:Key="Str_BtnBrowse">Procházet...</sys:String>
+    <sys:String x:Key="Str_Tip_Save">Uloží nastavení a zavře dialog.</sys:String>
+    <sys:String x:Key="Str_Tip_Reset">Obnoví všechny hodnoty na výchozí.</sys:String>
+    <sys:String x:Key="Str_Tip_Cancel">Zavře bez uložení.</sys:String>
+    <sys:String x:Key="Str_Tip_Browse">Vybere složku ze systému.</sys:String>
+
+    <!-- About -->
+    <sys:String x:Key="Str_Tip_AboutClose">Zavře dialog.</sys:String>
+
+    <!-- Gateway log dialog -->
+    <sys:String x:Key="Str_BtnCopy">Kopírovat</sys:String>
+    <sys:String x:Key="Str_BtnCopied">Zkopírováno</sys:String>
+    <sys:String x:Key="Str_Tip_Copy">Zkopíruje celý zobrazený log do schránky.</sys:String>
+
+    <!-- Menu -->
+    <sys:String x:Key="Str_Menu_Open">_Otevřít</sys:String>
+    <sys:String x:Key="Str_Menu_OpenOpenClawFolder">_OpenClaw složku</sys:String>
+    <sys:String x:Key="Str_Menu_OpenTempFolder">_Temp složku (Gateway logy)</sys:String>
+    <sys:String x:Key="Str_Menu_OpenGatewayLog">_Gateway log</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog10">Posledních 10 řádků</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog20">Posledních 20 řádků</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog30">Posledních 30 řádků</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog50">Posledních 50 řádků</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLog100">Posledních 100 řádků</sys:String>
+    <sys:String x:Key="Str_Menu_OpenLogAll">Celý log</sys:String>
+    <sys:String x:Key="Str_Menu_OpenPowerShell">_PowerShell</sys:String>
+    <sys:String x:Key="Str_Menu_Settings">_Nastavení</sys:String>
+    <sys:String x:Key="Str_Menu_Help">_Nápověda</sys:String>
+    <sys:String x:Key="Str_Menu_About">_O aplikaci...</sys:String>
+    <sys:String x:Key="Str_Menu_OpenSettings">Otevřít _Nastavení...</sys:String>
+    <sys:String x:Key="Str_Menu_OpenClawWeb">Otevřít web OpenClaw</sys:String>
+    <sys:String x:Key="Str_Menu_Exit">_Konec</sys:String>
+
+    <!-- Status bar -->
+    <sys:String x:Key="Str_Status_Running">běží</sys:String>
+    <sys:String x:Key="Str_Status_Starting">spouští se...</sys:String>
+    <sys:String x:Key="Str_Status_Failed">selhalo</sys:String>
+    <sys:String x:Key="Str_Status_Stopped">neběží</sys:String>
+
+    <!-- Log zprávy -->
+    <sys:String x:Key="Str_Log_AppStarted">Aplikace spuštěna (v0.4).</sys:String>
+    <sys:String x:Key="Str_Log_GatewayStarting">Spouštím Gateway...</sys:String>
+    <sys:String x:Key="Str_Log_GatewayReady">Gateway ready.</sys:String>
+    <sys:String x:Key="Str_Log_GatewayStopping">Zastavuji Gateway...</sys:String>
+    <sys:String x:Key="Str_Log_GatewayStopped">Gateway zastaven.</sys:String>
+    <sys:String x:Key="Str_Log_TuiStarting">Spouštím TUI v embedded terminálu...</sys:String>
+    <sys:String x:Key="Str_Log_TuiStopping">Zastavuji TUI...</sys:String>
+    <sys:String x:Key="Str_Log_OpeningCleaningTool">Otevírám Cleaning Tool.</sys:String>
+    <sys:String x:Key="Str_Log_ClosedCleaningTool">Cleaning Tool zavřen.</sys:String>
+    <sys:String x:Key="Str_Log_DoctorFix">Spouštím openclaw "doctor --fix"...</sys:String>
+    <sys:String x:Key="Str_Log_SettingsSaved">Nastavení uloženo.</sys:String>
+    <sys:String x:Key="Str_Log_WaitingGatewayReady">Čekám na Gateway ready (max 180s)...</sys:String>
+    <sys:String x:Key="Str_Log_GatewayTimeout">CHYBA: Gateway ready timeout po</sys:String>
+    <sys:String x:Key="Str_Log_GatewayReadyIn">Gateway ready za</sys:String>
+    <sys:String x:Key="Str_Log_DeletingLog">Mažu starý Gateway log...</sys:String>
+    <sys:String x:Key="Str_Log_StoppingGatewayTui">Zastavuji Gateway a zavírám všechna OpenClaw okna...</sys:String>
+
+</ResourceDictionary>

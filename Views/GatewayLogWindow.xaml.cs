@@ -1,112 +1,161 @@
 using System.IO;
 using System.Windows;
-using System.Windows.Controls;
+using System.Windows.Media.Animation;
+using System.Windows.Threading;
+using OpenClawManager.Services;
 
 namespace OpenClawManager.Views;
 
 /// <summary>
-/// Dialog pro zobrazení Gateway logu s volbou kolik řádků zobrazit.
-///
-/// Konstruktor přijímá defaultLineCount — kolik řádků zobrazit při otevření.
-/// Mapuje se na ComboBox položky s odpovídajícím Tag (string s číslem).
-/// 0 = celý log.
+/// Okno pro zobrazení Gateway log souboru.
+/// Zachovává původní funkcionalitu (dropdown, Aktualizovat, StatusBar).
+/// Nově: Kopírovat (s 2s fade feedback) + Živá data (otevře LiveLogWindow, toto zavře).
 /// </summary>
 public partial class GatewayLogWindow : Window
 {
-    private readonly string _logFilePath;
-    private readonly int _defaultLineCount;
+    private readonly string _logPath;
+    private DispatcherTimer? _feedbackTimer;
 
-    public GatewayLogWindow(string logFilePath, int defaultLineCount = 20)
+    public GatewayLogWindow(string logPath, int defaultLines = 20)
     {
         InitializeComponent();
-        _logFilePath = logFilePath;
-        _defaultLineCount = defaultLineCount;
+        _logPath = logPath;
 
-        TxtLogPath.Text = $"Soubor: {_logFilePath}";
-
-        // Předvybrat položku v ComboBoxu podle defaultLineCount
-        SelectComboBoxItemByTag(_defaultLineCount.ToString());
+        SelectLineCount(defaultLines);
 
         BtnRefresh.Click += (_, _) => LoadLog();
         BtnClose.Click += (_, _) => Close();
+        BtnCopy.Click += BtnCopy_Click;
+        BtnLiveLog.Click += BtnLiveLog_Click;
         CmbLineCount.SelectionChanged += (_, _) => LoadLog();
 
+        ApplyLocalization();
         LoadLog();
     }
 
-    /// <summary>
-    /// Najde a vybere ComboBoxItem podle Tag hodnoty.
-    /// Pokud nenajde, ponechá default (první položka v XAML).
-    /// </summary>
-    private void SelectComboBoxItemByTag(string tagValue)
+    private void ApplyLocalization()
     {
-        foreach (var item in CmbLineCount.Items)
-        {
-            if (item is ComboBoxItem cbItem && cbItem.Tag is string tag && tag == tagValue)
-            {
-                CmbLineCount.SelectedItem = cbItem;
-                return;
-            }
-        }
+        bool cs = L10n.Current == L10n.Language.CS;
+        BtnRefresh.Content  = cs ? "Aktualizovat" : "Refresh";
+        BtnCopy.Content     = cs ? "Kopírovat" : "Copy";
+        BtnClose.Content    = cs ? "Zavřít" : "Close";
+        BtnLiveLog.Content  = cs ? "Živá data" : "Live log";
+        BtnRefresh.ToolTip  = cs ? "Znovu načte obsah logu ze souboru." : "Reloads log content from file.";
+        BtnCopy.ToolTip     = cs ? "Zkopíruje celý zobrazený log do schránky." : "Copies displayed log to clipboard.";
+        BtnLiveLog.ToolTip  = cs
+            ? "Otevře okno pro živé sledování logu. Toto okno se zavře."
+            : "Opens live log monitoring window. This window will close.";
+        TxtCopiedFeedback.Text = "✓ " + (cs ? "Zkopírováno" : "Copied");
+    }
 
-        // Fallback: vyber 20 řádků
-        foreach (var item in CmbLineCount.Items)
+    private void SelectLineCount(int lines)
+    {
+        foreach (System.Windows.Controls.ComboBoxItem item in CmbLineCount.Items)
         {
-            if (item is ComboBoxItem cbItem && cbItem.Tag is string tag && tag == "20")
+            if (item.Tag is string tag && tag == lines.ToString())
             {
-                CmbLineCount.SelectedItem = cbItem;
+                CmbLineCount.SelectedItem = item;
                 return;
             }
         }
+        if (CmbLineCount.Items.Count > 1)
+            CmbLineCount.SelectedIndex = 1; // výchozí: 20 řádků
+    }
+
+    private int GetSelectedLineCount()
+    {
+        if (CmbLineCount.SelectedItem is System.Windows.Controls.ComboBoxItem item &&
+            item.Tag is string tag && int.TryParse(tag, out var n))
+            return n;
+        return 20;
     }
 
     private void LoadLog()
     {
-        if (!File.Exists(_logFilePath))
+        var lines = GetSelectedLineCount();
+
+        if (!File.Exists(_logPath))
         {
-            TxtLogContent.Text = $"Log soubor neexistuje:\n{_logFilePath}\n\nGateway zřejmě dnes ještě neběžel.";
-            TxtStatus.Text = "Soubor neexistuje.";
+            bool cs2 = L10n.Current == L10n.Language.CS;
+            TxtLogPath.Text   = $"{(cs2 ? "Soubor" : "File")}: {_logPath}";
+            TxtLogContent.Text = cs2 ? "(soubor neexistuje)" : "(file not found)";
+            TxtStatus.Text    = cs2 ? "Soubor nenalezen." : "File not found.";
             return;
         }
 
         try
         {
-            int lineCount = 20;
-            if (CmbLineCount.SelectedItem is ComboBoxItem item &&
-                item.Tag is string tagStr &&
-                int.TryParse(tagStr, out var parsed))
-            {
-                lineCount = parsed;
-            }
+            string content;
+            using (var fs = new FileStream(_logPath, FileMode.Open,
+                FileAccess.Read, FileShare.ReadWrite))
+            using (var reader = new StreamReader(fs))
+                content = reader.ReadToEnd();
 
-            string[] allLines;
-            using (var stream = new FileStream(_logFilePath, FileMode.Open,
-                                               FileAccess.Read, FileShare.ReadWrite))
-            using (var reader = new StreamReader(stream))
-            {
-                var content = reader.ReadToEnd();
-                allLines = content.Split('\n');
-            }
+            var allLines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+            var display  = lines > 0 && allLines.Length > lines
+                ? allLines.Skip(allLines.Length - lines).ToArray()
+                : allLines;
 
-            string[] selectedLines;
-            if (lineCount == 0 || lineCount >= allLines.Length)
-            {
-                selectedLines = allLines;
-                TxtStatus.Text = $"Zobrazen celý log ({allLines.Length} řádků).";
-            }
-            else
-            {
-                selectedLines = allLines.Skip(Math.Max(0, allLines.Length - lineCount)).ToArray();
-                TxtStatus.Text = $"Zobrazeno posledních {selectedLines.Length} z {allLines.Length} řádků.";
-            }
-
-            TxtLogContent.Text = string.Join("\n", selectedLines);
+            TxtLogContent.Text = string.Join("\n", display);
             TxtLogContent.ScrollToEnd();
+
+            var fi    = new FileInfo(_logPath);
+            var sizeKb = Math.Round(fi.Length / 1024.0, 1);
+            bool cs   = L10n.Current == L10n.Language.CS;
+
+            TxtLogPath.Text = cs
+                ? $"Soubor: {_logPath}   |   Velikost: {sizeKb} KB   |   Zobrazeno řádků: {display.Length}"
+                : $"File: {_logPath}   |   Size: {sizeKb} KB   |   Lines shown: {display.Length}";
+
+            TxtStatus.Text = cs
+                ? (lines == 0 ? $"Zobrazen celý log ({display.Length} řádků)."
+                              : $"Zobrazeno posledních {display.Length} řádků.")
+                : (lines == 0 ? $"Showing entire log ({display.Length} lines)."
+                              : $"Showing last {display.Length} lines.");
         }
         catch (Exception ex)
         {
-            TxtLogContent.Text = $"Chyba při čtení logu:\n{ex.Message}";
-            TxtStatus.Text = "Chyba při načítání.";
+            TxtStatus.Text = $"Chyba: {ex.Message}";
         }
+    }
+
+    private void BtnCopy_Click(object? sender, RoutedEventArgs e)
+    {
+        try
+        {
+            Clipboard.SetText(TxtLogContent.Text);
+            ShowCopiedFeedback();
+        }
+        catch (Exception ex)
+        {
+            bool cs = L10n.Current == L10n.Language.CS;
+            MessageBox.Show(
+                cs ? $"Kopírování selhalo:\n{ex.Message}" : $"Copy failed:\n{ex.Message}",
+                cs ? "Chyba" : "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    private void ShowCopiedFeedback()
+    {
+        _feedbackTimer?.Stop();
+        TxtCopiedFeedback.BeginAnimation(OpacityProperty,
+            new DoubleAnimation { From = 0, To = 1, Duration = TimeSpan.FromMilliseconds(200) });
+        _feedbackTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1800) };
+        _feedbackTimer.Tick += (_, _) =>
+        {
+            _feedbackTimer?.Stop();
+            TxtCopiedFeedback.BeginAnimation(OpacityProperty,
+                new DoubleAnimation { From = 1, To = 0, Duration = TimeSpan.FromMilliseconds(200) });
+        };
+        _feedbackTimer.Start();
+    }
+
+    private void BtnLiveLog_Click(object? sender, RoutedEventArgs e)
+    {
+        var lines = GetSelectedLineCount();
+        var live = new LiveLogWindow(_logPath, lines);
+        live.Show();
+        Close();
     }
 }

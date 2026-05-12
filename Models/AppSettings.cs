@@ -1,50 +1,80 @@
 using System.IO;
+using System.Text.Json.Serialization;
 
 namespace OpenClawManager.Models;
 
 /// <summary>
-/// Konfigurovatelná nastavení aplikace.
-/// Persistuje se jako JSON v %APPDATA%\OpenClawManager\settings.json.
-///
-/// Default hodnoty:
-/// - Cesty k OpenClaw složkám se odvozují z aktuálního uživatelského profilu (USERPROFILE)
-/// - 'openclaw' bez plné cesty = PATH lookup (npm globální instalace)
-/// - PowerShell pracovní adresář: E:\OpenClaw (kde běžně OpenClaw setup leží)
+/// Vizuální téma aplikace (v0.5+).
+/// Legacy = původní tmavé WPF téma s ASCII ART splashem.
+/// Modern = Light Modern paleta (C) s video/PNG splash overlay.
+/// </summary>
+public enum AppTheme
+{
+    Legacy,
+    Modern
+}
+
+/// <summary>
+/// Persistentní nastavení aplikace — ukládá se do %APPDATA%\OpenClawManager\settings.json.
 /// </summary>
 public class AppSettings
 {
-    /// <summary>
-    /// Hlavní složka OpenClaw setupu uživatele.
-    /// Default: %USERPROFILE%\.openclaw
-    /// </summary>
+    /// <summary>Cesta k OpenClaw konfiguraci (~\.openclaw)</summary>
     public string OpenClawPath { get; set; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".openclaw");
 
-    /// <summary>
-    /// Temp složka pro Gateway logy (denní log soubory).
-    /// Default: %LOCALAPPDATA%\Temp\openclaw
-    /// </summary>
+    /// <summary>Cesta k OpenClaw temp složce (Gateway logy)</summary>
     public string TempPath { get; set; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                     "Temp", "openclaw");
+            "Temp", "openclaw");
 
-    /// <summary>
-    /// Cesta k openclaw příkazu.
-    /// Default: "openclaw" — předpokládá PATH lookup (npm global bin v PATH).
-    /// Pokud uživatel chce explicitní cestu, např. C:\Users\test\AppData\Roaming\npm\openclaw.cmd
-    /// </summary>
+    /// <summary>Příkaz pro spuštění openclaw (default: openclaw = PATH lookup)</summary>
     public string OpenClawCommand { get; set; } = "openclaw";
 
-    /// <summary>
-    /// Pracovní adresář pro otevíraný PowerShell.
-    /// Default: E:\OpenClaw (typické umístění OpenClaw setupu na BlackStation)
-    /// </summary>
-    public string PowerShellWorkingDir { get; set; } = @"E:\OpenClaw";
+    /// <summary>Pracovní adresář pro PowerShell (prázdný = výchozí)</summary>
+    public string PowerShellWorkingDir { get; set; } =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            "AppData", "Roaming", "npm");
+
+    /// <summary>Agenti pro sessions.json cleanup v Cleaning Tool</summary>
+    public List<string> CleanupAgents { get; set; } =
+        new() { "main", "researcher", "executive", "safety" };
+
+    /// <summary>Cesta k Token Manager secrets.json vaultu</summary>
+    public string TokenManagerSecretsPath { get; set; } =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".token-manager", "secrets.json");
+
+    /// <summary>Jazyk UI — "CS" nebo "EN"</summary>
+    public string Language { get; set; } = "CS";
+
+    /// <summary>Auto-scroll v Log aplikace</summary>
+    public bool AutoScrollAppLog { get; set; } = true;
+
+    // ════════════════════════════════════════════════════════════════════════
+    // v0.5 — Vzhled
+    // ════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Vrátí cestu k aktuálnímu Gateway log souboru pro dnešní datum.
-    /// Formát: openclaw-YYYY-MM-DD.log
+    /// Vizuální téma aplikace. Výchozí: Legacy (zachování původního chování v0.4).
     /// </summary>
-    public string GetTodayGatewayLogPath() =>
-        Path.Combine(TempPath, $"openclaw-{DateTime.Now:yyyy-MM-dd}.log");
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public AppTheme Theme { get; set; } = AppTheme.Legacy;
+
+    /// <summary>
+    /// Zobrazit splash screen video při startu (jen v Modern theme).
+    /// Pokud false nebo splash.mp4 chybí — zobrazí se splash.png fallback.
+    /// </summary>
+    public bool UseSplashVideo { get; set; } = true;
+
+    // ════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Vrátí cestu k dnešnímu Gateway log souboru.
+    /// </summary>
+    public string GetTodayGatewayLogPath()
+    {
+        var fileName = $"openclaw-{DateTime.Now:yyyy-MM-dd}.log";
+        return Path.Combine(TempPath, fileName);
+    }
 }

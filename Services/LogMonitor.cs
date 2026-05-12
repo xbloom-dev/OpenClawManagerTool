@@ -1,124 +1,173 @@
 using System.IO;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace OpenClawManager.Services;
 
 /// <summary>
 /// Sledování Gateway log souboru.
-/// Používá se pro:
-/// - Detekci "gateway ready" během SPUSTIT TUI sekvence
-/// - Parsing latencí z 'res' záznamů (pro LatencyTracker)
 ///
-/// Přístup k souboru je vždy přes FileShare.ReadWrite — Gateway aktivně zapisuje
-/// do logu zatímco aplikace čte.
+/// Dvě funkce:
+/// 1. WaitForGatewayReady — polling dokud se neobjeví "gateway ready" v logu
+/// 2. ParseLatencyEntries — parsování res ✓ záznamů pro LatencyTracker
+///
+/// Formát logu: každý řádek je JSON objekt s polem "message".
+/// Zprávy obsahují ANSI escape sekvence — musí se stripovat před regex matchem.
+///
+/// Příklad res záznamu (po JSON parse a ANSI strip):
+///   "⇄ res ✓ agents.list 145ms conn=db8d5be5…c09a id=e2670228…7d13"
 /// </summary>
 public static class LogMonitor
 {
-    /// <summary>
-    /// Regex pro res záznamy v Gateway logu.
-    /// Příklady:
-    ///   res ✓ sessions.list 12ms
-    ///   res ✓ chat.send 1234ms
-    ///   res ✗ method.name 5678ms (chyba)
-    ///
-    /// Capture groups:
-    ///   1: status (✓ nebo ✗)
-    ///   2: method name
-    ///   3: latence v ms
-    /// </summary>
-    private static readonly Regex ResRecordPattern = new Regex(
-        @"res\s+([✓✗])\s+([\w\.]+)\s+(\d+)ms",
+    // Regex pro ANSI escape sekvence (ESC + [ + ... + finální písmeno)
+    private static readonly Regex AnsiRegex = new(@"\x1b\[[0-9;]*[mGKHFJA-Za-z]",
+        RegexOptions.Compiled);
+
+    // Regex pro latency záznamy — po ANSI strippingu
+    // Příklad: "⇄ res ✓ agents.list 145ms conn=..."
+    // Hledáme: "res" + whitespace + "✓" + whitespace + method + whitespace + číslo + "ms"
+    private static readonly Regex LatencyRegex = new(@"res\s+✓\s+([\w\.]+)\s+(\d+)ms",
         RegexOptions.Compiled);
 
     /// <summary>
-    /// Smaže Gateway log soubor pokud existuje.
+    /// Čeká na "gateway ready" v logu (polling každých 500ms).
+    /// </summary>
+    public static async Task<bool> WaitForGatewayReady(string logPath, int timeoutSeconds = 180)
+    {
+        var deadline = DateTime.Now.AddSeconds(timeoutSeconds);
+
+        while (DateTime.Now < deadline)
+        {
+            if (File.Exists(logPath))
+            {
+                try
+                {
+                    var content = await ReadLogSafeAsync(logPath);
+                    if (content.Contains("\"gateway ready\"") ||
+                        ContainsGatewayReadyMessage(content))
+                        return true;
+                }
+                catch { /* soubor se právě zapisuje, zkusíme znovu */ }
+            }
+
+            await Task.Delay(500);
+        }
+
+        return false;
+    }
+
+    private static bool ContainsGatewayReadyMessage(string rawContent)
+    {
+        // Projít každý řádek jako JSON a zkontrolovat message field
+        foreach (var line in rawContent.Split('\n', StringSplitOptions.RemoveEmptyEntries))
+        {
+            var msg = ExtractMessageField(line);
+            if (msg != null && msg.Contains("gateway ready"))
+                return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Smaže log soubor pokud existuje (před novým startem Gateway).
     /// </summary>
     public static void DeleteLogIfExists(string logPath)
     {
         try
         {
             if (File.Exists(logPath))
-            {
                 File.Delete(logPath);
-            }
         }
-        catch
-        {
-            // Pokud nelze smazat, pokračuj — detekce ready bude i tak fungovat
-        }
+        catch { }
     }
 
     /// <summary>
-    /// Čeká na řetězec "gateway ready" v logu.
+    /// Parsuje latency záznamy z logu pro LatencyTracker.
+    ///
+    /// Algoritmus:
+    /// 1. Přečíst nové řádky od posledního čtení (sledujeme offset)
+    /// 2. Pro každý řádek: parse JSON → číst "message" field → strip ANSI → regex match
+    /// 3. Vrátit seznam (method, ms) tuplů
     /// </summary>
-    public static async Task<bool> WaitForGatewayReady(
-        string logPath,
-        int timeoutSeconds = 180,
-        CancellationToken cancellationToken = default)
+    public static List<(string Method, int Ms)> ParseNewLatencyEntries(
+        string logPath, ref long fileOffset)
     {
-        var deadline = DateTime.Now.AddSeconds(timeoutSeconds);
+        var results = new List<(string, int)>();
 
-        while (DateTime.Now < deadline)
-        {
-            if (cancellationToken.IsCancellationRequested)
-                return false;
-
-            if (File.Exists(logPath))
-            {
-                try
-                {
-                    using var stream = new FileStream(logPath, FileMode.Open,
-                                                      FileAccess.Read, FileShare.ReadWrite);
-                    using var reader = new StreamReader(stream);
-                    var content = await reader.ReadToEndAsync(cancellationToken);
-
-                    if (content.Contains("\"gateway ready\""))
-                        return true;
-                }
-                catch { }
-            }
-
-            await Task.Delay(500, cancellationToken);
-        }
-
-        return false;
-    }
-
-    /// <summary>
-    /// Záznam z parsování Gateway logu — jeden res záznam.
-    /// </summary>
-    public record LogEntry(string Method, int LatencyMs, bool Success);
-
-    /// <summary>
-    /// Načte všechny res záznamy z aktuálního Gateway logu.
-    /// Vrací pole v pořadí jak jsou v logu (nejstarší první).
-    /// </summary>
-    public static List<LogEntry> ParseAllResEntries(string logPath)
-    {
-        var result = new List<LogEntry>();
-
-        if (!File.Exists(logPath)) return result;
+        if (!File.Exists(logPath))
+            return results;
 
         try
         {
-            using var stream = new FileStream(logPath, FileMode.Open,
-                                              FileAccess.Read, FileShare.ReadWrite);
-            using var reader = new StreamReader(stream);
-            var content = reader.ReadToEnd();
+            using var fs = new FileStream(logPath, FileMode.Open,
+                FileAccess.Read, FileShare.ReadWrite);
 
-            var matches = ResRecordPattern.Matches(content);
-            foreach (Match m in matches)
+            // Přeskočit na pozici kde jsme skončili minule
+            if (fileOffset > fs.Length)
+                fileOffset = 0; // log byl smazán/rotován
+
+            fs.Seek(fileOffset, SeekOrigin.Begin);
+
+            using var reader = new StreamReader(fs);
+            string? line;
+            while ((line = reader.ReadLine()) != null)
             {
-                var status = m.Groups[1].Value;
-                var method = m.Groups[2].Value;
-                if (int.TryParse(m.Groups[3].Value, out var ms))
-                {
-                    result.Add(new LogEntry(method, ms, status == "✓"));
-                }
+                var entry = TryParseLatencyLine(line);
+                if (entry.HasValue)
+                    results.Add(entry.Value);
             }
+
+            fileOffset = fs.Position;
         }
         catch { }
 
-        return result;
+        return results;
+    }
+
+    private static (string Method, int Ms)? TryParseLatencyLine(string line)
+    {
+        if (string.IsNullOrWhiteSpace(line)) return null;
+        if (!line.Contains("res")) return null; // rychlý pre-filter
+
+        // Extrahovat message field z JSON
+        var message = ExtractMessageField(line);
+        if (message == null) return null;
+
+        // Stripovat ANSI escape sekvence
+        var clean = AnsiRegex.Replace(message, "");
+
+        // Aplikovat latency regex
+        var match = LatencyRegex.Match(clean);
+        if (!match.Success) return null;
+
+        var method = match.Groups[1].Value;
+        if (!int.TryParse(match.Groups[2].Value, out var ms)) return null;
+
+        return (method, ms);
+    }
+
+    /// <summary>
+    /// Extrahuje "message" field z JSON řádku.
+    /// Používá JsonDocument pro robustní parsing (ne string search).
+    /// </summary>
+    private static string? ExtractMessageField(string jsonLine)
+    {
+        if (string.IsNullOrWhiteSpace(jsonLine)) return null;
+        try
+        {
+            using var doc = JsonDocument.Parse(jsonLine);
+            if (doc.RootElement.TryGetProperty("message", out var msgProp))
+                return msgProp.GetString();
+        }
+        catch { }
+        return null;
+    }
+
+    private static async Task<string> ReadLogSafeAsync(string path)
+    {
+        await using var fs = new FileStream(path, FileMode.Open,
+            FileAccess.Read, FileShare.ReadWrite);
+        using var reader = new StreamReader(fs);
+        return await reader.ReadToEndAsync();
     }
 }

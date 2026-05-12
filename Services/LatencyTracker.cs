@@ -1,48 +1,78 @@
 namespace OpenClawManager.Services;
 
 /// <summary>
-/// Statistiky latencí pro UI sekce "Měření latence".
-/// </summary>
-public record LatencyStats(
-    int? LastMs,
-    double? AvgMs,
-    int? MaxMs,
-    int Count);
-
-/// <summary>
-/// Sledování latencí Gateway requestů.
-/// Načítá záznamy z Gateway logu přes LogMonitor.ParseAllResEntries
-/// a počítá:
-/// - Poslední latence
-/// - Klouzavý průměr posledních 10 záznamů
-/// - Maximum všech záznamů v aktuální Gateway session
-/// - Celkový počet requestů
+/// Sleduje latence z Gateway logu — udržuje klouzavý průměr posledních 10 requestů.
 ///
-/// Resetuje se při restartu Gateway (nový log soubor → nové statistiky).
+/// Volá se z MainWindow.UpdateStatus() každé 2 sekundy.
+/// Čte pouze nové řádky logu od posledního čtení (fileOffset tracking).
+///
+/// Reset() se volá při restartu Gateway (logPath se změní, offset = 0).
 /// </summary>
 public static class LatencyTracker
 {
+    private const int WindowSize = 10;
+
+    private static readonly Queue<int> _window = new();
+    private static int? _maxMs = null;
+    private static int _totalCount = 0;
+    private static long _fileOffset = 0;
+    private static string? _currentLogPath = null;
+
     /// <summary>
-    /// Vrátí aktuální statistiky latencí na základě Gateway logu.
-    /// Pokud log neexistuje nebo neobsahuje žádné res záznamy, vrátí null hodnoty.
+    /// Načte nové záznamy z logu a aktualizuje statistiky.
+    /// Volej periodicky (každé 2s) z UI timeru.
+    /// </summary>
+    public static void Poll(string logPath)
+    {
+        // Pokud se změnil log soubor (po restartu Gateway), resetovat offset
+        if (_currentLogPath != logPath)
+        {
+            _fileOffset = 0;
+            _currentLogPath = logPath;
+        }
+
+        var entries = LogMonitor.ParseNewLatencyEntries(logPath, ref _fileOffset);
+
+        foreach (var (_, ms) in entries)
+        {
+            _window.Enqueue(ms);
+            if (_window.Count > WindowSize)
+                _window.Dequeue();
+
+            if (!_maxMs.HasValue || ms > _maxMs)
+                _maxMs = ms;
+
+            _totalCount++;
+        }
+    }
+
+    /// <summary>
+    /// Resetuje statistiky (volat při restartu Gateway).
+    /// </summary>
+    public static void Reset()
+    {
+        _window.Clear();
+        _maxMs = null;
+        _totalCount = 0;
+        _fileOffset = 0;
+        _currentLogPath = null;
+    }
+
+    /// <summary>
+    /// Vrátí aktuální statistiky.
     /// </summary>
     public static LatencyStats GetStats()
     {
-        var logPath = SettingsService.Current.GetTodayGatewayLogPath();
-        var entries = LogMonitor.ParseAllResEntries(logPath);
-
-        if (entries.Count == 0)
-        {
+        if (_totalCount == 0)
             return new LatencyStats(null, null, null, 0);
-        }
 
-        var lastMs = entries[entries.Count - 1].LatencyMs;
-        var maxMs = entries.Max(e => e.LatencyMs);
+        var last = _window.Count > 0 ? _window.Last() : (int?)null;
+        var avg = _window.Count > 0
+            ? (int?)Math.Round(_window.Average())
+            : null;
 
-        // Průměr posledních 10 záznamů
-        var lastTen = entries.Skip(Math.Max(0, entries.Count - 10)).ToList();
-        var avgMs = lastTen.Average(e => (double)e.LatencyMs);
-
-        return new LatencyStats(lastMs, avgMs, maxMs, entries.Count);
+        return new LatencyStats(last, avg, _maxMs, _totalCount);
     }
 }
+
+public record LatencyStats(int? LastMs, int? AvgMs, int? MaxMs, int Count);

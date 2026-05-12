@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" width="256" height="256">
+<defs xmlns="http://www.w3.org/2000/svg">
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1.2"></feGaussianBlur>
+      <feOffset dy="1"></feOffset>
+      <feComponentTransfer><feFuncA type="linear" slope="0.25"></feFuncA></feComponentTransfer>
+      <feMerge><feMergeNode></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+    </filter>
+
+    <radialGradient id="crabFill" cx="0.4" cy="0.35" r="0.9">
+      <stop offset="0%" stop-color="#ff6a55"></stop>
+      <stop offset="60%" stop-color="#e23d2a"></stop>
+      <stop offset="100%" stop-color="#b8261a"></stop>
+    </radialGradient>
+
+    <radialGradient id="crabFillTui" cx="0.4" cy="0.35" r="0.9">
+      <stop offset="0%" stop-color="#3a4252"></stop>
+      <stop offset="60%" stop-color="#1f242e"></stop>
+      <stop offset="100%" stop-color="#0d1015"></stop>
+    </radialGradient>
+
+    <linearGradient id="psBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b86ff"></stop>
+      <stop offset="100%" stop-color="#114799"></stop>
+    </linearGradient>
+
+    
+    <g id="crab">
+      <g stroke="#8a1a10" stroke-width="2.4" stroke-linecap="round" fill="none">
+        <path d="M22 56 L10 50 L4 58"></path>
+        <path d="M22 60 L8 64 L6 72"></path>
+        <path d="M78 56 L90 50 L96 58"></path>
+        <path d="M78 60 L92 64 L94 72"></path>
+        <path d="M30 64 L20 76"></path>
+        <path d="M70 64 L80 76"></path>
+      </g>
+      <g fill="url(#crabFill)" stroke="#8a1a10" stroke-width="2">
+        <path d="M14 36 q-10 -6 -8 -16 q10 -2 16 6 q4 -4 12 0 q4 6 -2 12 q-8 6 -18 -2 z"></path>
+        <path d="M86 36 q10 -6 8 -16 q-10 -2 -16 6 q-4 -4 -12 0 q-4 6 2 12 q8 6 18 -2 z"></path>
+      </g>
+      <ellipse cx="50" cy="58" rx="30" ry="22" fill="url(#crabFill)" stroke="#8a1a10" stroke-width="2"></ellipse>
+      <path d="M30 50 q20 -12 40 0" fill="none" stroke="#ffb3a8" stroke-width="2" stroke-linecap="round" opacity="0.7"></path>
+      <line x1="40" y1="40" x2="40" y2="30" stroke="#8a1a10" stroke-width="2.2" stroke-linecap="round"></line>
+      <line x1="60" y1="40" x2="60" y2="30" stroke="#8a1a10" stroke-width="2.2" stroke-linecap="round"></line>
+      <circle cx="40" cy="28" r="6" fill="#ffffff" stroke="#8a1a10" stroke-width="1.6"></circle>
+      <circle cx="60" cy="28" r="6" fill="#ffffff" stroke="#8a1a10" stroke-width="1.6"></circle>
+      <circle cx="41" cy="29" r="2.6" fill="#15181d"></circle>
+      <circle cx="61" cy="29" r="2.6" fill="#15181d"></circle>
+      <circle cx="42" cy="28" r="0.9" fill="#ffffff"></circle>
+      <circle cx="62" cy="28" r="0.9" fill="#ffffff"></circle>
+      <path d="M44 64 q6 6 12 0" stroke="#8a1a10" stroke-width="2" fill="none" stroke-linecap="round"></path>
+      <circle cx="34" cy="64" r="3" fill="#ffb3a8" opacity="0.8"></circle>
+      <circle cx="66" cy="64" r="3" fill="#ffb3a8" opacity="0.8"></circle>
+    </g>
+
+    
+    <g id="crab-tui">
+      <g stroke="#0d1015" stroke-width="2.4" stroke-linecap="round" fill="none">
+        <path d="M22 56 L10 50 L4 58"></path>
+        <path d="M22 60 L8 64 L6 72"></path>
+        <path d="M78 56 L90 50 L96 58"></path>
+        <path d="M78 60 L92 64 L94 72"></path>
+        <path d="M30 64 L20 76"></path>
+        <path d="M70 64 L80 76"></path>
+      </g>
+      <g fill="url(#crabFillTui)" stroke="#0d1015" stroke-width="2">
+        <path d="M14 36 q-10 -6 -8 -16 q10 -2 16 6 q4 -4 12 0 q4 6 -2 12 q-8 6 -18 -2 z"></path>
+        <path d="M86 36 q10 -6 8 -16 q-10 -2 -16 6 q-4 -4 -12 0 q-4 6 2 12 q8 6 18 -2 z"></path>
+      </g>
+      <ellipse cx="50" cy="58" rx="30" ry="22" fill="url(#crabFillTui)" stroke="#0d1015" stroke-width="2"></ellipse>
+      <line x1="40" y1="40" x2="40" y2="30" stroke="#0d1015" stroke-width="2.2" stroke-linecap="round"></line>
+      <line x1="60" y1="40" x2="60" y2="30" stroke="#0d1015" stroke-width="2.2" stroke-linecap="round"></line>
+      <circle cx="40" cy="28" r="5" fill="#0d1015"></circle>
+      <circle cx="60" cy="28" r="5" fill="#0d1015"></circle>
+    </g>
+
+    
+    <g id="terminal">
+      <rect x="2" y="6" width="56" height="40" rx="4" fill="#2a2f37" stroke="#15181d" stroke-width="1.5"></rect>
+      <rect x="2" y="6" width="56" height="9" rx="4" fill="#3a4049"></rect>
+      <circle cx="8" cy="10.5" r="1.6" fill="#ff5f56"></circle>
+      <circle cx="13" cy="10.5" r="1.6" fill="#ffbd2e"></circle>
+      <circle cx="18" cy="10.5" r="1.6" fill="#27c93f"></circle>
+      <text x="6" y="32" font-family="Menlo, monospace" font-size="9" fill="#9be38b">&gt;_</text>
+      <rect x="20" y="26" width="8" height="2" fill="#9be38b"></rect>
+    </g>
+
+    
+    <g id="ps-tile">
+      <rect x="0" y="0" width="100" height="100" rx="14" fill="url(#psBlue)" stroke="#0c3576" stroke-width="2"></rect>
+      <rect x="0" y="0" width="100" height="22" rx="14" fill="#5a9bff" opacity="0.4"></rect>
+      <text x="20" y="68" font-family="Menlo, monospace" font-size="38" font-weight="800" fill="#ffffff">&gt;_</text>
+    </g>
+
+    
+    <g id="refresh">
+      <g fill="#1f6feb" stroke="#114799" stroke-width="1.8" stroke-linejoin="round">
+        <path d="M50 14 a36 36 0 0 1 32 20 l-10 4 l16 12 l8 -18 l-9 4 a44 44 0 0 0 -37 -22 z"></path>
+        <path d="M50 86 a36 36 0 0 1 -32 -20 l10 -4 l-16 -12 l-8 18 l9 -4 a44 44 0 0 0 37 22 z"></path>
+      </g>
+    </g>
+
+  </defs>
+
+          <use href="#crab" transform="translate(8 8) scale(0.78)"></use>
+          <g transform="translate(34 44)" filter="url(#soft)"><use href="#terminal"></use></g>
+        </svg>

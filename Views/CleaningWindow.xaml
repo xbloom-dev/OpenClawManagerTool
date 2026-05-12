@@ -2,17 +2,18 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="OpenClaw Manager — Cleaning Tool"
-        Height="580" Width="720"
-        MinHeight="450" MinWidth="580"
+        Height="700" Width="780"
+        MinHeight="550" MinWidth="600"
         WindowStartupLocation="CenterOwner"
         ResizeMode="CanResize">
 
     <Grid Margin="12">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />  <!-- Kroky -->
-            <RowDefinition Height="*" />     <!-- Log -->
-            <RowDefinition Height="Auto" />  <!-- Souhrn -->
-            <RowDefinition Height="Auto" />  <!-- Tlačítka -->
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Kroky čištění -->
@@ -54,18 +55,71 @@
                         <Run Text=" — všechny *.lock v agents/*/sessions/" Foreground="Gray"/>
                     </TextBlock>
                 </CheckBox>
-                <CheckBox IsEnabled="False" IsChecked="False" Margin="0,3">
+
+                <!-- Krok 6 s integrovaným sliderem -->
+                <Grid Margin="0,3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <CheckBox Grid.Column="0" x:Name="ChkStep6" IsChecked="True" VerticalAlignment="Center">
+                        <TextBlock>
+                            <Run Text="[6]" FontWeight="Bold"/>
+                            <Run Text=" sessions.json"/>
+                            <Run Text=" — zachovat:" Foreground="Gray"/>
+                        </TextBlock>
+                    </CheckBox>
+                    <Slider Grid.Column="1" x:Name="SliderKeep"
+                            Minimum="1" Maximum="50" Value="10"
+                            IsSnapToTickEnabled="True" TickFrequency="1"
+                            Margin="8,0,8,0" VerticalAlignment="Center"
+                            IsEnabled="{Binding IsChecked, ElementName=ChkStep6}" />
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding Value, ElementName=SliderKeep, StringFormat={}{0:0}}"
+                               FontWeight="Bold" MinWidth="24" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="3"
+                               Text=" sessions/agent" Foreground="Gray" VerticalAlignment="Center" />
+                </Grid>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- OpenClaw Gateway sekce -->
+        <GroupBox Grid.Row="1" Header="OpenClaw Gateway" Padding="8" Margin="0,0,0,8">
+            <StackPanel>
+                <!-- Scheduled Task -->
+                <CheckBox x:Name="ChkManageTask" IsChecked="True" Margin="0,3">
                     <TextBlock>
-                        <Run Text="[6]" FontWeight="Bold"/>
-                        <Run Text=" sessions.json cleanup"/>
-                        <Run Text=" — Coming in v0.3+" FontStyle="Italic" Foreground="DarkGray"/>
+                        <Run Text="Dočasně vypnout Scheduled Task 'OpenClaw Gateway'" />
+                        <Run Text=" během cleanupu" Foreground="Gray" />
+                    </TextBlock>
+                </CheckBox>
+                <TextBlock x:Name="TxtTaskStatus"
+                           Foreground="Gray" FontSize="11"
+                           Margin="20,1,0,6" />
+
+                <!-- Zastavit Gateway -->
+                <CheckBox x:Name="ChkStopGateway" IsChecked="False" Margin="0,3">
+                    <TextBlock>
+                        <Run Text="Zastavit běžící Gateway" />
+                        <Run Text=" před cleanupem" Foreground="Gray" />
+                    </TextBlock>
+                </CheckBox>
+
+                <!-- Zavřít všechna okna — aktivní jen pokud je zaškrtnutý ChkStopGateway -->
+                <CheckBox x:Name="ChkCloseAll" IsChecked="False" Margin="20,3,0,0"
+                          IsEnabled="{Binding IsChecked, ElementName=ChkStopGateway}">
+                    <TextBlock>
+                        <Run Text="Zavřít všechna OpenClaw okna" />
+                        <Run Text=" (embedded TUI + PowerShell wrappery)" Foreground="Gray" />
                     </TextBlock>
                 </CheckBox>
             </StackPanel>
         </GroupBox>
 
         <!-- Log výstupů -->
-        <GroupBox Grid.Row="1" Header="Průběh / Log" Padding="4" Margin="0,0,0,8">
+        <GroupBox Grid.Row="2" Header="Průběh / Log" Padding="4" Margin="0,0,0,8">
             <TextBox x:Name="TxtLog"
                      IsReadOnly="True"
                      FontFamily="Consolas"
@@ -79,7 +133,7 @@
         </GroupBox>
 
         <!-- Souhrn -->
-        <Border Grid.Row="2" Padding="8,6" Margin="0,0,0,8"
+        <Border Grid.Row="3" Padding="8,6" Margin="0,0,0,8"
                 BorderBrush="LightGray" BorderThickness="1" CornerRadius="2">
             <Grid>
                 <Grid.ColumnDefinitions>
@@ -92,18 +146,19 @@
         </Border>
 
         <!-- Tlačítka -->
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right">
-            <Button x:Name="BtnDryRun" Content="Dry-run"
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="BtnDryRun" Content="Náhled"
+					Background="#D0FFD0"
                     Width="100" Height="28" Margin="4,0"
-                    ToolTip="Spočítá co by smazal, ale nic neudělá" />
+                    ToolTip="Zobrazí co by se smazalo, nic nemaže." />
             <Button x:Name="BtnRun" Content="Spustit"
                     Width="100" Height="28" Margin="4,0"
                     Background="#FFD0D0"
-                    ToolTip="POZOR: Trvale smaže vybrané soubory" />
+                    ToolTip="POZOR: Trvale smaže vybrané soubory. Akci nelze vrátit" />
             <Button x:Name="BtnClose" Content="Zavřít"
                     Width="80" Height="28" Margin="4,0"
+					ToolTip="Zavře Cleaning Tool."
                     IsCancel="True" />
         </StackPanel>
-
     </Grid>
 </Window>

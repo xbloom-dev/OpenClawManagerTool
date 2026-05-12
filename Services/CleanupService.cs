@@ -1,15 +1,11 @@
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace OpenClawManager.Services;
 
-/// <summary>
-/// Reprezentace jednoho kroku Cleaning Toolu.
-/// </summary>
 public record CleanupStep(int Number, string Title, string Description);
 
-/// <summary>
-/// Výsledek běhu jednoho kroku.
-/// </summary>
 public record CleanupStepResult(
     int StepNumber,
     int FilesProcessed,
@@ -18,15 +14,12 @@ public record CleanupStepResult(
     bool Skipped);
 
 /// <summary>
-/// Logika čištění OpenClaw souborů — port z cleanup.ps1 (kroky 1-5).
+/// Logika čištění OpenClaw souborů — port z cleanup.ps1 (kroky 1-6).
 ///
 /// Bezpečnostní vrstvy:
 /// - Dry-run: jen spočítá, nic nemaže
 /// - Selhání jednoho souboru neshodí celý krok
-/// - Logging každé akce přes callback
-///
-/// Záměrně bez Recycle Bin — přidáváme minimální závislosti.
-/// Dry-run je dostatečná bezpečnostní vrstva pro power usera.
+/// - Krok 6 vždy vytvoří .bak před zápisem, rollback při chybě
 /// </summary>
 public static class CleanupService
 {
@@ -37,12 +30,27 @@ public static class CleanupService
         new(3, "Stability reporty",    "Soubory v logs/stability/ starší než 3 dny"),
         new(4, "Browser cache",        "Obsah browser-data/ starší než 1 den"),
         new(5, "Session locky",        "Všechny *.lock soubory v agents/*/sessions/"),
+        new(6, "sessions.json",        "Pro každého agenta zachovat N nejnovějších sessions"),
+    };
+
+    /// <summary>
+    /// Default jména agentů pro krok 6 (sessions.json cleanup).
+    /// </summary>
+    public static readonly string[] DefaultAgents = { "main", "researcher", "executive", "safety" };
+
+    /// <summary>
+    /// Možné klíče pro timestamp v session JSON objektu.
+    /// </summary>
+    private static readonly string[] TimestampKeys =
+    {
+        "createdAt", "timestamp", "updatedAt", "lastModified", "mtime", "created_at"
     };
 
     public static CleanupStepResult RunStep(
         int stepNumber,
         bool dryRun,
-        Action<string> logCallback)
+        Action<string> logCallback,
+        int keepSessions = 10)
     {
         var settings = SettingsService.Current;
 
@@ -55,6 +63,7 @@ public static class CleanupService
                 3 => CleanStabilityReports(settings, dryRun, logCallback),
                 4 => CleanBrowserCache(settings, dryRun, logCallback),
                 5 => CleanSessionLocks(settings, dryRun, logCallback),
+                6 => CleanSessionsJson(settings, dryRun, logCallback, keepSessions),
                 _ => new CleanupStepResult(stepNumber, 0, 0, $"Neznámý krok: {stepNumber}", true)
             };
         }
@@ -64,11 +73,12 @@ public static class CleanupService
         }
     }
 
+    // ==================== KROKY 1-5 ====================
+
     private static CleanupStepResult CleanLogs(
         Models.AppSettings settings, bool dryRun, Action<string> log)
     {
-        log("[1/5] Staré logy...");
-
+        log("[1/6] Staré logy...");
         if (!Directory.Exists(settings.TempPath))
         {
             log($"  → Temp složka neexistuje: {settings.TempPath}");
@@ -87,8 +97,7 @@ public static class CleanupService
     private static CleanupStepResult CleanBackups(
         Models.AppSettings settings, bool dryRun, Action<string> log)
     {
-        log("[2/5] Zálohy konfigurace (ponechat 2 nejnovější)...");
-
+        log("[2/6] Zálohy konfigurace (ponechat 2 nejnovější)...");
         if (!Directory.Exists(settings.OpenClawPath))
         {
             log($"  → OpenClaw složka neexistuje: {settings.OpenClawPath}");
@@ -107,8 +116,7 @@ public static class CleanupService
     private static CleanupStepResult CleanStabilityReports(
         Models.AppSettings settings, bool dryRun, Action<string> log)
     {
-        log("[3/5] Stability reporty (> 3 dny)...");
-
+        log("[3/6] Stability reporty (> 3 dny)...");
         var stabPath = Path.Combine(settings.OpenClawPath, "logs", "stability");
         if (!Directory.Exists(stabPath))
         {
@@ -128,8 +136,7 @@ public static class CleanupService
     private static CleanupStepResult CleanBrowserCache(
         Models.AppSettings settings, bool dryRun, Action<string> log)
     {
-        log("[4/5] Browser cache (> 1 den)...");
-
+        log("[4/6] Browser cache (> 1 den)...");
         var cachePath = Path.Combine(settings.OpenClawPath, "browser-data");
         if (!Directory.Exists(cachePath))
         {
@@ -149,8 +156,7 @@ public static class CleanupService
     private static CleanupStepResult CleanSessionLocks(
         Models.AppSettings settings, bool dryRun, Action<string> log)
     {
-        log("[5/5] Session locky...");
-
+        log("[5/6] Session locky...");
         var agentsPath = Path.Combine(settings.OpenClawPath, "agents");
         if (!Directory.Exists(agentsPath))
         {
@@ -171,6 +177,264 @@ public static class CleanupService
 
         return DeleteFiles(5, allLocks, dryRun, log);
     }
+
+    // ==================== KROK 6: sessions.json cleanup ====================
+
+    /// <summary>
+    /// Krok 6: pro každého agenta v ~\.openclaw\agents\{agent}\sessions.json
+    /// zachovat N nejnovějších sessions, zbytek smazat.
+    ///
+    /// Bezpečnost:
+    /// - Vytvoří sessions.json.bak před zápisem
+    /// - Při chybě zápisu rollback ze zálohy
+    /// - JSON struktura může být array nebo object — zvládneme oboje
+    /// - Sessions bez detekovatelného timestamp se řadí jako nejstarší
+    /// </summary>
+    private static CleanupStepResult CleanSessionsJson(
+        Models.AppSettings settings, bool dryRun, Action<string> log, int keepSessions)
+    {
+        log($"[6/6] sessions.json cleanup (zachovat {keepSessions} nejnovějších)...");
+
+        var agentsPath = Path.Combine(settings.OpenClawPath, "agents");
+        if (!Directory.Exists(agentsPath))
+        {
+            log($"  → Adresář neexistuje: {agentsPath}");
+            return new CleanupStepResult(6, 0, 0, null, true);
+        }
+
+        int totalRemoved = 0;
+        long totalBytesSaved = 0;
+        bool anyError = false;
+
+        foreach (var agent in DefaultAgents)
+        {
+            var sessionsPath = Path.Combine(agentsPath, agent, "sessions.json");
+            if (!File.Exists(sessionsPath))
+            {
+                log($"  → Agent '{agent}': sessions.json neexistuje, přeskakuji");
+                continue;
+            }
+
+            var result = CleanupSessionsForAgent(agent, sessionsPath, keepSessions, dryRun, log);
+            if (result.Error)
+            {
+                anyError = true;
+                continue;
+            }
+
+            totalRemoved += result.Removed;
+            totalBytesSaved += result.BytesSaved;
+        }
+
+        if (totalRemoved == 0 && !anyError)
+        {
+            log("  → žádné sessions ke smazání");
+        }
+
+        return new CleanupStepResult(6, totalRemoved, totalBytesSaved, null, false);
+    }
+
+    private record SessionCleanupResult(int Removed, long BytesSaved, bool Error);
+
+    private static SessionCleanupResult CleanupSessionsForAgent(
+        string agent, string sessionsPath, int keep, bool dryRun, Action<string> log)
+    {
+        long sizeBefore = new FileInfo(sessionsPath).Length;
+
+        JsonNode? root;
+        try
+        {
+            var raw = File.ReadAllText(sessionsPath);
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                log($"  → Agent '{agent}': prázdný soubor, přeskakuji");
+                return new SessionCleanupResult(0, 0, false);
+            }
+            root = JsonNode.Parse(raw);
+        }
+        catch (Exception ex)
+        {
+            log($"  ⚠ Agent '{agent}': JSON parse selhal: {ex.Message}");
+            return new SessionCleanupResult(0, 0, true);
+        }
+
+        if (root == null)
+        {
+            log($"  ⚠ Agent '{agent}': prázdný JSON");
+            return new SessionCleanupResult(0, 0, false);
+        }
+
+        // Sběr (key, session, timestamp) tuplů — zvládá array i object
+        var entries = ExtractEntries(root);
+        bool isArray = root is JsonArray;
+
+        if (entries.Count <= keep)
+        {
+            log($"  → Agent '{agent}': {entries.Count} sessions, beze změny");
+            return new SessionCleanupResult(0, 0, false);
+        }
+
+        // Seřadit nejnovější první (sessions bez timestamp = nejstarší)
+        var sorted = entries
+            .OrderByDescending(e => e.Timestamp ?? DateTime.MinValue)
+            .ToList();
+
+        var kept = sorted.Take(keep).ToList();
+        var removedCount = entries.Count - keep;
+
+        log($"  → Agent '{agent}': {entries.Count} sessions → ponechat {keep}, smazat {removedCount}");
+
+        if (dryRun)
+        {
+            return new SessionCleanupResult(removedCount, 0, false);
+        }
+
+        // Záloha PŘED zápisem
+        var bakPath = sessionsPath + ".bak";
+        try
+        {
+            File.Copy(sessionsPath, bakPath, overwrite: true);
+        }
+        catch (Exception ex)
+        {
+            log($"  ⚠ Agent '{agent}': záloha selhala, NEZAPISUJI: {ex.Message}");
+            return new SessionCleanupResult(0, 0, true);
+        }
+
+        // Vytvořit nový JSON ve stejné struktuře
+        try
+        {
+            JsonNode newRoot;
+            if (isArray)
+            {
+                // Zachovat původní pořadí v poli — kept jsme přesortovali, vrátit zpět dle Key (int index)
+                var newArr = new JsonArray();
+                foreach (var e in kept.OrderBy(x => int.TryParse(x.Key, out var i) ? i : 0))
+                {
+                    newArr.Add(e.Session?.DeepClone());
+                }
+                newRoot = newArr;
+            }
+            else
+            {
+                var newObj = new JsonObject();
+                foreach (var e in kept)
+                {
+                    newObj[e.Key] = e.Session?.DeepClone();
+                }
+                newRoot = newObj;
+            }
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var newJson = newRoot.ToJsonString(options);
+            File.WriteAllText(sessionsPath, newJson);
+
+            long sizeAfter = new FileInfo(sessionsPath).Length;
+            long bytesSaved = sizeBefore - sizeAfter;
+
+            log($"  ✓ Agent '{agent}': smazáno {removedCount} sessions, ušetřeno {FormatBytes(bytesSaved)} (záloha: {Path.GetFileName(bakPath)})");
+
+            return new SessionCleanupResult(removedCount, bytesSaved, false);
+        }
+        catch (Exception ex)
+        {
+            log($"  ⚠ Agent '{agent}': zápis selhal, OBNOVUJI ze zálohy: {ex.Message}");
+            try
+            {
+                File.Copy(bakPath, sessionsPath, overwrite: true);
+                log($"  ✓ Agent '{agent}': obnoveno ze zálohy");
+            }
+            catch (Exception rollbackEx)
+            {
+                log($"  ✗ Agent '{agent}': ROLLBACK SELHAL: {rollbackEx.Message}");
+            }
+            return new SessionCleanupResult(0, 0, true);
+        }
+    }
+
+    private record SessionEntry(string Key, JsonNode? Session, DateTime? Timestamp);
+
+    /// <summary>
+    /// Extrahuje seznam sessions z JSON root (zvládá array i object strukturu).
+    /// </summary>
+    private static List<SessionEntry> ExtractEntries(JsonNode root)
+    {
+        var result = new List<SessionEntry>();
+
+        if (root is JsonArray arr)
+        {
+            for (int i = 0; i < arr.Count; i++)
+            {
+                var ts = ParseTimestamp(arr[i]);
+                result.Add(new SessionEntry(i.ToString(), arr[i], ts));
+            }
+        }
+        else if (root is JsonObject obj)
+        {
+            foreach (var kvp in obj)
+            {
+                var ts = ParseTimestamp(kvp.Value);
+                result.Add(new SessionEntry(kvp.Key, kvp.Value, ts));
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Zkusí najít timestamp v JSON objektu pomocí různých klíčů a formátů.
+    /// Akceptuje: ISO 8601 string, Unix epoch (sec/ms jako int nebo string).
+    /// </summary>
+    private static DateTime? ParseTimestamp(JsonNode? session)
+    {
+        if (session is not JsonObject obj) return null;
+
+        foreach (var key in TimestampKeys)
+        {
+            if (!obj.ContainsKey(key)) continue;
+            var val = obj[key];
+            if (val == null) continue;
+
+            // Zkusíme nejprve string (ISO 8601 nebo numeric-as-string)
+            try
+            {
+                var str = val.GetValue<string>();
+                if (DateTime.TryParse(str, out var dt)) return dt;
+                if (long.TryParse(str, out var epoch)) return FromEpoch(epoch);
+            }
+            catch { /* není string, zkusíme číslo */ }
+
+            // Zkusíme číselný timestamp
+            try
+            {
+                var num = val.GetValue<long>();
+                return FromEpoch(num);
+            }
+            catch { /* neúspěch, zkusíme další klíč */ }
+
+            try
+            {
+                var num = (long)val.GetValue<double>();
+                return FromEpoch(num);
+            }
+            catch { }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Konverze Unix epoch (sec nebo ms) na DateTime. Heuristika: > 10^10 = ms, jinak sec.
+    /// </summary>
+    private static DateTime FromEpoch(long epoch)
+    {
+        if (epoch > 10_000_000_000L)
+            return DateTimeOffset.FromUnixTimeMilliseconds(epoch).LocalDateTime;
+        else
+            return DateTimeOffset.FromUnixTimeSeconds(epoch).LocalDateTime;
+    }
+
+    // ==================== POMOCNÉ ====================
 
     private static CleanupStepResult DeleteFiles(
         int stepNumber, List<FileInfo> files, bool dryRun, Action<string> log)

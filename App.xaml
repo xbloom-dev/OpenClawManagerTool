@@ -1,9 +1,13 @@
-﻿<Application x:Class="OpenClawManager.App"
+<Application x:Class="OpenClawManager.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:OpenClawManager"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <!-- Výchozí jazyk — přepíše se L10n.Apply() v App.xaml.cs -->
+                <ResourceDictionary Source="Resources/Lang/Strings.cs.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

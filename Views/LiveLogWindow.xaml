@@ -1,0 +1,72 @@
+<Window x:Class="OpenClawManager.Views.LiveLogWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="OpenClaw Manager — Živý log"
+        Height="600" Width="1000"
+        MinHeight="300" MinWidth="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+
+    <DockPanel Margin="8">
+
+        <!-- Horní info lišta -->
+        <TextBlock x:Name="TxtLogPath" DockPanel.Dock="Top"
+                   FontFamily="Consolas" FontSize="11"
+                   Foreground="Gray" TextWrapping="Wrap"
+                   Margin="0,0,0,6" />
+
+        <!-- Spodní lišta: status vlevo + Kopírovat + Zavřít vpravo -->
+        <Grid DockPanel.Dock="Bottom" Margin="0,6,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StatusBar Grid.Column="0" Height="22" Background="Transparent">
+                <StatusBarItem>
+                    <TextBlock x:Name="TxtStatus" Text="Sledování aktivní..." />
+                </StatusBarItem>
+            </StatusBar>
+
+            <!-- Feedback "Zkopírováno" -->
+            <TextBlock Grid.Column="1"
+                       x:Name="TxtCopiedFeedback"
+                       Text="✓ Zkopírováno"
+                       FontWeight="Bold" Foreground="Green"
+                       VerticalAlignment="Center"
+                       Margin="0,0,6,0"
+                       Opacity="0" />
+
+            <Button Grid.Column="2"
+                    x:Name="BtnCopy"
+                    Content="Kopírovat"
+                    Width="100" Height="24"
+                    Margin="4,2"
+                    ToolTip="Zkopíruje celý zobrazený log do schránky." />
+
+            <Button Grid.Column="3"
+                    x:Name="BtnClose"
+                    Content="Zavřít"
+                    Width="80" Height="24"
+                    Margin="4,2"
+                    IsCancel="True" />
+        </Grid>
+
+        <!-- Obsah logu — tmavé pozadí jako původní Gateway Log okno -->
+        <Border BorderBrush="Gray" BorderThickness="1">
+            <TextBox x:Name="TxtLogContent"
+                     IsReadOnly="True"
+                     FontFamily="Consolas"
+                     FontSize="11"
+                     Background="#1E1E1E"
+                     Foreground="#DCDCDC"
+                     VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Auto"
+                     TextWrapping="NoWrap"
+                     Padding="6" />
+        </Border>
+
+    </DockPanel>
+</Window>
