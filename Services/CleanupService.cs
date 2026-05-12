@@ -31,6 +31,7 @@ public static class CleanupService
         new(4, "Browser cache",        "Obsah browser-data/ starší než 1 den"),
         new(5, "Session locky",        "Všechny *.lock soubory v agents/*/sessions/"),
         new(6, "sessions.json",        "Pro každého agenta zachovat N nejnovějších sessions"),
+        new(7, "Token Manager zálohy", "*.bak soubory v Token Manager složce (opt-in)"),
     };
 
     /// <summary>
@@ -64,6 +65,7 @@ public static class CleanupService
                 4 => CleanBrowserCache(settings, dryRun, logCallback),
                 5 => CleanSessionLocks(settings, dryRun, logCallback),
                 6 => CleanSessionsJson(settings, dryRun, logCallback, keepSessions),
+                7 => CleanTokenManagerBackups(settings, dryRun, logCallback),
                 _ => new CleanupStepResult(stepNumber, 0, 0, $"Neznámý krok: {stepNumber}", true)
             };
         }
@@ -483,4 +485,73 @@ public static class CleanupService
         if (bytes < 1024L * 1024 * 1024) return $"{bytes / (1024.0 * 1024):F1} MB";
         return $"{bytes / (1024.0 * 1024 * 1024):F2} GB";
     }
+
+    // ==================== KROK 7 — TOKEN MANAGER ZÁLOHY ====================
+
+    /// <summary>
+    /// Krok 7 — smaže *.bak soubory vzniklé z TokenService.RestoreFileInPlace
+    /// v Token Manager složce (~/.token-manager/ nebo cesta z nastavení).
+    ///
+    /// Opt-in (výchozí vypnuto) — zálohy jsou poslední záchrana pro případ
+    /// chyby při restore-inplace. Mazat vědomě.
+    /// </summary>
+    private static CleanupStepResult CleanTokenManagerBackups(
+        Models.AppSettings settings, bool dryRun, Action<string> log)
+    {
+        const int stepNumber = 7;
+        log("[7] Token Manager zálohy:");
+
+        // Složka se odvozuje od cesty k vaultu — zálohy jsou vedle secrets.json
+        var vaultPath = settings.TokenManagerSecretsPath;
+        var vaultDir  = Path.GetDirectoryName(vaultPath);
+
+        if (string.IsNullOrWhiteSpace(vaultDir) || !Directory.Exists(vaultDir))
+        {
+            log("  → složka Token Manageru neexistuje, přeskočeno.");
+            return new CleanupStepResult(stepNumber, 0, 0, null, true);
+        }
+
+        var bakFiles = Directory
+            .GetFiles(vaultDir, "*.bak", SearchOption.TopDirectoryOnly)
+            .Select(f => new FileInfo(f))
+            .OrderBy(f => f.Name)
+            .ToList();
+
+        if (bakFiles.Count == 0)
+        {
+            log("  → žádné *.bak soubory nenalezeny.");
+            return new CleanupStepResult(stepNumber, 0, 0, null, false);
+        }
+
+        var totalSize = bakFiles.Sum(f => f.Length);
+        log($"  nalezeno {bakFiles.Count} *.bak souborů ({FormatBytes(totalSize)}):");
+
+        foreach (var f in bakFiles)
+            log($"    {f.Name} ({FormatBytes(f.Length)})");
+
+        if (dryRun)
+            return new CleanupStepResult(stepNumber, bakFiles.Count, totalSize, null, false);
+
+        int deleted = 0;
+        long deletedBytes = 0;
+
+        foreach (var file in bakFiles)
+        {
+            try
+            {
+                long size = file.Length;
+                file.Delete();
+                deleted++;
+                deletedBytes += size;
+            }
+            catch (Exception ex)
+            {
+                log($"  ⚠ Selhalo mazání '{file.Name}': {ex.Message}");
+            }
+        }
+
+        log($"  → smazáno: {deleted} souborů ({FormatBytes(deletedBytes)})");
+        return new CleanupStepResult(stepNumber, deleted, deletedBytes, null, false);
+    }
+
 }

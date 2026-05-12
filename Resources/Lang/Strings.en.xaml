@@ -38,7 +38,7 @@
     <sys:String x:Key="Str_Tip_PowerShell">Opens PowerShell in working directory from Settings.</sys:String>
     <sys:String x:Key="Str_Tip_GatewayLog">Shows last 20 lines of Gateway log.</sys:String>
     <sys:String x:Key="Str_Tip_CleaningTool">Removes old logs, cache and session files.&#x0a;Shortcut: Ctrl+Shift+C</sys:String>
-    <sys:String x:Key="Str_Tip_TokenManager">API keys management and config file redaction. Available in v0.5.</sys:String>
+    <sys:String x:Key="Str_Tip_TokenManager">API keys management and config file redaction.</sys:String>
     <sys:String x:Key="Str_Tip_DoctorFix">Runs openclaw "doctor --fix" to repair configuration.</sys:String>
 
     <!-- Cleaning Tool -->
@@ -93,7 +93,7 @@
     <sys:String x:Key="Str_Status_Stopped">stopped</sys:String>
 
     <!-- Log zprávy -->
-    <sys:String x:Key="Str_Log_AppStarted">Application started (v0.4).</sys:String>
+    <sys:String x:Key="Str_Log_AppStarted">Application started (v0.95).</sys:String>
     <sys:String x:Key="Str_Log_GatewayStarting">Starting Gateway...</sys:String>
     <sys:String x:Key="Str_Log_GatewayReady">Gateway ready.</sys:String>
     <sys:String x:Key="Str_Log_GatewayStopping">Stopping Gateway...</sys:String>

@@ -38,7 +38,7 @@
     <sys:String x:Key="Str_Tip_PowerShell">Otevře PowerShell v pracovním adresáři z Nastavení.</sys:String>
     <sys:String x:Key="Str_Tip_GatewayLog">Zobrazí posledních 20 řádků Gateway logu.</sys:String>
     <sys:String x:Key="Str_Tip_CleaningTool">Odstraní staré logy, cache a session soubory.&#x0a;Zkratka: Ctrl+Shift+C</sys:String>
-    <sys:String x:Key="Str_Tip_TokenManager">Správa API klíčů a redakce konfiguračních souborů. Dostupné v v0.5.</sys:String>
+    <sys:String x:Key="Str_Tip_TokenManager">Správa API klíčů a redakce konfiguračních souborů.</sys:String>
     <sys:String x:Key="Str_Tip_DoctorFix">Spustí openclaw "doctor --fix" pro opravu konfigurace.</sys:String>
 
     <!-- Cleaning Tool -->
@@ -93,7 +93,7 @@
     <sys:String x:Key="Str_Status_Stopped">neběží</sys:String>
 
     <!-- Log zprávy -->
-    <sys:String x:Key="Str_Log_AppStarted">Aplikace spuštěna (v0.4).</sys:String>
+    <sys:String x:Key="Str_Log_AppStarted">Aplikace spuštěna (v0.95).</sys:String>
     <sys:String x:Key="Str_Log_GatewayStarting">Spouštím Gateway...</sys:String>
     <sys:String x:Key="Str_Log_GatewayReady">Gateway ready.</sys:String>
     <sys:String x:Key="Str_Log_GatewayStopping">Zastavuji Gateway...</sys:String>

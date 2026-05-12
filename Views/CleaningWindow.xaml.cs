@@ -218,6 +218,7 @@ public partial class CleaningWindow : Window
         if (ChkStep4.IsChecked == true) result.Add(4);
         if (ChkStep5.IsChecked == true) result.Add(5);
         if (ChkStep6.IsChecked == true) result.Add(6);
+        if (ChkStep7.IsChecked == true) result.Add(7);
         return result;
     }
 
@@ -231,6 +232,7 @@ public partial class CleaningWindow : Window
         ChkStep4.IsEnabled = enabled;
         ChkStep5.IsEnabled = enabled;
         ChkStep6.IsEnabled = enabled;
+        ChkStep7.IsEnabled = enabled;
         SliderKeep.IsEnabled = enabled && ChkStep6.IsChecked == true;
         ChkManageTask.IsEnabled = enabled;
         ChkStopGateway.IsEnabled = enabled;

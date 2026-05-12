@@ -26,7 +26,7 @@
                        Margin="0,0,0,4" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="v0.4  |  " Foreground="Gray" FontSize="12" />
+                <TextBlock Text="v0.95  |  " Foreground="Gray" FontSize="12" />
                 <TextBlock Text=".NET 8  |  WPF  |  WebView2 + ConPTY"
                            Foreground="Gray" FontSize="12" />
             </StackPanel>

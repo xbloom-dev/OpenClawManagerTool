@@ -1,6 +1,5 @@
 // MainWindow.Splash.cs
 // Partial class — splash screen logika (v0.5)
-// Umístění: OpenClawManager/ (vedle MainWindow.xaml.cs)
 
 using System.IO;
 using System.Windows;
@@ -12,28 +11,21 @@ namespace OpenClawManager;
 
 public partial class MainWindow
 {
-    // ── Splash fields ─────────────────────────────────────────────────────────
     private DispatcherTimer? _splashProgressTimer;
     private bool _splashVideoActive = false;
 
-    // ── Inicializace (volá se na konci konstruktoru MainWindow) ───────────────
     private void InitSplash()
     {
         var settings = SettingsService.Current;
 
-        // Legacy theme — splash overlay se nezobrazuje vůbec
         if (settings.Theme == AppTheme.Legacy)
         {
             SplashOverlay.Visibility = Visibility.Collapsed;
             return;
         }
 
-        // Modern theme — overlay vždy viditelný při startu
         SplashOverlay.Visibility = Visibility.Visible;
 
-        // Hledáme splash.mp4 ve dvou možných umístěních:
-        //   1) bin\...\Resources\splash.mp4  (CopyToOutputDirectory zachovává strukturu)
-        //   2) bin\...\splash.mp4            (kdyby ho někdo dal přímo vedle EXE)
         var pathInResources = Path.Combine(AppContext.BaseDirectory, "Resources", "splash.mp4");
         var pathInRoot      = Path.Combine(AppContext.BaseDirectory, "splash.mp4");
 
@@ -45,42 +37,29 @@ public partial class MainWindow
             $"mp4={(splashMp4 ?? "(not found)")}");
 
         if (settings.UseSplashVideo && splashMp4 != null)
-        {
             StartSplashVideo(splashMp4);
-        }
         else
         {
-            // PNG fallback — SplashImage je viditelný defaultně
-            SplashMedia.Visibility = Visibility.Collapsed;
+            SplashMedia.Visibility    = Visibility.Collapsed;
             SplashProgress.Visibility = Visibility.Collapsed;
             Log("[Splash] Zobrazuje se statický splash.png (fallback).");
         }
     }
 
-    // ── Video režim ───────────────────────────────────────────────────────────
     private void StartSplashVideo(string mp4Path)
     {
         _splashVideoActive = true;
-
-        // Diagnostické handlery — pomohou pokud video selže
         SplashMedia.MediaOpened += SplashMedia_MediaOpened;
         SplashMedia.MediaFailed += SplashMedia_MediaFailed;
-
-        SplashMedia.Visibility = Visibility.Visible;
+        SplashMedia.Visibility    = Visibility.Visible;
         SplashProgress.Visibility = Visibility.Visible;
-
         SplashMedia.Source = new Uri(mp4Path);
         SplashMedia.Play();
     }
 
-    // ── Video úspěšně načteno ─────────────────────────────────────────────────
     private void SplashMedia_MediaOpened(object? sender, RoutedEventArgs e)
     {
-        // Progress timer startujeme až po MediaOpened — máme jistotu o NaturalDuration
-        _splashProgressTimer = new DispatcherTimer
-        {
-            Interval = TimeSpan.FromMilliseconds(100)
-        };
+        _splashProgressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
         _splashProgressTimer.Tick += SplashProgressTimer_Tick;
         _splashProgressTimer.Start();
 
@@ -90,24 +69,19 @@ public partial class MainWindow
         Log($"[Splash] Video načteno, délka {duration}.");
     }
 
-    // ── Video selhalo (chybí codec, špatný formát atd.) ──────────────────────
     private void SplashMedia_MediaFailed(object? sender, ExceptionRoutedEventArgs e)
     {
         Log($"[Splash] CHYBA přehrávání videa: {e.ErrorException?.Message ?? "(unknown)"}");
         Log("[Splash] Přepínám na PNG fallback.");
 
-        _splashProgressTimer?.Stop();
-        _splashProgressTimer = null;
+        // Zastavit přehrávání bez ohledu na cokoli dalšího
+        StopSplashVideo();
 
-        SplashMedia.Stop();
-        SplashMedia.Source = null;
-        SplashMedia.Visibility = Visibility.Collapsed;
+        SplashMedia.Visibility    = Visibility.Collapsed;
         SplashProgress.Visibility = Visibility.Collapsed;
-        _splashVideoActive = false;
-        // SplashImage zůstane viditelný — to je náš PNG fallback
+        // SplashImage zůstane viditelný jako PNG fallback
     }
 
-    // ── Progress timer tick ───────────────────────────────────────────────────
     private void SplashProgressTimer_Tick(object? sender, EventArgs e)
     {
         if (!SplashMedia.NaturalDuration.HasTimeSpan) return;
@@ -120,38 +94,57 @@ public partial class MainWindow
             SplashMedia.Position.TotalSeconds / total, 0.0, 1.0);
     }
 
-    // ── Video doběhlo — XAML event handler ────────────────────────────────────
     private void SplashMedia_MediaEnded(object sender, RoutedEventArgs e)
     {
         _splashProgressTimer?.Stop();
         SplashProgress.Value = 1.0;
 
-        // Video doběhlo — po krátké pauze (500ms) skrýt overlay a zobrazit TUI.
-        // Nezamrazovat na prvním snímku — to způsobovalo černý overlay překrývající terminál.
+        // Video doběhlo — zastavit okamžitě (zastaví i zvuk),
+        // pak po 500ms skrýt overlay.
+        StopSplashVideo();
+
         var endTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
         endTimer.Tick += (_, _) =>
         {
             endTimer.Stop();
-            DisposeSplash();
+            SplashOverlay.Visibility = Visibility.Collapsed;
         };
         endTimer.Start();
     }
 
-    // ── Dispose splash (první věc v BtnStartTui_Click) ────────────────────────
-    private void DisposeSplash()
+    /// <summary>
+    /// Zastaví přehrávání videa a uvolní MediaElement.
+    /// Bezpečné volat vícekrát — idempotentní.
+    /// Odděleno od skrývání overlay aby zvuk vždy ustal okamžitě.
+    /// </summary>
+    private void StopSplashVideo()
     {
-        if (SplashOverlay.Visibility != Visibility.Visible) return;
+        if (!_splashVideoActive) return;
 
         _splashProgressTimer?.Stop();
         _splashProgressTimer = null;
 
-        if (_splashVideoActive)
+        try
         {
             SplashMedia.Stop();
             SplashMedia.Source = null;
             SplashMedia.Close();
-            _splashVideoActive = false;
         }
+        catch { }
+
+        _splashVideoActive = false;
+    }
+
+    /// <summary>
+    /// Dispose splash — voláno z BtnStartTui_Click nebo při přepnutí tématu.
+    /// Vždy zastaví video (i zvuk), pak skryje overlay.
+    /// </summary>
+    private void DisposeSplash()
+    {
+        // Zastavit video vždy — nezávisle na Visibility.
+        // Původní guard "if Visibility != Visible return" způsoboval
+        // že video hrálo dál na pozadí pokud overlay byl již skrytý.
+        StopSplashVideo();
 
         SplashOverlay.Visibility = Visibility.Collapsed;
     }

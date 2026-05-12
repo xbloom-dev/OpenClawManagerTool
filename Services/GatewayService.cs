@@ -13,14 +13,12 @@ public static class GatewayService
 {
     public static Process? Start()
     {
-        var openclawCmd = SettingsService.Current.OpenClawCommand;
-
         try
         {
             var psi = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
-                Arguments = $"-NoExit -NoProfile -Command \"& '{openclawCmd}' gateway\"",
+                Arguments = BuildPowerShellArguments("gateway"),
                 UseShellExecute = true,
                 CreateNoWindow = false
             };
@@ -35,14 +33,12 @@ public static class GatewayService
 
     public static Process? StartTui()
     {
-        var openclawCmd = SettingsService.Current.OpenClawCommand;
-
         try
         {
             var psi = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
-                Arguments = $"-NoExit -NoProfile -Command \"& '{openclawCmd}' tui\"",
+                Arguments = BuildPowerShellArguments("tui"),
                 UseShellExecute = true,
                 CreateNoWindow = false
             };
@@ -107,6 +103,49 @@ public static class GatewayService
         return ok;
     }
 
+
+    public static bool TryValidateOpenClawCommand(string command, out string error)
+    {
+        error = "";
+        if (string.IsNullOrWhiteSpace(command))
+        {
+            error = "OpenClaw command cannot be empty.";
+            return false;
+        }
+
+        char[] forbidden = ['\r', '\n', '"', '\'', ';', '&', '|', '`'];
+        var found = command.IndexOfAny(forbidden);
+        if (found >= 0)
+        {
+            error = $"OpenClaw command contains an unsafe character: {command[found]}";
+            return false;
+        }
+
+        return true;
+    }
+
+    public static string BuildPowerShellArguments(string openClawSubCommand)
+    {
+        var openclawCmd = GetValidatedOpenClawCommand();
+        return $"-NoExit -NoProfile -Command \"& '{EscapePowerShellSingleQuotedString(openclawCmd)}' {openClawSubCommand}\"";
+    }
+
+    public static string BuildCmdExeCommand(string openClawSubCommand)
+    {
+        var openclawCmd = GetValidatedOpenClawCommand();
+        return $"cmd.exe /c \"\"{openclawCmd}\" {openClawSubCommand}\"";
+    }
+
+    private static string GetValidatedOpenClawCommand()
+    {
+        var command = SettingsService.Current.OpenClawCommand;
+        if (!TryValidateOpenClawCommand(command, out var error))
+            throw new InvalidOperationException(error);
+        return command;
+    }
+
+    private static string EscapePowerShellSingleQuotedString(string value) => value.Replace("'", "''");
+
     private static void KillPowerShellGatewayWrappers()
     {
         var query = "SELECT ProcessId, CommandLine FROM Win32_Process WHERE Name='powershell.exe'";
@@ -166,14 +205,12 @@ public static class GatewayService
 
     public static Process? RunDoctorFix()
     {
-        var openclawCmd = SettingsService.Current.OpenClawCommand;
-
         try
         {
             var psi = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
-                Arguments = $"-NoExit -NoProfile -Command \"& '{openclawCmd}' doctor --fix\"",
+                Arguments = BuildPowerShellArguments("doctor --fix"),
                 UseShellExecute = true,
                 CreateNoWindow = false
             };

@@ -32,6 +32,7 @@ public partial class LiveLogWindow : Window
     private long _fileOffset = 0;
 
     // Highlight timer pro nové řádky
+    private DispatcherTimer? _highlightClearTimer;
     private DispatcherTimer? _feedbackTimer;
 
     // Počítadlo nových řádků pro status
@@ -47,7 +48,12 @@ public partial class LiveLogWindow : Window
         BtnClose.Click += (_, _) => Close();
         BtnCopy.Click  += BtnCopy_Click;
 
-        Closed += (_, _) => StopWatcher();
+        Closed += (_, _) =>
+        {
+            StopWatcher();
+            _highlightClearTimer?.Stop();
+            _feedbackTimer?.Stop();
+        };
 
         ApplyLocalization();
         LoadInitialLines();
@@ -115,20 +121,30 @@ public partial class LiveLogWindow : Window
 
     private void StartWatcher()
     {
-        if (!File.Exists(_logPath)) return;
-
         try
         {
-            var dir  = Path.GetDirectoryName(_logPath)!;
+            var dir  = Path.GetDirectoryName(_logPath);
+            if (string.IsNullOrWhiteSpace(dir) || !Directory.Exists(dir))
+            {
+                bool cs = L10n.Current == L10n.Language.CS;
+                TxtStatus.Text = cs
+                    ? "Složka logu zatím neexistuje. Spusť Gateway a otevři živý log znovu."
+                    : "Log folder does not exist yet. Start Gateway and reopen live log.";
+                return;
+            }
+
             var file = Path.GetFileName(_logPath);
 
-            _watcher = new FileSystemWatcher(dir, file)
+            _watcher = new FileSystemWatcher(dir)
             {
-                NotifyFilter        = NotifyFilters.LastWrite | NotifyFilters.Size,
+                Filter              = file,
+                NotifyFilter        = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size,
                 EnableRaisingEvents = true
             };
 
             _watcher.Changed += OnLogChanged;
+            _watcher.Created += OnLogChanged;
+            _watcher.Renamed += OnLogChanged;
         }
         catch { }
     }
@@ -212,22 +228,26 @@ public partial class LiveLogWindow : Window
                 (normalLines.Any() ? "\n" : "") +
                 string.Join("\n", highlighted.Select(l => "► " + l));
 
-            // Po 2s obnovit bez prefixu
-            var timer = new DispatcherTimer
+            _highlightClearTimer ??= new DispatcherTimer
                 { Interval = TimeSpan.FromSeconds(2) };
-            timer.Tick += (_, _) =>
-            {
-                timer.Stop();
-                TxtLogContent.Text = string.Join("\n", _lines);
-                TxtLogContent.ScrollToEnd();
-            };
-            timer.Start();
+            _highlightClearTimer.Stop();
+            _highlightClearTimer.Tick -= HighlightClearTimer_Tick;
+            _highlightClearTimer.Tick += HighlightClearTimer_Tick;
+            _highlightClearTimer.Start();
         }
         else
         {
             TxtLogContent.Text = string.Join("\n", allLines);
         }
 
+        TxtLogContent.ScrollToEnd();
+    }
+
+
+    private void HighlightClearTimer_Tick(object? sender, EventArgs e)
+    {
+        _highlightClearTimer?.Stop();
+        TxtLogContent.Text = string.Join("\n", _lines);
         TxtLogContent.ScrollToEnd();
     }
 

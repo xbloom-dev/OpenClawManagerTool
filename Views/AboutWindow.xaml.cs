@@ -1,5 +1,4 @@
 using System.IO;
-using System.Reflection;
 using System.Windows;
 using OpenClawManager.Services;
 
@@ -45,7 +44,7 @@ public partial class AboutWindow : Window
 
     private static string? FindSvgPath()
     {
-        var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? "";
+        var exeDir = AppContext.BaseDirectory;
         var candidates = new[]
         {
             Path.Combine(exeDir, "Resources", "app-logo.svg"),

@@ -5,10 +5,20 @@
              Background="#1E1E1E">
 
     <Grid>
-        <!-- Splashscreen / status před načtením TUI -->
+        <!-- WebView2 — skrytý dokud xterm.js není připraven.
+             Viditelnost řídí code-behind: Collapsed → Visible při _webViewReady.
+             POZOR: WebView2 renderuje i když je Collapsed — inicializace probíhá
+             na pozadí, což je záměr. -->
+        <wv2:WebView2 x:Name="WebView"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Stretch"
+                      Visibility="Collapsed" />
+
+        <!-- SplashBorder — překrývá WebView dokud terminál není připraven.
+             Skrytý code-behind při _webViewReady = true.
+             Znovu viditelný po StopTui / OnConPtyExited. -->
         <Border x:Name="SplashBorder"
-                Background="#1E1E1E"
-                Panel.ZIndex="1">
+                Background="#1E1E1E">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock x:Name="SplashLogo"
                            FontFamily="Consolas, Courier New, monospace"
@@ -31,13 +41,5 @@
                            HorizontalAlignment="Center" />
             </StackPanel>
         </Border>
-
-        <!-- WebView2 — vyplňuje celý dostupný prostor pravého panelu.
-             Velikost terminálu je řízena cols/rows v xterm.js (120×35),
-             a WebView2 viewport se zarovná podle CSS uvnitř HTML. -->
-        <wv2:WebView2 x:Name="WebView"
-                      HorizontalAlignment="Stretch"
-                      VerticalAlignment="Stretch"
-                      Visibility="Hidden" />
     </Grid>
 </UserControl>

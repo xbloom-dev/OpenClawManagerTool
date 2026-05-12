@@ -1,0 +1,12 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Theme: Legacy
+        Zachovává výchozí WPF vzhled (SystemColors).
+        Žádné přepsání barev ani stylů — aplikace vypadá jako v0.4.
+        Ikony: emoji TextBlock (zabudováno přímo v XAML tlačítek).
+    -->
+
+</ResourceDictionary>

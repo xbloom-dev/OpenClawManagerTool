@@ -82,6 +82,16 @@
                     <TextBlock Grid.Column="3"
                                Text=" sessions/agent" Foreground="Gray" VerticalAlignment="Center" />
                 </Grid>
+
+                <!-- Krok 7 — Token Manager zálohy (opt-in, výchozí vypnuto) -->
+                <CheckBox x:Name="ChkStep7" IsChecked="False" Margin="0,3">
+                    <TextBlock>
+                        <Run Text="[7]" FontWeight="Bold"/>
+                        <Run Text=" Token Manager zálohy"/>
+                        <Run Text=" — *.bak soubory v Token Manager složce" Foreground="Gray"/>
+                        <Run Text=" (opt-in)" FontStyle="Italic" Foreground="DarkGray"/>
+                    </TextBlock>
+                </CheckBox>
             </StackPanel>
         </GroupBox>
 

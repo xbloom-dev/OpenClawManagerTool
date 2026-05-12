@@ -1,6 +1,6 @@
 # Uživatelský manuál — OpenClaw Manager Tool by Bloom
 
-**Verze aplikace:** v0.4
+**Verze aplikace:** v0.95
 **Datum:** 12. května 2026
 
 ---
@@ -19,6 +19,8 @@
 10. [Nastavení](#10-nastavení)
 11. [O aplikaci](#11-o-aplikaci)
 12. [Časté situace a řešení](#12-časté-situace-a-řešení)
+13. [Token Manager](#13-token-manager)
+14. [Temata](#14-temata)
 
 ---
 
@@ -97,7 +99,7 @@ Text pod tlačítkem vždy ukazuje co se stane při kliknutí.
 #### Nástroje
 
 - **Vyčistit soubory** — otevře Cleaning Tool pro údržbu souborů OpenClaw
-- **Správce API klíčů** — dostupné v připravované verzi v0.5
+- **Správce API klíčů** — správa lokálního vaultu tokenů, redakce, obnova a ověření souborů
 
 #### Údržba
 
@@ -105,7 +107,7 @@ Text pod tlačítkem vždy ukazuje co se stane při kliknutí.
 
 ### Status bar (dole)
 
-`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v0.4`
+`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v0.95`
 
 | Barva tečky | Stav |
 |---|---|
@@ -343,6 +345,46 @@ Zobrazuje:
 **Příčina:** Scheduled Task "OpenClaw Gateway" je zakázaný nebo nebyl vytvořen.
 
 **Řešení:** Otevři Cleaning Tool → sekce "OpenClaw Gateway" → Enable Scheduled Task. Nebo spusť Gateway ručně přes Start tlačítko.
+
+---
+
+## 13. Token Manager
+
+Token Manager otevres tlacitkem **Spravce API klicu** v levem panelu. Slouzi k lokalnimu ulozeni citlivych hodnot a k bezpecnemu sdileni souboru bez plaintext tokenu.
+
+### Vault
+
+Vychozi vault je `%USERPROFILE%\.token-manager\secrets.json`. Hodnoty tokenu se ukladaji sifrovane pres Windows DPAPI pro aktualniho Windows uzivatele. Soubor zkopirovany na jiny pocitac nebo pod jiny ucet nejde bez puvodniho profilu desifrovat.
+
+Token Manager zobrazi varovani, pokud je vault v rizikovem umisteni:
+- uvnitr Git repozitare
+- uvnitr `.openclaw`
+- v cloud-synchronizovane slozce
+- ve sdilene nebo projektove slozce
+
+### Zakladni prace
+
+1. Klikni **Inicializovat**, pokud vault jeste neexistuje.
+2. Klikni **Pridat** a zadej ID, hodnotu a popis tokenu.
+3. Pro sdileni souboru pouzij **Nahled**, potom **Redact**.
+4. Pred odeslanim souboru spust **Verify**.
+5. Pokud potrebujes vratit placeholdery zpet na hodnoty, pouzij **Restore**.
+
+`Placeholder` zkopiruje text ve formatu `[REDACTED_ID]`. `Slozka` otevre adresar vaultu. `.gitignore` prida vault do nejblizsiho ignorovaciho souboru.
+
+### Doporuceni
+
+Neposilej `secrets.json` spolu s projektem. Pro backup pouzij bezpecne misto chranene stejnym Windows uctem. Pokud menis cestu k vaultu v Nastaveni, Token Manager se po ulozeni nastaveni automaticky obnovi.
+
+---
+
+## 14. Temata
+
+Tema zmenis v **Nastaveni**. K dispozici jsou:
+- **Modern**: ikony, splash panel a novejsi vzhled.
+- **Legacy**: jednodussi klasicke rozhrani.
+
+Zmena tematu se ulozi do `%APPDATA%\OpenClawManager\settings.json`. Pokud se splash video nespusti, aplikace automaticky pouzije staticky obrazek.
 
 ---
 

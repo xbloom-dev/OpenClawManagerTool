@@ -66,7 +66,8 @@ public partial class MainWindow : Window
         UpdateStatus();
         Log(L10n.Get("Str_Log_AppStarted"));
 
-        // v0.5: splash screen
+        // v0.5: tema + splash screen (pořadí důležité: theme před splash)
+        InitTheme();
         InitSplash();
     }
 
@@ -544,12 +545,8 @@ public partial class MainWindow : Window
 
     private void BtnTokenManager_Click(object? sender, RoutedEventArgs e)
     {
-        bool cs = L10n.Current == L10n.Language.CS;
-        MessageBox.Show(
-            cs ? "Správce API klíčů bude dostupný ve verzi v0.5."
-               : "Token Manager will be available in v0.5.",
-            cs ? "Připravujeme" : "Coming soon",
-            MessageBoxButton.OK, MessageBoxImage.Information);
+        var dialog = new TokenManagerWindow { Owner = this };
+        dialog.ShowDialog();
     }
 
     private void BtnDoctorFix_Click(object? sender, RoutedEventArgs e)
@@ -649,6 +646,9 @@ public partial class MainWindow : Window
         {
             Terminal.StopTui();
         }
+
+        // v0.5: odhlásit event handler
+        ThemeService.ThemeChanged -= OnThemeChanged;
 
         base.OnClosing(e);
     }

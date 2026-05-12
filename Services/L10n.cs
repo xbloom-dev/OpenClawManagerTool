@@ -17,6 +17,7 @@ public static class L10n
     public enum Language { EN, CS }
 
     public static Language Current { get; private set; } = Language.CS;
+    public static bool IsCzech => Current == Language.CS;
 
     private const string EN_URI = "Resources/Lang/Strings.en.xaml";
     private const string CS_URI = "Resources/Lang/Strings.cs.xaml";

@@ -3,7 +3,7 @@
 **Verze dokumentu:** 2.0
 **Datum:** 12. května 2026
 **Autor:** Bloom
-**Status:** v0.4 — aktuální stav
+**Status:** v0.95 — stabilizační build Token Manager + GUI redesign
 
 ---
 
@@ -118,7 +118,7 @@ Layout: dvě svislé panely vedle sebe, menu nahoře, status bar dole.
 
 **Nástroje:**
 - Vyčistit soubory (dříve "Cleaning Tool") — Ctrl+Shift+C
-- Správce API klíčů (dříve "Token Manager") — dostupné v v0.5
+- Správce API klíčů (dříve "Token Manager") — lokální vault, redakce, obnova, ověření a import tokenů
 
 **Údržba:**
 - Opravit konfiguraci (dříve "doctor --fix") — spustí `openclaw "doctor --fix"`
@@ -138,7 +138,7 @@ Layout: dvě svislé panely vedle sebe, menu nahoře, status bar dole.
 
 ### 4.4 Status bar
 
-`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v0.4`
+`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v0.95`
 
 Stavy Gateway indikátoru:
 - ● zelená — běží
@@ -200,8 +200,8 @@ Před zápisem vždy vytvoří `.bak`, při chybě rollback.
 
 ### 5.2 Správce API klíčů (Token Manager)
 
-Dostupné v **v0.5**. Aktuálně zobrazí informační dialog.
-Implementace dle `token-manager-spec-v2.md`.
+Implementováno ve **v0.95** podle `token-manager-spec-v2.md`.
+Obsahuje správu lokálního vaultu, přidání/editaci/odebrání/rotaci tokenů, import tokenů ze souboru a operace redact/restore/verify pro textové konfigurační soubory.
 
 ### 5.3 Nastavení
 
@@ -289,7 +289,9 @@ OpenClawManager/
 ├── Views/
 │   ├── TerminalControl.xaml / .cs       (embedded TUI)
 │   ├── CleaningWindow.xaml / .cs        (Cleaning Tool)
-│   ├── TokenManagerWindow.xaml / .cs    (stub, v0.5)
+│   ├── TokenManagerWindow.xaml / .cs    (Token Manager UI)
+│   ├── TokenEditWindow.xaml / .cs       (dialog tokenu)
+│   ├── TokenImportWindow.xaml / .cs     (import tokenů)
 │   ├── SettingsWindow.xaml / .cs
 │   ├── AboutWindow.xaml / .cs           (SVG logo + zkratky)
 │   ├── GatewayLogWindow.xaml / .cs      (log viewer)
@@ -311,7 +313,9 @@ OpenClawManager/
 │   ├── AppSettings.cs                   (+ Language property)
 │   ├── GatewayState.cs
 │   ├── CleanupResult.cs
-│   └── LatencyStats.cs
+│   ├── LatencyStats.cs
+│   ├── TokenEntry.cs
+│   └── TokenVault.cs
 └── Resources/
     ├── app-icon.ico
     ├── app-logo.svg                     (krab, kopírován vedle EXE)
@@ -360,7 +364,7 @@ Distribuce jako ZIP s `OpenClawManager.exe` + `README.md`.
 
 ### 9.3 Verzování
 
-Sémantické: `MAJOR.MINOR.PATCH`. Aktuální: **v0.4.0**.
+Sémantické: `MAJOR.MINOR.PATCH`. Aktuální stabilizační build: **v0.95.0**.
 
 ---
 
@@ -375,23 +379,23 @@ Modální okno, 6 kroků, dry-run, live log, Gateway detekce před cleanupem.
 ### ✅ v0.3 — Embedded TUI + Sessions cleanup
 ConPTY + WebView2 + xterm.js terminál v pravém panelu. Krok 6 sessions.json s backup/rollback. Admin elevation. Scheduled Task management.
 
-### ✅ v0.4 — Polish (aktuální)
+### ✅ v0.4 — Polish
 - Oprava parsování latencí (JSON + ANSI strip + file offset tracking)
 - Lokalizace EN/CS (ResourceDictionary, přepínač v Settings)
 - Dialog "O aplikaci" se SVG logem (WebView2, světlé pozadí)
 - Barvy tlačítek (#D0FFD0 zelená / #FFD0D0 červená)
-- Token Manager aktivní (info dialog o v0.5)
+- Token Manager tlačítko připravené v hlavním UI
 - Tooltipy na všech tlačítkách ve všech oknech
 - Klávesové zkratky kompletní
 - Menu plně lokalizováno
 - Gateway Log: Kopírovat (2s feedback) + Živá data tlačítko
 - LiveLogWindow: FileSystemWatcher, sliding window, zvýraznění nových řádků
 
-### 🔲 v0.5 — GUI redesign
+### ✅ v0.5 — GUI redesign
 - Skinovatelnost (Legacy / Modern theme) via ResourceDictionary
-- Splash screen video (MediaElement, MP4)
+- Splash screen video (MediaElement, MP4) + PNG fallback
 
-### 🔲 v0.6 — Token Manager
+### ✅ v0.95 — Token Manager integration
 Implementace dle `token-manager-spec-v2.md`:
 - Vault management (add/edit/remove/rotate)
 - File operations (redact/restore/verify)

@@ -11,15 +11,17 @@ using OpenClawManager.Services;
 namespace OpenClawManager.Views;
 
 /// <summary>
-/// Terminal embedded v aplikaci â€” WebView2 + xterm.js + ConPTY.
+/// Terminal embedded v aplikaci — WebView2 + xterm.js + ConPTY.
 ///
 /// Architektura:
-/// [openclaw tui proces] â†â†’ [ConPtyProcess] â†â†’ [WebView2 PostWebMessage] â†â†’ [xterm.js]
+/// [openclaw tui proces] ↔ [ConPtyProcess] ↔ [WebView2 PostWebMessage] ↔ [xterm.js]
 ///
-/// Stdout z ConPTY â†’ xterm.js pĹ™es term.write()
-/// Stdin do ConPTY â† xterm.js pĹ™es onData event + window.chrome.webview.postMessage()
+/// Stdout z ConPTY → xterm.js přes term.write()
+/// Stdin do ConPTY ← xterm.js přes onData event + window.chrome.webview.postMessage()
 ///
-/// FixnĂ­ velikost 120Ă—40 (ĹľĂˇdnĂ˝ resize ve v0.3).
+/// Viditelnost:
+/// - WebView: Collapsed při startu → Visible při _webViewReady = true (xterm.js připraven)
+/// - SplashBorder: viditelný při startu → Collapsed při _webViewReady → Visible po StopTui
 /// </summary>
 public partial class TerminalControl : UserControl
 {
@@ -27,26 +29,24 @@ public partial class TerminalControl : UserControl
     private bool _webViewReady = false;
     private bool _webViewFailed = false;
 
-    // Buffering optimalizace â€” sbĂ­rĂˇme output z ConPTY do bufferu
-    // a flushujeme do xterm.js dĂˇvkovÄ› (eliminuje per-keystroke lag).
+    // Buffering — sbíráme output z ConPTY do bufferu a flushujeme dávkově (10ms timer).
     private readonly System.Text.StringBuilder _outputBuffer = new();
     private readonly object _bufferLock = new();
     private DispatcherTimer? _flushTimer;
     private DispatcherTimer? _webViewReadyTimeoutTimer;
 
-    /// <summary>
-    /// VyvolĂˇ se kdyĹľ TUI proces nastartuje nebo skonÄŤĂ­.
-    /// MainWindow ho pouĹľĂ­vĂˇ pro pĹ™epĂ­nĂˇnĂ­ tlaÄŤĂ­tka mezi "Start TUI" a "Stop TUI".
-    /// </summary>
     public event Action<bool>? TuiStateChanged;
 
-    /// <summary>
-    /// True pokud TUI proces aktuĂˇlnÄ› bÄ›ĹľĂ­.
-    /// </summary>
     public bool IsTuiRunning => _conpty != null && _conpty.IsRunning;
 
     /// <summary>
-    /// HTML strĂˇnka s lokĂˇlnĂ­m xterm.js + bridge na C#.
+    /// Sestaví HTML stránku s lokálním xterm.js + bridge na C#.
+    ///
+    /// DŮLEŽITÉ: všechny non-ASCII znaky v JS string literálech musí být
+    /// jako \uXXXX unicode escape — heredoc string je UTF-8 v C#, ale
+    /// WebView2 NavigateToString ho předává Chromiu jako UTF-16 string
+    /// bez BOM, a inline text v script bloku se může interpretovat chybně
+    /// pokud obsahuje raw UTF-8 multi-byte sekvence.
     /// </summary>
     private static string BuildTerminalHtml(string xtermJs, string xtermCss) => $$"""
         <!DOCTYPE html>
@@ -92,6 +92,9 @@ public partial class TerminalControl : UserControl
                     scrollback: 5000
                 });
                 term.open(document.getElementById('terminal'));
+
+                // \u010cek\u00e1 se na ConPTY... = "Čeká se na ConPTY..."
+                // Unicode escape nutný — viz komentář u BuildTerminalHtml
                 term.writeln('\x1b[90m\u010cek\u00e1 se na ConPTY...\x1b[0m');
 
                 window.chrome.webview.addEventListener('message', (event) => {
@@ -121,14 +124,15 @@ public partial class TerminalControl : UserControl
         var resource = Application.GetResourceStream(uri)
             ?? throw new FileNotFoundException($"Missing terminal asset: {relativePath}");
 
-        using var reader = new StreamReader(resource.Stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+        using var reader = new StreamReader(resource.Stream, Encoding.UTF8,
+            detectEncodingFromByteOrderMarks: true);
         return reader.ReadToEnd();
     }
 
     private static string BuildTerminalHtmlFromResources()
     {
         var css = LoadTerminalResource("Resources/Terminal/xterm.min.css");
-        var js = LoadTerminalResource("Resources/Terminal/xterm.min.js")
+        var js  = LoadTerminalResource("Resources/Terminal/xterm.min.js")
             .Replace("</script>", "<\\/script>", StringComparison.OrdinalIgnoreCase);
         return BuildTerminalHtml(js, css);
     }
@@ -136,11 +140,9 @@ public partial class TerminalControl : UserControl
     public TerminalControl()
     {
         InitializeComponent();
-        Loaded += async (_, _) => await InitializeWebView();
+        Loaded   += async (_, _) => await InitializeWebView();
         Unloaded += (_, _) => Cleanup();
 
-        // Flush timer â€” kaĹľdĂ˝ch 10ms poĹˇle nashromĂˇĹľdÄ›nĂ˝ buffer do xterm.js
-        // TĂ­m sluÄŤujeme rychle pĹ™Ă­chozĂ­ output do dĂˇvek mĂ­sto zprĂˇvy-na-znak.
         _flushTimer = new DispatcherTimer(DispatcherPriority.Send)
         {
             Interval = TimeSpan.FromMilliseconds(10)
@@ -164,22 +166,15 @@ public partial class TerminalControl : UserControl
         }
 
         if (toSend != null)
-        {
-            // PostWebMessageAsString je rychlejĹˇĂ­ neĹľ PostWebMessageAsJson
-            // (ĹľĂˇdnĂ˝ JSON parsing na JS stranÄ›). String pĹ™Ă­jde jako event.data string.
             WebView.CoreWebView2.PostWebMessageAsString(toSend);
-        }
     }
-
 
     private static string GetWebViewUserDataFolder()
     {
         var processFolder = Process.GetCurrentProcess().Id.ToString();
         var primary = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "OpenClawManager",
-            "WebView2",
-            processFolder);
+            "OpenClawManager", "WebView2", processFolder);
 
         if (TryPrepareUserDataFolder(primary))
             return primary;
@@ -199,30 +194,27 @@ public partial class TerminalControl : UserControl
             File.Delete(probe);
             return true;
         }
-        catch
-        {
-            return false;
-        }
+        catch { return false; }
     }
 
     private async Task InitializeWebView()
     {
         try
         {
+            // Počkat až WPF dokončí layout — ApplicationIdle + malý delay
+            // zabraňuje race condition kdy WebView2 inicializuje dřív než
+            // má hostitelské okno stabilní HWND.
             await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.ApplicationIdle);
             await Task.Delay(500);
-
-            var userDataFolder = GetWebViewUserDataFolder();
 
             StatusText.Text = "Inicializuji WebView2...";
 
             var env = await CoreWebView2Environment.CreateAsync(
                 browserExecutableFolder: null,
-                userDataFolder: userDataFolder);
+                userDataFolder: GetWebViewUserDataFolder());
 
             await WebView.EnsureCoreWebView2Async(env);
 
-            // Bridge: messages from xterm.js (input and ready signal).
             WebView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
             WebView.CoreWebView2.Settings.IsWebMessageEnabled = true;
 
@@ -235,18 +227,12 @@ public partial class TerminalControl : UserControl
                     return;
                 }
 
-                var terminalReadyJson = await WebView.CoreWebView2.ExecuteScriptAsync(
+                var ready = await WebView.CoreWebView2.ExecuteScriptAsync(
                     "Boolean(window.Terminal && document.querySelector('.xterm'))");
 
-                if (string.Equals(terminalReadyJson, "true", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(ready, "true", StringComparison.OrdinalIgnoreCase))
                 {
-                    _webViewReady = true;
-                    _webViewFailed = false;
-                    _webViewReadyTimeoutTimer?.Stop();
-                    _webViewReadyTimeoutTimer = null;
-                    StatusText.Text = L10n.IsCzech
-                        ? "Klikni na \"OpenClaw TUI\" pro spusteni."
-                        : "Click \"OpenClaw TUI\" to start.";
+                    OnWebViewReady();
                 }
                 else
                 {
@@ -257,9 +243,17 @@ public partial class TerminalControl : UserControl
                 }
             };
 
-            StatusText.Text = L10n.IsCzech ? "Nacitam lokalni xterm.js..." : "Loading local xterm.js...";
+            StatusText.Text = L10n.IsCzech
+                ? "Nacitam lokalni xterm.js..."
+                : "Loading local xterm.js...";
+
             WebView.NavigateToString(BuildTerminalHtmlFromResources());
-            _webViewReadyTimeoutTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+
+            // Timeout 10s — pokud xterm.js neodpoví přes "ready" zprávu
+            _webViewReadyTimeoutTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(10)
+            };
             _webViewReadyTimeoutTimer.Tick += (_, _) =>
             {
                 _webViewReadyTimeoutTimer?.Stop();
@@ -267,7 +261,9 @@ public partial class TerminalControl : UserControl
                 if (_webViewReady) return;
 
                 _webViewFailed = true;
-                StatusText.Text = L10n.IsCzech ? "TerminĂˇl se nenaÄŤetl. ChybĂ­ lokĂˇlnĂ­ xterm.js assety." : "Terminal did not load. Local xterm.js assets are missing.";
+                StatusText.Text = L10n.IsCzech
+                    ? "Terminal se nena\u010detl. Chyb\u00ed lok\u00e1ln\u00ed xterm.js assety."
+                    : "Terminal did not load. Local xterm.js assets are missing.";
             };
             _webViewReadyTimeoutTimer.Start();
         }
@@ -279,8 +275,27 @@ public partial class TerminalControl : UserControl
     }
 
     /// <summary>
-    /// ZprĂˇvy z xterm.js pĹ™es JavaScript bridge.
+    /// Centralizovaná logika pro přechod do stavu "terminál připraven".
+    /// Volána z NavigationCompleted i z OnWebMessageReceived ("ready").
     /// </summary>
+    private void OnWebViewReady()
+    {
+        if (_webViewReady) return; // idempotentní — oba handlery mohou dorazit
+
+        _webViewReady = true;
+        _webViewFailed = false;
+        _webViewReadyTimeoutTimer?.Stop();
+        _webViewReadyTimeoutTimer = null;
+
+        // Zobrazit WebView, schovat splash
+        WebView.Visibility = Visibility.Visible;
+        SplashBorder.Visibility = Visibility.Collapsed;
+
+        StatusText.Text = L10n.IsCzech
+            ? "Klikni na \"OpenClaw TUI\" pro spusteni."
+            : "Click \"OpenClaw TUI\" to start.";
+    }
+
     private void OnWebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
         try
@@ -292,10 +307,7 @@ public partial class TerminalControl : UserControl
             switch (type)
             {
                 case "ready":
-                    _webViewReady = true;
-                    _webViewFailed = false;
-                    _webViewReadyTimeoutTimer?.Stop();
-                    _webViewReadyTimeoutTimer = null;
+                    Dispatcher.BeginInvoke(OnWebViewReady);
                     break;
 
                 case "input":
@@ -304,15 +316,9 @@ public partial class TerminalControl : UserControl
                     break;
             }
         }
-        catch
-        {
-            // Ĺ patnÄ› formĂˇtovanĂˇ zprĂˇva â€” ignorovat
-        }
+        catch { }
     }
 
-    /// <summary>
-    /// SpustĂ­ openclaw tui v ConPTY a propojĂ­ s xterm.js.
-    /// </summary>
     public void StartTui()
     {
         if (_conpty != null && _conpty.IsRunning)
@@ -321,26 +327,27 @@ public partial class TerminalControl : UserControl
         if (!_webViewReady)
         {
             StatusText.Text = _webViewFailed
-                ? (L10n.IsCzech ? "TerminĂˇl nenĂ­ pĹ™ipraven. ChybĂ­ lokĂˇlnĂ­ xterm.js assety." : "Terminal is not ready. Local xterm.js assets are missing.")
-                : (L10n.IsCzech ? "TerminĂˇl se jeĹˇtÄ› naÄŤĂ­tĂˇ. Zkus to prosĂ­m za chvĂ­li." : "Terminal is still loading. Please try again shortly.");
+                ? (L10n.IsCzech
+                    ? "Termin\u00e1l nen\u00ed p\u0159ipraven. Chyb\u00ed lok\u00e1ln\u00ed xterm.js assety."
+                    : "Terminal is not ready. Local xterm.js assets are missing.")
+                : (L10n.IsCzech
+                    ? "Termin\u00e1l se je\u0161t\u011b na\u010d\u00edt\u00e1. Zkus to pros\u00edm za chv\u00edli."
+                    : "Terminal is still loading. Please try again shortly.");
             return;
         }
 
         try
         {
-            // VyÄŤistit terminĂˇl pĹ™ed novĂ˝m spuĹˇtÄ›nĂ­m (smaze pĹ™edchozĂ­ vĂ˝stup)
             WebView.CoreWebView2.PostWebMessageAsJson("{\"type\":\"clear\"}");
 
             _conpty = new ConPtyProcess();
             _conpty.OutputReceived += OnConPtyOutput;
-            _conpty.ProcessExited += OnConPtyExited;
+            _conpty.ProcessExited  += OnConPtyExited;
 
-            // openclaw je .cmd skript, takĹľe ho musĂ­me spouĹˇtÄ›t pĹ™es cmd.exe /c
             _conpty.Start(GatewayService.BuildCmdExeCommand("tui"));
 
-            // Schovat splash a zobrazit WebView â€” TUI startuje
+            // WebView je již Visible od OnWebViewReady — jen schovat splash
             SplashBorder.Visibility = Visibility.Collapsed;
-            WebView.Visibility = Visibility.Visible;
 
             TuiStateChanged?.Invoke(true);
         }
@@ -355,23 +362,21 @@ public partial class TerminalControl : UserControl
 
     public void StopTui()
     {
-        if (_conpty != null)
-        {
-            _conpty.Dispose();
-            _conpty = null;
+        if (_conpty == null) return;
 
-            // Zobrazit splash znovu
-            StatusText.Text = "TUI ukonÄŤeno. Klikni na â€žOpenClaw TUI\" pro novĂ˝ start.";
-            SplashBorder.Visibility = Visibility.Visible;
+        _conpty.Dispose();
+        _conpty = null;
 
-            TuiStateChanged?.Invoke(false);
-        }
+        StatusText.Text = L10n.IsCzech
+            ? "TUI ukon\u010deno. Klikni na \u201eOpenClaw TUI\u201c pro nov\u00fd start."
+            : "TUI stopped. Click \"OpenClaw TUI\" to start again.";
+        SplashBorder.Visibility = Visibility.Visible;
+
+        TuiStateChanged?.Invoke(false);
     }
 
     private void OnConPtyOutput(string data)
     {
-        // MĂ­sto okamĹľitĂ©ho posĂ­lĂˇnĂ­ pĹ™es WebView2 (pomalĂ©)
-        // sbĂ­rĂˇme do bufferu â€” DispatcherTimer flushne kaĹľdĂ˝ch 10ms.
         lock (_bufferLock)
         {
             _outputBuffer.Append(data);
@@ -382,13 +387,14 @@ public partial class TerminalControl : UserControl
     {
         lock (_bufferLock)
         {
-            _outputBuffer.Append("\r\n\x1b[90m[Proces ukonÄŤen]\x1b[0m\r\n");
+            _outputBuffer.Append("\r\n\x1b[90m[Proces ukon\u010den]\x1b[0m\r\n");
         }
 
-        // Notifikovat MainWindow Ĺľe TUI skonÄŤilo + zobrazit splash
         Dispatcher.BeginInvoke(new Action(() =>
         {
-            StatusText.Text = "TUI ukonÄŤeno. Klikni na â€žOpenClaw TUI\" pro novĂ˝ start.";
+            StatusText.Text = L10n.IsCzech
+                ? "TUI ukon\u010deno. Klikni na \u201eOpenClaw TUI\u201c pro nov\u00fd start."
+                : "TUI stopped. Click \"OpenClaw TUI\" to start again.";
             SplashBorder.Visibility = Visibility.Visible;
             TuiStateChanged?.Invoke(false);
         }));
@@ -404,4 +410,3 @@ public partial class TerminalControl : UserControl
         _conpty = null;
     }
 }
-

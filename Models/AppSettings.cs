@@ -1,4 +1,5 @@
 using System.IO;
+using OpenClawManager.Services;
 using System.Text.Json.Serialization;
 
 namespace OpenClawManager.Models;
@@ -19,6 +20,9 @@ public enum AppTheme
 /// </summary>
 public class AppSettings
 {
+    /// <summary>Verze schématu nastavení pro budoucí migrace.</summary>
+    public int SchemaVersion { get; set; } = 1;
+
     /// <summary>Cesta k OpenClaw konfiguraci (~\.openclaw)</summary>
     public string OpenClawPath { get; set; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".openclaw");
@@ -41,9 +45,7 @@ public class AppSettings
         new() { "main", "researcher", "executive", "safety" };
 
     /// <summary>Cesta k Token Manager secrets.json vaultu</summary>
-    public string TokenManagerSecretsPath { get; set; } =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".token-manager", "secrets.json");
+    public string TokenManagerSecretsPath { get; set; } = GetDefaultTokenManagerSecretsPath();
 
     /// <summary>Jazyk UI — "CS" nebo "EN"</summary>
     public string Language { get; set; } = "CS";
@@ -77,4 +79,6 @@ public class AppSettings
         var fileName = $"openclaw-{DateTime.Now:yyyy-MM-dd}.log";
         return Path.Combine(TempPath, fileName);
     }
+
+    private static string GetDefaultTokenManagerSecretsPath() => TokenService.GetDefaultVaultPath();
 }

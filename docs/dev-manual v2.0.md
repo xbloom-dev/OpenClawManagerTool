@@ -1,6 +1,6 @@
 # Dev Manual — OpenClaw Manager Tool by Bloom
 
-**Verze:** 2.0 (aktualizováno pro v0.4)
+**Verze:** 2.0 (aktualizováno pro stabilizační build v0.95)
 **Prostředí:** Windows 11, .NET 8 SDK, VS Code, Git.
 
 ---
@@ -413,7 +413,7 @@ git add .
 git commit -m "popis změny"
 
 # Tag verze (po dokončení milestone)
-git tag -a v0.4 -m "v0.4 - Polish: lokalizace, tooltipy, latence, LiveLog"
+git tag -a v0.95 -m "v0.95 - GUI redesign + Token Manager integration"
 git log --oneline   # přehled commitů
 ```
 

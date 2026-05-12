@@ -1,0 +1,63 @@
+<Window x:Class="OpenClawManager.Views.TokenImportWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Import token"
+        Height="520" Width="760"
+        MinHeight="420" MinWidth="620"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize">
+
+    <DockPanel Margin="12">
+        <StackPanel DockPanel.Dock="Bottom"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,12,0,0">
+            <Button x:Name="BtnImport" Content="Import selection"
+                    Width="130" Height="28" Margin="4,0"
+                    IsDefault="True" />
+            <Button x:Name="BtnCancel" Content="Cancel"
+                    Width="100" Height="28" Margin="4,0"
+                    IsCancel="True" />
+        </StackPanel>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="90" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="TxtIdLabel" Grid.Row="0" Grid.Column="0" Text="ID:"
+                       VerticalAlignment="Center" Margin="0,0,8,8" />
+            <TextBox x:Name="TxtId" Grid.Row="0" Grid.Column="1"
+                     Height="24" VerticalContentAlignment="Center"
+                     Margin="0,0,0,8" />
+
+            <TextBlock x:Name="TxtDescriptionLabel" Grid.Row="1" Grid.Column="0" Text="Description:"
+                       VerticalAlignment="Center" Margin="0,0,8,8" />
+            <TextBox x:Name="TxtDescription" Grid.Row="1" Grid.Column="1"
+                     Height="24" VerticalContentAlignment="Center"
+                     Margin="0,0,0,8" />
+
+            <TextBox x:Name="TxtContent" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"
+                     FontFamily="Consolas"
+                     FontSize="12"
+                     AcceptsReturn="True"
+                     AcceptsTab="True"
+                     TextWrapping="NoWrap"
+                     VerticalScrollBarVisibility="Auto"
+                     HorizontalScrollBarVisibility="Auto" />
+
+            <TextBlock x:Name="TxtHint" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2"
+                       Text="Select the token value in the text and click Import selection."
+                       Foreground="Gray"
+                       TextWrapping="Wrap"
+                       Margin="0,8,0,0" />
+        </Grid>
+    </DockPanel>
+</Window>
