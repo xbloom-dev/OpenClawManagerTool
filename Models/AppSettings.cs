@@ -15,7 +15,8 @@ public enum AppTheme
     Modern,
     Dark,
     HighContrast,
-    Compact
+    CrabCute,
+    Compact = CrabCute
 }
 
 /// <summary>

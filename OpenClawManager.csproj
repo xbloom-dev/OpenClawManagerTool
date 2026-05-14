@@ -33,7 +33,7 @@
     <Resource Include="Resources\Themes\Theme.Modern.xaml" />
     <Resource Include="Resources\Themes\Theme.Dark.xaml" />
     <Resource Include="Resources\Themes\Theme.HighContrast.xaml" />
-    <Resource Include="Resources\Themes\Theme.Compact.xaml" />
+    <Resource Include="Resources\Themes\Theme.CrabCute.xaml" />
 
     <!-- v0.5: Ikony Modern tématu (PNG 48×48, konvertováno ze SVG) -->
     <Resource Include="Resources\Icons\Modern\start.png" />

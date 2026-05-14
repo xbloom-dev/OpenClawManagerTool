@@ -70,7 +70,7 @@ public partial class MainWindow
             case AppTheme.Modern:
             case AppTheme.Dark:
             case AppTheme.HighContrast:
-            case AppTheme.Compact:
+            case AppTheme.CrabCute:
                 ApplyModernUi();
                 break;
             case AppTheme.Legacy:

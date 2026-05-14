@@ -38,7 +38,7 @@ public static class ThemeService
         { AppTheme.Modern, "/Resources/Themes/Theme.Modern.xaml" },
         { AppTheme.Dark, "/Resources/Themes/Theme.Dark.xaml" },
         { AppTheme.HighContrast, "/Resources/Themes/Theme.HighContrast.xaml" },
-        { AppTheme.Compact, "/Resources/Themes/Theme.Compact.xaml" },
+        { AppTheme.CrabCute, "/Resources/Themes/Theme.CrabCute.xaml" },
     };
 
     // ── Registr složek ikon ───────────────────────────────────────────────────
@@ -49,7 +49,7 @@ public static class ThemeService
         { AppTheme.Modern, "Modern" },
         { AppTheme.Dark, "Modern" },
         { AppTheme.HighContrast, "Modern" },
-        { AppTheme.Compact, "Modern" },
+        { AppTheme.CrabCute, "Modern" },
     };
 
     // ── Veřejné API ──────────────────────────────────────────────────────────

@@ -51,7 +51,7 @@ public partial class SettingsWindow : Window
         RbThemeModern.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeDark.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeHighContrast.Checked += (_, _) => UpdateSplashVideoEnabled();
-        RbThemeCompact.Checked += (_, _) => UpdateSplashVideoEnabled();
+        RbThemeCrabCute.Checked += (_, _) => UpdateSplashVideoEnabled();
 
         TxtSettingsPath.Text = SettingsService.SettingsFilePath;
     }
@@ -80,7 +80,7 @@ public partial class SettingsWindow : Window
         RbThemeModern.Content = "Modern";
         RbThemeDark.Content = "Dark";
         RbThemeHighContrast.Content = T("Vysok\u00FD kontrast", "High Contrast");
-        RbThemeCompact.Content = "Compact";
+        RbThemeCrabCute.Content = "CrabCute";
         ChkUseSplashVideo.Content = T("P\u0159ehr\u00E1t splash screen video p\u0159i startu", "Play splash screen video on startup");
         TxtThemeHint.Text = T("Zm\u011Bna t\u00E9matu se projev\u00ED po ulo\u017Een\u00ED. Video je aktivn\u00ED ve v\u0161ech modern\u00EDch t\u00E9matech.", "Theme changes after saving. Video is active in all modern-style themes.");
 
@@ -128,8 +128,8 @@ public partial class SettingsWindow : Window
             case AppTheme.HighContrast:
                 RbThemeHighContrast.IsChecked = true;
                 break;
-            case AppTheme.Compact:
-                RbThemeCompact.IsChecked = true;
+            case AppTheme.CrabCute:
+                RbThemeCrabCute.IsChecked = true;
                 break;
             case AppTheme.Legacy:
             default:
@@ -162,7 +162,7 @@ public partial class SettingsWindow : Window
         if (RbThemeModern.IsChecked == true) return AppTheme.Modern;
         if (RbThemeDark.IsChecked == true) return AppTheme.Dark;
         if (RbThemeHighContrast.IsChecked == true) return AppTheme.HighContrast;
-        if (RbThemeCompact.IsChecked == true) return AppTheme.Compact;
+        if (RbThemeCrabCute.IsChecked == true) return AppTheme.CrabCute;
         return AppTheme.Legacy;
     }
 
