@@ -13,8 +13,9 @@ public static class LatencyTracker
     private const int WindowSize = 10;
 
     private static readonly Queue<int> _window = new();
-    private static int? _maxMs = null;
-    private static int _totalCount = 0;
+    private static int? _lastMs   = null; // O(1) last — Queue.Last() je O(n)
+    private static int? _maxMs    = null;
+    private static int  _totalCount = 0;
     private static long _fileOffset = 0;
     private static string? _currentLogPath = null;
 
@@ -35,6 +36,7 @@ public static class LatencyTracker
 
         foreach (var (_, ms) in entries)
         {
+            _lastMs = ms;
             _window.Enqueue(ms);
             if (_window.Count > WindowSize)
                 _window.Dequeue();
@@ -52,7 +54,8 @@ public static class LatencyTracker
     public static void Reset()
     {
         _window.Clear();
-        _maxMs = null;
+        _lastMs    = null;
+        _maxMs     = null;
         _totalCount = 0;
         _fileOffset = 0;
         _currentLogPath = null;
@@ -66,12 +69,11 @@ public static class LatencyTracker
         if (_totalCount == 0)
             return new LatencyStats(null, null, null, 0);
 
-        var last = _window.Count > 0 ? _window.Last() : (int?)null;
         var avg = _window.Count > 0
             ? (int?)Math.Round(_window.Average())
             : null;
 
-        return new LatencyStats(last, avg, _maxMs, _totalCount);
+        return new LatencyStats(_lastMs, avg, _maxMs, _totalCount);
     }
 }
 

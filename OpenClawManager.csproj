@@ -6,9 +6,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>0.95.0.0</AssemblyVersion>
-    <FileVersion>0.95.0.0</FileVersion>
-    <Version>0.95.0</Version>
+    <AssemblyVersion>0.99.0.0</AssemblyVersion>
+    <FileVersion>0.99.0.0</FileVersion>
+    <Version>0.99.0</Version>
     <ApplicationIcon>Resources\app-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -42,7 +42,7 @@
     <Resource Include="Resources\Icons\Modern\token-manager.png" />
     <Resource Include="Resources\Icons\Modern\doctor-fix.png" />
 
-    <!-- v0.95: Offline xterm.js assets for embedded terminal -->
+    <!-- v0.99: Offline xterm.js assets for embedded terminal -->
     <Resource Include="Resources\Terminal\xterm.min.js" />
     <Resource Include="Resources\Terminal\xterm.min.css" />
 

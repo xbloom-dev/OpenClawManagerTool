@@ -27,11 +27,11 @@ public partial class TokenImportWindow : Window
 
     private void ApplyLocalization()
     {
-        BtnImport.Content = T("Importovat vyber", "Import selection");
-        BtnCancel.Content = T("Zrusit", "Cancel");
+        BtnImport.Content = T("Importovat výběr", "Import selection");
+        BtnCancel.Content = T("Zrušit", "Cancel");
         TxtIdLabel.Text = "ID:";
         TxtDescriptionLabel.Text = T("Popis:", "Description:");
-        TxtHint.Text = T("Oznac v textu hodnotu tokenu a klikni Importovat vyber.",
+        TxtHint.Text = T("Označ v textu hodnotu tokenu a klikni Importovat výběr.",
             "Select the token value in the text and click Import selection.");
     }
 
@@ -45,7 +45,7 @@ public partial class TokenImportWindow : Window
 
         if (string.IsNullOrEmpty(TokenValue))
         {
-            MessageBox.Show(T("Oznac v textu hodnotu tokenu.", "Select the token value in the text."), Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(T("Označ v textu hodnotu tokenu.", "Select the token value in the text."), Title, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

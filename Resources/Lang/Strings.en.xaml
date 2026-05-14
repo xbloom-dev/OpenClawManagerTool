@@ -93,7 +93,7 @@
     <sys:String x:Key="Str_Status_Stopped">stopped</sys:String>
 
     <!-- Log zprávy -->
-    <sys:String x:Key="Str_Log_AppStarted">Application started (v0.95).</sys:String>
+    <sys:String x:Key="Str_Log_AppStarted">Application started (v0.99).</sys:String>
     <sys:String x:Key="Str_Log_GatewayStarting">Starting Gateway...</sys:String>
     <sys:String x:Key="Str_Log_GatewayReady">Gateway ready.</sys:String>
     <sys:String x:Key="Str_Log_GatewayStopping">Stopping Gateway...</sys:String>

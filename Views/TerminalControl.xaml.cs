@@ -40,6 +40,33 @@ public partial class TerminalControl : UserControl
     public bool IsTuiRunning => _conpty != null && _conpty.IsRunning;
 
     /// <summary>
+    /// Skryje ASCII art SplashBorder. Volá MainWindow v Modern theme kde
+    /// SplashOverlay přebírá roli splash screenu.
+    /// </summary>
+    public void HideSplashBorder()
+    {
+        SplashBorder.Visibility = Visibility.Collapsed;
+    }
+
+    /// <summary>
+    /// Zobrazí ASCII art SplashBorder. Volá MainWindow při přepnutí na Legacy theme.
+    /// </summary>
+    public void ShowSplashBorder()
+    {
+        SplashBorder.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>
+    /// Zobrazí WebView. Volá MainWindow po skrytí SplashOverlay.
+    /// WebView musí zůstat Hidden dokud SplashOverlay překrývá terminál —
+    /// WebView2 HWND (Win32 okno) by jinak vyskočil nad WPF overlay.
+    /// </summary>
+    public void ShowWebView()
+    {
+        WebView.Visibility = Visibility.Visible;
+    }
+
+    /// <summary>
     /// Sestaví HTML stránku s lokálním xterm.js + bridge na C#.
     ///
     /// DŮLEŽITÉ: všechny non-ASCII znaky v JS string literálech musí být
@@ -223,7 +250,7 @@ public partial class TerminalControl : UserControl
                 if (!e.IsSuccess)
                 {
                     _webViewFailed = true;
-                    StatusText.Text = $"Chyba nacitani: {e.WebErrorStatus}";
+                    StatusText.Text = $"Chyba načítání: {e.WebErrorStatus}";
                     return;
                 }
 
@@ -238,13 +265,13 @@ public partial class TerminalControl : UserControl
                 {
                     _webViewFailed = true;
                     StatusText.Text = L10n.IsCzech
-                        ? "Terminal se nenacetl. Lokalni xterm.js se nespustil."
+                        ? "Terminál se nenačetl. Lokální xterm.js se nespustil."
                         : "Terminal did not load. Local xterm.js did not start.";
                 }
             };
 
             StatusText.Text = L10n.IsCzech
-                ? "Nacitam lokalni xterm.js..."
+                ? "Načítám lokální xterm.js..."
                 : "Loading local xterm.js...";
 
             WebView.NavigateToString(BuildTerminalHtmlFromResources());
@@ -262,7 +289,7 @@ public partial class TerminalControl : UserControl
 
                 _webViewFailed = true;
                 StatusText.Text = L10n.IsCzech
-                    ? "Terminal se nena\u010detl. Chyb\u00ed lok\u00e1ln\u00ed xterm.js assety."
+                    ? "Terminál se nenačetl. Chybí lokální xterm.js assety."
                     : "Terminal did not load. Local xterm.js assets are missing.";
             };
             _webViewReadyTimeoutTimer.Start();
@@ -280,19 +307,20 @@ public partial class TerminalControl : UserControl
     /// </summary>
     private void OnWebViewReady()
     {
-        if (_webViewReady) return; // idempotentní — oba handlery mohou dorazit
+        if (_webViewReady) return;
 
         _webViewReady = true;
         _webViewFailed = false;
         _webViewReadyTimeoutTimer?.Stop();
         _webViewReadyTimeoutTimer = null;
 
-        // Zobrazit WebView, schovat splash
-        WebView.Visibility = Visibility.Visible;
-        SplashBorder.Visibility = Visibility.Collapsed;
+        // WebView zůstane Hidden — zobrazí se přes ShowWebView() až MainWindow
+        // skryje SplashOverlay. WebView2 HWND by jinak překryl WPF splash video.
+        // SplashBorder NESKRÝVAT — zůstane viditelný dokud uživatel neklikne
+        // na OpenClaw TUI (DisposeSplash() ho skryje přes HideSplashBorder()).
 
         StatusText.Text = L10n.IsCzech
-            ? "Klikni na \"OpenClaw TUI\" pro spusteni."
+            ? "Klikni na \"OpenClaw TUI\" pro spuštění."
             : "Click \"OpenClaw TUI\" to start.";
     }
 
@@ -328,10 +356,10 @@ public partial class TerminalControl : UserControl
         {
             StatusText.Text = _webViewFailed
                 ? (L10n.IsCzech
-                    ? "Termin\u00e1l nen\u00ed p\u0159ipraven. Chyb\u00ed lok\u00e1ln\u00ed xterm.js assety."
+                    ? "Terminál není připraven. Chybí lokální xterm.js assety."
                     : "Terminal is not ready. Local xterm.js assets are missing.")
                 : (L10n.IsCzech
-                    ? "Termin\u00e1l se je\u0161t\u011b na\u010d\u00edt\u00e1. Zkus to pros\u00edm za chv\u00edli."
+                    ? "Terminál se ještě načítá. Zkus to prosím za chvíli."
                     : "Terminal is still loading. Please try again shortly.");
             return;
         }
@@ -346,7 +374,8 @@ public partial class TerminalControl : UserControl
 
             _conpty.Start(GatewayService.BuildCmdExeCommand("tui"));
 
-            // WebView je již Visible od OnWebViewReady — jen schovat splash
+            // Zajistit že WebView je Visible (mohl zůstat Hidden)
+            WebView.Visibility = Visibility.Visible;
             SplashBorder.Visibility = Visibility.Collapsed;
 
             TuiStateChanged?.Invoke(true);
@@ -368,7 +397,7 @@ public partial class TerminalControl : UserControl
         _conpty = null;
 
         StatusText.Text = L10n.IsCzech
-            ? "TUI ukon\u010deno. Klikni na \u201eOpenClaw TUI\u201c pro nov\u00fd start."
+            ? "TUI ukončeno. Klikni na „OpenClaw TUI“ pro nový start."
             : "TUI stopped. Click \"OpenClaw TUI\" to start again.";
         SplashBorder.Visibility = Visibility.Visible;
 
@@ -387,13 +416,13 @@ public partial class TerminalControl : UserControl
     {
         lock (_bufferLock)
         {
-            _outputBuffer.Append("\r\n\x1b[90m[Proces ukon\u010den]\x1b[0m\r\n");
+            _outputBuffer.Append("\r\n\x1b[90m[Proces ukončen]\x1b[0m\r\n");
         }
 
         Dispatcher.BeginInvoke(new Action(() =>
         {
             StatusText.Text = L10n.IsCzech
-                ? "TUI ukon\u010deno. Klikni na \u201eOpenClaw TUI\u201c pro nov\u00fd start."
+                ? "TUI ukončeno. Klikni na „OpenClaw TUI“ pro nový start."
                 : "TUI stopped. Click \"OpenClaw TUI\" to start again.";
             SplashBorder.Visibility = Visibility.Visible;
             TuiStateChanged?.Invoke(false);

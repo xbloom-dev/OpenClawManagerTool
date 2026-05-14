@@ -1,7 +1,8 @@
 # Uživatelský manuál — OpenClaw Manager Tool by Bloom
 
-**Verze aplikace:** v0.95
-**Datum:** 12. května 2026
+**Verze aplikace:** v0.99
+**Verze dokumentu:** 2.0
+**Datum:** 13. května 2026
 
 ---
 
@@ -18,9 +19,9 @@
 9. [Cleaning Tool — Vyčistit soubory](#9-cleaning-tool--vyčistit-soubory)
 10. [Nastavení](#10-nastavení)
 11. [O aplikaci](#11-o-aplikaci)
-12. [Časté situace a řešení](#12-časté-situace-a-řešení)
-13. [Token Manager](#13-token-manager)
-14. [Temata](#14-temata)
+12. [Token Manager](#12-token-manager)
+13. [Témata a splash screen](#13-témata-a-splash-screen)
+14. [Časté situace a řešení](#14-časté-situace-a-řešení)
 
 ---
 
@@ -33,6 +34,7 @@ OpenClaw Manager je diagnostický a údržbový nástroj pro OpenClaw setup. Slo
 - Restartovat Gateway po update nebo havárii
 - Zjistit jak rychle Gateway odpovídá (měření latencí)
 - Vyčistit staré logy a session soubory
+- Spravovat API klíče a tokeny bezpečně přes Token Manager
 - Opravit poškozenou konfiguraci
 
 ---
@@ -42,12 +44,12 @@ OpenClaw Manager je diagnostický a údržbový nástroj pro OpenClaw setup. Slo
 ### Požadavky
 
 - Windows 10 nebo 11
-- WebView2 Runtime (součást Windows 11, pro Windows 10 stáhnout z microsoft.com)
+- WebView2 Runtime (součást Windows 11; pro Windows 10 stáhnout z microsoft.com)
 - OpenClaw nainstalovaný a funkční
 
 ### Spuštění
 
-Spusť `OpenClawManager.exe`. Žádná instalace není potřeba — aplikace je přenositelná (portable).
+Spusť `OpenClawManager.exe`. Žádná instalace není potřeba — aplikace je přenositelná (portable). Terminál používá lokální xterm.js soubory ze složky `Resources/Terminal` — internet ani CDN nejsou potřeba.
 
 ### Nastavení cest při prvním spuštění
 
@@ -59,8 +61,9 @@ Při prvním spuštění zkontroluj v **Nastavení** (Ctrl+,) že cesty odpovíd
 | Temp složka (Gateway logy) | `%LOCALAPPDATA%\Temp\openclaw` |
 | openclaw příkaz | `openclaw` (PATH lookup) |
 | PowerShell pracovní adresář | `%APPDATA%\npm` |
+| Token Manager vault | `%USERPROFILE%\.token-manager\secrets.json` |
 
-Pokud OpenClaw nespustíš přes `openclaw` v PATH (např. máš vlastní cestu), uprav "openclaw příkaz" na plnou cestu jako `C:\Users\jmeno\AppData\Roaming\npm\openclaw.cmd`.
+Pokud OpenClaw nespustíš přes `openclaw` v PATH, uprav "openclaw příkaz" na plnou cestu, například `C:\Users\jmeno\AppData\Roaming\npm\openclaw.cmd`.
 
 ---
 
@@ -103,11 +106,11 @@ Text pod tlačítkem vždy ukazuje co se stane při kliknutí.
 
 #### Údržba
 
-- **Opravit konfiguraci** — spustí `openclaw "doctor --fix"` v PowerShellu; opraví poškozenou konfiguraci
+- **Opravit konfiguraci** — spustí `openclaw "doctor --fix"` v PowerShellu
 
 ### Status bar (dole)
 
-`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v0.95`
+`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v0.99`
 
 | Barva tečky | Stav |
 |---|---|
@@ -115,6 +118,8 @@ Text pod tlačítkem vždy ukazuje co se stane při kliknutí.
 | 🟠 oranžová | Gateway se spouští |
 | 🔴 červená | Gateway selhalo |
 | ⚫ šedá | Gateway neběží |
+
+RAM, CPU a VRAM se aktualizují každé 2 sekundy asynchronně — nezasekávají UI.
 
 ---
 
@@ -142,7 +147,7 @@ Text pod tlačítkem vždy ukazuje co se stane při kliknutí.
    - Spustí Gateway
    - Čeká na "gateway ready" (max 3 minuty)
    - Spustí TUI v embedded terminálu vpravo
-3. Gateway log zobrazuje průběh v "Log aplikace"
+3. Průběh sleduj v "Log aplikace" vlevo dole
 
 ### Pokud Gateway již běží
 
@@ -165,9 +170,7 @@ Při zavření se zobrazí dialog se třemi možnostmi:
 
 ### Spuštění Gateway
 
-Tlačítko **Start** nebo Ctrl+G. Gateway se spustí v novém PowerShell okně viditelném na hlavním panelu.
-
-Aplikace čeká na signál "gateway ready" — status bar zobrazuje "spouští se..." dokud Gateway není připraven.
+Tlačítko **Start** nebo Ctrl+G. Gateway se spustí v novém PowerShell okně. Aplikace čeká na signál "gateway ready" — status bar zobrazuje "spouští se..." dokud Gateway není připraven.
 
 ### Zastavení Gateway
 
@@ -197,7 +200,7 @@ Sekce **Měření latence** v levém panelu zobrazuje rychlost odpovědí Gatewa
 - černá — 1000–5000 ms (normální)
 - 🔴 červená — nad 5000 ms (pomalá odpověď, možná přetížení)
 
-**Kdy se hodnoty resetují:** při každém restartu Gateway (nebo spuštění přes hlavní TUI tlačítko).
+**Kdy se hodnoty resetují:** při každém restartu Gateway nebo spuštění přes hlavní TUI tlačítko.
 
 **Kdy se hodnoty aktualizují:** automaticky každé 2 sekundy ze Gateway logu. Hodnoty se začnou zobrazovat až po prvním requestu v TUI.
 
@@ -209,9 +212,7 @@ Otevři přes **Gateway log** tlačítko nebo přes menu **Otevřít → Gateway
 
 ### Zobrazení logu
 
-V horní části vyber počet zobrazených řádků (výchozí: posledních 20). Klikni **Aktualizovat** pro obnovení obsahu.
-
-Nahoře se zobrazuje: cesta k souboru, velikost, počet zobrazených řádků.
+V horní části vyber počet zobrazených řádků (výchozí: posledních 20). Klikni **Aktualizovat** pro obnovení obsahu. Nahoře se zobrazuje cesta k souboru, velikost a počet zobrazených řádků.
 
 ### Kopírování do schránky
 
@@ -244,8 +245,11 @@ Otevři přes tlačítko **Vyčistit soubory** nebo Ctrl+Shift+C.
 | 4 — Browser cache | Cache starší než 1 den | ✅ zapnuto |
 | 5 — Session locky | Zámkové soubory sessions | ✅ zapnuto |
 | 6 — sessions.json | Stará session data (ponechá N nejnovějších) | ✅ zapnuto |
+| 7 — Token Manager zálohy | `*.bak` v Token Manager složce | ❌ vypnuto (opt-in) |
 
 Posuvníkem u kroku 6 nastav kolik nejnovějších sessions zachovat (výchozí: 10).
+
+Krok 7 je záměrně vypnutý — zálohy Token Manageru jsou záchrana pro případ selhání restore operace. Mazej je vědomě.
 
 ### Doporučený postup
 
@@ -257,7 +261,7 @@ Posuvníkem u kroku 6 nastav kolik nejnovějších sessions zachovat (výchozí:
 
 ### sessions.json — bezpečnost
 
-Před každou úpravou `sessions.json` se automaticky vytvoří záložní soubor `.bak`. Pokud dojde k chybě při zápisu, soubor se obnoví ze zálohy. Nikdy nepřijdeš o session data kvůli chybě v aplikaci.
+Před každou úpravou `sessions.json` se automaticky vytvoří záložní soubor `.bak`. Pokud dojde k chybě při zápisu, soubor se obnoví ze zálohy.
 
 ---
 
@@ -267,7 +271,7 @@ Otevři přes menu **Nastavení → Otevřít Nastavení...** nebo Ctrl+,.
 
 ### Jazyk / Language
 
-Přepni mezi **Čeština** a **English**. Změna se projeví po kliknutí na **Uložit** — celá aplikace (tlačítka, menu, tooltipy) se přepne do vybraného jazyka.
+Přepni mezi **Čeština** a **English**. Změna se projeví po kliknutí na **Uložit** — celá aplikace se přepne do vybraného jazyka.
 
 ### Cesty
 
@@ -277,8 +281,9 @@ Přepni mezi **Čeština** a **English**. Změna se projeví po kliknutí na **U
 | Temp složka | Kde jsou uloženy Gateway logy |
 | openclaw příkaz | Příkaz nebo cesta k `openclaw` spustitelnému souboru |
 | PowerShell pracovní adresář | Adresář kde se otevře PowerShell z tlačítka PowerShell |
+| Token Manager vault | Cesta k `secrets.json` — uloženo šifrovaně přes DPAPI |
 
-Tlačítka **Procházet...** otevřou dialog pro výběr složky ze systému.
+Tlačítka **Procházet...** otevřou dialog pro výběr složky. Pole "openclaw příkaz" validuje zakázané znaky (`'`, `"`, `;`, `&`, `|`, `` ` ``) — takové hodnoty nejdou uložit.
 
 ### Tlačítka
 
@@ -292,16 +297,86 @@ Nastavení se ukládá do `%APPDATA%\OpenClawManager\settings.json`.
 
 ## 11. O aplikaci
 
-Otevři přes menu **Nápověda → O aplikaci...** nebo F1.
-
-Zobrazuje:
-- Logo aplikace
-- Verzi a technický stack
-- Přehled klávesových zkratek
+Otevři přes menu **Nápověda → O aplikaci...** nebo F1. Zobrazuje logo, verzi, technický stack a přehled klávesových zkratek.
 
 ---
 
-## 12. Časté situace a řešení
+## 12. Token Manager
+
+Token Manager otevřeš tlačítkem **Správce API klíčů** v levém panelu. Slouží k bezpečnému ukládání API klíčů a jiných citlivých hodnot a k redakci souborů před jejich sdílením.
+
+### Vault a bezpečnost
+
+Vault je JSON soubor `secrets.json` v cestě nastavené v Nastavení (výchozí `%USERPROFILE%\.token-manager\`). Hodnoty tokenů jsou šifrované přes **Windows DPAPI** pro aktuálního Windows uživatele. Vault zkopírovaný na jiný počítač nebo pod jiný účet nejde dešifrovat — je vázaný na konkrétní Windows profil.
+
+Pokud existuje starší vault s nešifrovanými hodnotami, aplikace ho automaticky přemigruje na šifrovanou verzi při prvním uložení.
+
+Token Manager zobrazí varování, pokud vault leží v rizikovém umístění:
+- uvnitř Git repozitáře
+- uvnitř `.openclaw`
+- v cloud-synchronizované složce (OneDrive, Dropbox, iCloud)
+- ve sdílené nebo projektové složce
+
+**Doporučení:** používej `%USERPROFILE%\.token-manager\` nebo jinou složku chráněnou Windows účtem, mimo projekt, Git a cloud sync.
+
+### Inicializace vaultu
+
+Při prvním otevření Token Manageru klikni **Inicializovat vault**. Vytvoří se prázdný šifrovaný soubor na cestě z Nastavení.
+
+### Přidání a správa tokenů
+
+Klikni **Přidat** a vyplň:
+- **ID** — unikátní identifikátor bez mezer (např. `OPENAI_KEY`), používá se jako placeholder `[REDACTED_OPENAI_KEY]`
+- **Hodnota** — samotný tajný klíč (zobrazí se jako PasswordBox)
+- **Popis** — volitelná poznámka
+
+Existující token upravíš přes **Upravit** — nechej Hodnotu prázdnou pokud chceš zachovat stávající hodnotu. Tlačítko **Odstranit** odstraní token ze vaultu. Tlačítko **Rotovat** umožní zadat novou hodnotu bez ztráty ID a popisu.
+
+### Redakce a obnova souborů
+
+Token Manager slouží k bezpečnému sdílení souborů, které by jinak obsahovaly plaintext klíče.
+
+**Workflow redakce:**
+1. Vyber token v seznamu a klikni **Náhled** — zobrazí jak bude soubor vypadat po redakci
+2. Klikni **Redact** — v souboru nahradí hodnoty tokenu textem `[REDACTED_ID]`
+3. Před odesláním souboru klikni **Verify** — ověří, že soubor neobsahuje žádnou plaintext hodnotu
+
+**Obnova souboru:**
+- Klikni **Restore** — nahradí placeholdery zpět skutečnými hodnotami
+- Při restore se automaticky vytvoří záložní `.bak` soubor; při chybě se soubor obnoví ze zálohy
+
+### Pomocné funkce
+
+- **Placeholder** — zkopíruje text `[REDACTED_ID]` do schránky pro ruční vložení do souborů
+- **Složka** — otevře adresář vault souboru v Průzkumníku
+- **.gitignore** — přidá cestu k vaultu do nejbližšího `.gitignore` souboru
+
+### Import tokenů
+
+Tlačítkem **Import** lze načíst tokeny ze souboru. Soubor může být JSON nebo prostý text s páry `KLÍČ=HODNOTA`. Duplikátní ID jsou přeskočena nebo (volitelně) přepsána.
+
+---
+
+## 13. Témata a splash screen
+
+Téma změníš v **Nastavení**. K dispozici jsou dvě témata:
+
+**Legacy** — jednodušší klasické rozhraní s emoji ikonami v tlačítkách. Při startu aplikace se zobrazí ASCII art splash screen v pravém panelu, který zmizí po kliknutí na **OpenClaw TUI**.
+
+**Modern** — bitmap ikony v tlačítkách, splash panel při startu. Splash se chová takto:
+1. Přehraje se `splash.mp4` (pokud existuje v `Resources/`)
+2. Po doběhnutí videa zůstane statický `splash.png` jako freeze frame
+3. Overlay zmizí po kliknutí na **OpenClaw TUI**
+
+Pokud `splash.mp4` neexistuje nebo selže přehrávání, zobrazí se rovnou `splash.png`.
+
+**Přepnutí tématu za běhu** — změna se projeví okamžitě po uložení Nastavení bez restartu aplikace. Přepnutí Modern → Legacy: video se zastaví, splash overlay zmizí a zobrazí se ASCII art. Přepnutí Legacy → Modern: ASCII art zmizí a zobrazí se PNG splash.
+
+Nastavení tématu se ukládá do `%APPDATA%\OpenClawManager\settings.json`.
+
+---
+
+## 14. Časté situace a řešení
 
 ### Gateway se nespustí
 
@@ -313,7 +388,7 @@ Zobrazuje:
 3. Spusť `openclaw "doctor --fix"` tlačítkem **Opravit konfiguraci**
 4. Zkus restartovat Gateway
 
-### TUI se nezobrazí (bílá/prázdná plocha vpravo)
+### TUI se nezobrazí (prázdná černá plocha vpravo)
 
 **Příznak:** Gateway běží, TUI tlačítko změní text na "Zastavit", ale terminál je prázdný.
 
@@ -324,11 +399,17 @@ Zobrazuje:
 
 ### Latence se nezobrazují (pomlčky)
 
-**Příznak:** Sekce "Měření latence" zobrazuje `—` i po delším používání TUI.
-
-**Příčina:** Latence se měří z Gateway logu. Záznamy se vytvoří až po prvním requestu zpracovaném přes WebSocket (tj. po odeslání zprávy v TUI).
+**Příčina:** Latence se měří z Gateway logu až po prvním requestu přes WebSocket.
 
 **Řešení:** Napiš zprávu do TUI a počkej na odpověď — latence se začnou zobrazovat.
+
+### Token Manager hlásí "vault nenalezen"
+
+**Řešení:** Otevři Token Manager → klikni **Inicializovat vault**. Pokud ses přihlásil pod jiným Windows účtem, vault nelze dešifrovat — vytvoř nový a přidej tokeny znovu.
+
+### Token Manager zobrazí varování o rizikovém umístění
+
+**Řešení:** Přesuň vault do bezpečné složky: otevři Nastavení → změň cestu k Token Manager vaultu → uložit. Token Manager se automaticky obnoví.
 
 ### Aplikace hlásí "Složka neexistuje"
 
@@ -336,7 +417,7 @@ Zobrazuje:
 
 ### Gateway log je prázdný nebo nenalezen
 
-**Příčina:** Gateway nebyl spuštěn, nebo byl spuštěn jinak než přes tuto aplikaci. Log soubor se vytváří v `%LOCALAPPDATA%\Temp\openclaw\`.
+**Příčina:** Gateway nebyl spuštěn přes tuto aplikaci. Log soubor se vytváří v `%LOCALAPPDATA%\Temp\openclaw\`.
 
 **Řešení:** Spusť Gateway přes tlačítko Start nebo přes hlavní TUI tlačítko.
 
@@ -348,44 +429,4 @@ Zobrazuje:
 
 ---
 
-## 13. Token Manager
-
-Token Manager otevres tlacitkem **Spravce API klicu** v levem panelu. Slouzi k lokalnimu ulozeni citlivych hodnot a k bezpecnemu sdileni souboru bez plaintext tokenu.
-
-### Vault
-
-Vychozi vault je `%USERPROFILE%\.token-manager\secrets.json`. Hodnoty tokenu se ukladaji sifrovane pres Windows DPAPI pro aktualniho Windows uzivatele. Soubor zkopirovany na jiny pocitac nebo pod jiny ucet nejde bez puvodniho profilu desifrovat.
-
-Token Manager zobrazi varovani, pokud je vault v rizikovem umisteni:
-- uvnitr Git repozitare
-- uvnitr `.openclaw`
-- v cloud-synchronizovane slozce
-- ve sdilene nebo projektove slozce
-
-### Zakladni prace
-
-1. Klikni **Inicializovat**, pokud vault jeste neexistuje.
-2. Klikni **Pridat** a zadej ID, hodnotu a popis tokenu.
-3. Pro sdileni souboru pouzij **Nahled**, potom **Redact**.
-4. Pred odeslanim souboru spust **Verify**.
-5. Pokud potrebujes vratit placeholdery zpet na hodnoty, pouzij **Restore**.
-
-`Placeholder` zkopiruje text ve formatu `[REDACTED_ID]`. `Slozka` otevre adresar vaultu. `.gitignore` prida vault do nejblizsiho ignorovaciho souboru.
-
-### Doporuceni
-
-Neposilej `secrets.json` spolu s projektem. Pro backup pouzij bezpecne misto chranene stejnym Windows uctem. Pokud menis cestu k vaultu v Nastaveni, Token Manager se po ulozeni nastaveni automaticky obnovi.
-
----
-
-## 14. Temata
-
-Tema zmenis v **Nastaveni**. K dispozici jsou:
-- **Modern**: ikony, splash panel a novejsi vzhled.
-- **Legacy**: jednodussi klasicke rozhrani.
-
-Zmena tematu se ulozi do `%APPDATA%\OpenClawManager\settings.json`. Pokud se splash video nespusti, aplikace automaticky pouzije staticky obrazek.
-
----
-
-**Konec dokumentu v1.0**
+**Konec dokumentu v2.0**

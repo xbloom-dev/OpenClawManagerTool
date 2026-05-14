@@ -28,7 +28,7 @@ public partial class TokenEditWindow : Window
             TxtDescription.Text = token.Description;
             PwdValue.ToolTip = rotateOnly
                 ? T("Zadej novou hodnotu tokenu.", "Enter the new token value.")
-                : T("Nech prazdne, pokud chces zachovat aktualni hodnotu.", "Leave empty to keep the current value.");
+                : T("Nech prázdné, pokud chceš zachovat aktuální hodnotu.", "Leave empty to keep the current value.");
         }
 
         TxtId.IsReadOnly = idReadOnly;
@@ -41,15 +41,15 @@ public partial class TokenEditWindow : Window
 
     private void ApplyLocalization(bool editingExisting, bool rotateOnly)
     {
-        BtnSave.Content = T("Ulozit", "Save");
-        BtnCancel.Content = T("Zrusit", "Cancel");
+        BtnSave.Content = T("Uložit", "Save");
+        BtnCancel.Content = T("Zrušit", "Cancel");
         TxtIdLabel.Text = "ID:";
         TxtValueLabel.Text = T("Hodnota:", "Value:");
         TxtDescriptionLabel.Text = T("Popis:", "Description:");
         TxtHint.Text = editingExisting && !rotateOnly
-            ? T("ID smi obsahovat pismena, cislice a underscore. Nech hodnotu prazdnou pro zachovani aktualniho tokenu.",
+            ? T("ID smí obsahovat písmena, číslice a underscore. Nech hodnotu prázdnou pro zachování aktuálního tokenu.",
                 "ID may contain letters, digits and underscore. Leave value empty to keep the current token.")
-            : T("ID smi obsahovat pismena, cislice a underscore. Hodnota musi mit alespon 8 znaku.",
+            : T("ID smí obsahovat písmena, číslice a underscore. Hodnota musí mít alespoň 8 znaků.",
                 "ID may contain letters, digits and underscore. Value must be at least 8 characters.");
     }
 

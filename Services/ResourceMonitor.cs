@@ -5,38 +5,78 @@ namespace OpenClawManager.Services;
 
 /// <summary>
 /// Měření systémových zdrojů: RAM, CPU, VRAM.
-/// Použité metody přesně odpovídají osvědčeným postupům z PowerShell skriptů
-/// (Win32_OperatingSystem, Win32_Processor, nvidia-smi).
+///
+/// Measure() je synchronní a blokující — volat výhradně z background tasku.
+/// MeasureAsync() je správná entry-point pro UI timer (neblokuje UI thread).
+///
+/// RAM/CPU jsou cachované na 4s — WMI dotazy trvají 50–200ms každý,
+/// spouštět je každé 2s bylo příčinou UI lag a sekání tlačítek.
+/// VRAM se měří každé 2s (nvidia-smi je rychlý a hodnotnější čerstvý).
 /// </summary>
 public static class ResourceMonitor
 {
-    /// <summary>
-    /// Snapshot všech aktuálních hodnot zdrojů.
-    /// </summary>
     public record ResourceSnapshot(
         double RamUsedGb,
         double RamTotalGb,
-        int CpuPercent,
+        int    CpuPercent,
         double? VramUsedGb,
-        double? VramTotalGb
-    );
+        double? VramTotalGb);
+
+    // Cache pro pomalé WMI dotazy (RAM, CPU) — obnovuje se každé 4s
+    private static ResourceSnapshot? _lastSnapshot;
+    private static DateTime          _lastMeasureTime = DateTime.MinValue;
+    private static readonly TimeSpan  CacheInterval = TimeSpan.FromSeconds(4);
+
+    // Zámek — Measure() může být volán z více threadů (Task.Run)
+    private static readonly SemaphoreSlim _lock = new(1, 1);
 
     /// <summary>
-    /// Změří aktuální zdroje. Pokud nějaké měření selže, vrátí jen co se podařilo.
+    /// Asynchronní entry-point pro UI timer.
+    /// Spouští Measure() na thread pool — UI thread není blokován.
+    /// </summary>
+    public static Task<ResourceSnapshot> MeasureAsync()
+        => Task.Run(Measure);
+
+    /// <summary>
+    /// Synchronní měření. NEPOUŽÍVAT přímo z UI threadu.
     /// </summary>
     public static ResourceSnapshot Measure()
     {
-        var (ramUsed, ramTotal) = MeasureRam();
-        var cpu = MeasureCpu();
-        var (vramUsed, vramTotal) = MeasureVram();
+        _lock.Wait();
+        try
+        {
+            var now = DateTime.UtcNow;
+            var useCache = _lastSnapshot != null && (now - _lastMeasureTime) < CacheInterval;
 
-        return new ResourceSnapshot(ramUsed, ramTotal, cpu, vramUsed, vramTotal);
+            double ramUsed, ramTotal;
+            int cpu;
+
+            if (useCache)
+            {
+                ramUsed  = _lastSnapshot!.RamUsedGb;
+                ramTotal = _lastSnapshot!.RamTotalGb;
+                cpu      = _lastSnapshot!.CpuPercent;
+            }
+            else
+            {
+                (ramUsed, ramTotal) = MeasureRam();
+                cpu = MeasureCpu();
+                _lastMeasureTime = now;
+            }
+
+            // VRAM se měří vždy — nvidia-smi je rychlý a hodnota se mění rychle
+            var (vramUsed, vramTotal) = MeasureVram();
+
+            var snap = new ResourceSnapshot(ramUsed, ramTotal, cpu, vramUsed, vramTotal);
+            _lastSnapshot = snap;
+            return snap;
+        }
+        finally
+        {
+            _lock.Release();
+        }
     }
 
-    /// <summary>
-    /// RAM přes Win32_OperatingSystem (TotalVisibleMemorySize, FreePhysicalMemory).
-    /// Vrací GB, zaokrouhleno na 1 desetinné místo.
-    /// </summary>
     private static (double used, double total) MeasureRam()
     {
         try
@@ -47,29 +87,17 @@ public static class ResourceMonitor
 
             foreach (ManagementObject os in results)
             {
-                // Hodnoty jsou v KB
                 var totalKb = Convert.ToDouble(os["TotalVisibleMemorySize"]);
                 var freeKb  = Convert.ToDouble(os["FreePhysicalMemory"]);
-
                 var totalGb = Math.Round(totalKb / 1024 / 1024, 1);
                 var freeGb  = Math.Round(freeKb  / 1024 / 1024, 1);
-                var usedGb  = Math.Round(totalGb - freeGb, 1);
-
-                return (usedGb, totalGb);
+                return (Math.Round(totalGb - freeGb, 1), totalGb);
             }
         }
-        catch
-        {
-            // ignore — vrátíme nuly níže
-        }
-
+        catch { }
         return (0, 0);
     }
 
-    /// <summary>
-    /// CPU přes Win32_Processor (LoadPercentage).
-    /// Funguje na české i anglické lokalizaci Windows (na rozdíl od Get-Counter).
-    /// </summary>
     private static int MeasureCpu()
     {
         try
@@ -85,54 +113,48 @@ public static class ResourceMonitor
                 if (load != null)
                     loads.Add(Convert.ToInt32(load));
             }
-
             return loads.Count > 0 ? (int)loads.Average() : 0;
         }
-        catch
-        {
-            return 0;
-        }
+        catch { return 0; }
     }
 
-    /// <summary>
-    /// VRAM přes nvidia-smi. Vrací null pokud GPU nedostupné nebo nvidia-smi chybí.
-    /// </summary>
     private static (double? used, double? total) MeasureVram()
     {
+        Process? proc = null;
         try
         {
             var psi = new ProcessStartInfo
             {
-                FileName = "nvidia-smi",
-                Arguments = "--query-gpu=memory.used,memory.total --format=csv,noheader,nounits",
+                FileName               = "nvidia-smi",
+                Arguments              = "--query-gpu=memory.used,memory.total --format=csv,noheader,nounits",
                 RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
+                RedirectStandardError  = true,
+                UseShellExecute        = false,
+                CreateNoWindow         = true
             };
 
-            using var proc = Process.Start(psi);
+            proc = Process.Start(psi);
             if (proc == null) return (null, null);
 
             var output = proc.StandardOutput.ReadToEnd();
-            proc.WaitForExit(2000);
 
-            // Output format: "1234, 16384"
+            // Kill pokud nvidia-smi visí — timeout 2s
+            if (!proc.WaitForExit(2000))
+            {
+                proc.Kill();
+                return (null, null);
+            }
+
             var parts = output.Trim().Split(',');
             if (parts.Length != 2) return (null, null);
 
-            var usedMb  = int.Parse(parts[0].Trim());
-            var totalMb = int.Parse(parts[1].Trim());
+            if (!int.TryParse(parts[0].Trim(), out var usedMb)  ||
+                !int.TryParse(parts[1].Trim(), out var totalMb))
+                return (null, null);
 
-            var usedGb  = Math.Round(usedMb  / 1024.0, 1);
-            var totalGb = Math.Round(totalMb / 1024.0, 1);
-
-            return (usedGb, totalGb);
+            return (Math.Round(usedMb / 1024.0, 1), Math.Round(totalMb / 1024.0, 1));
         }
-        catch
-        {
-            // nvidia-smi nedostupné nebo GPU chybí
-            return (null, null);
-        }
+        catch { return (null, null); }
+        finally { proc?.Dispose(); }
     }
 }

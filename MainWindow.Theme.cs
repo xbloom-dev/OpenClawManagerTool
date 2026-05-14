@@ -35,6 +35,31 @@ public partial class MainWindow
         }
 
         ApplyThemeToUi(theme);
+
+        if (theme == AppTheme.Legacy)
+        {
+            StopSplashVideo();
+            SplashOverlay.Visibility = Visibility.Collapsed;
+
+            if (Terminal.IsTuiRunning)
+            {
+                Terminal.HideSplashBorder();
+                Terminal.ShowWebView();
+            }
+            else
+            {
+                Terminal.ShowSplashBorder();
+            }
+        }
+        else
+        {
+            Terminal.HideSplashBorder();
+            SplashMedia.Visibility = Visibility.Collapsed;
+            SplashProgress.Visibility = Visibility.Collapsed;
+
+            if (!Terminal.IsTuiRunning)
+                SplashOverlay.Visibility = Visibility.Visible;
+        }
     }
 
     // ── Aplikace tématu na UI ─────────────────────────────────────────────────

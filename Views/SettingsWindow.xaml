@@ -16,7 +16,7 @@
             <StackPanel>
                 <TextBlock x:Name="LblLanguage" Text="Language" FontWeight="Bold" Margin="0,0,0,6" />
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                    <RadioButton x:Name="RbLangCS" Content="Cestina" GroupName="Language" Margin="0,0,16,0" />
+                    <RadioButton x:Name="RbLangCS" Content="Čeština" GroupName="Language" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbLangEN" Content="English" GroupName="Language" />
                 </StackPanel>
                 <TextBlock x:Name="TxtLanguageHint" Foreground="Gray" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,14" />

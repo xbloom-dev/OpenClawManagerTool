@@ -63,7 +63,7 @@ public partial class MainWindow : Window
         _statusTimer.Start();
 
         ApplyLocalization();
-        UpdateStatus();
+        _ = UpdateStatusAsync(); // první měření na pozadí — neblokovat konstruktor
         Log(L10n.Get("Str_Log_AppStarted"));
 
         // v0.5: tema + splash screen (pořadí důležité: theme před splash)
@@ -180,11 +180,14 @@ public partial class MainWindow : Window
 
     // ==================== STATUS UPDATE ====================
 
-    private void StatusTimer_Tick(object? sender, EventArgs e) => UpdateStatus();
+    private async void StatusTimer_Tick(object? sender, EventArgs e) => await UpdateStatusAsync();
 
-    private void UpdateStatus()
+    private async Task UpdateStatusAsync()
     {
-        var snap = ResourceMonitor.Measure();
+        // MeasureAsync() běží na thread pool — UI thread není blokován
+        // WMI dotazy a nvidia-smi mohou trvat 100–500ms každý
+        var snap = await ResourceMonitor.MeasureAsync();
+
         StatusRam.Text = $"RAM: {snap.RamUsedGb:F1}/{snap.RamTotalGb:F1} GB";
         StatusCpu.Text = $"CPU: {snap.CpuPercent}%";
 

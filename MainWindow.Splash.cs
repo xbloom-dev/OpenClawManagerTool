@@ -1,5 +1,4 @@
-// MainWindow.Splash.cs
-// Partial class — splash screen logika (v0.5)
+// MainWindow.Splash.cs — splash screen logika (v0.5)
 
 using System.IO;
 using System.Windows;
@@ -12,7 +11,6 @@ namespace OpenClawManager;
 public partial class MainWindow
 {
     private DispatcherTimer? _splashProgressTimer;
-    private bool _splashVideoActive = false;
 
     private void InitSplash()
     {
@@ -21,10 +19,15 @@ public partial class MainWindow
         if (settings.Theme == AppTheme.Legacy)
         {
             SplashOverlay.Visibility = Visibility.Collapsed;
+            // SplashBorder (ASCII art) v TerminalControl zůstane viditelný
+            // dokud uživatel neklikne na OpenClaw TUI — DisposeSplash() ho skryje.
             return;
         }
 
+        // Modern theme — SplashOverlay (video/PNG) překrývá terminál.
+        // Schovat ASCII art SplashBorder v TerminalControl — ten patří Legacy.
         SplashOverlay.Visibility = Visibility.Visible;
+        Terminal.HideSplashBorder();
 
         var pathInResources = Path.Combine(AppContext.BaseDirectory, "Resources", "splash.mp4");
         var pathInRoot      = Path.Combine(AppContext.BaseDirectory, "splash.mp4");
@@ -48,16 +51,16 @@ public partial class MainWindow
 
     private void StartSplashVideo(string mp4Path)
     {
-        _splashVideoActive = true;
-        SplashMedia.MediaOpened += SplashMedia_MediaOpened;
-        SplashMedia.MediaFailed += SplashMedia_MediaFailed;
         SplashMedia.Visibility    = Visibility.Visible;
         SplashProgress.Visibility = Visibility.Visible;
-        SplashMedia.Source = new Uri(mp4Path);
+        SplashMedia.Volume        = 1.0;
+        SplashMedia.IsMuted       = false;
+        SplashMedia.Source        = new Uri(mp4Path);
         SplashMedia.Play();
+        Log("[Splash] SplashMedia.Play() spuštěno.");
     }
 
-    private void SplashMedia_MediaOpened(object? sender, RoutedEventArgs e)
+    private void SplashMedia_MediaOpened(object sender, RoutedEventArgs e)
     {
         _splashProgressTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
         _splashProgressTimer.Tick += SplashProgressTimer_Tick;
@@ -69,29 +72,13 @@ public partial class MainWindow
         Log($"[Splash] Video načteno, délka {duration}.");
     }
 
-    private void SplashMedia_MediaFailed(object? sender, ExceptionRoutedEventArgs e)
+    private void SplashMedia_MediaFailed(object sender, ExceptionRoutedEventArgs e)
     {
-        Log($"[Splash] CHYBA přehrávání videa: {e.ErrorException?.Message ?? "(unknown)"}");
-        Log("[Splash] Přepínám na PNG fallback.");
-
-        // Zastavit přehrávání bez ohledu na cokoli dalšího
+        Log($"[Splash] CHYBA videa: {e.ErrorException?.Message ?? "(unknown)"}");
         StopSplashVideo();
-
         SplashMedia.Visibility    = Visibility.Collapsed;
         SplashProgress.Visibility = Visibility.Collapsed;
-        // SplashImage zůstane viditelný jako PNG fallback
-    }
-
-    private void SplashProgressTimer_Tick(object? sender, EventArgs e)
-    {
-        if (!SplashMedia.NaturalDuration.HasTimeSpan) return;
-        if (SplashMedia.Position == TimeSpan.Zero) return;
-
-        var total = SplashMedia.NaturalDuration.TimeSpan.TotalSeconds;
-        if (total <= 0) return;
-
-        SplashProgress.Value = Math.Clamp(
-            SplashMedia.Position.TotalSeconds / total, 0.0, 1.0);
+        // SplashImage (PNG) zůstane jako fallback
     }
 
     private void SplashMedia_MediaEnded(object sender, RoutedEventArgs e)
@@ -99,53 +86,46 @@ public partial class MainWindow
         _splashProgressTimer?.Stop();
         SplashProgress.Value = 1.0;
 
-        // Video doběhlo — zastavit okamžitě (zastaví i zvuk),
-        // pak po 500ms skrýt overlay.
+        // Zastavit video a schovat ho.
+        // SplashImage (PNG) pod ním zůstane viditelný jako freeze frame.
+        // Overlay se neskryje automaticky — čeká na kliknutí uživatele
+        // na tlačítko OpenClaw TUI (DisposeSplash() v BtnStartTui_Click).
         StopSplashVideo();
-
-        var endTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(500) };
-        endTimer.Tick += (_, _) =>
-        {
-            endTimer.Stop();
-            SplashOverlay.Visibility = Visibility.Collapsed;
-        };
-        endTimer.Start();
+        SplashMedia.Visibility    = Visibility.Collapsed;
+        SplashProgress.Visibility = Visibility.Collapsed;
     }
 
-    /// <summary>
-    /// Zastaví přehrávání videa a uvolní MediaElement.
-    /// Bezpečné volat vícekrát — idempotentní.
-    /// Odděleno od skrývání overlay aby zvuk vždy ustal okamžitě.
-    /// </summary>
+    private void SplashProgressTimer_Tick(object? sender, EventArgs e)
+    {
+        if (!SplashMedia.NaturalDuration.HasTimeSpan) return;
+        var total = SplashMedia.NaturalDuration.TimeSpan.TotalSeconds;
+        if (total <= 0) return;
+        SplashProgress.Value = Math.Clamp(SplashMedia.Position.TotalSeconds / total, 0, 1);
+    }
+
     private void StopSplashVideo()
     {
-        if (!_splashVideoActive) return;
-
         _splashProgressTimer?.Stop();
         _splashProgressTimer = null;
-
         try
         {
+            SplashMedia.Volume  = 0;
+            SplashMedia.IsMuted = true;
             SplashMedia.Stop();
-            SplashMedia.Source = null;
-            SplashMedia.Close();
+            SplashMedia.Source  = null;
         }
         catch { }
-
-        _splashVideoActive = false;
+        Log("[Splash] StopSplashVideo() dokončeno.");
     }
 
-    /// <summary>
-    /// Dispose splash — voláno z BtnStartTui_Click nebo při přepnutí tématu.
-    /// Vždy zastaví video (i zvuk), pak skryje overlay.
-    /// </summary>
     private void DisposeSplash()
     {
-        // Zastavit video vždy — nezávisle na Visibility.
-        // Původní guard "if Visibility != Visible return" způsoboval
-        // že video hrálo dál na pozadí pokud overlay byl již skrytý.
+        // Modern theme: zastavit video, skrýt overlay
         StopSplashVideo();
-
         SplashOverlay.Visibility = Visibility.Collapsed;
+
+        // Obě témata: schovat ASCII art SplashBorder a zobrazit WebView
+        Terminal.HideSplashBorder();
+        Terminal.ShowWebView();
     }
 }

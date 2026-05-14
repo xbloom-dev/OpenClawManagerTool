@@ -3,7 +3,7 @@
 **Verze dokumentu:** 2.0
 **Datum:** 12. května 2026
 **Autor:** Bloom
-**Status:** v0.95 — stabilizační build Token Manager + GUI redesign
+**Status:** v0.99 — stabilizační build Token Manager + GUI redesign
 
 ---
 
@@ -138,7 +138,7 @@ Layout: dvě svislé panely vedle sebe, menu nahoře, status bar dole.
 
 ### 4.4 Status bar
 
-`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v0.95`
+`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v0.99`
 
 Stavy Gateway indikátoru:
 - ● zelená — běží
@@ -200,7 +200,7 @@ Před zápisem vždy vytvoří `.bak`, při chybě rollback.
 
 ### 5.2 Správce API klíčů (Token Manager)
 
-Implementováno ve **v0.95** podle `token-manager-spec-v2.md`.
+Implementováno ve **v0.99** podle `token-manager-spec-v2.md`.
 Obsahuje správu lokálního vaultu, přidání/editaci/odebrání/rotaci tokenů, import tokenů ze souboru a operace redact/restore/verify pro textové konfigurační soubory.
 
 ### 5.3 Nastavení
@@ -364,7 +364,7 @@ Distribuce jako ZIP s `OpenClawManager.exe` + `README.md`.
 
 ### 9.3 Verzování
 
-Sémantické: `MAJOR.MINOR.PATCH`. Aktuální stabilizační build: **v0.95.0**.
+Sémantické: `MAJOR.MINOR.PATCH`. Aktuální stabilizační build: **v0.99.0**.
 
 ---
 
@@ -395,7 +395,7 @@ ConPTY + WebView2 + xterm.js terminál v pravém panelu. Krok 6 sessions.json s 
 - Skinovatelnost (Legacy / Modern theme) via ResourceDictionary
 - Splash screen video (MediaElement, MP4) + PNG fallback
 
-### ✅ v0.95 — Token Manager integration
+### ✅ v0.99 — Token Manager integration
 Implementace dle `token-manager-spec-v2.md`:
 - Vault management (add/edit/remove/rotate)
 - File operations (redact/restore/verify)

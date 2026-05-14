@@ -68,7 +68,7 @@
                 <TextBlock x:Name="StatusCpu" Text="CPU: —" />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="v0.95" Foreground="Gray" />
+                <TextBlock Text="v0.99" Foreground="Gray" />
             </StatusBarItem>
         </StatusBar>
 
@@ -235,13 +235,18 @@
                                Stretch="Uniform"
                                RenderOptions.BitmapScalingMode="HighQuality" />
 
-                        <!-- Video (viditelný jen v video režimu) -->
+                        <!-- Video splash — MediaElement s UnloadedBehavior="Stop"
+                             zastaví audio automaticky při skrytí overlay. -->
                         <MediaElement x:Name="SplashMedia"
                                       LoadedBehavior="Manual"
-                                      UnloadedBehavior="Manual"
+                                      UnloadedBehavior="Stop"
                                       Stretch="Uniform"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
                                       Visibility="Collapsed"
-                                      MediaEnded="SplashMedia_MediaEnded" />
+                                      MediaEnded="SplashMedia_MediaEnded"
+                                      MediaFailed="SplashMedia_MediaFailed"
+                                      MediaOpened="SplashMedia_MediaOpened" />
 
                         <!-- Progress bar — tenký pruh dole, jen při videu -->
                         <ProgressBar x:Name="SplashProgress"

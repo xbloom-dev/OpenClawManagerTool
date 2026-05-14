@@ -58,39 +58,39 @@ public partial class SettingsWindow : Window
 
     private void ApplyLocalization()
     {
-        Title = T("OpenClaw Manager - Nastaveni", "OpenClaw Manager - Settings");
-        BtnSave.Content = T("Ulozit", "Save");
-        BtnReset.Content = T("Reset na vychozi", "Reset to defaults");
-        BtnCancel.Content = T("Zrusit", "Cancel");
-        BtnSave.ToolTip = T("Ulozi nastaveni a zavre dialog.", "Saves settings and closes the dialog.");
-        BtnReset.ToolTip = T("Obnovi vsechny hodnoty na vychozi.", "Restores all values to defaults.");
-        BtnCancel.ToolTip = T("Zavre bez ulozeni.", "Closes without saving.");
+        Title = T("OpenClaw Manager - Nastavení", "OpenClaw Manager - Settings");
+        BtnSave.Content = T("Uložit", "Save");
+        BtnReset.Content = T("Reset na výchozí", "Reset to defaults");
+        BtnCancel.Content = T("Zrušit", "Cancel");
+        BtnSave.ToolTip = T("Uloží nastavení a zavře dialog.", "Saves settings and closes the dialog.");
+        BtnReset.ToolTip = T("Obnoví všechny hodnoty na výchozí.", "Restores all values to defaults.");
+        BtnCancel.ToolTip = T("Zavře bez uložení.", "Closes without saving.");
 
         LblLanguage.Text = T("Jazyk / Language", "Language");
-        RbLangCS.Content = "Cestina";
+        RbLangCS.Content = "Čeština";
         RbLangEN.Content = "English";
-        TxtLanguageHint.Text = T("Zmena jazyka se projevi po ulozeni nastaveni.", "Language changes after saving settings.");
+        TxtLanguageHint.Text = T("Změna jazyka se projeví po uložení nastavení.", "Language changes after saving settings.");
 
         LblAppearance.Text = T("Vzhled", "Appearance");
-        LblTheme.Text = T("Tema aplikace:", "Application theme:");
+        LblTheme.Text = T("Téma aplikace:", "Application theme:");
         ChkUseSplashVideo.Content = T("Prehrat splash screen video pri startu", "Play splash screen video on startup");
         TxtThemeHint.Text = T("Zmena tematu se projevi po restartu aplikace. Video je aktivni pouze v Modern tematu.", "Theme changes after app restart. Video is active only in Modern theme.");
 
         LblPaths.Text = T("Cesty", "Paths");
-        LblOpenClawPath.Text = T("OpenClaw slozka:", "OpenClaw folder:");
-        LblTempPath.Text = T("Temp slozka (Gateway logy):", "Temp folder (Gateway logs):");
-        LblOpenClawCommand.Text = T("Cesta k openclaw prikazu:", "OpenClaw command path:");
+        LblOpenClawPath.Text = T("OpenClaw složka:", "OpenClaw folder:");
+        LblTempPath.Text = T("Temp složka (Gateway logy):", "Temp folder (Gateway logs):");
+        LblOpenClawCommand.Text = T("Cesta k openclaw příkazu:", "OpenClaw command path:");
         TxtOpenClawCommandHint.Text = T("Nech 'openclaw' pro PATH lookup, nebo zadej plnou cestu bez uvozovek a shell znaku.", "Keep 'openclaw' for PATH lookup, or enter a full path without quotes or shell characters.");
         LblPowerShellWorkingDir.Text = T("PowerShell pracovni adresar:", "PowerShell working directory:");
         TxtPowerShellHint.Text = T("Adresar, ve kterem se otevira PowerShell pres menu Otevrit.", "Directory used when opening PowerShell from the Open menu.");
         LblTokenManagerSecrets.Text = "Token Manager secrets.json:";
-        TxtTokenManagerSecretsHint.Text = T("Lokalni DPAPI chraneny vault s API klici; nesdilet a neukladat do cloudu.", "Local DPAPI-protected API key vault; do not share or place in cloud sync.");
-        LblSettingsPath.Text = T("Soubor s nastavenim:", "Settings file:");
+        TxtTokenManagerSecretsHint.Text = T("Lokální DPAPI chráněný vault s API klíči; nesdílet a neukládat do cloudu.", "Local DPAPI-protected API key vault; do not share or place in cloud sync.");
+        LblSettingsPath.Text = T("Soubor s nastavením:", "Settings file:");
 
         foreach (var button in new[] { BtnBrowseOpenClaw, BtnBrowseTemp, BtnBrowsePowerShell, BtnBrowseTokenManagerSecrets })
         {
-            button.Content = T("Prochazet...", "Browse...");
-            button.ToolTip = T("Vybere cestu ze systemu.", "Selects a path from the filesystem.");
+            button.Content = T("Procházet...", "Browse...");
+            button.ToolTip = T("Vybere cestu ze systému.", "Selects a path from the filesystem.");
         }
     }
 
@@ -150,7 +150,7 @@ public partial class SettingsWindow : Window
         if (!GatewayService.TryValidateOpenClawCommand(_settings.OpenClawCommand, out var commandError))
         {
             MessageBox.Show(
-                T("OpenClaw prikaz neni bezpecny nebo platny:\n", "OpenClaw command is not safe or valid:\n") + commandError,
+                T("OpenClaw příkaz není bezpečný nebo platný:\n", "OpenClaw command is not safe or valid:\n") + commandError,
                 T("Neplatny prikaz", "Invalid command"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
@@ -161,7 +161,7 @@ public partial class SettingsWindow : Window
         if (!ok)
         {
             MessageBox.Show(
-                T("Ulozeni nastaveni selhalo.\nZkontroluj zda mas opravneni zapisovat do ", "Saving settings failed.\nCheck write permissions for ") + SettingsService.SettingsFilePath,
+                T("Uložení nastavení selhalo.\nZkontroluj, zda máš oprávnění zapisovat do ", "Saving settings failed.\nCheck write permissions for ") + SettingsService.SettingsFilePath,
                 T("Chyba", "Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }
@@ -176,8 +176,8 @@ public partial class SettingsWindow : Window
     private void BtnReset_Click(object? sender, RoutedEventArgs e)
     {
         var result = MessageBox.Show(
-            T("Opravdu resetovat vsechna nastaveni na vychozi hodnoty?\nZmeny budou aktivni az po kliknuti na Ulozit.", "Reset all settings to defaults?\nChanges become active after clicking Save."),
-            T("Reset na vychozi", "Reset to defaults"),
+            T("Opravdu resetovat všechna nastavení na výchozí hodnoty?\nZměny budou aktivní až po kliknutí na Uložit.", "Reset all settings to defaults?\nChanges become active after clicking Save."),
+            T("Reset na výchozí", "Reset to defaults"),
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
 
@@ -192,7 +192,7 @@ public partial class SettingsWindow : Window
     {
         var dialog = new OpenFolderDialog
         {
-            Title = T("Vyber slozku", "Select folder"),
+            Title = T("Vyber složku", "Select folder"),
             InitialDirectory = string.IsNullOrEmpty(target.Text) ? "" : target.Text
         };
 
