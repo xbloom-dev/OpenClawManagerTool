@@ -44,7 +44,7 @@
     <Resource Include="Resources\Icons\Modern\cleaning-tool.png" />
     <Resource Include="Resources\Icons\Modern\token-manager.png" />
     <Resource Include="Resources\Icons\Modern\doctor-fix.png" />
-    <Resource Include="Resources\Icons\CrabCute\Button_*.png" />
+    <Resource Include="Resources\Icons\CrabCute\*.png" />
 
     <!-- v1.0: Offline xterm.js assets for embedded terminal -->
     <Resource Include="Resources\Terminal\xterm.min.js" />
