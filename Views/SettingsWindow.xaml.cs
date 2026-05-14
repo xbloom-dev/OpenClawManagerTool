@@ -79,10 +79,10 @@ public partial class SettingsWindow : Window
         RbThemeLegacy.Content = "Legacy";
         RbThemeModern.Content = "Modern";
         RbThemeDark.Content = "Dark";
-        RbThemeHighContrast.Content = T("VysokĂ˝ kontrast", "High Contrast");
+        RbThemeHighContrast.Content = T("Vysok\u00FD kontrast", "High Contrast");
         RbThemeCompact.Content = "Compact";
-        ChkUseSplashVideo.Content = T("Prehrat splash screen video pri startu", "Play splash screen video on startup");
-        TxtThemeHint.Text = T("Zmena tematu se projevi po ulozeni. Video je aktivni ve vsech modernich tematech.", "Theme changes after saving. Video is active in all modern-style themes.");
+        ChkUseSplashVideo.Content = T("P\u0159ehr\u00E1t splash screen video p\u0159i startu", "Play splash screen video on startup");
+        TxtThemeHint.Text = T("Zm\u011Bna t\u00E9matu se projev\u00ED po ulo\u017Een\u00ED. Video je aktivn\u00ED ve v\u0161ech modern\u00EDch t\u00E9matech.", "Theme changes after saving. Video is active in all modern-style themes.");
 
         LblPaths.Text = T("Cesty", "Paths");
         LblOpenClawPath.Text = T("OpenClaw složka:", "OpenClaw folder:");
