@@ -25,7 +25,6 @@ public partial class MainWindow
 
     private readonly Dictionary<Button, ButtonVisualState> _buttonVisualStates = new();
     private readonly Dictionary<Control, ShellVisualState> _shellControlStates = new();
-    private readonly Dictionary<MenuItem, object?> _menuItemIcons = new();
 
     // ── Inicializace theme (volat v konstruktoru po InitializeComponent) ──────
     private void InitTheme()
@@ -132,19 +131,14 @@ public partial class MainWindow
         SetCrabCuteButtonImage(BtnTokenManager,   "token-manager", 44);
         SetCrabCuteButtonImage(BtnDoctorFix,      "doctor-fix", 44);
 
-        SetMenuIcon(MnuOpenPowerShell, "menu-powershell");
-        SetMenuIcon(MnuOpenGatewayLog, "log");
-        SetMenuIcon(MnuSettings, "menu-settings");
-        SetMenuIcon(MnuMenuSettings, "menu-settings");
-
         UpdateStartTuiButton(Terminal.IsTuiRunning);
     }
 
     private void ApplyCrabCuteShell()
     {
-        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0xFF, 0xF7, 0xF0));
-        var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0xFF, 0xFF, 0xFF));
-        var border = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0xFF, 0xD8, 0xC2));
+        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0xEE, 0xF1, 0xF5));
+        var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0xEE, 0xF1, 0xF5));
+        var border = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0xD8, 0xDE, 0xE7));
         var text = ThemeService.GetBrush("Theme.Brush.Text.Primary", Color.FromRgb(0x17, 0x20, 0x33));
         var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x5F, 0x6B, 0x7A));
 
@@ -263,11 +257,6 @@ public partial class MainWindow
         }
     }
 
-    private void SetMenuIcon(MenuItem item, string iconName)
-    {
-        item.Icon = CreateThemeImage(iconName, 18);
-    }
-
     private void ApplyThemeSpecificTuiVisual(bool tuiRunning)
     {
         if (SettingsService.Current.Theme != AppTheme.CrabCute) return;
@@ -301,11 +290,6 @@ public partial class MainWindow
                 button.BorderBrush);
         }
 
-        foreach (var item in new[] { MnuOpenPowerShell, MnuOpenGatewayLog, MnuSettings, MnuMenuSettings })
-        {
-            _menuItemIcons[item] = item.Icon;
-        }
-
         foreach (var control in new Control[] { MainMenu, MainStatusBar, GrpActions, GrpLatency, GrpAppLog, AppLog })
         {
             _shellControlStates[control] = new ShellVisualState(control.Background, control.Foreground);
@@ -326,11 +310,6 @@ public partial class MainWindow
             button.BorderThickness = state.BorderThickness;
             button.Background = state.Background;
             button.BorderBrush = state.BorderBrush;
-        }
-
-        foreach (var (item, icon) in _menuItemIcons)
-        {
-            item.Icon = icon;
         }
 
         foreach (var (control, state) in _shellControlStates)

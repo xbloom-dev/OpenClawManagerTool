@@ -67,10 +67,6 @@ public static class ThemeService
                 { "token-manager", "Button_TokenManager.png" },
                 { "doctor-fix", "Button_Fix.png" },
                 { "tui", "Button_TUI_1.png" },
-                { "menu-powershell", "Menu-PowerShell.png" },
-                { "menu-settings", "Menu-Settings.png" },
-                { "menu-status", "Menu-Status.png" },
-                { "log", "Log.png" },
             }
         }
     };

@@ -21,19 +21,19 @@
     -->
 
     <!-- ── Barvy ── -->
-    <Color x:Key="Theme.Color.Background">#FFF7F0</Color>
-    <Color x:Key="Theme.Color.Surface">#FFFFFF</Color>
-    <Color x:Key="Theme.Color.Accent">#F97316</Color>
+    <Color x:Key="Theme.Color.Background">#EEF1F5</Color>
+    <Color x:Key="Theme.Color.Surface">#EEF1F5</Color>
+    <Color x:Key="Theme.Color.Accent">#7B8794</Color>
     <Color x:Key="Theme.Color.Text.Primary">#172033</Color>
     <Color x:Key="Theme.Color.Text.Secondary">#5F6B7A</Color>
-    <Color x:Key="Theme.Color.Border">#FFD8C2</Color>
+    <Color x:Key="Theme.Color.Border">#D8DEE7</Color>
     <Color x:Key="Theme.Color.Success">#22A06B</Color>
     <Color x:Key="Theme.Color.Danger">#E5484D</Color>
     <Color x:Key="Theme.Color.Warning">#F59E0B</Color>
-    <Color x:Key="Theme.Color.ActionPositive">#CFFAE5</Color>
-    <Color x:Key="Theme.Color.ActionDanger">#FFD6D6</Color>
-    <Color x:Key="Theme.Color.ActionUtility">#D6F0FF</Color>
-    <Color x:Key="Theme.Color.SplashModernBackground">#FF8A4C</Color>
+    <Color x:Key="Theme.Color.ActionPositive">#E2F3EA</Color>
+    <Color x:Key="Theme.Color.ActionDanger">#F5E1E1</Color>
+    <Color x:Key="Theme.Color.ActionUtility">#EEF1F5</Color>
+    <Color x:Key="Theme.Color.SplashModernBackground">#EEF1F5</Color>
 
     <!-- ── Brushe ── -->
     <SolidColorBrush x:Key="Theme.Brush.Background"  Color="{StaticResource Theme.Color.Background}" />
@@ -72,11 +72,11 @@
         <Setter Property="Padding"      Value="6,2" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#FFF1E8" />
+                <Setter Property="Background" Value="#E2E7EE" />
                 <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Accent}" />
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="#FFE3D1" />
+                <Setter Property="Background" Value="#D8DEE7" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Opacity" Value="0.45" />

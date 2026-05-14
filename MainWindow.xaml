@@ -87,12 +87,12 @@
                 </Grid.RowDefinitions>
 
                 <!-- Sekce Akce -->
-                <GroupBox x:Name="GrpActions" Grid.Row="0" Header="Akce" Margin="8,8,8,4" Padding="8">
+                <GroupBox x:Name="GrpActions" Grid.Row="0" Header="Akce" Margin="6,6,6,3" Padding="6">
                     <StackPanel>
 
                         <!-- Dynamické TUI tlačítko -->
                         <Button x:Name="BtnStartTui" Height="48" FontWeight="Bold" FontSize="13"
-                                Margin="0,0,0,8" Background="{DynamicResource Brush.ActionPositive}">
+                                Margin="0,0,0,4" Background="{DynamicResource Brush.ActionPositive}">
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock x:Name="BtnStartTuiSymbol" Text="▶" Foreground="Green"
@@ -105,8 +105,8 @@
                         </Button>
 
                         <!-- Gateway tlačítka -->
-                        <TextBlock x:Name="TxtGatewayLabel" Text="Gateway:" FontWeight="Bold" Margin="0,4,0,4" />
-                        <Grid Margin="0,0,0,4">
+                        <TextBlock x:Name="TxtGatewayLabel" Text="Gateway:" FontWeight="Bold" Margin="0,2,0,3" />
+                        <Grid Margin="0,0,0,2">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="4" />
@@ -125,7 +125,7 @@
                                 </StackPanel>
                             </Button>
                         </Grid>
-                        <Button x:Name="BtnGatewayRestart" Height="28" Margin="0,0,0,8" IsEnabled="False">
+                        <Button x:Name="BtnGatewayRestart" Height="28" Margin="0,0,0,4" IsEnabled="False">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Text="↻" Foreground="Orange" FontWeight="Bold" FontSize="14" Margin="0,0,6,0" />
                                 <TextBlock x:Name="BtnGatewayRestartLabel" Text="Restart" VerticalAlignment="Center" />
@@ -133,14 +133,14 @@
                         </Button>
 
                         <!-- Otevřít -->
-                        <TextBlock x:Name="TxtSectionOpen" Text="Otevřít:" FontWeight="Bold" Margin="0,4,0,4" />
-                        <Button x:Name="BtnOpenPowerShell" Height="28" Margin="0,0,0,4">
+                        <TextBlock x:Name="TxtSectionOpen" Text="Otevřít:" FontWeight="Bold" Margin="0" Visibility="Collapsed" />
+                        <Button x:Name="BtnOpenPowerShell" Height="28" Margin="0,0,0,2">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="⚡" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
                                 <TextBlock x:Name="BtnPowerShellLabel" Text="PowerShell" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="BtnOpenGatewayLog" Height="28" Margin="0,0,0,8">
+                        <Button x:Name="BtnOpenGatewayLog" Height="28" Margin="0,0,0,4">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="📄" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
                                 <TextBlock x:Name="BtnGatewayLogLabel" Text="Gateway log" VerticalAlignment="Center" />
@@ -148,14 +148,14 @@
                         </Button>
 
                         <!-- Nástroje -->
-                        <TextBlock x:Name="TxtSectionTools" Text="Nástroje:" FontWeight="Bold" Margin="0,4,0,4" />
-                        <Button x:Name="BtnCleaningTool" Height="28" Margin="0,0,0,4">
+                        <TextBlock x:Name="TxtSectionTools" Text="Nástroje:" FontWeight="Bold" Margin="0" Visibility="Collapsed" />
+                        <Button x:Name="BtnCleaningTool" Height="28" Margin="0,0,0,2">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🧹" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
                                 <TextBlock x:Name="BtnCleaningToolLabel" Text="Vyčistit soubory" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="BtnTokenManager" Height="28" Margin="0,0,0,8">
+                        <Button x:Name="BtnTokenManager" Height="28" Margin="0,0,0,4">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🔑" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
                                 <TextBlock x:Name="BtnTokenManagerLabel" Text="Správce API klíčů" VerticalAlignment="Center" />
@@ -163,7 +163,7 @@
                         </Button>
 
                         <!-- Údržba -->
-                        <TextBlock x:Name="TxtSectionMaintenance" Text="Údržba:" FontWeight="Bold" Margin="0,4,0,4" />
+                        <TextBlock x:Name="TxtSectionMaintenance" Text="Údržba:" FontWeight="Bold" Margin="0" Visibility="Collapsed" />
                         <Button x:Name="BtnDoctorFix" Height="28" Background="{DynamicResource Brush.ActionDanger}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🩺" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
@@ -175,7 +175,7 @@
                 </GroupBox>
 
                 <!-- Sekce Měření latence -->
-                <GroupBox x:Name="GrpLatency" Grid.Row="1" Header="Měření latence" Margin="8,4,8,4" Padding="8"
+                <GroupBox x:Name="GrpLatency" Grid.Row="1" Header="Měření latence" Margin="6,3,6,3" Padding="6"
                           ToolTip="Měřeno z Gateway logu (res záznamy). Resetuje se při restartu Gateway.">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -200,7 +200,7 @@
                 </GroupBox>
 
                 <!-- Sekce Log aplikace -->
-                <GroupBox x:Name="GrpAppLog" Grid.Row="2" Header="Log aplikace" Margin="8,4,8,8" Padding="8">
+                <GroupBox x:Name="GrpAppLog" Grid.Row="2" Header="Log aplikace" Margin="6,3,6,6" Padding="6">
                     <ListBox x:Name="AppLog"
                              FontFamily="Consolas" FontSize="11"
                              BorderThickness="0"
