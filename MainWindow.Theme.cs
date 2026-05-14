@@ -68,6 +68,9 @@ public partial class MainWindow
         switch (theme)
         {
             case AppTheme.Modern:
+            case AppTheme.Dark:
+            case AppTheme.HighContrast:
+            case AppTheme.Compact:
                 ApplyModernUi();
                 break;
             case AppTheme.Legacy:

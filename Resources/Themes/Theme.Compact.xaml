@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        Theme: Modern (Light Modern — paleta C)
+        Theme: Compact (Light Modern dense controls)
         ═══════════════════════════════════════════════════════════════════
         Barvy:
           Pozadí okna:    #F4F6FA
@@ -69,7 +69,7 @@
         <Setter Property="Foreground"   Value="{StaticResource Theme.Brush.Text.Primary}" />
         <Setter Property="BorderBrush"  Value="{StaticResource Theme.Brush.Border}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Padding"      Value="8,4" />
+        <Setter Property="Padding"      Value="6,2" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#EFF6FF" />

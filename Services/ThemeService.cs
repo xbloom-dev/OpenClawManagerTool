@@ -16,6 +16,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 using System.Windows;
+using System.Windows.Media;
 using OpenClawManager.Models;
 
 namespace OpenClawManager.Services;
@@ -35,10 +36,9 @@ public static class ThemeService
     {
         { AppTheme.Legacy, "/Resources/Themes/Theme.Legacy.xaml" },
         { AppTheme.Modern, "/Resources/Themes/Theme.Modern.xaml" },
-        // Budoucí témata:
-        // { AppTheme.Dark,          "/Resources/Themes/Theme.Dark.xaml" },
-        // { AppTheme.HighContrast,  "/Resources/Themes/Theme.HighContrast.xaml" },
-        // { AppTheme.Compact,       "/Resources/Themes/Theme.Compact.xaml" },
+        { AppTheme.Dark, "/Resources/Themes/Theme.Dark.xaml" },
+        { AppTheme.HighContrast, "/Resources/Themes/Theme.HighContrast.xaml" },
+        { AppTheme.Compact, "/Resources/Themes/Theme.Compact.xaml" },
     };
 
     // ── Registr složek ikon ───────────────────────────────────────────────────
@@ -47,8 +47,9 @@ public static class ThemeService
     {
         { AppTheme.Legacy, "" },         // Legacy nemá PNG ikony (používá emoji)
         { AppTheme.Modern, "Modern" },
-        // { AppTheme.Dark,         "Dark" },
-        // { AppTheme.HighContrast, "HighContrast" },
+        { AppTheme.Dark, "Modern" },
+        { AppTheme.HighContrast, "Modern" },
+        { AppTheme.Compact, "Modern" },
     };
 
     // ── Veřejné API ──────────────────────────────────────────────────────────
@@ -83,6 +84,12 @@ public static class ThemeService
         var folder = GetIconFolder(theme);
         if (string.IsNullOrEmpty(folder)) return null;
         return new Uri($"pack://application:,,,/Resources/Icons/{folder}/{iconName}.png");
+    }
+
+    public static Brush GetBrush(string key, Color fallback)
+    {
+        return Application.Current?.TryFindResource(key) as Brush
+            ?? new SolidColorBrush(fallback);
     }
 
     // ── Interní: swap ResourceDictionary ─────────────────────────────────────
