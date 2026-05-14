@@ -9,17 +9,17 @@
 
 1. [Co je OpenClaw Manager](#1-co-je-openclaw-manager)
 2. [Instalace a spuštění](#2-instalace-a-spuštění)
-3. [Hlavní okno](#3-hlavní-okno)
-4. [Klávesové zkratky](#4-klávesové-zkratky)
-5. [Spuštění OpenClaw TUI](#5-spuštění-openclaw-tui)
-6. [Řízení Gateway](#6-řízení-gateway)
-7. [Měření latencí](#7-měření-latencí)
-8. [Gateway log](#8-gateway-log)
-9. [Cleaning Tool — Vyčistit soubory](#9-cleaning-tool--vyčistit-soubory)
-10. [Nastavení](#10-nastavení)
-11. [O aplikaci](#11-o-aplikaci)
-12. [Správce API klíčů (Token Manager)](#12-správce-api-klíčů-token-manager)
-13. [Témata a splash screen](#13-témata-a-splash-screen)
+3. [Témata a splash screen](#3-témata-a-splash-screen)
+4. [Hlavní okno](#4-hlavní-okno)
+5. [Klávesové zkratky](#5-klávesové-zkratky)
+6. [Spuštění OpenClaw TUI](#6-spuštění-openclaw-tui)
+7. [Řízení Gateway](#7-řízení-gateway)
+8. [Měření latencí](#8-měření-latencí)
+9. [Gateway log](#9-gateway-log)
+10. [Správce API klíčů (Token Manager)](#10-správce-api-klíčů-token-manager)
+11. [Cleaning Tool — Vyčistit soubory](#11-cleaning-tool--vyčistit-soubory)
+12. [Nastavení](#12-nastavení)
+13. [O aplikaci](#13-o-aplikaci)
 14. [Časté situace a řešení](#14-časté-situace-a-řešení)
 
 ---
@@ -66,7 +66,32 @@ Pokud OpenClaw nespustíš přes `openclaw` v PATH, uprav "openclaw příkaz" na
 
 ---
 
-## 3. Hlavní okno
+## 3. Témata a splash screen
+
+Téma změníš v **Nastavení**. K dispozici jsou dvě témata:
+
+### Legacy
+
+Jednodušší klasické rozhraní s emoji ikonami v tlačítkách. Při startu aplikace se v pravém panelu zobrazí ASCII art splash screen — zmizí po kliknutí na **OpenClaw TUI**.
+
+### Modern
+
+Bitmap ikony v tlačítkách. Splash panel při startu se chová takto:
+1. Přehraje se `splash.mp4` (pokud existuje v `Resources/`)
+2. Po doběhnutí videa zůstane statický `splash.png` jako freeze frame
+3. Overlay zmizí po kliknutí na **OpenClaw TUI**
+
+Pokud `splash.mp4` chybí nebo selže přehrávání, zobrazí se rovnou `splash.png`. Pokud chybí i `splash.png`, zobrazí se ASCII art jako fallback.
+
+### Přepínání za běhu
+
+Změna tématu se projeví okamžitě po uložení Nastavení:
+- **Modern → Legacy:** video se zastaví, overlay zmizí, zobrazí se ASCII art
+- **Legacy → Modern:** ASCII art zmizí, zobrazí se PNG splash
+
+---
+
+## 4. Hlavní okno
 
 Okno je rozděleno na dvě části:
 
@@ -100,7 +125,7 @@ Hlavní tlačítko aplikace. Má **3 režimy** podle aktuálního stavu:
 #### Nástroje
 
 - **Vyčistit soubory** — otevře Cleaning Tool
-- **Správce API klíčů** — správa trezoru (vaultu) tokenů a API klíčů
+- **Správce API klíčů** — správa trezoru tokenů a API klíčů
 
 #### Údržba
 
@@ -121,7 +146,7 @@ RAM, CPU a VRAM se aktualizují každé 2 sekundy na pozadí — UI se nezaseká
 
 ---
 
-## 4. Klávesové zkratky
+## 5. Klávesové zkratky
 
 | Zkratka | Akce |
 |---|---|
@@ -136,7 +161,7 @@ RAM, CPU a VRAM se aktualizují každé 2 sekundy na pozadí — UI se nezaseká
 
 ---
 
-## 5. Spuštění OpenClaw TUI
+## 6. Spuštění OpenClaw TUI
 
 ### Standardní postup
 
@@ -165,7 +190,7 @@ Při zavření se zobrazí dialog se třemi možnostmi:
 
 ---
 
-## 6. Řízení Gateway
+## 7. Řízení Gateway
 
 ### Spuštění Gateway
 
@@ -183,7 +208,7 @@ Tlačítko **Restart** nebo Ctrl+R. TUI se odpojí, Gateway se zastaví a znovu 
 
 ---
 
-## 7. Měření latencí
+## 8. Měření latencí
 
 Sekce **Měření latence** v levém panelu zobrazuje rychlost odpovědí Gateway:
 
@@ -203,7 +228,7 @@ Hodnoty se začnou zobrazovat až po prvním requestu odeslaném přes TUI.
 
 ---
 
-## 8. Gateway log
+## 9. Gateway log
 
 Otevři přes **Gateway log** tlačítko nebo přes menu **Otevřít → Gateway log**.
 
@@ -227,77 +252,7 @@ Klikni **Živá data** pro otevření živého okna:
 
 ---
 
-## 9. Cleaning Tool — Vyčistit soubory
-
-Otevři přes tlačítko **Vyčistit soubory** nebo Ctrl+Shift+C.
-
-### Co lze vyčistit
-
-| Krok | Co maže | Výchozí |
-|---|---|---|
-| 1 — Gateway logy | Staré log soubory (ne dnešní) | ✅ zapnuto |
-| 2 — Zálohy konfigurace | `.bak` soubory (ponechá 2 nejnovější) | ✅ zapnuto |
-| 3 — Stability logy | Logy starší než 3 dny | ❌ vypnuto |
-| 4 — Browser cache | Cache starší než 1 den | ✅ zapnuto |
-| 5 — Session locky | Zámkové soubory sessions | ✅ zapnuto |
-| 6 — sessions.json | Stará session data (ponechá N nejnovějších) | ✅ zapnuto |
-| 7 — Zálohy trezoru | `*.bak` v Token Manager složce | ❌ vypnuto (opt-in) |
-
-Posuvníkem u kroku 6 nastav kolik sessions zachovat (výchozí: 10).
-
-Krok 7 je záměrně vypnutý — zálohy trezoru jsou záchrana při selhání obnovy. Mazej je vědomě.
-
-### Doporučený postup
-
-1. Klikni **Náhled** (modré tlačítko) — zobrazí co by se smazalo, nic neudělá
-2. Zkontroluj výpis
-3. Klikni **Spustit** (zelené tlačítko) — skutečné smazání
-
-> ⚠️ **Upozornění:** Spustit trvale smaže vybrané soubory. Akci nelze vrátit.
-
----
-
-## 10. Nastavení
-
-Otevři přes menu **Nastavení → Otevřít Nastavení...** nebo Ctrl+,.
-
-### Jazyk / Language
-
-Přepni mezi **Čeština** a **English**. Změna se projeví po uložení.
-
-### Cesty
-
-| Pole | Popis |
-|---|---|
-| OpenClaw složka | Kde OpenClaw ukládá konfiguraci (`~\.openclaw`) |
-| Temp složka | Kde jsou uloženy Gateway logy |
-| openclaw příkaz | Příkaz nebo cesta k `openclaw` spustitelnému souboru |
-| PowerShell pracovní adresář | Adresář kde se otevře PowerShell |
-| Trezor (vault) | Cesta k `secrets.json` — šifrováno přes Windows DPAPI |
-
-Tlačítka **Procházet...** otevřou dialog pro výběr složky. Pole "openclaw příkaz" validuje zakázané znaky — taková hodnota nejde uložit.
-
-### Téma
-
-Přepni mezi **Legacy** a **Modern**. Změna se projeví okamžitě.
-
-### Tlačítka
-
-- **Uložit** — uloží a zavře
-- **Reset na výchozí** — obnoví výchozí hodnoty (vyžaduje potvrzení)
-- **Zrušit** — zavře bez uložení
-
-Nastavení se ukládá do `%APPDATA%\OpenClawManager\settings.json`.
-
----
-
-## 11. O aplikaci
-
-Otevři přes menu **Nápověda → O aplikaci...** nebo F1. Zobrazuje logo, verzi, technický stack a přehled klávesových zkratek.
-
----
-
-## 12. Správce API klíčů (Token Manager)
+## 10. Správce API klíčů (Token Manager)
 
 Otevři tlačítkem **Správce API klíčů** v levém panelu. Slouží k bezpečnému ukládání API klíčů a citlivých hodnot a k maskování souborů před jejich sdílením.
 
@@ -335,7 +290,7 @@ Klikni **Přidat** a vyplň:
 2. Klikni **[REDACT]** — nahradí hodnoty zastupným textem `[REDACTED_ID]`
 3. Před odesláním klikni **Ověřit** — zkontroluje že soubor neobsahuje žádnou plaintext hodnotu
 
-**Obnova:** klikni **Obnovit** — nahradí zastupné texty zpět hodnotami. Automaticky se vytvoří záložní `.bak` soubor; při chybě se soubor obnoví ze zálohy.
+**Obnova:** klikni **Obnovit** — nahradí zastupné texty zpět hodnotami. Automaticky se vytvoří záložní `.bak` soubor.
 
 ### Tlačítka přehled
 
@@ -357,28 +312,71 @@ Klikni **Přidat** a vyplň:
 
 ---
 
-## 13. Témata a splash screen
+## 11. Cleaning Tool — Vyčistit soubory
 
-Téma změníš v **Nastavení**. K dispozici jsou dvě témata:
+Otevři přes tlačítko **Vyčistit soubory** nebo Ctrl+Shift+C.
 
-### Legacy
+### Co lze vyčistit
 
-Jednodušší klasické rozhraní s emoji ikonami v tlačítkách. Při startu aplikace se v pravém panelu zobrazí ASCII art splash screen — zmizí po kliknutí na **OpenClaw TUI**.
+| Krok | Co maže | Výchozí |
+|---|---|---|
+| 1 — Gateway logy | Staré log soubory (ne dnešní) | ✅ zapnuto |
+| 2 — Zálohy konfigurace | `.bak` soubory (ponechá 2 nejnovější) | ✅ zapnuto |
+| 3 — Stability logy | Logy starší než 3 dny | ❌ vypnuto |
+| 4 — Browser cache | Cache starší než 1 den | ✅ zapnuto |
+| 5 — Session locky | Zámkové soubory sessions | ✅ zapnuto |
+| 6 — sessions.json | Stará session data (ponechá N nejnovějších) | ✅ zapnuto |
+| 7 — Zálohy trezoru | `*.bak` v Token Manager složce | ❌ vypnuto (opt-in) |
 
-### Modern
+Posuvníkem u kroku 6 nastav kolik sessions zachovat (výchozí: 10). Krok 7 je záměrně vypnutý — zálohy trezoru jsou záchrana při selhání obnovy.
 
-Bitmap ikony v tlačítkách. Splash panel při startu se chová takto:
-1. Přehraje se `splash.mp4` (pokud existuje v `Resources/`)
-2. Po doběhnutí videa zůstane statický `splash.png` jako freeze frame
-3. Overlay zmizí po kliknutí na **OpenClaw TUI**
+### Doporučený postup
 
-Pokud `splash.mp4` chybí nebo selže přehrávání, zobrazí se rovnou `splash.png`. Pokud chybí i `splash.png`, zobrazí se ASCII art jako fallback.
+1. Klikni **Náhled** (modré tlačítko) — zobrazí co by se smazalo, nic neudělá
+2. Zkontroluj výpis
+3. Klikni **Spustit** (zelené tlačítko) — skutečné smazání
 
-### Přepínání za běhu
+> ⚠️ **Upozornění:** Spustit trvale smaže vybrané soubory. Akci nelze vrátit.
 
-Změna tématu se projeví okamžitě po uložení Nastavení:
-- **Modern → Legacy:** video se zastaví, splash overlay zmizí, zobrazí se ASCII art
-- **Legacy → Modern:** ASCII art zmizí, zobrazí se PNG splash
+---
+
+## 12. Nastavení
+
+Otevři přes menu **Nastavení → Otevřít Nastavení...** nebo Ctrl+,.
+
+### Jazyk / Language
+
+Přepni mezi **Čeština** a **English**. Změna se projeví po uložení.
+
+### Cesty
+
+| Pole | Popis |
+|---|---|
+| OpenClaw složka | Kde OpenClaw ukládá konfiguraci (`~\.openclaw`) |
+| Temp složka | Kde jsou uloženy Gateway logy |
+| openclaw příkaz | Příkaz nebo cesta k `openclaw` spustitelnému souboru |
+| PowerShell pracovní adresář | Adresář kde se otevře PowerShell |
+| Trezor (vault) | Cesta k `secrets.json` — šifrováno přes Windows DPAPI |
+
+Tlačítka **Procházet...** otevřou dialog pro výběr složky. Pole "openclaw příkaz" validuje zakázané znaky — taková hodnota nejde uložit.
+
+### Téma
+
+Přepni mezi **Legacy** a **Modern**. Změna se projeví okamžitě — viz kapitola [3. Témata a splash screen](#3-témata-a-splash-screen).
+
+### Tlačítka
+
+- **Uložit** — uloží a zavře
+- **Reset na výchozí** — obnoví výchozí hodnoty (vyžaduje potvrzení)
+- **Zrušit** — zavře bez uložení
+
+Nastavení se ukládá do `%APPDATA%\OpenClawManager\settings.json`.
+
+---
+
+## 13. O aplikaci
+
+Otevři přes menu **Nápověda → O aplikaci...** nebo F1. Zobrazuje logo, verzi, technický stack a přehled klávesových zkratek.
 
 ---
 
@@ -413,7 +411,7 @@ Změna tématu se projeví okamžitě po uložení Nastavení:
 
 ### Správce API klíčů zobrazí varování o rizikovém umístění
 
-**Řešení:** Otevři Nastavení → změň cestu k trezoru → uložit. Správce se automaticky obnoví.
+**Řešení:** Otevři Nastavení → změň cestu k trezoru → uložit.
 
 ### Aplikace hlásí "Složka neexistuje"
 
@@ -433,4 +431,4 @@ Změna tématu se projeví okamžitě po uložení Nastavení:
 
 ---
 
-**Konec dokumentu v1.0**
+**Konec dokumentu — verze aplikace v1.0**
