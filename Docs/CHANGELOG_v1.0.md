@@ -1,63 +1,86 @@
-# OpenClaw Manager Tool by Bloom - changelog v1.0
+# OpenClaw Manager Tool by Bloom — Changelog
 
-## v1.0
+---
 
-Finalni stabilizacni vydani po v0.99.
+## v1.1 (vývoj — větev develop/v1.1)
 
-### Bezpecnost
+### Refactoring
+- Centralizované theme resource tokeny: `Brush.ActionPositive`, `Brush.ActionDanger`, `Brush.ActionUtility`, `Brush.SplashModernBackground`
+- Tlačítka v hlavních oknech přepnutá z přímých HEX hodnot na theme resources
+- `ThemeService.GetBrush()` API pro code-behind přístup ke theme brushům
 
-- DPAPI sifrovani tokenu
-- migrace token vaultu
-- ochrana proti novejsi verzi trezoru
-- Git/vault safety banner
-- validace a escapovani prikazu
+---
 
-### Stabilita
+## v1.0 — 13. května 2026
 
-- optimalizace ResourceMonitoru
-- WMI mereni mimo UI thread
-- korektni timeout pro `nvidia-smi`
-- guard proti prekryvu status ticku
-- oprava timer leak v LiveLogWindow
-- oprava subscription v TokenManagerWindow
+Finální stabilizační vydání po v0.99.
+
+### Bezpečnost
+- DPAPI šifrování tokenů (Windows CryptProtectData / CryptUnprotectData)
+- Migrace trezoru z plaintext na DPAPI při prvním uložení
+- `CurrentVaultVersion` — ochrana proti otevření novější verze trezoru
+- Git/vault safety banner v Token Manageru
+- Validace a escapování příkazů v Nastavení
+
+### Stabilita a výkon
+- `ResourceMonitor.MeasureAsync()` — WMI měření mimo UI thread
+- Správný async timeout pro `nvidia-smi` s Kill po vypršení
+- Guard proti překryvu status ticků v `MainWindow`
+- `LatencyTracker._lastMs` — O(1) místo `Queue.Last()`
+- Oprava timer leak v `LiveLogWindow` (persistent `_highlightClearTimer`)
+- Oprava `SettingsChanged` subscription v `TokenManagerWindow`
 
 ### SplashScreen a WebView2
-
-- oprava WebView2 airspace chovani
-- WebView je `Hidden`, ne `Collapsed`
-- Modern video -> PNG freeze frame
+- Oprava WebView2 airspace chování — WebView je `Hidden`, ne `Collapsed`
+- `ShowWebView()` se volá až po `DisposeSplash()`
+- Modern video → PNG freeze frame po doběhnutí
 - Legacy ASCII art
-- fallback na ASCII pri chybe splash assetu
-- bezpecnejsi uvolneni videa
-- zachovani splash az do kliknuti na TUI
+- Fallback na ASCII při chybě splash assetů
+- `MediaElement UnloadedBehavior="Stop"` pro spolehlivé uvolnění videa
+- Splash zůstane viditelný až do kliknutí na TUI
 
-### Lokalizace
+### Lokalizace a UI
+- Kompletní lokalizace hlavních UI stringů (EN/CS)
+- Token Manager lokalizován — terminologie dle `DEVELOPER_MANUAL_v1.0.md`
+- Opravena česká diakritika — odstraněny garbled znaky
+- Tooltipy pro tlačítka
+- Barevné zvýraznění tlačítek (zelená / červená / modrá)
+- Modern splash pozadí `#4C247E`
+- About okno doplněno o klávesové zkratky
+- `Ctrl+L` pro živá data Gateway logu
+- Cleaning Tool — český titulek
+- Favicon přes `EventManager` — všechna okna
 
-- UI texty pres resources
-- TokenManager lokalizovan
-- doplnena ceska diakritika
-- odstranene garbled znaky
-- tooltips pro tlacitka
+### Token Manager
+- Titulek: **Správce API klíčů**
+- Terminologie: Trezor (vault), zastupný text, [REDACT], Obnovit, Ověřit
+- Náhled maskování (přejmenováno z "Redact náhled")
+- Finální kosmetika tlačítek dle barevného systému
 
-### UI
+---
 
-- barevne zvyrazneni tlacitek:
-  - zelena `#D0FFD0`
-  - cervena `#FFD0D0`
-  - modra `#D0E8FF`
-- Modern splash pozadi `#4C247E`
-- About okno doplnene o zkratky
-- `Ctrl+L` pro ziva data Gateway logu
-- Cleaning Tool ma cesky titulek
+## v0.99 — 12. května 2026
 
-### TokenManager
+- Integrační build: v0.5 GUI + Token Manager
+- Lokální xterm.js — žádný CDN
+- WebView2 per-process user data folder
+- Vault safety varování
 
-- titulek `Spravce API klicu`
-- `Trezor (vault)`
-- `zastupny text`
-- `[REDACT]` zachovano jako technicky vyraz
-- `Obnovit`
-- `Overit`
-- `Redact nahled` prejmenovano na `Nahled`
-- finalni kosmetika tlacitek podle barevneho systemu
+## v0.4 — 8. května 2026
 
+- Lokalizace EN/CS přes ResourceDictionary
+- Tooltipy na všech tlačítkách
+- Klávesové zkratky kompletní
+- Oprava parsování latencí (JSON + ANSI strip)
+- LiveLogWindow (FileSystemWatcher, sliding window)
+- Gateway Log — tlačítko Kopírovat + Živá data
+
+## v0.2 — 7. května 2026
+
+- Layout, TUI sekvence, sledování latencí
+- Cleaning Tool (základní verze)
+
+## v0.1 — 6. května 2026
+
+- Správa Gateway (Start/Stop/Restart)
+- Nastavení, menu, log viewer
