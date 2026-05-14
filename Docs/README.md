@@ -1,27 +1,57 @@
-# OpenClaw Manager Tool by Bloom - dokumentacni balik v1.0
+# OpenClaw Manager Tool by Bloom
 
-Tento balik slouzi jako predani stavu projektu pro novy workspace s pristupem do:
+Windows WPF utility for managing an OpenClaw environment: Gateway/TUI control, embedded terminal, logs, cleanup, settings, themes, and Token Manager.
 
-`E:\OpenClaw\`
+## First Run
 
-Obsahuje:
+1. Start `OpenClawManager.exe`.
+2. Open Settings (Ctrl+,) and confirm the OpenClaw folders and command path.
+3. Open Token Manager and initialize the vault.
+4. Keep the vault outside project, `.openclaw`, Git, and cloud-synced folders.
 
-- `PROJECT_HANDOFF_v1.0.md` - kompletni predavaci brief aktualniho stavu
-- `USER_MANUAL_v1.0.md` - uzivatelsky manual
-- `DEVELOPER_MANUAL_v1.0.md` - vyvojarsky manual a pravidla dalsich uprav
-- `SPLASH_WEBVIEW2_SAFETY_v1.0.md` - kriticka pravidla pro SplashScreen a WebView2
-- `COLOR_STYLE_GUIDE_v1.0.md` - pouzite barvy tlacitek vcetne HEX kodu
-- `RELEASE_CHECKLIST_v1.0_to_v1.1.md` - checklist pro overeni a pripravu v1.1
-- `CHANGELOG_v1.0.md` - souhrn zmen ve v1.0
+## Token Vault Safety
 
-Finalni stav projektu:
+Token values are stored with Windows DPAPI for the current Windows user. A copied vault cannot be decrypted on another Windows user profile or machine. Token Manager still warns if the vault is placed in risky locations.
 
-- Verze: `v1.0`
-- Git commit: `07184b5`
-- Git tag: `v1.0`
+Use `%USERPROFILE%\.token-manager\secrets.json` or another private, non-synced folder for the vault. Avoid project folders, `.openclaw`, Git repositories, cloud sync folders, and shared folders.
 
-Puvodni finalni balicky:
+## Themes
 
-- `OpenClawManager-v1.0-source.zip`
-- `OpenClawManager-v1.0-runtime.zip`
+Settings lets you switch between Legacy and Modern themes. Modern shows the splash panel and bitmap icons; Legacy keeps the simpler classic layout. Language, theme, paths, and Token Manager vault path are saved in `%APPDATA%\OpenClawManager\settings.json`.
 
+## Offline Terminal
+
+The embedded terminal uses local xterm.js files included under `Resources/Terminal`, so it does not need CDN or internet access at runtime.
+
+## Smoke Test
+
+- Start the app and confirm the status bar shows `v1.0`.
+- Start Gateway.
+- Open OpenClaw TUI.
+- Open Gateway Log and Live Log.
+- Run Cleaning Tool in preview mode.
+- In Token Manager, add a token, redact a sample file, verify the redacted file, then restore it.
+- Open Settings and About.
+
+## Build
+
+```powershell
+dotnet build
+dotnet run --project TokenService.Tests\TokenService.Tests.csproj
+dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
+```
+
+## Branch Model
+
+```
+master          ← stable releases only (v1.0, v1.1, ...)
+develop/v1.1    ← shared development branch
+codex/v1.1-*    ← Codex working branches
+claude/v1.1-*   ← Claude working branches
+```
+
+See [Docs/COLLABORATION.md](Docs/COLLABORATION.md) for full details on the AI collaboration model.
+
+## Development
+
+This project is developed by Bloom with assistance from two AI agents — Claude (Anthropic) and Codex (OpenAI). Claude handles documentation, architecture review, and release notes. Codex handles code, refactoring, builds, and tests.
