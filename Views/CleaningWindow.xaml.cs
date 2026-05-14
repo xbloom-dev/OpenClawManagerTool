@@ -21,6 +21,7 @@ public partial class CleaningWindow : Window
     public CleaningWindow()
     {
         InitializeComponent();
+        Title = L10n.IsCzech ? "OpenClaw Manager — Vyčistit soubory" : "OpenClaw Manager — Cleaning Tool";
 
         BtnDryRun.Click += (_, _) => RunCleanup(dryRun: true);
         BtnRun.Click += BtnRun_Click;

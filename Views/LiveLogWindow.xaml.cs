@@ -67,6 +67,7 @@ public partial class LiveLogWindow : Window
         BtnCopy.Content    = cs ? "Kopírovat" : "Copy";
         BtnClose.Content   = cs ? "Zavřít" : "Close";
         BtnCopy.ToolTip    = cs ? "Zkopíruje celý zobrazený log do schránky." : "Copies displayed log to clipboard.";
+        BtnClose.ToolTip   = cs ? "Zavře okno živého logu." : "Closes the live log window.";
         TxtCopiedFeedback.Text = "✓ " + (cs ? "Zkopírováno" : "Copied");
     }
 

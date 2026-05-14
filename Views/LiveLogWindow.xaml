@@ -44,6 +44,7 @@
                     Content="Kopírovat"
                     Width="100" Height="24"
                     Margin="4,2"
+                    Background="#D0E8FF"
                     ToolTip="Zkopíruje celý zobrazený log do schránky." />
 
             <Button Grid.Column="3"
@@ -51,6 +52,7 @@
                     Content="Zavřít"
                     Width="80" Height="24"
                     Margin="4,2"
+                    Background="#FFD0D0"
                     IsCancel="True" />
         </Grid>
 

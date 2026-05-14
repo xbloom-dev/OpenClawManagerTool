@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         Title="OpenClaw Manager — O aplikaci"
-        Height="480" Width="440"
+        Height="535" Width="440"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False">
@@ -26,7 +26,7 @@
                        Margin="0,0,0,4" />
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,12">
-                <TextBlock Text="v0.99  |  " Foreground="Gray" FontSize="12" />
+                <TextBlock Text="v1.0  |  " Foreground="Gray" FontSize="12" />
                 <TextBlock Text=".NET 8  |  WPF  |  WebView2 + ConPTY"
                            Foreground="Gray" FontSize="12" />
             </StackPanel>
@@ -42,6 +42,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition /> <RowDefinition /> <RowDefinition />
                         <RowDefinition /> <RowDefinition /> <RowDefinition />
+                        <RowDefinition /> <RowDefinition />
                     </Grid.RowDefinitions>
 
                     <TextBlock Grid.Row="0" Grid.Column="0" Text="Ctrl+T" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
@@ -59,8 +60,14 @@
                     <TextBlock Grid.Row="4" Grid.Column="0" Text="Ctrl+," FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
                     <TextBlock Grid.Row="4" Grid.Column="2" x:Name="TxtShortcut_Settings" FontSize="11" />
 
-                    <TextBlock Grid.Row="5" Grid.Column="0" Text="F1" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
-                    <TextBlock Grid.Row="5" Grid.Column="2" x:Name="TxtShortcut_F1" FontSize="11" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Ctrl+L" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="5" Grid.Column="2" x:Name="TxtShortcut_L" FontSize="11" />
+
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="F1" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="6" Grid.Column="2" x:Name="TxtShortcut_F1" FontSize="11" />
+
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Alt+F4" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="7" Grid.Column="2" x:Name="TxtShortcut_AltF4" FontSize="11" />
                 </Grid>
             </Border>
         </StackPanel>

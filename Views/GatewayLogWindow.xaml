@@ -60,6 +60,7 @@
                     Content="Kopírovat"
                     Width="100" Height="24"
                     Margin="4,0"
+                    Background="#D0E8FF"
                     ToolTip="Zkopíruje celý zobrazený log do schránky." />
 
             <!-- Feedback text "Zkopírováno" — zobrazí se vedle Kopírovat na 2s -->
@@ -91,6 +92,7 @@
                     Content="Živá data"
                     Width="100" Height="24"
                     Margin="4,2"
+                    Background="#D0FFD0"
                     ToolTip="Otevře okno pro živé sledování logu. Toto okno se zavře." />
 
             <Button Grid.Column="2"
@@ -98,6 +100,7 @@
                     Content="Zavřít"
                     Width="80" Height="24"
                     Margin="4,2"
+                    Background="#FFD0D0"
                     IsCancel="True" />
         </Grid>
 

@@ -20,8 +20,10 @@ public enum AppTheme
 /// </summary>
 public class AppSettings
 {
+    public const int CurrentSchemaVersion = 1;
+
     /// <summary>Verze schématu nastavení pro budoucí migrace.</summary>
-    public int SchemaVersion { get; set; } = 1;
+    public int SchemaVersion { get; set; } = CurrentSchemaVersion;
 
     /// <summary>Cesta k OpenClaw konfiguraci (~\.openclaw)</summary>
     public string OpenClawPath { get; set; } =

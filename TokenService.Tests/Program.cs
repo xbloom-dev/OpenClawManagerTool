@@ -1,5 +1,6 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
+using OpenClawManager.Models;
 using OpenClawManager.Services;
 
 var root = Path.Combine(Path.GetTempPath(), "OpenClawManager.TokenService.Tests", Guid.NewGuid().ToString("N"));
@@ -15,6 +16,7 @@ try
     VaultIsEncryptedAtRest();
     VaultSafetyDetectsRiskyPaths();
     OpenClawCommandValidationRejectsShellCharacters();
+    AppSettingsMigrationFillsMissingValues();
 
     Console.WriteLine("TokenService tests OK.");
     return 0;
@@ -159,6 +161,33 @@ void OpenClawCommandValidationRejectsShellCharacters()
     Assert(!GatewayService.TryValidateOpenClawCommand("openclaw; calc", out _), "Semicolon should be rejected.");
     Assert(!GatewayService.TryValidateOpenClawCommand("openclaw & calc", out _), "Ampersand should be rejected.");
     Assert(!GatewayService.TryValidateOpenClawCommand("C:\\Tools\\bad\"path.cmd", out _), "Quote should be rejected.");
+}
+
+void AppSettingsMigrationFillsMissingValues()
+{
+    var settings = new AppSettings
+    {
+        SchemaVersion = 0,
+        OpenClawPath = "",
+        TempPath = "",
+        OpenClawCommand = "",
+        PowerShellWorkingDir = null!,
+        CleanupAgents = null!,
+        TokenManagerSecretsPath = "",
+        Language = "en"
+    };
+
+    var migrated = SettingsService.MigrateSettings(settings, out var changed);
+
+    Assert(changed, "Migration should report changes for legacy settings.");
+    Assert(migrated.SchemaVersion == AppSettings.CurrentSchemaVersion, "Migration should set current schema version.");
+    Assert(!string.IsNullOrWhiteSpace(migrated.OpenClawPath), "Migration should fill OpenClaw path.");
+    Assert(!string.IsNullOrWhiteSpace(migrated.TempPath), "Migration should fill temp path.");
+    Assert(!string.IsNullOrWhiteSpace(migrated.OpenClawCommand), "Migration should fill OpenClaw command.");
+    Assert(migrated.PowerShellWorkingDir != null, "Migration should fill PowerShell working directory.");
+    Assert(migrated.CleanupAgents.Count > 0, "Migration should fill cleanup agents.");
+    Assert(!string.IsNullOrWhiteSpace(migrated.TokenManagerSecretsPath), "Migration should fill token vault path.");
+    Assert(migrated.Language == "EN", "Migration should normalize language.");
 }
 
 string NewCase()

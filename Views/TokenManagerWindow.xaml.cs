@@ -16,8 +16,8 @@ public partial class TokenManagerWindow : Window
     private bool? _isTrackedByGit;
 
     private string VaultPath => SettingsService.Current.TokenManagerSecretsPath;
-    private bool Cs => L10n.IsCzech;
-    private string T(string cs, string en) => Cs ? cs : en;
+    private static string S(string key) => L10n.Get(key);
+    private static string F(string key, params object[] args) => L10n.Format(key, args);
 
     public TokenManagerWindow()
     {
@@ -48,36 +48,62 @@ public partial class TokenManagerWindow : Window
 
         ApplyLocalization();
         TxtVaultPath.Text = VaultPath;
-        SetVerifyStatus(T("Verify: zatím neprovedeno", "Verify: not run yet"), Brushes.Gray);
-        AppendOutput(T("Token Manager připraven.", "Token Manager ready."));
+        SetVerifyStatus(S("Str_Token_VerifyNotRun"), Brushes.Gray);
+        AppendOutput(S("Str_Token_Ready"));
         LoadTokens();
     }
 
     private void ApplyLocalization()
     {
-        Title = T("OpenClaw Manager - Správce API klíčů", "OpenClaw Manager - Token Manager");
-        GrpVault.Header = "Vault";
-        TxtVaultLabel.Text = "secrets.json:";
-        BtnInitVault.Content = T("Inicializovat", "Initialize");
-        BtnRefresh.Content = T("Obnovit", "Refresh");
-        BtnOpenVaultFolder.Content = T("Složka", "Folder");
-        BtnOpenVaultFolder.ToolTip = T("Otevře složku vaultu.", "Opens the vault folder.");
-        BtnAddGitIgnore.ToolTip = T("Přidá cestu k vaultu do nejbližšího .gitignore.", "Adds the vault path to the nearest .gitignore.");
-        GrpTokens.Header = T("Tokeny", "Tokens");
-        ColDescription.Header = T("Popis", "Description");
-        ColCreated.Header = T("Vytvořeno", "Created");
-        BtnAdd.Content = T("Přidat", "Add");
-        BtnEdit.Content = T("Upravit", "Edit");
-        BtnRemove.Content = T("Smazat", "Delete");
-        BtnRotate.Content = T("Rotovat", "Rotate");
-        BtnCopyPlaceholder.Content = "Placeholder";
-        BtnCopyPlaceholder.ToolTip = T("Zkopíruje placeholder vybraného tokenu.", "Copies the selected token placeholder.");
-        GrpFileOps.Header = T("Operace nad souborem", "File operations");
-        TxtFileLabel.Text = T("Soubor:", "File:");
-        BtnBrowseTarget.Content = T("Procházet...", "Browse...");
-        BtnRedactPreview.Content = T("Náhled", "Preview");
-        ChkRestoreInPlace.ToolTip = T("Když je vypnuto, Restore vytvoří výstupní .restored soubor.", "When off, Restore creates a .restored output file.");
-        BtnClose.Content = T("Zavřít", "Close");
+        Title = S("Str_Token_Title");
+        GrpVault.Header = S("Str_Token_GroupVault");
+        TxtVaultLabel.Text = S("Str_Token_VaultLabel");
+        BtnInitVault.Content = S("Str_Token_InitVault");
+        BtnInitVault.ToolTip = S("Str_Token_TipInitVault");
+        BtnRefresh.Content = S("Str_Token_Refresh");
+        BtnRefresh.ToolTip = S("Str_Token_TipRefresh");
+        BtnOpenVaultFolder.Content = S("Str_Token_Folder");
+        BtnOpenVaultFolder.ToolTip = S("Str_Token_TipOpenVaultFolder");
+        BtnAddGitIgnore.ToolTip = S("Str_Token_TipAddGitIgnore");
+        GrpTokens.Header = S("Str_Token_GroupTokens");
+        ColDescription.Header = S("Str_Token_Description");
+        ColCreated.Header = S("Str_Token_Created");
+        ColPreview.Header = S("Str_Token_Preview");
+        BtnAdd.Content = S("Str_Token_Add");
+        BtnAdd.ToolTip = S("Str_Token_TipAdd");
+        BtnImport.Content = S("Str_Token_Import");
+        BtnImport.ToolTip = S("Str_Token_TipImport");
+        BtnEdit.Content = S("Str_Token_Edit");
+        BtnEdit.ToolTip = S("Str_Token_TipEdit");
+        BtnRemove.Content = S("Str_Token_Delete");
+        BtnRemove.ToolTip = S("Str_Token_TipDelete");
+        BtnRotate.Content = S("Str_Token_Rotate");
+        BtnRotate.ToolTip = S("Str_Token_TipRotate");
+        BtnCopyPlaceholder.Content = S("Str_Token_CopyPlaceholder");
+        BtnCopyPlaceholder.ToolTip = S("Str_Token_TipCopyPlaceholder");
+        GrpFileOps.Header = S("Str_Token_GroupFileOps");
+        TxtFileLabel.Text = S("Str_Token_File");
+        BtnBrowseTarget.Content = S("Str_BtnBrowse");
+        BtnBrowseTarget.Background = new SolidColorBrush(Color.FromRgb(0xD0, 0xE8, 0xFF));
+        BtnBrowseTarget.ToolTip = S("Str_Token_TipBrowseTarget");
+        BtnRedactPreview.Content = S("Str_Token_RedactPreview");
+        BtnRedactPreview.ToolTip = S("Str_Token_TipRedactPreview");
+        BtnRedact.Content = S("Str_Token_Redact");
+        BtnRedact.Background = new SolidColorBrush(Color.FromRgb(0xD0, 0xFF, 0xD0));
+        BtnRedact.FontWeight = FontWeights.Bold;
+        BtnRedact.ToolTip = S("Str_Token_TipRedact");
+        BtnRestore.Content = S("Str_Token_Restore");
+        BtnRestore.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xD0, 0xD0));
+        BtnRestore.ToolTip = S("Str_Token_TipRestore");
+        BtnVerify.Content = S("Str_Token_Verify");
+        BtnVerify.Background = new SolidColorBrush(Color.FromRgb(0xD0, 0xE8, 0xFF));
+        BtnVerify.FontWeight = FontWeights.Bold;
+        BtnVerify.ToolTip = S("Str_Token_TipVerify");
+        ChkRestoreInPlace.Content = S("Str_Token_RestoreInPlace");
+        ChkRestoreInPlace.ToolTip = S("Str_Token_TipRestoreInPlace");
+        BtnClose.Content = S("Str_BtnClose");
+        BtnClose.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xD0, 0xD0));
+        BtnClose.ToolTip = S("Str_Token_TipClose");
     }
 
     private void SettingsService_SettingsChanged(object? sender, EventArgs e)
@@ -93,7 +119,7 @@ public partial class TokenManagerWindow : Window
         try
         {
             var created = TokenService.EnsureVaultExists(VaultPath);
-            AppendOutput(created ? T($"Vault vytvořen a chráněn DPAPI: {VaultPath}", $"Vault created and protected with DPAPI: {VaultPath}") : T($"Vault už existuje: {VaultPath}", $"Vault already exists: {VaultPath}"));
+            AppendOutput(created ? F("Str_Token_VaultCreated", VaultPath) : F("Str_Token_VaultExists", VaultPath));
             LoadTokens(forceGitCheck: true);
         }
         catch (Exception ex) { ShowError(ex.Message); }
@@ -103,8 +129,8 @@ public partial class TokenManagerWindow : Window
     {
         var safety = TokenService.AnalyzeVaultPath(VaultPath, SettingsService.Current.OpenClawPath);
         if (safety.IsSafe) return true;
-        var message = T("Umístění vaultu má bezpečnostní varování:\n\n", "The vault location has security warnings:\n\n") + string.Join("\n", safety.Warnings) + T("\n\nPokračovat i tak?", "\n\nContinue anyway?");
-        return MessageBox.Show(message, T("Rizikové umístění vaultu", "Risky vault location"), MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
+        var message = F("Str_Token_RiskyVaultMessage", string.Join("\n", safety.Warnings));
+        return MessageBox.Show(message, S("Str_Token_RiskyVaultTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
     }
 
     private void LoadTokens(bool forceGitCheck = false)
@@ -116,15 +142,15 @@ public partial class TokenManagerWindow : Window
         {
             if (!File.Exists(VaultPath))
             {
-                AppendOutput(T($"Vault neexistuje. Klikni na Inicializovat: {VaultPath}", $"Vault does not exist. Click Initialize: {VaultPath}"));
+                AppendOutput(F("Str_Token_VaultMissingInit", VaultPath));
                 UpdateTokenButtons();
                 return;
             }
             var vault = TokenService.LoadVault(VaultPath);
             foreach (var token in vault.Tokens.OrderBy(t => t.Id, StringComparer.Ordinal)) _tokens.Add(token);
-            AppendOutput(T($"Načteno tokenů: {_tokens.Count}", $"Loaded tokens: {_tokens.Count}"));
-            AppendOutput(TokenService.IsVaultEncryptedAtRest(VaultPath) ? T("Vault je uložen šifrovaně přes Windows DPAPI.", "Vault is stored encrypted with Windows DPAPI.") : T("[VAROVÁNÍ] Vault stále obsahuje plaintext hodnoty. Ulož token pro migraci na DPAPI.", "[WARNING] Vault still contains plaintext values. Save a token to migrate it to DPAPI."));
-            if (IsVaultTrackedByGitCached(forceGitCheck)) AppendOutput(T("[VAROVÁNÍ] secrets.json je trackovaný Gitem. Odstraň ho z indexu a přidej do .gitignore.", "[WARNING] secrets.json is tracked by Git. Remove it from the index and add it to .gitignore."));
+            AppendOutput(F("Str_Token_LoadedCount", _tokens.Count));
+            AppendOutput(TokenService.IsVaultEncryptedAtRest(VaultPath) ? S("Str_Token_VaultEncrypted") : S("Str_Token_VaultPlainWarning"));
+            if (IsVaultTrackedByGitCached(forceGitCheck)) AppendOutput(S("Str_Token_VaultGitWarning"));
         }
         catch (Exception ex) { ShowError(ex.Message); }
         UpdateTokenButtons();
@@ -142,50 +168,50 @@ public partial class TokenManagerWindow : Window
     {
         var safety = TokenService.AnalyzeVaultPath(VaultPath, SettingsService.Current.OpenClawPath);
         VaultWarningBanner.Visibility = safety.IsSafe ? Visibility.Collapsed : Visibility.Visible;
-        TxtVaultWarning.Text = safety.IsSafe ? "" : T("Bezpečnostní upozornění: ", "Security warning: ") + string.Join(" ", safety.Warnings);
+        TxtVaultWarning.Text = safety.IsSafe ? "" : S("Str_Token_SecurityWarningPrefix") + string.Join(" ", safety.Warnings);
     }
 
     private void AddToken()
     {
-        var dialog = new TokenEditWindow(T("Přidat token", "Add token")) { Owner = this };
+        var dialog = new TokenEditWindow(S("Str_Token_AddTitle")) { Owner = this };
         if (dialog.ShowDialog() != true) return;
-        try { TokenService.AddToken(VaultPath, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(T($"Token přidán: {dialog.TokenId}", $"Token added: {dialog.TokenId}")); LoadTokens(); }
+        try { TokenService.AddToken(VaultPath, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(F("Str_Token_TokenAdded", dialog.TokenId)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
     private void ImportTokenFromFile()
     {
-        var fileDialog = new OpenFileDialog { Title = T("Vyber soubor, ze kterého chceš označit token", "Select a file to import a token from"), Filter = T("Všechny soubory (*.*)|*.*", "All files (*.*)|*.*"), CheckFileExists = true };
+        var fileDialog = new OpenFileDialog { Title = S("Str_Token_FileDialogImportTitle"), Filter = S("Str_Token_FileDialogAllFiles"), CheckFileExists = true };
         if (fileDialog.ShowDialog() != true) return;
         var dialog = new TokenImportWindow(fileDialog.FileName) { Owner = this };
         if (dialog.ShowDialog() != true) return;
-        try { TokenService.AddToken(VaultPath, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(T($"Token importován: {dialog.TokenId}", $"Token imported: {dialog.TokenId}")); LoadTokens(); }
+        try { TokenService.AddToken(VaultPath, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(F("Str_Token_TokenImported", dialog.TokenId)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
     private void EditSelectedToken()
     {
         if (TokenGrid.SelectedItem is not TokenEntry token) return;
-        var dialog = new TokenEditWindow(T("Upravit token", "Edit token"), token) { Owner = this };
+        var dialog = new TokenEditWindow(S("Str_Token_EditTitle"), token) { Owner = this };
         if (dialog.ShowDialog() != true) return;
-        try { TokenService.UpdateToken(VaultPath, token.Id, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(T($"Token upraven: {dialog.TokenId}", $"Token updated: {dialog.TokenId}")); LoadTokens(); }
+        try { TokenService.UpdateToken(VaultPath, token.Id, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(F("Str_Token_TokenUpdated", dialog.TokenId)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
     private void RemoveSelectedToken()
     {
         if (TokenGrid.SelectedItem is not TokenEntry token) return;
-        if (MessageBox.Show(T($"Opravdu smazat token '{token.Id}'?", $"Delete token '{token.Id}'?"), T("Smazat token", "Delete token"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-        try { TokenService.RemoveToken(VaultPath, token.Id); AppendOutput(T($"Token smazán: {token.Id}", $"Token deleted: {token.Id}")); LoadTokens(); }
+        if (MessageBox.Show(F("Str_Token_DeleteConfirm", token.Id), S("Str_Token_DeleteTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        try { TokenService.RemoveToken(VaultPath, token.Id); AppendOutput(F("Str_Token_TokenDeleted", token.Id)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
     private void RotateSelectedToken()
     {
         if (TokenGrid.SelectedItem is not TokenEntry token) return;
-        var dialog = new TokenEditWindow(T("Rotovat token", "Rotate token"), token, idReadOnly: true, rotateOnly: true) { Owner = this };
+        var dialog = new TokenEditWindow(S("Str_Token_RotateTitle"), token, idReadOnly: true, rotateOnly: true) { Owner = this };
         if (dialog.ShowDialog() != true) return;
-        try { TokenService.RotateToken(VaultPath, token.Id, dialog.TokenValue); AppendOutput(T($"Token rotován: {token.Id}", $"Token rotated: {token.Id}")); LoadTokens(); }
+        try { TokenService.RotateToken(VaultPath, token.Id, dialog.TokenValue); AppendOutput(F("Str_Token_TokenRotated", token.Id)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
@@ -193,7 +219,7 @@ public partial class TokenManagerWindow : Window
     {
         if (TokenGrid.SelectedItem is not TokenEntry token) return;
         Clipboard.SetText(token.Placeholder);
-        AppendOutput(T($"Placeholder zkopírován: {token.Placeholder}", $"Placeholder copied: {token.Placeholder}"));
+        AppendOutput(F("Str_Token_PlaceholderCopied", token.Placeholder));
     }
 
     private void OpenVaultFolder()
@@ -210,7 +236,7 @@ public partial class TokenManagerWindow : Window
 
     private void BrowseTargetFile()
     {
-        var dialog = new OpenFileDialog { Title = T("Vyber soubor pro Token Manager", "Select a file for Token Manager"), Filter = T("Všechny soubory (*.*)|*.*", "All files (*.*)|*.*"), CheckFileExists = true };
+        var dialog = new OpenFileDialog { Title = S("Str_Token_FileDialogTargetTitle"), Filter = S("Str_Token_FileDialogAllFiles"), CheckFileExists = true };
         if (dialog.ShowDialog() == true) TxtTargetFile.Text = dialog.FileName;
     }
 
@@ -222,9 +248,9 @@ public partial class TokenManagerWindow : Window
             var inputPath = TxtTargetFile.Text.Trim();
             var outputPath = TokenService.BuildDefaultOutputPath(inputPath, "redacted");
             var result = TokenService.RedactFile(VaultPath, inputPath, outputPath, overwrite: true, dryRun: true);
-            AppendOutput(T($"NÁHLED: Redact by nahradil {result.TotalCount} výskytů ({result.UniqueCount} unique IDs)", $"PREVIEW: Redact would replace {result.TotalCount} occurrences ({result.UniqueCount} unique IDs)"));
-            AppendOutput(result.TokenIds.Count > 0 ? $"ID: {string.Join(", ", result.TokenIds)}" : T("ID: žádné tokeny nenalezeny", "ID: no tokens found"));
-            AppendOutput(T($"Výstup by byl: {result.OutputPath}", $"Output would be: {result.OutputPath}"));
+            AppendOutput(F("Str_Token_RedactPreviewResult", result.TotalCount, result.UniqueCount));
+            AppendOutput(result.TokenIds.Count > 0 ? $"ID: {string.Join(", ", result.TokenIds)}" : S("Str_Token_NoTokensFound"));
+            AppendOutput(F("Str_Token_OutputWouldBe", result.OutputPath));
         }
         catch (Exception ex) { ShowError(ex.Message); }
     }
@@ -237,11 +263,11 @@ public partial class TokenManagerWindow : Window
         var overwrite = false;
         if (File.Exists(outputPath))
         {
-            var confirm = MessageBox.Show(T($"Výstupní soubor už existuje:\n{outputPath}\n\nPřepsat?", $"Output file already exists:\n{outputPath}\n\nOverwrite?"), T("Přepsat výstup", "Overwrite output"), MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var confirm = MessageBox.Show(F("Str_Token_OutputExistsConfirm", outputPath), S("Str_Token_OverwriteOutput"), MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (confirm != MessageBoxResult.Yes) return;
             overwrite = true;
         }
-        try { var result = TokenService.RedactFile(VaultPath, inputPath, outputPath, overwrite); AppendOutput($"Redacted {result.TotalCount} tokens ({result.UniqueCount} unique IDs)"); AppendOutput(T($"Výstup: {result.OutputPath}", $"Output: {result.OutputPath}")); }
+        try { var result = TokenService.RedactFile(VaultPath, inputPath, outputPath, overwrite); AppendOutput(F("Str_Token_RedactedResult", result.TotalCount, result.UniqueCount)); AppendOutput(F("Str_Token_OutputPath", result.OutputPath)); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
@@ -250,8 +276,8 @@ public partial class TokenManagerWindow : Window
         if (!EnsureVaultAndTarget()) return;
         var inputPath = TxtTargetFile.Text.Trim();
         var inplace = ChkRestoreInPlace.IsChecked == true;
-        var confirmText = inplace ? T("Restore přepíše vybraný soubor a nejdřív vytvoří .bak zálohu.\n\nPokračovat?", "Restore will overwrite the selected file after creating a .bak backup.\n\nContinue?") : T("Restore vytvoří nový .restored soubor a původní soubor nechá beze změny.\n\nPokračovat?", "Restore will create a .restored file and leave the original unchanged.\n\nContinue?");
-        if (MessageBox.Show(confirmText, T("Restore souboru", "Restore file"), MessageBoxButton.YesNo, inplace ? MessageBoxImage.Warning : MessageBoxImage.Question) != MessageBoxResult.Yes) return;
+        var confirmText = inplace ? S("Str_Token_RestoreInPlaceConfirm") : S("Str_Token_RestoreCopyConfirm");
+        if (MessageBox.Show(confirmText, S("Str_Token_RestoreFileTitle"), MessageBoxButton.YesNo, inplace ? MessageBoxImage.Warning : MessageBoxImage.Question) != MessageBoxResult.Yes) return;
         try
         {
             TokenFileOperationResult result;
@@ -265,19 +291,19 @@ public partial class TokenManagerWindow : Window
                 var overwrite = false;
                 if (File.Exists(outputPath))
                 {
-                    var overwriteConfirm = MessageBox.Show(T($"Výstupní soubor už existuje:\n{outputPath}\n\nPřepsat?", $"Output file already exists:\n{outputPath}\n\nOverwrite?"), T("Přepsat výstup", "Overwrite output"), MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    var overwriteConfirm = MessageBox.Show(F("Str_Token_OutputExistsConfirm", outputPath), S("Str_Token_OverwriteOutput"), MessageBoxButton.YesNo, MessageBoxImage.Question);
                     if (overwriteConfirm != MessageBoxResult.Yes) return;
                     overwrite = true;
                 }
                 result = TokenService.RestoreFile(VaultPath, inputPath, outputPath, overwrite);
             }
-            AppendOutput($"Restored {result.TotalCount} placeholders ({result.UniqueCount} unique IDs)");
-            AppendOutput(T($"Výstup: {result.OutputPath}", $"Output: {result.OutputPath}"));
-            if (result.BackupPath != null) AppendOutput(T($"Záloha: {result.BackupPath}", $"Backup: {result.BackupPath}"));
+            AppendOutput(F("Str_Token_RestoredResult", result.TotalCount, result.UniqueCount));
+            AppendOutput(F("Str_Token_OutputPath", result.OutputPath));
+            if (result.BackupPath != null) AppendOutput(F("Str_Token_BackupPath", result.BackupPath));
             if (result.UnknownPlaceholders.Count > 0)
             {
-                AppendOutput($"WARN: unknown placeholders skipped: {string.Join(", ", result.UnknownPlaceholders)}");
-                MessageBox.Show(T("Některé placeholdery nemají odpovídající token ve vaultu:\n", "Some placeholders do not have a matching token in the vault:\n") + string.Join("\n", result.UnknownPlaceholders), T("Neznámé placeholdery", "Unknown placeholders"), MessageBoxButton.OK, MessageBoxImage.Warning);
+                AppendOutput(F("Str_Token_UnknownPlaceholdersLog", string.Join(", ", result.UnknownPlaceholders)));
+                MessageBox.Show(F("Str_Token_UnknownPlaceholdersMessage", string.Join("\n", result.UnknownPlaceholders)), S("Str_Token_UnknownPlaceholdersTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
         catch (Exception ex) { ShowError(ex.Message); }
@@ -291,30 +317,30 @@ public partial class TokenManagerWindow : Window
             var result = TokenService.VerifyFile(VaultPath, TxtTargetFile.Text.Trim());
             if (result.IsSafe)
             {
-                AppendOutput("OK: file is safe to share");
-                SetVerifyStatus(T("Verify: soubor je bezpečný ke sdílení", "Verify: file is safe to share"), Brushes.DarkGreen);
-                MessageBox.Show(T("Soubor je bezpečný ke sdílení.", "File is safe to share."), "Verify", MessageBoxButton.OK, MessageBoxImage.Information);
+                AppendOutput(S("Str_Token_FileSafeLog"));
+                SetVerifyStatus(S("Str_Token_VerifySafeStatus"), Brushes.DarkGreen);
+                MessageBox.Show(S("Str_Token_FileSafeMessage"), S("Str_Token_VerifyTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
             if (result.FoundTokenIds.Count > 0)
             {
-                AppendOutput(T($"NESDÍLET: soubor obsahuje reálné tokeny: {string.Join(", ", result.FoundTokenIds)}", $"DO NOT SHARE: file contains real tokens: {string.Join(", ", result.FoundTokenIds)}"));
-                SetVerifyStatus(T($"Verify: NESDÍLET, nalezeny reálné tokeny ({result.FoundTokenIds.Count})", $"Verify: DO NOT SHARE, real tokens found ({result.FoundTokenIds.Count})"), Brushes.DarkRed);
+                AppendOutput(F("Str_Token_DoNotShareLog", string.Join(", ", result.FoundTokenIds)));
+                SetVerifyStatus(F("Str_Token_DoNotShareStatus", result.FoundTokenIds.Count), Brushes.DarkRed);
             }
             if (result.UnknownPlaceholders.Count > 0)
             {
-                AppendOutput($"WARN: stale placeholders: {string.Join(", ", result.UnknownPlaceholders)}");
-                if (result.FoundTokenIds.Count == 0) SetVerifyStatus(T($"Verify: stale placeholdery ({result.UnknownPlaceholders.Count})", $"Verify: stale placeholders ({result.UnknownPlaceholders.Count})"), Brushes.DarkOrange);
+                AppendOutput(F("Str_Token_StalePlaceholdersLog", string.Join(", ", result.UnknownPlaceholders)));
+                if (result.FoundTokenIds.Count == 0) SetVerifyStatus(F("Str_Token_StalePlaceholdersStatus", result.UnknownPlaceholders.Count), Brushes.DarkOrange);
             }
-            MessageBox.Show(T("Soubor není bezpečný ke sdílení. Detaily jsou ve výstupu.", "File is not safe to share. Details are in the output."), "Verify", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(S("Str_Token_FileUnsafeMessage"), S("Str_Token_VerifyTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
     private bool EnsureVaultAndTarget()
     {
-        if (!File.Exists(VaultPath)) { ShowError(T("Vault neexistuje. Nejdřív klikni na Inicializovat.", "Vault does not exist. Click Initialize first.")); return false; }
-        if (string.IsNullOrWhiteSpace(TxtTargetFile.Text) || !File.Exists(TxtTargetFile.Text.Trim())) { ShowError(T("Vyber existující soubor.", "Select an existing file.")); return false; }
+        if (!File.Exists(VaultPath)) { ShowError(S("Str_Token_VaultMissingError")); return false; }
+        if (string.IsNullOrWhiteSpace(TxtTargetFile.Text) || !File.Exists(TxtTargetFile.Text.Trim())) { ShowError(S("Str_Token_TargetMissingError")); return false; }
         return true;
     }
 
@@ -332,8 +358,8 @@ public partial class TokenManagerWindow : Window
         try
         {
             var result = TokenService.AddVaultToGitIgnore(VaultPath);
-            AppendOutput(result.Added ? T($"Přidáno do .gitignore: {result.Pattern}", $"Added to .gitignore: {result.Pattern}") : T($".gitignore už obsahuje: {result.Pattern}", $".gitignore already contains: {result.Pattern}"));
-            AppendOutput($"Repo: {result.RepoPath}");
+            AppendOutput(result.Added ? F("Str_Token_GitIgnoreAdded", result.Pattern) : F("Str_Token_GitIgnoreExists", result.Pattern));
+            AppendOutput(F("Str_Token_RepoPath", result.RepoPath));
             _isTrackedByGit = null;
             LoadTokens(forceGitCheck: true);
         }
@@ -342,8 +368,8 @@ public partial class TokenManagerWindow : Window
 
     private void ShowError(string message)
     {
-        AppendOutput(T($"[CHYBA] {message}", $"[ERROR] {message}"));
-        MessageBox.Show(message, "Token Manager", MessageBoxButton.OK, MessageBoxImage.Error);
+        AppendOutput(F("Str_Token_Error", message));
+        MessageBox.Show(message, S("Str_Token_Title"), MessageBoxButton.OK, MessageBoxImage.Error);
     }
 
     private void SetVerifyStatus(string message, Brush color)

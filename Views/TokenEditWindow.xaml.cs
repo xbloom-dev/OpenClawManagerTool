@@ -10,8 +10,7 @@ public partial class TokenEditWindow : Window
     public string TokenValue => PwdValue.Password;
     public string TokenDescription => TxtDescription.Text.Trim();
 
-    private bool Cs => L10n.IsCzech;
-    private string T(string cs, string en) => Cs ? cs : en;
+    private static string S(string key) => L10n.Get(key);
 
     public TokenEditWindow(string title, TokenEntry? token = null, bool idReadOnly = false, bool rotateOnly = false)
     {
@@ -27,8 +26,8 @@ public partial class TokenEditWindow : Window
             TxtId.Text = token.Id;
             TxtDescription.Text = token.Description;
             PwdValue.ToolTip = rotateOnly
-                ? T("Zadej novou hodnotu tokenu.", "Enter the new token value.")
-                : T("Nech prázdné, pokud chceš zachovat aktuální hodnotu.", "Leave empty to keep the current value.");
+                ? S("Str_Token_EditTipNewValue")
+                : S("Str_Token_EditTipKeepValue");
         }
 
         TxtId.IsReadOnly = idReadOnly;
@@ -41,16 +40,16 @@ public partial class TokenEditWindow : Window
 
     private void ApplyLocalization(bool editingExisting, bool rotateOnly)
     {
-        BtnSave.Content = T("Uložit", "Save");
-        BtnCancel.Content = T("Zrušit", "Cancel");
+        BtnSave.Content = S("Str_BtnSave");
+        BtnSave.ToolTip = S("Str_Token_TipEditSave");
+        BtnCancel.Content = S("Str_BtnCancel");
+        BtnCancel.ToolTip = S("Str_Token_TipEditCancel");
         TxtIdLabel.Text = "ID:";
-        TxtValueLabel.Text = T("Hodnota:", "Value:");
-        TxtDescriptionLabel.Text = T("Popis:", "Description:");
+        TxtValueLabel.Text = S("Str_Token_Value");
+        TxtDescriptionLabel.Text = S("Str_Token_Description") + ":";
         TxtHint.Text = editingExisting && !rotateOnly
-            ? T("ID smí obsahovat písmena, číslice a underscore. Nech hodnotu prázdnou pro zachování aktuálního tokenu.",
-                "ID may contain letters, digits and underscore. Leave value empty to keep the current token.")
-            : T("ID smí obsahovat písmena, číslice a underscore. Hodnota musí mít alespoň 8 znaků.",
-                "ID may contain letters, digits and underscore. Value must be at least 8 characters.");
+            ? S("Str_Token_EditHintKeep")
+            : S("Str_Token_EditHintNew");
     }
 
     private void BtnSave_Click(object? sender, RoutedEventArgs e)

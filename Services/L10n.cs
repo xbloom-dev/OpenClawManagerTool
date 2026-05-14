@@ -59,4 +59,16 @@ public static class L10n
             return key;
         }
     }
+
+    public static string Format(string key, params object[] args)
+    {
+        try
+        {
+            return string.Format(Get(key), args);
+        }
+        catch
+        {
+            return key;
+        }
+    }
 }

@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     private readonly DispatcherTimer _statusTimer;
     private DateTime? _gatewayStartTime;
     private int? _lastKnownGatewayPid;
+    private bool _isStatusUpdateRunning;
 
     private enum GatewayUiState { Stopped, Starting, Running, Failed }
     private GatewayUiState _gatewayState = GatewayUiState.Stopped;
@@ -63,7 +64,7 @@ public partial class MainWindow : Window
         _statusTimer.Start();
 
         ApplyLocalization();
-        _ = UpdateStatusAsync(); // první měření na pozadí — neblokovat konstruktor
+        _ = UpdateStatusAsync();
         Log(L10n.Get("Str_Log_AppStarted"));
 
         // v0.5: tema + splash screen (pořadí důležité: theme před splash)
@@ -170,6 +171,8 @@ public partial class MainWindow : Window
                 if (_gatewayState == GatewayUiState.Running)
                     BtnGatewayRestart_Click(this, new RoutedEventArgs());
                 e.Handled = true; break;
+            case Key.L:
+                OpenLiveGatewayLog(20); e.Handled = true; break;
             case Key.C:
                 if (shift) { BtnCleaningTool_Click(this, new RoutedEventArgs()); e.Handled = true; }
                 break;
@@ -184,25 +187,35 @@ public partial class MainWindow : Window
 
     private async Task UpdateStatusAsync()
     {
-        // MeasureAsync() běží na thread pool — UI thread není blokován
-        // WMI dotazy a nvidia-smi mohou trvat 100–500ms každý
-        var snap = await ResourceMonitor.MeasureAsync();
-
-        StatusRam.Text = $"RAM: {snap.RamUsedGb:F1}/{snap.RamTotalGb:F1} GB";
-        StatusCpu.Text = $"CPU: {snap.CpuPercent}%";
-
-        if (snap.VramUsedGb.HasValue)
+        if (_isStatusUpdateRunning) return;
+        _isStatusUpdateRunning = true;
+        try
         {
-            StatusVram.Text = $"VRAM: {snap.VramUsedGb.Value:F1}/{snap.VramTotalGb!.Value:F1} GB";
-            StatusVram.Visibility = Visibility.Visible;
-        }
-        else
-        {
-            StatusVram.Visibility = Visibility.Collapsed;
-        }
+            var snap = await ResourceMonitor.MeasureAsync();
+            StatusRam.Text = $"RAM: {snap.RamUsedGb:F1}/{snap.RamTotalGb:F1} GB";
+            StatusCpu.Text = $"CPU: {snap.CpuPercent}%";
 
-        UpdateGatewayStatus();
-        UpdateLatencyStats();
+            if (snap.VramUsedGb.HasValue)
+            {
+                StatusVram.Text = $"VRAM: {snap.VramUsedGb.Value:F1}/{snap.VramTotalGb!.Value:F1} GB";
+                StatusVram.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                StatusVram.Visibility = Visibility.Collapsed;
+            }
+
+            UpdateGatewayStatus();
+            UpdateLatencyStats();
+        }
+        catch (Exception ex)
+        {
+            Log($"[CHYBA] Status update selhal: {ex.Message}");
+        }
+        finally
+        {
+            _isStatusUpdateRunning = false;
+        }
     }
 
     private void UpdateGatewayStatus()
@@ -578,6 +591,13 @@ public partial class MainWindow : Window
         var logPath = SettingsService.Current.GetTodayGatewayLogPath();
         var dialog = new GatewayLogWindow(logPath, lines) { Owner = this };
         dialog.ShowDialog();
+    }
+
+    private void OpenLiveGatewayLog(int lines)
+    {
+        var logPath = SettingsService.Current.GetTodayGatewayLogPath();
+        var live = new LiveLogWindow(logPath, lines) { Owner = this };
+        live.Show();
     }
 
     private void OpenLogMenuItem_Click(object? sender, RoutedEventArgs e)

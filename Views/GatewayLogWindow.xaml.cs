@@ -45,6 +45,7 @@ public partial class GatewayLogWindow : Window
         BtnLiveLog.ToolTip  = cs
             ? "Otevře okno pro živé sledování logu. Toto okno se zavře."
             : "Opens live log monitoring window. This window will close.";
+        BtnClose.ToolTip    = cs ? "Zavře okno s logem." : "Closes the log window.";
         TxtCopiedFeedback.Text = "✓ " + (cs ? "Zkopírováno" : "Copied");
     }
 

@@ -9,3 +9,7 @@ obj/
 
 # LF/CRLF
 * text=auto
+WebView2Data/
+.token-manager/
+**/.token-manager/
+**/secrets.json

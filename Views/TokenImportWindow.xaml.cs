@@ -10,14 +10,14 @@ public partial class TokenImportWindow : Window
     public string TokenValue => TxtContent.SelectedText;
     public string TokenDescription => TxtDescription.Text.Trim();
 
-    private bool Cs => L10n.IsCzech;
-    private string T(string cs, string en) => Cs ? cs : en;
+    private static string S(string key) => L10n.Get(key);
+    private static string F(string key, params object[] args) => L10n.Format(key, args);
 
     public TokenImportWindow(string filePath)
     {
         InitializeComponent();
 
-        Title = T($"Import tokenu - {Path.GetFileName(filePath)}", $"Import token - {Path.GetFileName(filePath)}");
+        Title = F("Str_Token_ImportTitle", Path.GetFileName(filePath));
         ApplyLocalization();
         TxtContent.Text = File.ReadAllText(filePath);
 
@@ -27,25 +27,26 @@ public partial class TokenImportWindow : Window
 
     private void ApplyLocalization()
     {
-        BtnImport.Content = T("Importovat výběr", "Import selection");
-        BtnCancel.Content = T("Zrušit", "Cancel");
+        BtnImport.Content = S("Str_Token_ImportSelection");
+        BtnImport.ToolTip = S("Str_Token_TipImportSelection");
+        BtnCancel.Content = S("Str_BtnCancel");
+        BtnCancel.ToolTip = S("Str_Token_TipImportCancel");
         TxtIdLabel.Text = "ID:";
-        TxtDescriptionLabel.Text = T("Popis:", "Description:");
-        TxtHint.Text = T("Označ v textu hodnotu tokenu a klikni Importovat výběr.",
-            "Select the token value in the text and click Import selection.");
+        TxtDescriptionLabel.Text = S("Str_Token_Description") + ":";
+        TxtHint.Text = S("Str_Token_ImportHint");
     }
 
     private void BtnImport_Click(object? sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(TokenId))
         {
-            MessageBox.Show(T("Zadej ID tokenu.", "Enter token ID."), Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(S("Str_Token_ImportMissingId"), Title, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (string.IsNullOrEmpty(TokenValue))
         {
-            MessageBox.Show(T("Označ v textu hodnotu tokenu.", "Select the token value in the text."), Title, MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(S("Str_Token_ImportMissingValue"), Title, MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 

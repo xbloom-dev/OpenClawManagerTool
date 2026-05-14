@@ -11,6 +11,7 @@ namespace OpenClawManager;
 public partial class MainWindow
 {
     private DispatcherTimer? _splashProgressTimer;
+    private bool _splashVideoStarted;
 
     private void InitSplash()
     {
@@ -45,7 +46,7 @@ public partial class MainWindow
         {
             SplashMedia.Visibility    = Visibility.Collapsed;
             SplashProgress.Visibility = Visibility.Collapsed;
-            Log("[Splash] Zobrazuje se statický splash.png (fallback).");
+            Log("[Splash] Zobrazuje se statický splash.png (fallback), pokud je dostupný.");
         }
     }
 
@@ -56,6 +57,7 @@ public partial class MainWindow
         SplashMedia.Volume        = 1.0;
         SplashMedia.IsMuted       = false;
         SplashMedia.Source        = new Uri(mp4Path);
+        _splashVideoStarted       = true;
         SplashMedia.Play();
         Log("[Splash] SplashMedia.Play() spuštěno.");
     }
@@ -79,6 +81,12 @@ public partial class MainWindow
         SplashMedia.Visibility    = Visibility.Collapsed;
         SplashProgress.Visibility = Visibility.Collapsed;
         // SplashImage (PNG) zůstane jako fallback
+    }
+
+    private void SplashImage_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+    {
+        Log($"[Splash] CHYBA splash.png: {e.ErrorException?.Message ?? "(unknown)"}");
+        ShowAsciiSplashFallback();
     }
 
     private void SplashMedia_MediaEnded(object sender, RoutedEventArgs e)
@@ -105,6 +113,9 @@ public partial class MainWindow
 
     private void StopSplashVideo()
     {
+        if (!_splashVideoStarted && _splashProgressTimer == null && SplashMedia.Source == null)
+            return;
+
         _splashProgressTimer?.Stop();
         _splashProgressTimer = null;
         try
@@ -115,6 +126,7 @@ public partial class MainWindow
             SplashMedia.Source  = null;
         }
         catch { }
+        _splashVideoStarted = false;
         Log("[Splash] StopSplashVideo() dokončeno.");
     }
 
@@ -127,5 +139,25 @@ public partial class MainWindow
         // Obě témata: schovat ASCII art SplashBorder a zobrazit WebView
         Terminal.HideSplashBorder();
         Terminal.ShowWebView();
+    }
+
+    private void ShowAsciiSplashFallback()
+    {
+        StopSplashVideo();
+        SplashMedia.Visibility    = Visibility.Collapsed;
+        SplashProgress.Visibility = Visibility.Collapsed;
+        SplashOverlay.Visibility  = Visibility.Collapsed;
+
+        if (Terminal.IsTuiRunning)
+        {
+            Terminal.HideSplashBorder();
+            Terminal.ShowWebView();
+        }
+        else
+        {
+            Terminal.ShowSplashBorder();
+        }
+
+        Log("[Splash] Chybí video i PNG fallback, zobrazuji ASCII ART.");
     }
 }

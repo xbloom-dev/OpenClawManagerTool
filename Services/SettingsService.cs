@@ -41,7 +41,11 @@ public static class SettingsService
 
             var json = File.ReadAllText(SettingsFilePath);
             var settings = JsonSerializer.Deserialize<AppSettings>(json);
-            return settings ?? new AppSettings();
+            settings = MigrateSettings(settings ?? new AppSettings(), out var changed);
+            if (changed)
+                SaveToDisk(settings);
+
+            return settings;
         }
         catch
         {
@@ -49,17 +53,87 @@ public static class SettingsService
         }
     }
 
+    public static AppSettings MigrateSettings(AppSettings settings, out bool changed)
+    {
+        changed = false;
+        var defaults = new AppSettings();
+
+        if (settings.SchemaVersion < 1)
+            changed = true;
+
+        if (string.IsNullOrWhiteSpace(settings.OpenClawPath))
+        {
+            settings.OpenClawPath = defaults.OpenClawPath;
+            changed = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(settings.TempPath))
+        {
+            settings.TempPath = defaults.TempPath;
+            changed = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(settings.OpenClawCommand))
+        {
+            settings.OpenClawCommand = defaults.OpenClawCommand;
+            changed = true;
+        }
+
+        if (settings.PowerShellWorkingDir == null)
+        {
+            settings.PowerShellWorkingDir = defaults.PowerShellWorkingDir;
+            changed = true;
+        }
+
+        if (settings.CleanupAgents == null || settings.CleanupAgents.Count == 0)
+        {
+            settings.CleanupAgents = defaults.CleanupAgents;
+            changed = true;
+        }
+
+        if (string.IsNullOrWhiteSpace(settings.TokenManagerSecretsPath))
+        {
+            settings.TokenManagerSecretsPath = defaults.TokenManagerSecretsPath;
+            changed = true;
+        }
+
+        if (!string.Equals(settings.Language, "CS", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(settings.Language, "EN", StringComparison.OrdinalIgnoreCase))
+        {
+            settings.Language = defaults.Language;
+            changed = true;
+        }
+        else
+        {
+            var normalizedLanguage = settings.Language.ToUpperInvariant();
+            if (settings.Language != normalizedLanguage)
+            {
+                settings.Language = normalizedLanguage;
+                changed = true;
+            }
+        }
+
+        if (!Enum.IsDefined(settings.Theme))
+        {
+            settings.Theme = defaults.Theme;
+            changed = true;
+        }
+
+        if (settings.SchemaVersion < AppSettings.CurrentSchemaVersion)
+        {
+            settings.SchemaVersion = AppSettings.CurrentSchemaVersion;
+            changed = true;
+        }
+
+        return settings;
+    }
+
     public static bool Save(AppSettings settings)
     {
         try
         {
-            var dir = Path.GetDirectoryName(SettingsFilePath);
-            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
-                Directory.CreateDirectory(dir);
-
-            var options = new JsonSerializerOptions { WriteIndented = true };
-            var json = JsonSerializer.Serialize(settings, options);
-            File.WriteAllText(SettingsFilePath, json);
+            settings = MigrateSettings(settings, out _);
+            SaveToDisk(settings);
 
             Current = settings;
             SettingsChanged?.Invoke(null, EventArgs.Empty);
@@ -70,5 +144,16 @@ public static class SettingsService
         {
             return false;
         }
+    }
+
+    private static void SaveToDisk(AppSettings settings)
+    {
+        var dir = Path.GetDirectoryName(SettingsFilePath);
+        if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            Directory.CreateDirectory(dir);
+
+        var options = new JsonSerializerOptions { WriteIndented = true };
+        var json = JsonSerializer.Serialize(settings, options);
+        File.WriteAllText(SettingsFilePath, json);
     }
 }

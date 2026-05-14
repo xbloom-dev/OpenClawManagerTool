@@ -23,8 +23,11 @@ public partial class AboutWindow : Window
         TxtShortcut_R.Text        = "Restart Gateway";
         TxtShortcut_C.Text        = cs ? "Vyčistit soubory" : "Cleaning Tool";
         TxtShortcut_Settings.Text = cs ? "Nastavení" : "Settings";
+        TxtShortcut_L.Text        = cs ? "Živá data Gateway logu" : "Gateway live log";
         TxtShortcut_F1.Text       = cs ? "O aplikaci" : "About";
+        TxtShortcut_AltF4.Text    = cs ? "Zavřít aplikaci" : "Close application";
         BtnClose.Content          = cs ? "Zavřít" : "Close";
+        BtnClose.ToolTip          = L10n.Get("Str_Tip_AboutClose");
         Title = cs ? "OpenClaw Manager — O aplikaci" : "OpenClaw Manager — About";
     }
 

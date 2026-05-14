@@ -68,7 +68,7 @@
                 <TextBlock x:Name="StatusCpu" Text="CPU: —" />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="v0.99" Foreground="Gray" />
+                <TextBlock Text="v1.0" Foreground="Gray" />
             </StatusBarItem>
         </StatusBar>
 
@@ -216,16 +216,16 @@
             <!-- ════════════════════════════════════════════════════════════ -->
             <!-- v0.5: Pravý panel — Grid se dvěma vrstvami                    -->
             <!-- Vrstva 0: TerminalControl (TUI)                               -->
-            <!-- Vrstva 1: SplashOverlay (video/PNG nad TUI, černé pozadí)    -->
+            <!-- Vrstva 1: SplashOverlay (video/PNG nad TUI, moderní pozadí)  -->
             <!-- ════════════════════════════════════════════════════════════ -->
             <Grid Grid.Column="2">
 
                 <!-- Vrstva 0: Embedded TUI terminál (vždy přítomný) -->
                 <views:TerminalControl x:Name="Terminal" />
 
-                <!-- Vrstva 1: Splash overlay — černé pozadí ladí s terminálem -->
+                <!-- Vrstva 1: Splash overlay — pozadí ladí s nejtmavší fialovou ze splash.png -->
                 <Border x:Name="SplashOverlay"
-                        Background="Black"
+                        Background="#4C247E"
                         Visibility="Collapsed">
                     <Grid>
 
@@ -233,7 +233,8 @@
                         <Image x:Name="SplashImage"
                                Source="pack://application:,,,/Resources/splash.png"
                                Stretch="Uniform"
-                               RenderOptions.BitmapScalingMode="HighQuality" />
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               ImageFailed="SplashImage_ImageFailed" />
 
                         <!-- Video splash — MediaElement s UnloadedBehavior="Stop"
                              zastaví audio automaticky při skrytí overlay. -->
