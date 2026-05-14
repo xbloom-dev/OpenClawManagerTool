@@ -16,6 +16,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 using System.Windows;
+using System.Windows.Media;
 using OpenClawManager.Models;
 
 namespace OpenClawManager.Services;
@@ -83,6 +84,12 @@ public static class ThemeService
         var folder = GetIconFolder(theme);
         if (string.IsNullOrEmpty(folder)) return null;
         return new Uri($"pack://application:,,,/Resources/Icons/{folder}/{iconName}.png");
+    }
+
+    public static Brush GetBrush(string key, Color fallback)
+    {
+        return Application.Current?.TryFindResource(key) as Brush
+            ?? new SolidColorBrush(fallback);
     }
 
     // ── Interní: swap ResourceDictionary ─────────────────────────────────────

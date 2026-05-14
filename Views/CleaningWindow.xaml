@@ -158,16 +158,16 @@
         <!-- Tlačítka -->
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="BtnDryRun" Content="Náhled"
-                    Background="#D0E8FF"
+                    Background="{DynamicResource Brush.ActionUtility}"
                     Width="100" Height="28" Margin="4,0"
                     ToolTip="Zobrazí co by se smazalo, nic nemaže." />
             <Button x:Name="BtnRun" Content="Spustit"
                     Width="100" Height="28" Margin="4,0"
-                    Background="#D0FFD0"
+                    Background="{DynamicResource Brush.ActionPositive}"
                     ToolTip="POZOR: Trvale smaže vybrané soubory. Akci nelze vrátit" />
             <Button x:Name="BtnClose" Content="Zavřít"
                     Width="80" Height="28" Margin="4,0"
-                    Background="#FFD0D0"
+                    Background="{DynamicResource Brush.ActionDanger}"
                     ToolTip="Zavře Cleaning Tool."
                     IsCancel="True" />
         </StackPanel>

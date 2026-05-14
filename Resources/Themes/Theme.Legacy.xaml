@@ -9,4 +9,14 @@
         Ikony: emoji TextBlock (zabudováno přímo v XAML tlačítek).
     -->
 
+    <Color x:Key="Theme.Color.ActionPositive">#D0FFD0</Color>
+    <Color x:Key="Theme.Color.ActionDanger">#FFD0D0</Color>
+    <Color x:Key="Theme.Color.ActionUtility">#D0E8FF</Color>
+    <Color x:Key="Theme.Color.SplashModernBackground">#4C247E</Color>
+
+    <SolidColorBrush x:Key="Brush.ActionPositive" Color="{StaticResource Theme.Color.ActionPositive}" />
+    <SolidColorBrush x:Key="Brush.ActionDanger" Color="{StaticResource Theme.Color.ActionDanger}" />
+    <SolidColorBrush x:Key="Brush.ActionUtility" Color="{StaticResource Theme.Color.ActionUtility}" />
+    <SolidColorBrush x:Key="Brush.SplashModernBackground" Color="{StaticResource Theme.Color.SplashModernBackground}" />
+
 </ResourceDictionary>

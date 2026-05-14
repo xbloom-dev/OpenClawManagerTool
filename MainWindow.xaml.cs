@@ -22,10 +22,10 @@ public partial class MainWindow : Window
     private GatewayUiState _gatewayState = GatewayUiState.Stopped;
     private bool _waitingForGatewayReady = false;
 
-    private static readonly SolidColorBrush BrushStartGreen =
-        new(Color.FromRgb(0xD0, 0xFF, 0xD0));
-    private static readonly SolidColorBrush BrushStopRed =
-        new(Color.FromRgb(0xFF, 0xD0, 0xD0));
+    private static Brush ActionPositiveBrush =>
+        ThemeService.GetBrush("Brush.ActionPositive", Color.FromRgb(0xD0, 0xFF, 0xD0));
+    private static Brush ActionDangerBrush =>
+        ThemeService.GetBrush("Brush.ActionDanger", Color.FromRgb(0xFF, 0xD0, 0xD0));
 
     public MainWindow()
     {
@@ -529,7 +529,7 @@ public partial class MainWindow : Window
             BtnStartTuiSymbol.Foreground = Brushes.Red;
             BtnStartTuiLabel.Text = L10n.Get("Str_BtnStartTui_Stop");
             BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Stop");
-            BtnStartTui.Background = BrushStopRed;
+            BtnStartTui.Background = ActionDangerBrush;
         }
         else if (_gatewayState == GatewayUiState.Running)
         {
@@ -537,7 +537,7 @@ public partial class MainWindow : Window
             BtnStartTuiSymbol.Foreground = Brushes.Green;
             BtnStartTuiLabel.Text = L10n.Get("Str_BtnStartTui_Label");
             BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Running");
-            BtnStartTui.Background = BrushStartGreen;
+            BtnStartTui.Background = ActionPositiveBrush;
         }
         else
         {
@@ -545,7 +545,7 @@ public partial class MainWindow : Window
             BtnStartTuiSymbol.Foreground = Brushes.Green;
             BtnStartTuiLabel.Text = L10n.Get("Str_BtnStartTui_Label");
             BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Restart");
-            BtnStartTui.Background = BrushStartGreen;
+            BtnStartTui.Background = ActionPositiveBrush;
         }
     }
 

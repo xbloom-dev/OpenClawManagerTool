@@ -7,9 +7,9 @@
         WindowStartupLocation="CenterOwner">
     <DockPanel Margin="16">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
-            <Button x:Name="BtnSave" Content="Save" Width="100" Height="28" Margin="4,0" Background="#D0FFD0" IsDefault="True" />
-            <Button x:Name="BtnReset" Content="Reset" Width="130" Height="28" Margin="4,0" Background="#D0E8FF" />
-            <Button x:Name="BtnCancel" Content="Cancel" Width="100" Height="28" Margin="4,0" Background="#FFD0D0" IsCancel="True" />
+        <Button x:Name="BtnSave" Content="Save" Width="100" Height="28" Margin="4,0" Background="{DynamicResource Brush.ActionPositive}" IsDefault="True" />
+        <Button x:Name="BtnReset" Content="Reset" Width="130" Height="28" Margin="4,0" Background="{DynamicResource Brush.ActionUtility}" />
+        <Button x:Name="BtnCancel" Content="Cancel" Width="100" Height="28" Margin="4,0" Background="{DynamicResource Brush.ActionDanger}" IsCancel="True" />
         </StackPanel>
 
         <ScrollViewer VerticalScrollBarVisibility="Auto">
