@@ -12,7 +12,10 @@ namespace OpenClawManager.Models;
 public enum AppTheme
 {
     Legacy,
-    Modern
+    Modern,
+    Dark,
+    HighContrast,
+    Compact
 }
 
 /// <summary>

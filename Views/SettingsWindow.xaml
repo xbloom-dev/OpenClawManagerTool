@@ -25,7 +25,10 @@
                 <TextBlock x:Name="LblTheme" Text="Theme:" Margin="0,0,0,4" />
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
                     <RadioButton x:Name="RbThemeLegacy" Content="Legacy" GroupName="Theme" Margin="0,0,16,0" />
-                    <RadioButton x:Name="RbThemeModern" Content="Modern" GroupName="Theme" />
+                    <RadioButton x:Name="RbThemeModern" Content="Modern" GroupName="Theme" Margin="0,0,16,0" />
+                    <RadioButton x:Name="RbThemeDark" Content="Dark" GroupName="Theme" Margin="0,0,16,0" />
+                    <RadioButton x:Name="RbThemeHighContrast" Content="High Contrast" GroupName="Theme" Margin="0,0,16,0" />
+                    <RadioButton x:Name="RbThemeCompact" Content="Compact" GroupName="Theme" />
                 </StackPanel>
                 <CheckBox x:Name="ChkUseSplashVideo" Content="Play splash video on startup" Margin="0,0,0,4" />
                 <TextBlock x:Name="TxtThemeHint" Foreground="Gray" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,14" />

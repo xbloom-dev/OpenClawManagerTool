@@ -49,6 +49,9 @@ public partial class SettingsWindow : Window
         // v0.5: Theme přepínač řídí dostupnost video checkboxu
         RbThemeLegacy.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeModern.Checked += (_, _) => UpdateSplashVideoEnabled();
+        RbThemeDark.Checked += (_, _) => UpdateSplashVideoEnabled();
+        RbThemeHighContrast.Checked += (_, _) => UpdateSplashVideoEnabled();
+        RbThemeCompact.Checked += (_, _) => UpdateSplashVideoEnabled();
 
         TxtSettingsPath.Text = SettingsService.SettingsFilePath;
     }
@@ -73,8 +76,13 @@ public partial class SettingsWindow : Window
 
         LblAppearance.Text = T("Vzhled", "Appearance");
         LblTheme.Text = T("Téma aplikace:", "Application theme:");
+        RbThemeLegacy.Content = "Legacy";
+        RbThemeModern.Content = "Modern";
+        RbThemeDark.Content = "Dark";
+        RbThemeHighContrast.Content = T("VysokĂ˝ kontrast", "High Contrast");
+        RbThemeCompact.Content = "Compact";
         ChkUseSplashVideo.Content = T("Prehrat splash screen video pri startu", "Play splash screen video on startup");
-        TxtThemeHint.Text = T("Zmena tematu se projevi po restartu aplikace. Video je aktivni pouze v Modern tematu.", "Theme changes after app restart. Video is active only in Modern theme.");
+        TxtThemeHint.Text = T("Zmena tematu se projevi po ulozeni. Video je aktivni ve vsech modernich tematech.", "Theme changes after saving. Video is active in all modern-style themes.");
 
         LblPaths.Text = T("Cesty", "Paths");
         LblOpenClawPath.Text = T("OpenClaw složka:", "OpenClaw folder:");
@@ -109,10 +117,25 @@ public partial class SettingsWindow : Window
             RbLangCS.IsChecked = true;
 
         // v0.5: Téma + splash video
-        if (_settings.Theme == AppTheme.Modern)
-            RbThemeModern.IsChecked = true;
-        else
-            RbThemeLegacy.IsChecked = true;
+        switch (_settings.Theme)
+        {
+            case AppTheme.Modern:
+                RbThemeModern.IsChecked = true;
+                break;
+            case AppTheme.Dark:
+                RbThemeDark.IsChecked = true;
+                break;
+            case AppTheme.HighContrast:
+                RbThemeHighContrast.IsChecked = true;
+                break;
+            case AppTheme.Compact:
+                RbThemeCompact.IsChecked = true;
+                break;
+            case AppTheme.Legacy:
+            default:
+                RbThemeLegacy.IsChecked = true;
+                break;
+        }
 
         ChkUseSplashVideo.IsChecked = _settings.UseSplashVideo;
         UpdateSplashVideoEnabled();
@@ -130,8 +153,17 @@ public partial class SettingsWindow : Window
         _settings.Language = RbLangEN.IsChecked == true ? "EN" : "CS";
 
         // v0.5: Téma + splash video
-        _settings.Theme = RbThemeModern.IsChecked == true ? AppTheme.Modern : AppTheme.Legacy;
+        _settings.Theme = GetSelectedTheme();
         _settings.UseSplashVideo = ChkUseSplashVideo.IsChecked == true;
+    }
+
+    private AppTheme GetSelectedTheme()
+    {
+        if (RbThemeModern.IsChecked == true) return AppTheme.Modern;
+        if (RbThemeDark.IsChecked == true) return AppTheme.Dark;
+        if (RbThemeHighContrast.IsChecked == true) return AppTheme.HighContrast;
+        if (RbThemeCompact.IsChecked == true) return AppTheme.Compact;
+        return AppTheme.Legacy;
     }
 
     /// <summary>
@@ -140,7 +172,7 @@ public partial class SettingsWindow : Window
     private void UpdateSplashVideoEnabled()
     {
         if (ChkUseSplashVideo == null) return;
-        ChkUseSplashVideo.IsEnabled = RbThemeModern.IsChecked == true;
+        ChkUseSplashVideo.IsEnabled = GetSelectedTheme() != AppTheme.Legacy;
     }
 
     private void BtnSave_Click(object? sender, RoutedEventArgs e)

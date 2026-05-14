@@ -36,10 +36,9 @@ public static class ThemeService
     {
         { AppTheme.Legacy, "/Resources/Themes/Theme.Legacy.xaml" },
         { AppTheme.Modern, "/Resources/Themes/Theme.Modern.xaml" },
-        // Budoucí témata:
-        // { AppTheme.Dark,          "/Resources/Themes/Theme.Dark.xaml" },
-        // { AppTheme.HighContrast,  "/Resources/Themes/Theme.HighContrast.xaml" },
-        // { AppTheme.Compact,       "/Resources/Themes/Theme.Compact.xaml" },
+        { AppTheme.Dark, "/Resources/Themes/Theme.Dark.xaml" },
+        { AppTheme.HighContrast, "/Resources/Themes/Theme.HighContrast.xaml" },
+        { AppTheme.Compact, "/Resources/Themes/Theme.Compact.xaml" },
     };
 
     // ── Registr složek ikon ───────────────────────────────────────────────────
@@ -48,8 +47,9 @@ public static class ThemeService
     {
         { AppTheme.Legacy, "" },         // Legacy nemá PNG ikony (používá emoji)
         { AppTheme.Modern, "Modern" },
-        // { AppTheme.Dark,         "Dark" },
-        // { AppTheme.HighContrast, "HighContrast" },
+        { AppTheme.Dark, "Modern" },
+        { AppTheme.HighContrast, "Modern" },
+        { AppTheme.Compact, "Modern" },
     };
 
     // ── Veřejné API ──────────────────────────────────────────────────────────
