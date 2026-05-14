@@ -13,9 +13,25 @@ namespace OpenClawManager;
 
 public partial class MainWindow
 {
+    private sealed record ButtonVisualState(
+        object? Content,
+        double Height,
+        Thickness Padding,
+        Thickness BorderThickness,
+        Brush Background,
+        Brush BorderBrush);
+
+    private sealed record ShellVisualState(Brush Background, Brush Foreground);
+
+    private readonly Dictionary<Button, ButtonVisualState> _buttonVisualStates = new();
+    private readonly Dictionary<Control, ShellVisualState> _shellControlStates = new();
+    private readonly Dictionary<MenuItem, object?> _menuItemIcons = new();
+
     // ── Inicializace theme (volat v konstruktoru po InitializeComponent) ──────
     private void InitTheme()
     {
+        CaptureThemeBaseline();
+
         // Přihlásit se na event — přepnutí tématu za běhu (ze SettingsWindow)
         ThemeService.ThemeChanged += OnThemeChanged;
 
@@ -65,13 +81,17 @@ public partial class MainWindow
     // ── Aplikace tématu na UI ─────────────────────────────────────────────────
     private void ApplyThemeToUi(AppTheme theme)
     {
+        RestoreThemeBaseline();
+
         switch (theme)
         {
             case AppTheme.Modern:
             case AppTheme.Dark:
             case AppTheme.HighContrast:
-            case AppTheme.CrabCute:
                 ApplyModernUi();
+                break;
+            case AppTheme.CrabCute:
+                ApplyCrabCuteUi();
                 break;
             case AppTheme.Legacy:
             default:
@@ -95,6 +115,59 @@ public partial class MainWindow
 
         // TUI tlačítko — ponechat dynamický stav (UpdateStartTuiButton ho řídí)
         // Ikony Start/Stop se přepínají v UpdateStartTuiButton()
+        UpdateStartTuiButton(Terminal.IsTuiRunning);
+    }
+
+    // ── CrabCute UI ──────────────────────────────────────────────────────────
+    private void ApplyCrabCuteUi()
+    {
+        ApplyCrabCuteShell();
+
+        SetCrabCuteButtonImage(BtnGatewayStart,   "start", 44);
+        SetCrabCuteButtonImage(BtnGatewayStop,    "stop", 44);
+        SetCrabCuteButtonImage(BtnGatewayRestart, "restart", 44);
+        SetCrabCuteButtonImage(BtnOpenPowerShell, "powershell", 44);
+        SetCrabCuteButtonImage(BtnOpenGatewayLog, "gateway-log", 44);
+        SetCrabCuteButtonImage(BtnCleaningTool,   "cleaning-tool", 44);
+        SetCrabCuteButtonImage(BtnTokenManager,   "token-manager", 44);
+        SetCrabCuteButtonImage(BtnDoctorFix,      "doctor-fix", 44);
+
+        SetMenuIcon(MnuOpenPowerShell, "menu-powershell");
+        SetMenuIcon(MnuOpenGatewayLog, "log");
+        SetMenuIcon(MnuSettings, "menu-settings");
+        SetMenuIcon(MnuMenuSettings, "menu-settings");
+
+        UpdateStartTuiButton(Terminal.IsTuiRunning);
+    }
+
+    private void ApplyCrabCuteShell()
+    {
+        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0xFF, 0xF7, 0xF0));
+        var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0xFF, 0xFF, 0xFF));
+        var border = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0xFF, 0xD8, 0xC2));
+        var text = ThemeService.GetBrush("Theme.Brush.Text.Primary", Color.FromRgb(0x17, 0x20, 0x33));
+        var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x5F, 0x6B, 0x7A));
+
+        Background = background;
+        Foreground = text;
+
+        MainMenu.Background = surface;
+        MainMenu.Foreground = text;
+        MainStatusBar.Background = surface;
+        MainStatusBar.Foreground = secondary;
+        MainGridSplitter.Background = border;
+
+        foreach (var group in new[] { GrpActions, GrpLatency, GrpAppLog })
+        {
+            group.Background = surface;
+            group.Foreground = text;
+            group.BorderBrush = border;
+            group.BorderThickness = new Thickness(1);
+        }
+
+        AppLog.Background = surface;
+        AppLog.Foreground = text;
+        AppLog.BorderBrush = border;
     }
 
     // ── Legacy UI — obnovit emoji TextBlock ───────────────────────────────────
@@ -119,7 +192,7 @@ public partial class MainWindow
     /// </summary>
     private void SetButtonIcon(Button btn, string iconName)
     {
-        var uri = ThemeService.GetIconUri(AppTheme.Modern, iconName);
+        var uri = ThemeService.GetIconUri(SettingsService.Current.Theme, iconName);
         if (uri == null) return;
 
         try
@@ -149,6 +222,121 @@ public partial class MainWindow
         catch (Exception ex)
         {
             Log($"[Theme] Ikona {iconName} se nenačetla: {ex.Message}");
+        }
+    }
+
+    private void SetCrabCuteButtonImage(Button btn, string iconName, double height)
+    {
+        var image = CreateThemeImage(iconName, height);
+        if (image == null) return;
+
+        btn.Content = image;
+        btn.Height = height;
+        btn.Padding = new Thickness(0);
+        btn.BorderThickness = new Thickness(0);
+        btn.Background = Brushes.Transparent;
+        btn.BorderBrush = Brushes.Transparent;
+    }
+
+    private Image? CreateThemeImage(string iconName, double height)
+    {
+        var uri = ThemeService.GetIconUri(SettingsService.Current.Theme, iconName);
+        if (uri == null) return null;
+
+        try
+        {
+            var image = new Image
+            {
+                Source = new BitmapImage(uri),
+                Height = height,
+                Stretch = Stretch.Uniform,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+            };
+            RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.HighQuality);
+            return image;
+        }
+        catch (Exception ex)
+        {
+            Log($"[Theme] Ikona {iconName} se nenačetla: {ex.Message}");
+            return null;
+        }
+    }
+
+    private void SetMenuIcon(MenuItem item, string iconName)
+    {
+        item.Icon = CreateThemeImage(iconName, 18);
+    }
+
+    private void ApplyThemeSpecificTuiVisual(bool tuiRunning)
+    {
+        if (SettingsService.Current.Theme != AppTheme.CrabCute) return;
+
+        SetCrabCuteButtonImage(BtnStartTui, tuiRunning ? "stop" : "tui", tuiRunning ? 44 : 88);
+    }
+
+    private void CaptureThemeBaseline()
+    {
+        if (_buttonVisualStates.Count > 0) return;
+
+        foreach (var button in new[]
+        {
+            BtnStartTui,
+            BtnGatewayStart,
+            BtnGatewayStop,
+            BtnGatewayRestart,
+            BtnOpenPowerShell,
+            BtnOpenGatewayLog,
+            BtnCleaningTool,
+            BtnTokenManager,
+            BtnDoctorFix
+        })
+        {
+            _buttonVisualStates[button] = new ButtonVisualState(
+                button.Content,
+                button.Height,
+                button.Padding,
+                button.BorderThickness,
+                button.Background,
+                button.BorderBrush);
+        }
+
+        foreach (var item in new[] { MnuOpenPowerShell, MnuOpenGatewayLog, MnuSettings, MnuMenuSettings })
+        {
+            _menuItemIcons[item] = item.Icon;
+        }
+
+        foreach (var control in new Control[] { MainMenu, MainStatusBar, GrpActions, GrpLatency, GrpAppLog, AppLog })
+        {
+            _shellControlStates[control] = new ShellVisualState(control.Background, control.Foreground);
+        }
+    }
+
+    private void RestoreThemeBaseline()
+    {
+        Background = SystemColors.WindowBrush;
+        Foreground = SystemColors.ControlTextBrush;
+        MainGridSplitter.Background = Brushes.LightGray;
+
+        foreach (var (button, state) in _buttonVisualStates)
+        {
+            button.Content = state.Content;
+            button.Height = state.Height;
+            button.Padding = state.Padding;
+            button.BorderThickness = state.BorderThickness;
+            button.Background = state.Background;
+            button.BorderBrush = state.BorderBrush;
+        }
+
+        foreach (var (item, icon) in _menuItemIcons)
+        {
+            item.Icon = icon;
+        }
+
+        foreach (var (control, state) in _shellControlStates)
+        {
+            control.Background = state.Background;
+            control.Foreground = state.Foreground;
         }
     }
 

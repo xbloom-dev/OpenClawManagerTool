@@ -49,7 +49,30 @@ public static class ThemeService
         { AppTheme.Modern, "Modern" },
         { AppTheme.Dark, "Modern" },
         { AppTheme.HighContrast, "Modern" },
-        { AppTheme.CrabCute, "Modern" },
+        { AppTheme.CrabCute, "CrabCute" },
+    };
+
+    private static readonly Dictionary<AppTheme, Dictionary<string, string>> _iconFileNames = new()
+    {
+        {
+            AppTheme.CrabCute,
+            new Dictionary<string, string>
+            {
+                { "start", "Button_GatewayStart.png" },
+                { "stop", "Button_GatewayStop.png" },
+                { "restart", "Button_GatewayRestart.png" },
+                { "powershell", "Button_PowerShell.png" },
+                { "gateway-log", "Button_GatewayLog.png" },
+                { "cleaning-tool", "Button_CleaningTool.png" },
+                { "token-manager", "Button_TokenManager.png" },
+                { "doctor-fix", "Button_Fix.png" },
+                { "tui", "Button_TUI_1.png" },
+                { "menu-powershell", "Menu-PowerShell.png" },
+                { "menu-settings", "Menu-Settings.png" },
+                { "menu-status", "Menu-Status.png" },
+                { "log", "Log.png" },
+            }
+        }
     };
 
     // ── Veřejné API ──────────────────────────────────────────────────────────
@@ -83,7 +106,13 @@ public static class ThemeService
     {
         var folder = GetIconFolder(theme);
         if (string.IsNullOrEmpty(folder)) return null;
-        return new Uri($"pack://application:,,,/Resources/Icons/{folder}/{iconName}.png");
+
+        var fileName = _iconFileNames.TryGetValue(theme, out var names) &&
+                       names.TryGetValue(iconName, out var mapped)
+            ? mapped
+            : $"{iconName}.png";
+
+        return new Uri($"pack://application:,,,/Resources/Icons/{folder}/{fileName}");
     }
 
     public static Brush GetBrush(string key, Color fallback)

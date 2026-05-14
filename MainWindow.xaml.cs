@@ -547,6 +547,8 @@ public partial class MainWindow : Window
             BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Restart");
             BtnStartTui.Background = ActionPositiveBrush;
         }
+
+        ApplyThemeSpecificTuiVisual(tuiRunning);
     }
 
     // ==================== Ostatní tlačítka ====================

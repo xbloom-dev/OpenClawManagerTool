@@ -9,7 +9,7 @@
         WindowStartupLocation="CenterScreen">
 
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
+        <Menu x:Name="MainMenu" DockPanel.Dock="Top">
             <MenuItem x:Name="MnuMenuOpen" Header="_Otevřít">
                 <MenuItem x:Name="MnuOpenOpenClawFolder" Header="_OpenClaw složku" />
                 <MenuItem x:Name="MnuOpenTempFolder" Header="_Temp složku (Gateway logy)" />
@@ -35,7 +35,7 @@
             </MenuItem>
         </Menu>
 
-        <StatusBar DockPanel.Dock="Bottom" Height="24">
+        <StatusBar x:Name="MainStatusBar" DockPanel.Dock="Bottom" Height="24">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Gateway: " />
@@ -209,7 +209,7 @@
                 </GroupBox>
             </Grid>
 
-            <GridSplitter Grid.Column="1" Width="5"
+            <GridSplitter x:Name="MainGridSplitter" Grid.Column="1" Width="5"
                           HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                           Background="LightGray" />
 
