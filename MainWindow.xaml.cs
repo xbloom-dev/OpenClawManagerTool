@@ -618,6 +618,7 @@ public partial class MainWindow : Window
                 ? L10n.Language.EN : L10n.Language.CS;
             L10n.Apply(lang);
             ApplyLocalization();
+            ReapplyCurrentThemeLayoutAfterLocalization();
             Log(L10n.Get("Str_Log_SettingsSaved"));
         }
     }

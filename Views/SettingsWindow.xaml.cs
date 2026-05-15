@@ -32,6 +32,7 @@ public partial class SettingsWindow : Window
             // v0.5
             Theme                   = current.Theme,
             UseSplashVideo          = current.UseSplashVideo,
+            UseButtonScanlineEffect = current.UseButtonScanlineEffect,
         };
 
         ApplyLocalization();
@@ -81,7 +82,8 @@ public partial class SettingsWindow : Window
         RbThemeDark.Content = "Dark";
         RbThemeHighContrast.Content = T("Vysok\u00FD kontrast", "High Contrast");
         RbThemeCrabCute.Content = "CrabCute";
-        ChkUseSplashVideo.Content = T("P\u0159ehr\u00E1t splash screen video p\u0159i startu", "Play splash screen video on startup");
+        ChkUseSplashVideo.Content = T("SplashScreen animace p\u0159i startu", "SplashScreen startup animation");
+        ChkUseButtonScanlineEffect.Content = T("Efekt \u0159\u00E1dkov\u00E1n\u00ED tla\u010D\u00EDtek", "Button scanline effect");
         TxtThemeHint.Text = T("Zm\u011Bna t\u00E9matu se projev\u00ED po ulo\u017Een\u00ED. Video je aktivn\u00ED ve v\u0161ech modern\u00EDch t\u00E9matech.", "Theme changes after saving. Video is active in all modern-style themes.");
 
         LblPaths.Text = T("Cesty", "Paths");
@@ -138,6 +140,7 @@ public partial class SettingsWindow : Window
         }
 
         ChkUseSplashVideo.IsChecked = _settings.UseSplashVideo;
+        ChkUseButtonScanlineEffect.IsChecked = _settings.UseButtonScanlineEffect;
         UpdateSplashVideoEnabled();
     }
 
@@ -155,6 +158,7 @@ public partial class SettingsWindow : Window
         // v0.5: Téma + splash video
         _settings.Theme = GetSelectedTheme();
         _settings.UseSplashVideo = ChkUseSplashVideo.IsChecked == true;
+        _settings.UseButtonScanlineEffect = ChkUseButtonScanlineEffect.IsChecked == true;
     }
 
     private AppTheme GetSelectedTheme()
@@ -172,7 +176,10 @@ public partial class SettingsWindow : Window
     private void UpdateSplashVideoEnabled()
     {
         if (ChkUseSplashVideo == null) return;
-        ChkUseSplashVideo.IsEnabled = GetSelectedTheme() != AppTheme.Legacy;
+        var isModernTheme = GetSelectedTheme() != AppTheme.Legacy;
+        ChkUseSplashVideo.IsEnabled = isModernTheme;
+        if (ChkUseButtonScanlineEffect != null)
+            ChkUseButtonScanlineEffect.IsEnabled = isModernTheme;
     }
 
     private void BtnSave_Click(object? sender, RoutedEventArgs e)

@@ -12,7 +12,7 @@
         <Button x:Name="BtnCancel" Content="Cancel" Width="100" Height="28" Margin="4,0" Background="{DynamicResource Brush.ActionDanger}" IsCancel="True" />
         </StackPanel>
 
-        <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ScrollViewer VerticalScrollBarVisibility="Hidden">
             <StackPanel>
                 <TextBlock x:Name="LblLanguage" Text="Language" FontWeight="Bold" Margin="0,0,0,6" />
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
@@ -30,7 +30,10 @@
                     <RadioButton x:Name="RbThemeHighContrast" Content="High Contrast" GroupName="Theme" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbThemeCrabCute" Content="CrabCute" GroupName="Theme" />
                 </StackPanel>
-                <CheckBox x:Name="ChkUseSplashVideo" Content="Play splash video on startup" Margin="0,0,0,4" />
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <CheckBox x:Name="ChkUseSplashVideo" Content="SplashScreen startup animation" Margin="0,0,16,0" />
+                    <CheckBox x:Name="ChkUseButtonScanlineEffect" Content="Button scanline effect" />
+                </StackPanel>
                 <TextBlock x:Name="TxtThemeHint" Foreground="Gray" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,14" />
 
                 <TextBlock x:Name="LblPaths" Text="Paths" FontWeight="Bold" Margin="0,0,0,6" />

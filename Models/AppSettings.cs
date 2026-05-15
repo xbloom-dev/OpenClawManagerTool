@@ -75,6 +75,12 @@ public class AppSettings
     /// </summary>
     public bool UseSplashVideo { get; set; } = true;
 
+    /// <summary>
+    /// Volitelny scanline efekt pri stisku tlacitek v modernich tematech.
+    /// Legacy tema zustava bez zasahu.
+    /// </summary>
+    public bool UseButtonScanlineEffect { get; set; } = false;
+
     // ════════════════════════════════════════════════════════════════════════
 
     /// <summary>
