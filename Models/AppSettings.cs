@@ -12,7 +12,11 @@ namespace OpenClawManager.Models;
 public enum AppTheme
 {
     Legacy,
-    Modern
+    Modern,
+    Dark,
+    HighContrast,
+    CrabCute,
+    Compact = CrabCute
 }
 
 /// <summary>
@@ -70,6 +74,12 @@ public class AppSettings
     /// Pokud false nebo splash.mp4 chybí — zobrazí se splash.png fallback.
     /// </summary>
     public bool UseSplashVideo { get; set; } = true;
+
+    /// <summary>
+    /// Volitelny scanline efekt pri stisku tlacitek v modernich tematech.
+    /// Legacy tema zustava bez zasahu.
+    /// </summary>
+    public bool UseButtonScanlineEffect { get; set; } = false;
 
     // ════════════════════════════════════════════════════════════════════════
 

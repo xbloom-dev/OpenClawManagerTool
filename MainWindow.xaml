@@ -9,7 +9,7 @@
         WindowStartupLocation="CenterScreen">
 
     <DockPanel>
-        <Menu DockPanel.Dock="Top">
+        <Menu x:Name="MainMenu" DockPanel.Dock="Top">
             <MenuItem x:Name="MnuMenuOpen" Header="_Otevřít">
                 <MenuItem x:Name="MnuOpenOpenClawFolder" Header="_OpenClaw složku" />
                 <MenuItem x:Name="MnuOpenTempFolder" Header="_Temp složku (Gateway logy)" />
@@ -35,7 +35,7 @@
             </MenuItem>
         </Menu>
 
-        <StatusBar DockPanel.Dock="Bottom" Height="24">
+        <StatusBar x:Name="MainStatusBar" DockPanel.Dock="Bottom" Height="24">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Gateway: " />
@@ -92,7 +92,7 @@
 
                         <!-- Dynamické TUI tlačítko -->
                         <Button x:Name="BtnStartTui" Height="48" FontWeight="Bold" FontSize="13"
-                                Margin="0,0,0,8" Background="#D0FFD0">
+                                Margin="0,0,0,8" Background="{DynamicResource Brush.ActionPositive}">
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                     <TextBlock x:Name="BtnStartTuiSymbol" Text="▶" Foreground="Green"
@@ -164,7 +164,7 @@
 
                         <!-- Údržba -->
                         <TextBlock x:Name="TxtSectionMaintenance" Text="Údržba:" FontWeight="Bold" Margin="0,4,0,4" />
-                        <Button x:Name="BtnDoctorFix" Height="28" Background="#FFD0D0">
+                        <Button x:Name="BtnDoctorFix" Height="28" Background="{DynamicResource Brush.ActionDanger}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🩺" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
                                 <TextBlock x:Name="BtnDoctorFixLabel" Text="Opravit konfiguraci" VerticalAlignment="Center" />
@@ -209,7 +209,7 @@
                 </GroupBox>
             </Grid>
 
-            <GridSplitter Grid.Column="1" Width="5"
+            <GridSplitter x:Name="MainGridSplitter" Grid.Column="1" Width="5"
                           HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                           Background="LightGray" />
 
@@ -225,7 +225,7 @@
 
                 <!-- Vrstva 1: Splash overlay — pozadí ladí s nejtmavší fialovou ze splash.png -->
                 <Border x:Name="SplashOverlay"
-                        Background="#4C247E"
+                        Background="{DynamicResource Brush.SplashModernBackground}"
                         Visibility="Collapsed">
                     <Grid>
 

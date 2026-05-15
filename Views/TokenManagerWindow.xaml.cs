@@ -18,6 +18,12 @@ public partial class TokenManagerWindow : Window
     private string VaultPath => SettingsService.Current.TokenManagerSecretsPath;
     private static string S(string key) => L10n.Get(key);
     private static string F(string key, params object[] args) => L10n.Format(key, args);
+    private static Brush ActionPositiveBrush =>
+        ThemeService.GetBrush("Brush.ActionPositive", Color.FromRgb(0xD0, 0xFF, 0xD0));
+    private static Brush ActionDangerBrush =>
+        ThemeService.GetBrush("Brush.ActionDanger", Color.FromRgb(0xFF, 0xD0, 0xD0));
+    private static Brush ActionUtilityBrush =>
+        ThemeService.GetBrush("Brush.ActionUtility", Color.FromRgb(0xD0, 0xE8, 0xFF));
 
     public TokenManagerWindow()
     {
@@ -84,25 +90,25 @@ public partial class TokenManagerWindow : Window
         GrpFileOps.Header = S("Str_Token_GroupFileOps");
         TxtFileLabel.Text = S("Str_Token_File");
         BtnBrowseTarget.Content = S("Str_BtnBrowse");
-        BtnBrowseTarget.Background = new SolidColorBrush(Color.FromRgb(0xD0, 0xE8, 0xFF));
+        BtnBrowseTarget.Background = ActionUtilityBrush;
         BtnBrowseTarget.ToolTip = S("Str_Token_TipBrowseTarget");
         BtnRedactPreview.Content = S("Str_Token_RedactPreview");
         BtnRedactPreview.ToolTip = S("Str_Token_TipRedactPreview");
         BtnRedact.Content = S("Str_Token_Redact");
-        BtnRedact.Background = new SolidColorBrush(Color.FromRgb(0xD0, 0xFF, 0xD0));
+        BtnRedact.Background = ActionPositiveBrush;
         BtnRedact.FontWeight = FontWeights.Bold;
         BtnRedact.ToolTip = S("Str_Token_TipRedact");
         BtnRestore.Content = S("Str_Token_Restore");
-        BtnRestore.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xD0, 0xD0));
+        BtnRestore.Background = ActionDangerBrush;
         BtnRestore.ToolTip = S("Str_Token_TipRestore");
         BtnVerify.Content = S("Str_Token_Verify");
-        BtnVerify.Background = new SolidColorBrush(Color.FromRgb(0xD0, 0xE8, 0xFF));
+        BtnVerify.Background = ActionUtilityBrush;
         BtnVerify.FontWeight = FontWeights.Bold;
         BtnVerify.ToolTip = S("Str_Token_TipVerify");
         ChkRestoreInPlace.Content = S("Str_Token_RestoreInPlace");
         ChkRestoreInPlace.ToolTip = S("Str_Token_TipRestoreInPlace");
         BtnClose.Content = S("Str_BtnClose");
-        BtnClose.Background = new SolidColorBrush(Color.FromRgb(0xFF, 0xD0, 0xD0));
+        BtnClose.Background = ActionDangerBrush;
         BtnClose.ToolTip = S("Str_Token_TipClose");
     }
 

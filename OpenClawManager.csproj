@@ -31,6 +31,9 @@
     <!-- v0.5: ResourceDictionary pro témata -->
     <Resource Include="Resources\Themes\Theme.Legacy.xaml" />
     <Resource Include="Resources\Themes\Theme.Modern.xaml" />
+    <Resource Include="Resources\Themes\Theme.Dark.xaml" />
+    <Resource Include="Resources\Themes\Theme.HighContrast.xaml" />
+    <Resource Include="Resources\Themes\Theme.CrabCute.xaml" />
 
     <!-- v0.5: Ikony Modern tématu (PNG 48×48, konvertováno ze SVG) -->
     <Resource Include="Resources\Icons\Modern\start.png" />
@@ -41,6 +44,7 @@
     <Resource Include="Resources\Icons\Modern\cleaning-tool.png" />
     <Resource Include="Resources\Icons\Modern\token-manager.png" />
     <Resource Include="Resources\Icons\Modern\doctor-fix.png" />
+    <Resource Include="Resources\Icons\CrabCute\*.png" />
 
     <!-- v1.0: Offline xterm.js assets for embedded terminal -->
     <Resource Include="Resources\Terminal\xterm.min.js" />
