@@ -269,7 +269,7 @@ public partial class MainWindow
         if (image == null) return;
 
         btn.Content = image;
-        btn.Style = CreateModernButtonFeedbackStyle(SettingsService.Current.UseButtonScanlineEffect);
+        btn.Style = CreateCrabCuteButtonFeedbackStyle(SettingsService.Current.UseButtonScanlineEffect);
         btn.Height = height;
         btn.Margin = btn == BtnStartTui ? new Thickness(0, 0, 0, 8) : btn.Margin;
         btn.Padding = new Thickness(0);
@@ -338,6 +338,66 @@ public partial class MainWindow
         pressed.Setters.Add(new Setter(Border.BorderBrushProperty, pressedBorderBrush, "Root"));
         pressed.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(1), "Root"));
         pressed.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(3, 3), "ContentGrid"));
+        pressed.Setters.Add(new Setter(UIElement.OpacityProperty, useScanlineEffect ? 0.62 : 0.0, "PressedOverlay"));
+
+        template.Triggers.Add(hover);
+        template.Triggers.Add(pressed);
+
+        var style = new Style(typeof(Button));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.TemplateProperty, template));
+        style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
+        style.Triggers.Add(new Trigger
+        {
+            Property = UIElement.IsEnabledProperty,
+            Value = false,
+            Setters = { new Setter(UIElement.OpacityProperty, 0.55) }
+        });
+        return style;
+    }
+
+    private static Style CreateCrabCuteButtonFeedbackStyle(bool useScanlineEffect)
+    {
+        var pressedOverlayBrush = CreatePressedScanlineBrush();
+
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.Name = "Root";
+        root.SetValue(Border.BackgroundProperty, Brushes.Transparent);
+        root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
+        root.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+
+        var contentGrid = new FrameworkElementFactory(typeof(Grid));
+        contentGrid.Name = "ContentGrid";
+        contentGrid.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+        contentGrid.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+        contentGrid.SetValue(UIElement.RenderTransformProperty, new TranslateTransform(0, 0));
+
+        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+        presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+        contentGrid.AppendChild(presenter);
+
+        var pressedOverlay = new FrameworkElementFactory(typeof(Border));
+        pressedOverlay.Name = "PressedOverlay";
+        pressedOverlay.SetValue(Border.BackgroundProperty, pressedOverlayBrush);
+        pressedOverlay.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+        pressedOverlay.SetValue(UIElement.OpacityProperty, 0.0);
+        pressedOverlay.SetValue(UIElement.IsHitTestVisibleProperty, false);
+        contentGrid.AppendChild(pressedOverlay);
+
+        root.AppendChild(contentGrid);
+
+        var template = new ControlTemplate(typeof(Button)) { VisualTree = root };
+
+        var hover = new Trigger { Property = Button.IsMouseOverProperty, Value = true };
+        hover.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(2, 2), "ContentGrid"));
+
+        var pressed = new Trigger { Property = Button.IsPressedProperty, Value = true };
+        pressed.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(3, 3), "ContentGrid"));
+        pressed.Setters.Add(new Setter(UIElement.OpacityProperty, 0.82, "ContentGrid"));
         pressed.Setters.Add(new Setter(UIElement.OpacityProperty, useScanlineEffect ? 0.62 : 0.0, "PressedOverlay"));
 
         template.Triggers.Add(hover);
