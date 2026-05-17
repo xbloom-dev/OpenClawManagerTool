@@ -13,3 +13,6 @@ WebView2Data/
 .token-manager/
 **/.token-manager/
 **/secrets.json
+
+# Claude Code — lokální nastavení (nepatří do repo)
+.claude/settings.local.json
