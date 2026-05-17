@@ -384,6 +384,7 @@ public partial class MainWindow
         pressedOverlay.Name = "PressedOverlay";
         pressedOverlay.SetValue(Border.BackgroundProperty, pressedOverlayBrush);
         pressedOverlay.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+        pressedOverlay.SetValue(FrameworkElement.MarginProperty, new Thickness(4, 0, 4, 0));
         pressedOverlay.SetValue(UIElement.OpacityProperty, 0.0);
         pressedOverlay.SetValue(UIElement.IsHitTestVisibleProperty, false);
         contentGrid.AppendChild(pressedOverlay);
