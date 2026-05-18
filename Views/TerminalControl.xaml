@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
-             Background="#1E1E1E">
+             Background="#191919">
 
     <Grid>
         <!-- WebView2 — MUSÍ být Hidden (ne Collapsed).
@@ -18,7 +18,7 @@
              Explicitně Visible. Skrytý z code-behind při _webViewReady = true.
              Znovu Visible po StopTui / OnConPtyExited. -->
         <Border x:Name="SplashBorder"
-                Background="#1E1E1E"
+                Background="#191919"
                 Visibility="Visible">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                 <TextBlock x:Name="SplashLogo"

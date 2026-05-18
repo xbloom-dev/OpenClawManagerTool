@@ -9,6 +9,7 @@ public partial class AboutWindow : Window
     public AboutWindow()
     {
         InitializeComponent();
+        DarkThemeRuntimeStyles.ApplyIfDark(this);
         BtnClose.Click += (_, _) => Close();
         ApplyLocalization();
         _ = InitWebViewAsync();
@@ -59,13 +60,17 @@ public partial class AboutWindow : Window
 
     private static string BuildHtml(string svgContent)
     {
+        var background = SettingsService.Current.Theme == OpenClawManager.Models.AppTheme.Dark
+            ? "#191919"
+            : "#F0F0F0";
+
         return $@"<!DOCTYPE html>
 <html>
 <head>
 <style>
   html, body {{
     margin: 0; padding: 0;
-    background: #F0F0F0;
+    background: {background};
     display: flex;
     align-items: center;
     justify-content: center;

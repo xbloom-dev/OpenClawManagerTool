@@ -85,7 +85,7 @@ public partial class TerminalControl : UserControl
                 html, body {
                     margin: 0;
                     padding: 0;
-                    background: #1e1e1e;
+                    background: #191919;
                     overflow: hidden;
                     height: 100vh;
                     display: flex;
@@ -111,7 +111,7 @@ public partial class TerminalControl : UserControl
                     fontFamily: 'Consolas, "Courier New", monospace',
                     fontSize: 14,
                     theme: {
-                        background: '#1e1e1e',
+                        background: '#191919',
                         foreground: '#dcdcdc',
                         cursor: '#dcdcdc'
                     },

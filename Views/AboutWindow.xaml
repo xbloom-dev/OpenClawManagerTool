@@ -31,7 +31,8 @@
                            Foreground="Gray" FontSize="12" />
             </StackPanel>
 
-            <Border Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1"
+            <Border x:Name="ShortcutFrame"
+                    Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1"
                     CornerRadius="4" Padding="12,8" Margin="0,0,0,8">
                 <Grid>
                     <Grid.ColumnDefinitions>

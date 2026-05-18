@@ -17,6 +17,7 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
+        DarkThemeRuntimeStyles.ApplyIfDark(this);
 
         // Klon aktuálních nastavení (uživatel pak může Cancel bez změny originálu)
         var current = SettingsService.Current;

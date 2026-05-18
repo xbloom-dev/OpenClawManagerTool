@@ -28,6 +28,7 @@ public partial class TokenManagerWindow : Window
     public TokenManagerWindow()
     {
         InitializeComponent();
+        DarkThemeRuntimeStyles.ApplyIfDark(this);
 
         TokenGrid.ItemsSource = _tokens;
         TokenGrid.SelectionChanged += (_, _) => UpdateTokenButtons();

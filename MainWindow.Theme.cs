@@ -4,8 +4,12 @@
 
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Interop;
+using System.Runtime.InteropServices;
 using OpenClawManager.Models;
 using OpenClawManager.Services;
 
@@ -13,12 +17,18 @@ namespace OpenClawManager;
 
 public partial class MainWindow
 {
+    private const int DwmwaBorderColor = 34;
+    private const int DwmwaCaptionColor = 35;
+    private const int DwmwaTextColor = 36;
+    private const int DwmDefaultColor = unchecked((int)0xFFFFFFFF);
+
     private sealed record ButtonVisualState(
         object? Content,
         Style? Style,
         Style? FocusVisualStyle,
         double Height,
         Thickness Margin,
+        HorizontalAlignment HorizontalContentAlignment,
         Thickness Padding,
         Thickness BorderThickness,
         Brush Background,
@@ -30,8 +40,12 @@ public partial class MainWindow
     private readonly Dictionary<Button, ButtonVisualState> _buttonVisualStates = new();
     private readonly Dictionary<Control, ShellVisualState> _shellControlStates = new();
     private readonly Dictionary<FrameworkElement, ElementLayoutState> _layoutElementStates = new();
+    private readonly Dictionary<TextBlock, Brush> _textBlockForegroundStates = new();
     private readonly Dictionary<MenuItem, object?> _menuItemIcons = new();
     private AppTheme _activeTheme = AppTheme.Legacy;
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
 
     // ── Inicializace theme (volat v konstruktoru po InitializeComponent) ──────
     private void InitTheme()
@@ -93,10 +107,15 @@ public partial class MainWindow
         switch (theme)
         {
             case AppTheme.Modern:
-            case AppTheme.Dark:
             case AppTheme.HighContrast:
                 ApplyModernUi();
                 ApplyModernToolLayout();
+                break;
+            case AppTheme.Dark:
+                ApplyDarkUi();
+                ApplyModernToolLayout();
+                ApplyDarkToolLayout();
+                ApplyResourceThemeShell();
                 break;
             case AppTheme.CrabCute:
                 ApplyCrabCuteUi();
@@ -133,6 +152,33 @@ public partial class MainWindow
 
         // TUI tlačítko — ponechat dynamický stav (UpdateStartTuiButton ho řídí)
         // Ikony Start/Stop se přepínají v UpdateStartTuiButton()
+        UpdateStartTuiButton(Terminal.IsTuiRunning);
+    }
+
+    private void ApplyDarkUi()
+    {
+        SetButtonIcon(BtnGatewayStart,    "start");
+        SetButtonIcon(BtnGatewayStop,     "stop");
+        SetButtonIcon(BtnGatewayRestart,  "restart");
+        SetButtonIcon(BtnOpenPowerShell,  "powershell");
+        SetButtonIcon(BtnOpenGatewayLog,  "gateway-log");
+        SetButtonIcon(BtnCleaningTool,    "cleaning-tool");
+        SetButtonIcon(BtnTokenManager,    "token-manager");
+        SetButtonIcon(BtnDoctorFix,       "doctor-fix");
+
+        ApplyDarkButtonFeedbackStyle(Color.FromRgb(0x27, 0x27, 0x27),
+            BtnStartTui,
+            BtnGatewayStart,
+            BtnGatewayStop,
+            BtnGatewayRestart);
+
+        ApplyDarkButtonFeedbackStyle(Color.FromRgb(0x19, 0x19, 0x19),
+            BtnOpenPowerShell,
+            BtnOpenGatewayLog,
+            BtnCleaningTool,
+            BtnTokenManager,
+            BtnDoctorFix);
+
         UpdateStartTuiButton(Terminal.IsTuiRunning);
     }
 
@@ -189,6 +235,238 @@ public partial class MainWindow
         AppLog.BorderBrush = border;
     }
 
+    private void ApplyResourceThemeShell()
+    {
+        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
+        var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x19, 0x19, 0x19));
+        var chrome = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12));
+        var text = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x4E, 0x4E, 0x4E));
+        var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x4E, 0x4E, 0x4E));
+
+        Background = background;
+        Foreground = text;
+
+        MainMenu.Background = background;
+        MainMenu.Foreground = text;
+        MainStatusBar.Background = chrome;
+        MainStatusBar.Foreground = secondary;
+        MainStatusBar.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
+        MainGridSplitter.Background = background;
+
+        GrpActions.Background = surface;
+        GrpActions.Foreground = text;
+        GrpActions.BorderBrush = Brushes.Transparent;
+        GrpActions.BorderThickness = new Thickness(0);
+
+        foreach (var group in new[] { GrpLatency, GrpAppLog })
+        {
+            group.Background = surface;
+            group.Foreground = text;
+            group.BorderBrush = text;
+            group.BorderThickness = new Thickness(1);
+            group.Style = CreateDarkFramedGroupBoxStyle();
+        }
+
+        AppLog.Background = surface;
+        AppLog.Foreground = text;
+        AppLog.BorderBrush = Brushes.Transparent;
+        AppLog.BorderThickness = new Thickness(0);
+        Terminal.Background = background;
+        ApplyDarkMenuVisuals();
+        ApplyDarkButtonText();
+        AlignToolButtonsLeft();
+
+        ApplyWindowCaptionColor(Color.FromRgb(0x12, 0x12, 0x12), Colors.White);
+    }
+
+    private void ApplyDarkMenuVisuals()
+    {
+        MainMenu.Resources[typeof(MenuItem)] = CreateDarkMenuItemStyle();
+        MainMenu.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
+    }
+
+    private static Style CreateHiddenSeparatorStyle()
+    {
+        var style = new Style(typeof(Separator));
+        style.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Collapsed));
+        return style;
+    }
+
+    private static Style CreateDarkMenuItemStyle()
+    {
+        var style = new Style(typeof(MenuItem));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, Brushes.White));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x19, 0x19, 0x19))));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(8, 4, 8, 4)));
+        style.Setters.Add(new Setter(Control.TemplateProperty, CreateDarkMenuItemTemplate()));
+        return style;
+    }
+
+    private static Style CreateDarkFramedGroupBoxStyle()
+    {
+        var textBrush = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x4E, 0x4E, 0x4E));
+        var borderBrush = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0x4E, 0x4E, 0x4E));
+        var backgroundBrush = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x19, 0x19, 0x19));
+
+        var border = new FrameworkElementFactory(typeof(Border));
+        border.Name = "Border";
+        border.SetValue(Border.BackgroundProperty, backgroundBrush);
+        border.SetValue(Border.BorderBrushProperty, borderBrush);
+        border.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+        border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
+
+        var dock = new FrameworkElementFactory(typeof(DockPanel));
+        dock.SetValue(DockPanel.LastChildFillProperty, true);
+
+        var header = new FrameworkElementFactory(typeof(ContentPresenter));
+        header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
+        header.SetValue(TextElement.ForegroundProperty, textBrush);
+        header.SetValue(TextElement.FontWeightProperty, FontWeights.SemiBold);
+        header.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 0, 0, 6));
+        header.SetValue(DockPanel.DockProperty, Dock.Top);
+        dock.AppendChild(header);
+
+        var content = new FrameworkElementFactory(typeof(ContentPresenter));
+        content.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(ContentControl.ContentProperty));
+        dock.AppendChild(content);
+
+        border.AppendChild(dock);
+
+        var style = new Style(typeof(GroupBox));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, backgroundBrush));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, borderBrush));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
+        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
+        return style;
+    }
+
+    private static ControlTemplate CreateDarkMenuItemTemplate()
+    {
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.Name = "Root";
+        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
+        root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
+        root.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+
+        var dock = new FrameworkElementFactory(typeof(DockPanel));
+        dock.Name = "Dock";
+        dock.SetValue(FrameworkElement.MinWidthProperty, 160.0);
+        dock.SetValue(FrameworkElement.MarginProperty, new Thickness(0));
+
+        var arrow = new FrameworkElementFactory(typeof(TextBlock));
+        arrow.Name = "Arrow";
+        arrow.SetValue(TextBlock.TextProperty, ">");
+        arrow.SetValue(TextBlock.ForegroundProperty, new SolidColorBrush(Color.FromRgb(0x4E, 0x4E, 0x4E)));
+        arrow.SetValue(FrameworkElement.MarginProperty, new Thickness(16, 0, 0, 0));
+        arrow.SetValue(DockPanel.DockProperty, Dock.Right);
+        arrow.SetValue(UIElement.VisibilityProperty, Visibility.Collapsed);
+        dock.AppendChild(arrow);
+
+        var gesture = new FrameworkElementFactory(typeof(TextBlock));
+        gesture.Name = "Gesture";
+        gesture.SetValue(TextBlock.TextProperty, new TemplateBindingExtension(MenuItem.InputGestureTextProperty));
+        gesture.SetValue(TextBlock.ForegroundProperty, new SolidColorBrush(Color.FromRgb(0x4E, 0x4E, 0x4E)));
+        gesture.SetValue(FrameworkElement.MarginProperty, new Thickness(24, 0, 0, 0));
+        gesture.SetValue(DockPanel.DockProperty, Dock.Right);
+        dock.AppendChild(gesture);
+
+        var header = new FrameworkElementFactory(typeof(ContentPresenter));
+        header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
+        header.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
+        header.SetValue(TextElement.ForegroundProperty, new TemplateBindingExtension(Control.ForegroundProperty));
+        header.SetValue(FrameworkElement.MarginProperty, new Thickness(8, 4, 8, 4));
+        dock.AppendChild(header);
+
+        root.AppendChild(dock);
+
+        var popup = new FrameworkElementFactory(typeof(Popup));
+        popup.Name = "PART_Popup";
+        popup.SetValue(Popup.AllowsTransparencyProperty, true);
+        popup.SetValue(Popup.FocusableProperty, false);
+        popup.SetValue(Popup.IsOpenProperty, new TemplateBindingExtension(MenuItem.IsSubmenuOpenProperty));
+        popup.SetValue(Popup.PlacementProperty, PlacementMode.Right);
+
+        var popupBorder = new FrameworkElementFactory(typeof(Border));
+        popupBorder.SetValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x12, 0x12, 0x12)));
+        popupBorder.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+
+        var items = new FrameworkElementFactory(typeof(ItemsPresenter));
+        popupBorder.AppendChild(items);
+        popup.AppendChild(popupBorder);
+
+        var panel = new FrameworkElementFactory(typeof(Grid));
+        panel.AppendChild(root);
+        panel.AppendChild(popup);
+
+        var template = new ControlTemplate(typeof(MenuItem)) { VisualTree = panel };
+
+        var hover = new Trigger { Property = MenuItem.IsHighlightedProperty, Value = true };
+        hover.Setters.Add(new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x27, 0x27, 0x27)), "Root"));
+
+        var submenu = new Trigger { Property = MenuItem.RoleProperty, Value = MenuItemRole.SubmenuHeader };
+        submenu.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Visible, "Arrow"));
+        submenu.Setters.Add(new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x27, 0x27, 0x27)), "Root"));
+
+        var open = new Trigger { Property = MenuItem.IsSubmenuOpenProperty, Value = true };
+        open.Setters.Add(new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x27, 0x27, 0x27)), "Root"));
+
+        var topLevel = new Trigger { Property = MenuItem.RoleProperty, Value = MenuItemRole.TopLevelHeader };
+        topLevel.Setters.Add(new Setter(Control.ForegroundProperty, new SolidColorBrush(Color.FromRgb(0x4E, 0x4E, 0x4E))));
+        topLevel.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Collapsed, "Arrow"));
+        topLevel.Setters.Add(new Setter(FrameworkElement.MinWidthProperty, 0.0, "Dock"));
+        topLevel.Setters.Add(new Setter(Popup.PlacementProperty, PlacementMode.Bottom, "PART_Popup"));
+
+        template.Triggers.Add(hover);
+        template.Triggers.Add(submenu);
+        template.Triggers.Add(open);
+        template.Triggers.Add(topLevel);
+        return template;
+    }
+
+    private void ApplyDarkButtonText()
+    {
+        var buttonText = ThemeService.GetBrush("Theme.Brush.ButtonText", Color.FromRgb(0xD0, 0xD0, 0xD0));
+
+        foreach (var label in new[]
+        {
+            BtnStartTuiLabel,
+            BtnStartTuiSubLabel,
+            BtnGatewayStartLabel,
+            BtnGatewayStopLabel,
+            BtnGatewayRestartLabel,
+            BtnPowerShellLabel,
+            BtnGatewayLogLabel,
+            BtnCleaningToolLabel,
+            BtnTokenManagerLabel,
+            BtnDoctorFixLabel
+        })
+        {
+            label.Foreground = buttonText;
+        }
+    }
+
+    private void AlignToolButtonsLeft()
+    {
+        foreach (var button in new[]
+        {
+            BtnOpenPowerShell,
+            BtnOpenGatewayLog,
+            BtnCleaningTool,
+            BtnTokenManager,
+            BtnDoctorFix
+        })
+        {
+            button.HorizontalContentAlignment = HorizontalAlignment.Left;
+            if (button.Content is StackPanel stack)
+            {
+                stack.HorizontalAlignment = HorizontalAlignment.Left;
+                stack.VerticalAlignment = VerticalAlignment.Center;
+            }
+        }
+    }
+
     private void ApplyModernToolLayout()
     {
         TxtSectionOpen.Text = "Nástroje:";
@@ -200,6 +478,15 @@ public partial class MainWindow
         BtnOpenGatewayLog.Margin = new Thickness(0, 0, 0, 2);
         BtnCleaningTool.Margin = new Thickness(0, 0, 0, 2);
         BtnTokenManager.Margin = new Thickness(0, 0, 0, 2);
+    }
+
+    private void ApplyDarkToolLayout()
+    {
+        BtnOpenPowerShell.Margin = new Thickness(0, 0, 0, 6);
+        BtnOpenGatewayLog.Margin = new Thickness(0, 0, 0, 6);
+        BtnCleaningTool.Margin = new Thickness(0, 0, 0, 6);
+        BtnTokenManager.Margin = new Thickness(0, 0, 0, 6);
+        BtnDoctorFix.Margin = new Thickness(0, 0, 0, 0);
     }
 
     private void ReapplyCurrentThemeLayoutAfterLocalization()
@@ -359,6 +646,92 @@ public partial class MainWindow
         return style;
     }
 
+    private static void ApplyDarkButtonFeedbackStyle(Color idleColor, params Button[] buttons)
+    {
+        foreach (var button in buttons)
+        {
+            button.Style = CreateDarkButtonFeedbackStyle(SettingsService.Current.UseButtonScanlineEffect, idleColor);
+            button.FocusVisualStyle = null;
+        }
+    }
+
+    private static Style CreateDarkButtonFeedbackStyle(bool useScanlineEffect, Color idleColor)
+    {
+        var idleBrush = new SolidColorBrush(idleColor);
+        var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x38, 0x38, 0x38));
+        var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x30, 0x30, 0x30));
+        var buttonTextBrush = ThemeService.GetBrush("Theme.Brush.ButtonText", Colors.White);
+        var pressedOverlayBrush = CreatePressedScanlineBrush();
+
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.Name = "Root";
+        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Button.BackgroundProperty));
+        root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
+        root.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+
+        var contentGrid = new FrameworkElementFactory(typeof(Grid));
+        contentGrid.Name = "ContentGrid";
+        contentGrid.SetValue(
+            FrameworkElement.HorizontalAlignmentProperty,
+            new TemplateBindingExtension(Control.HorizontalContentAlignmentProperty));
+        contentGrid.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
+        contentGrid.SetValue(UIElement.RenderTransformProperty, new TranslateTransform(0, 0));
+
+        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        presenter.Name = "ContentHost";
+        presenter.SetValue(
+            ContentPresenter.HorizontalAlignmentProperty,
+            new TemplateBindingExtension(Control.HorizontalContentAlignmentProperty));
+        presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+        presenter.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
+        contentGrid.AppendChild(presenter);
+
+        var pressedOverlay = new FrameworkElementFactory(typeof(Border));
+        pressedOverlay.Name = "PressedOverlay";
+        pressedOverlay.SetValue(Border.BackgroundProperty, pressedOverlayBrush);
+        pressedOverlay.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+        pressedOverlay.SetValue(UIElement.OpacityProperty, 0.0);
+        pressedOverlay.SetValue(UIElement.IsHitTestVisibleProperty, false);
+        contentGrid.AppendChild(pressedOverlay);
+
+        root.AppendChild(contentGrid);
+
+        var template = new ControlTemplate(typeof(Button)) { VisualTree = root };
+
+        var hover = new Trigger { Property = Button.IsMouseOverProperty, Value = true };
+        hover.Setters.Add(new Setter(Border.BackgroundProperty, hoverBrush, "Root"));
+        hover.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(2, 2), "ContentGrid"));
+
+        var pressed = new Trigger { Property = Button.IsPressedProperty, Value = true };
+        pressed.Setters.Add(new Setter(Border.BackgroundProperty, pressedBrush, "Root"));
+        pressed.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(3, 3), "ContentGrid"));
+        pressed.Setters.Add(new Setter(UIElement.OpacityProperty, useScanlineEffect ? 0.62 : 0.0, "PressedOverlay"));
+
+        template.Triggers.Add(hover);
+        template.Triggers.Add(pressed);
+
+        var style = new Style(typeof(Button));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, idleBrush));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, buttonTextBrush));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.TemplateProperty, template));
+        style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
+        style.Triggers.Add(new Trigger
+        {
+            Property = UIElement.IsEnabledProperty,
+            Value = false,
+            Setters =
+            {
+                new Setter(Control.BackgroundProperty, idleBrush),
+                new Setter(UIElement.OpacityProperty, 0.55)
+            }
+        });
+        return style;
+    }
+
     private static Style CreateCrabCuteButtonFeedbackStyle(bool useScanlineEffect)
     {
         var pressedOverlayBrush = CreatePressedScanlineBrush();
@@ -502,6 +875,7 @@ public partial class MainWindow
                 button.FocusVisualStyle,
                 button.Height,
                 button.Margin,
+                button.HorizontalContentAlignment,
                 button.Padding,
                 button.BorderThickness,
                 button.Background,
@@ -526,6 +900,23 @@ public partial class MainWindow
             _menuItemIcons[item] = item.Icon;
         }
 
+        foreach (var textBlock in new[]
+        {
+            BtnStartTuiLabel,
+            BtnStartTuiSubLabel,
+            BtnGatewayStartLabel,
+            BtnGatewayStopLabel,
+            BtnGatewayRestartLabel,
+            BtnPowerShellLabel,
+            BtnGatewayLogLabel,
+            BtnCleaningToolLabel,
+            BtnTokenManagerLabel,
+            BtnDoctorFixLabel
+        })
+        {
+            _textBlockForegroundStates[textBlock] = textBlock.Foreground;
+        }
+
         foreach (var control in new Control[] { MainMenu, MainStatusBar, GrpActions, GrpLatency, GrpAppLog, AppLog })
         {
             _shellControlStates[control] = new ShellVisualState(control.Background, control.Foreground);
@@ -534,6 +925,7 @@ public partial class MainWindow
 
     private void RestoreThemeBaseline()
     {
+        ApplyWindowCaptionColor(null, null);
         Background = SystemColors.WindowBrush;
         Foreground = SystemColors.ControlTextBrush;
         MainGridSplitter.Background = Brushes.LightGray;
@@ -545,6 +937,7 @@ public partial class MainWindow
             button.FocusVisualStyle = state.FocusVisualStyle;
             button.Height = state.Height;
             button.Margin = state.Margin;
+            button.HorizontalContentAlignment = state.HorizontalContentAlignment;
             button.Padding = state.Padding;
             button.BorderThickness = state.BorderThickness;
             button.Background = state.Background;
@@ -569,6 +962,42 @@ public partial class MainWindow
             if (element is TextBlock tb && state.Text != null)
                 tb.Text = state.Text;
         }
+
+        foreach (var (textBlock, foreground) in _textBlockForegroundStates)
+        {
+            textBlock.Foreground = foreground;
+        }
+
+        MainMenu.Resources.Remove(typeof(MenuItem));
+        MainMenu.Resources.Remove(typeof(Separator));
+        MainStatusBar.Resources.Remove(typeof(Separator));
+    }
+
+    private void ApplyWindowCaptionColor(Color? captionColor, Color? textColor)
+    {
+        void ApplyNow()
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            if (hwnd == IntPtr.Zero) return;
+
+            var caption = captionColor.HasValue ? ToColorRef(captionColor.Value) : DwmDefaultColor;
+            var border = caption;
+            var text = textColor.HasValue ? ToColorRef(textColor.Value) : DwmDefaultColor;
+
+            _ = DwmSetWindowAttribute(hwnd, DwmwaCaptionColor, ref caption, sizeof(int));
+            _ = DwmSetWindowAttribute(hwnd, DwmwaBorderColor, ref border, sizeof(int));
+            _ = DwmSetWindowAttribute(hwnd, DwmwaTextColor, ref text, sizeof(int));
+        }
+
+        if (new WindowInteropHelper(this).Handle == IntPtr.Zero)
+            SourceInitialized += (_, _) => ApplyNow();
+        else
+            ApplyNow();
+    }
+
+    private static int ToColorRef(Color color)
+    {
+        return color.R | (color.G << 8) | (color.B << 16);
     }
 
     /// <summary>

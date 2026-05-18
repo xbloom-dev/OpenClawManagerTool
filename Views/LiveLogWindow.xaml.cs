@@ -41,6 +41,7 @@ public partial class LiveLogWindow : Window
     public LiveLogWindow(string logPath, int windowSize = 20)
     {
         InitializeComponent();
+        DarkThemeRuntimeStyles.ApplyIfDark(this);
         _logPath    = logPath;
         _windowSize = windowSize > 0 ? windowSize : 20;
         _lines      = new Queue<string>(_windowSize + 1);

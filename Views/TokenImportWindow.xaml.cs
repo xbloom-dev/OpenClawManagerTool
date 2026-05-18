@@ -16,6 +16,7 @@ public partial class TokenImportWindow : Window
     public TokenImportWindow(string filePath)
     {
         InitializeComponent();
+        DarkThemeRuntimeStyles.ApplyIfDark(this);
 
         Title = F("Str_Token_ImportTitle", Path.GetFileName(filePath));
         ApplyLocalization();

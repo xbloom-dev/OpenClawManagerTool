@@ -3,21 +3,19 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!--
-        Theme: Dark (Dark Slate — paleta B)
+        Theme: Dark (Graphite — tříodstínová paleta)
         Vychází z: Modern (stejná struktura tokenů a x:Key styly)
         ═══════════════════════════════════════════════════════════════════
-        Pozadí okna:     #181A1F
-        Panely/GroupBox: #242832
-        Akcent:          #4CC2FF    světle modrá
-        Text primární:   #F3F7FA
-        Text sekundární: #AAB4C0
-        Ohraničení:      #3A4250
-        Button hover:    #2E3444
-        Button pressed:  #38404F
-        ActionPositive:  #143D2A    TUI, Spustit, [REDACT]
-        ActionDanger:    #4A1E24    Zavřít, Zrušit, Obnovit, Opravit
-        ActionUtility:   #183A52    Kopírovat, Náhled, Procházet
-        SplashBackground:#2B174C    tmavě fialové splash pozadí
+        Pozadí okna:     #191919
+        Panely/GroupBox: #191919
+        Akcent:          #383838    neutrální, bez barevného akcentu
+        Text primární:   #FFFFFF
+        Text sekundární: #4E4E4E
+        Ohraničení:      #4E4E4E
+        Button idle:     #272727
+        Button hover:    #383838
+        Button pressed:  #303030
+        SplashBackground:#191919
         ═══════════════════════════════════════════════════════════════════
         Přidání nového tématu:
           1. Zkopírovat tento soubor jako Theme.{Název}.xaml
@@ -27,31 +25,37 @@
     -->
 
     <!-- ── Barvy ── -->
-    <Color x:Key="Theme.Color.Background">#181A1F</Color>
-    <Color x:Key="Theme.Color.Surface">#242832</Color>
-    <Color x:Key="Theme.Color.Accent">#4CC2FF</Color>
-    <Color x:Key="Theme.Color.Text.Primary">#F3F7FA</Color>
-    <Color x:Key="Theme.Color.Text.Secondary">#AAB4C0</Color>
-    <Color x:Key="Theme.Color.Border">#3A4250</Color>
-    <Color x:Key="Theme.Color.Hover">#2E3444</Color>
-    <Color x:Key="Theme.Color.Pressed">#38404F</Color>
-    <Color x:Key="Theme.Color.Success">#38C172</Color>
-    <Color x:Key="Theme.Color.Danger">#FF6B7A</Color>
-    <Color x:Key="Theme.Color.Warning">#F6C177</Color>
-    <Color x:Key="Theme.Color.ActionPositive">#143D2A</Color>
-    <Color x:Key="Theme.Color.ActionDanger">#4A1E24</Color>
-    <Color x:Key="Theme.Color.ActionUtility">#183A52</Color>
-    <Color x:Key="Theme.Color.SplashModernBackground">#2B174C</Color>
+    <Color x:Key="Theme.Color.Background">#191919</Color>
+    <Color x:Key="Theme.Color.Surface">#191919</Color>
+    <Color x:Key="Theme.Color.Chrome">#121212</Color>
+    <Color x:Key="Theme.Color.Accent">#383838</Color>
+    <Color x:Key="Theme.Color.Text.Primary">#FFFFFF</Color>
+    <Color x:Key="Theme.Color.Text.Secondary">#4E4E4E</Color>
+    <Color x:Key="Theme.Color.Border">#4E4E4E</Color>
+    <Color x:Key="Theme.Color.Hover">#383838</Color>
+    <Color x:Key="Theme.Color.Pressed">#303030</Color>
+    <Color x:Key="Theme.Color.Disabled">#272727</Color>
+    <Color x:Key="Theme.Color.ButtonText">#FFFFFF</Color>
+    <Color x:Key="Theme.Color.Success">#383838</Color>
+    <Color x:Key="Theme.Color.Danger">#383838</Color>
+    <Color x:Key="Theme.Color.Warning">#383838</Color>
+    <Color x:Key="Theme.Color.ActionPositive">#272727</Color>
+    <Color x:Key="Theme.Color.ActionDanger">#272727</Color>
+    <Color x:Key="Theme.Color.ActionUtility">#272727</Color>
+    <Color x:Key="Theme.Color.SplashModernBackground">#191919</Color>
 
     <!-- ── Brushe ── -->
     <SolidColorBrush x:Key="Theme.Brush.Background"     Color="{StaticResource Theme.Color.Background}" />
     <SolidColorBrush x:Key="Theme.Brush.Surface"        Color="{StaticResource Theme.Color.Surface}" />
+    <SolidColorBrush x:Key="Theme.Brush.Chrome"         Color="{StaticResource Theme.Color.Chrome}" />
     <SolidColorBrush x:Key="Theme.Brush.Accent"         Color="{StaticResource Theme.Color.Accent}" />
     <SolidColorBrush x:Key="Theme.Brush.Text.Primary"   Color="{StaticResource Theme.Color.Text.Primary}" />
     <SolidColorBrush x:Key="Theme.Brush.Text.Secondary" Color="{StaticResource Theme.Color.Text.Secondary}" />
     <SolidColorBrush x:Key="Theme.Brush.Border"         Color="{StaticResource Theme.Color.Border}" />
     <SolidColorBrush x:Key="Theme.Brush.Hover"          Color="{StaticResource Theme.Color.Hover}" />
     <SolidColorBrush x:Key="Theme.Brush.Pressed"        Color="{StaticResource Theme.Color.Pressed}" />
+    <SolidColorBrush x:Key="Theme.Brush.Disabled"       Color="{StaticResource Theme.Color.Disabled}" />
+    <SolidColorBrush x:Key="Theme.Brush.ButtonText"     Color="{StaticResource Theme.Color.ButtonText}" />
     <SolidColorBrush x:Key="Brush.ActionPositive"       Color="{StaticResource Theme.Color.ActionPositive}" />
     <SolidColorBrush x:Key="Brush.ActionDanger"         Color="{StaticResource Theme.Color.ActionDanger}" />
     <SolidColorBrush x:Key="Brush.ActionUtility"        Color="{StaticResource Theme.Color.ActionUtility}" />
@@ -68,27 +72,28 @@
     <!-- GroupBox -->
     <Style x:Key="Theme.Style.GroupBox" TargetType="GroupBox">
         <Setter Property="Background"      Value="{StaticResource Theme.Brush.Surface}" />
-        <Setter Property="BorderBrush"     Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="BorderBrush"     Value="Transparent" />
         <Setter Property="Foreground"      Value="{StaticResource Theme.Brush.Text.Primary}" />
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderThickness" Value="0" />
     </Style>
 
-    <!-- Button — tmavé hover/pressed barvy (opraveno oproti copy-paste z Modern) -->
+    <!-- Button — tmavé neutrální barvy bez samostatného ohraničení -->
     <Style x:Key="Theme.Style.Button" TargetType="Button">
-        <Setter Property="Background"      Value="{StaticResource Theme.Brush.Surface}" />
-        <Setter Property="Foreground"      Value="{StaticResource Theme.Brush.Text.Primary}" />
-        <Setter Property="BorderBrush"     Value="{StaticResource Theme.Brush.Border}" />
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Background"      Value="{StaticResource Theme.Brush.Disabled}" />
+        <Setter Property="Foreground"      Value="{StaticResource Theme.Brush.ButtonText}" />
+        <Setter Property="BorderBrush"     Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding"         Value="8,4" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{StaticResource Theme.Brush.Hover}" />
-                <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Accent}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
             </Trigger>
             <Trigger Property="IsPressed" Value="True">
                 <Setter Property="Background" Value="{StaticResource Theme.Brush.Pressed}" />
             </Trigger>
             <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Background" Value="{StaticResource Theme.Brush.Disabled}" />
                 <Setter Property="Opacity" Value="0.45" />
             </Trigger>
         </Style.Triggers>
@@ -102,8 +107,151 @@
     <!-- ListBox (AppLog) -->
     <Style x:Key="Theme.Style.ListBox" TargetType="ListBox">
         <Setter Property="Background"  Value="{StaticResource Theme.Brush.Surface}" />
-        <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground"  Value="{StaticResource Theme.Brush.Text.Primary}" />
+    </Style>
+
+    <!-- Implicitní styly pro nově otevřená okna v Dark tématu -->
+    <Style TargetType="Window" BasedOn="{StaticResource Theme.Style.Window}" />
+    <Style TargetType="GroupBox" BasedOn="{StaticResource Theme.Style.GroupBox}" />
+    <Style TargetType="Button" BasedOn="{StaticResource Theme.Style.Button}" />
+    <Style TargetType="TextBlock" BasedOn="{StaticResource Theme.Style.TextBlock}" />
+    <Style TargetType="ListBox" BasedOn="{StaticResource Theme.Style.ListBox}" />
+
+    <Style TargetType="TextBox">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CaretBrush" Value="{StaticResource Theme.Brush.Accent}" />
+        <Setter Property="SelectionBrush" Value="{StaticResource Theme.Brush.Hover}" />
+    </Style>
+
+    <Style TargetType="PasswordBox">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CaretBrush" Value="{StaticResource Theme.Brush.Accent}" />
+        <Setter Property="SelectionBrush" Value="{StaticResource Theme.Brush.Hover}" />
+    </Style>
+
+    <Style TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+    </Style>
+
+    <Style TargetType="RadioButton">
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+    </Style>
+
+    <Style TargetType="ComboBox">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Disabled}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+
+    <Style TargetType="ListBoxItem">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+    </Style>
+
+    <Style TargetType="DataGrid">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="GridLinesVisibility" Value="None" />
+        <Setter Property="RowBackground" Value="{StaticResource Theme.Brush.Background}" />
+        <Setter Property="AlternatingRowBackground" Value="{StaticResource Theme.Brush.Disabled}" />
+        <Setter Property="HorizontalGridLinesBrush" Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="VerticalGridLinesBrush" Value="{StaticResource Theme.Brush.Border}" />
+    </Style>
+
+    <Style TargetType="Menu">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Secondary}" />
+    </Style>
+
+    <Style TargetType="MenuItem">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style TargetType="StatusBar">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Chrome}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Secondary}" />
+    </Style>
+
+    <Style TargetType="Separator">
+        <Setter Property="Visibility" Value="Collapsed" />
+    </Style>
+
+    <Style TargetType="ToolTip">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Disabled}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Secondary}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="6,4" />
+    </Style>
+
+    <Style x:Key="Theme.ScrollBar.RepeatButton" TargetType="RepeatButton">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="IsTabStop" Value="False" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="RepeatButton">
+                    <Border Background="Transparent" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.ScrollBar.Thumb" TargetType="Thumb">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Thumb">
+                    <Border Background="{StaticResource Theme.Brush.Hover}" CornerRadius="4" Margin="2" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="ScrollBar">
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Chrome}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Width" Value="12" />
+        <Setter Property="MinWidth" Value="12" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="ScrollBar">
+                    <Grid Background="{TemplateBinding Background}">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource Theme.ScrollBar.RepeatButton}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource Theme.ScrollBar.Thumb}" />
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Style="{StaticResource Theme.ScrollBar.RepeatButton}" />
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Orientation" Value="Horizontal">
+                            <Setter Property="Width" Value="Auto" />
+                            <Setter Property="MinWidth" Value="0" />
+                            <Setter Property="Height" Value="12" />
+                            <Setter Property="MinHeight" Value="12" />
+                            <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>
