@@ -107,11 +107,14 @@ public partial class MainWindow
         switch (theme)
         {
             case AppTheme.Modern:
+                ApplyStandardModernUi();
+                break;
             case AppTheme.HighContrast:
                 ApplyModernUi();
                 ApplyModernToolLayout();
                 break;
             case AppTheme.Dark:
+            case AppTheme.ModernLight:
                 ApplyDarkUi();
                 ApplyModernToolLayout();
                 ApplyDarkToolLayout();
@@ -128,6 +131,18 @@ public partial class MainWindow
     }
 
     // ── Modern UI ─────────────────────────────────────────────────────────────
+    private void ApplyStandardModernUi()
+    {
+        SetButtonIcon(BtnGatewayStart,    "start");
+        SetButtonIcon(BtnGatewayStop,     "stop");
+        SetButtonIcon(BtnGatewayRestart,  "restart");
+        SetButtonIcon(BtnOpenPowerShell,  "powershell");
+        SetButtonIcon(BtnOpenGatewayLog,  "gateway-log");
+        SetButtonIcon(BtnCleaningTool,    "cleaning-tool");
+        SetButtonIcon(BtnTokenManager,    "token-manager");
+        SetButtonIcon(BtnDoctorFix,       "doctor-fix");
+    }
+
     private void ApplyModernUi()
     {
         // Ikony tlačítek — nahradit emoji za PNG ikony
@@ -157,6 +172,9 @@ public partial class MainWindow
 
     private void ApplyDarkUi()
     {
+        var primaryIdle = ThemeService.GetBrush("Theme.Brush.Disabled", Color.FromRgb(0x27, 0x27, 0x27));
+        var secondaryIdle = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
+
         SetButtonIcon(BtnGatewayStart,    "start");
         SetButtonIcon(BtnGatewayStop,     "stop");
         SetButtonIcon(BtnGatewayRestart,  "restart");
@@ -166,13 +184,13 @@ public partial class MainWindow
         SetButtonIcon(BtnTokenManager,    "token-manager");
         SetButtonIcon(BtnDoctorFix,       "doctor-fix");
 
-        ApplyDarkButtonFeedbackStyle(Color.FromRgb(0x27, 0x27, 0x27),
+        ApplyDarkButtonFeedbackStyle(primaryIdle,
             BtnStartTui,
             BtnGatewayStart,
             BtnGatewayStop,
             BtnGatewayRestart);
 
-        ApplyDarkButtonFeedbackStyle(Color.FromRgb(0x19, 0x19, 0x19),
+        ApplyDarkButtonFeedbackStyle(secondaryIdle,
             BtnOpenPowerShell,
             BtnOpenGatewayLog,
             BtnCleaningTool,
@@ -276,7 +294,8 @@ public partial class MainWindow
         ApplyDarkButtonText();
         AlignToolButtonsLeft();
 
-        ApplyWindowCaptionColor(Color.FromRgb(0x12, 0x12, 0x12), Colors.White);
+        var captionText = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
+        ApplyWindowCaptionColor(GetBrushColor(chrome, Color.FromRgb(0x12, 0x12, 0x12)), GetBrushColor(captionText, Colors.White));
     }
 
     private void ApplyDarkMenuVisuals()
@@ -294,12 +313,18 @@ public partial class MainWindow
 
     private static Style CreateDarkMenuItemStyle()
     {
+        var foreground = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
+        var topLevelForeground = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x4E, 0x4E, 0x4E));
+        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
+        var popupBackground = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12));
+        var hoverBackground = ThemeService.GetBrush("Theme.Brush.Disabled", Color.FromRgb(0x27, 0x27, 0x27));
+
         var style = new Style(typeof(MenuItem));
-        style.Setters.Add(new Setter(Control.ForegroundProperty, Brushes.White));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x19, 0x19, 0x19))));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, foreground));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, background));
         style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
         style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(8, 4, 8, 4)));
-        style.Setters.Add(new Setter(Control.TemplateProperty, CreateDarkMenuItemTemplate()));
+        style.Setters.Add(new Setter(Control.TemplateProperty, CreateDarkMenuItemTemplate(topLevelForeground, popupBackground, hoverBackground)));
         return style;
     }
 
@@ -342,7 +367,7 @@ public partial class MainWindow
         return style;
     }
 
-    private static ControlTemplate CreateDarkMenuItemTemplate()
+    private static ControlTemplate CreateDarkMenuItemTemplate(Brush secondaryBrush, Brush popupBackground, Brush hoverBackground)
     {
         var root = new FrameworkElementFactory(typeof(Border));
         root.Name = "Root";
@@ -358,7 +383,7 @@ public partial class MainWindow
         var arrow = new FrameworkElementFactory(typeof(TextBlock));
         arrow.Name = "Arrow";
         arrow.SetValue(TextBlock.TextProperty, ">");
-        arrow.SetValue(TextBlock.ForegroundProperty, new SolidColorBrush(Color.FromRgb(0x4E, 0x4E, 0x4E)));
+        arrow.SetValue(TextBlock.ForegroundProperty, secondaryBrush);
         arrow.SetValue(FrameworkElement.MarginProperty, new Thickness(16, 0, 0, 0));
         arrow.SetValue(DockPanel.DockProperty, Dock.Right);
         arrow.SetValue(UIElement.VisibilityProperty, Visibility.Collapsed);
@@ -367,7 +392,7 @@ public partial class MainWindow
         var gesture = new FrameworkElementFactory(typeof(TextBlock));
         gesture.Name = "Gesture";
         gesture.SetValue(TextBlock.TextProperty, new TemplateBindingExtension(MenuItem.InputGestureTextProperty));
-        gesture.SetValue(TextBlock.ForegroundProperty, new SolidColorBrush(Color.FromRgb(0x4E, 0x4E, 0x4E)));
+        gesture.SetValue(TextBlock.ForegroundProperty, secondaryBrush);
         gesture.SetValue(FrameworkElement.MarginProperty, new Thickness(24, 0, 0, 0));
         gesture.SetValue(DockPanel.DockProperty, Dock.Right);
         dock.AppendChild(gesture);
@@ -389,7 +414,7 @@ public partial class MainWindow
         popup.SetValue(Popup.PlacementProperty, PlacementMode.Right);
 
         var popupBorder = new FrameworkElementFactory(typeof(Border));
-        popupBorder.SetValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x12, 0x12, 0x12)));
+        popupBorder.SetValue(Border.BackgroundProperty, popupBackground);
         popupBorder.SetValue(Border.BorderThicknessProperty, new Thickness(0));
 
         var items = new FrameworkElementFactory(typeof(ItemsPresenter));
@@ -403,17 +428,17 @@ public partial class MainWindow
         var template = new ControlTemplate(typeof(MenuItem)) { VisualTree = panel };
 
         var hover = new Trigger { Property = MenuItem.IsHighlightedProperty, Value = true };
-        hover.Setters.Add(new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x27, 0x27, 0x27)), "Root"));
+        hover.Setters.Add(new Setter(Border.BackgroundProperty, hoverBackground, "Root"));
 
         var submenu = new Trigger { Property = MenuItem.RoleProperty, Value = MenuItemRole.SubmenuHeader };
         submenu.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Visible, "Arrow"));
-        submenu.Setters.Add(new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x27, 0x27, 0x27)), "Root"));
+        submenu.Setters.Add(new Setter(Border.BackgroundProperty, hoverBackground, "Root"));
 
         var open = new Trigger { Property = MenuItem.IsSubmenuOpenProperty, Value = true };
-        open.Setters.Add(new Setter(Border.BackgroundProperty, new SolidColorBrush(Color.FromRgb(0x27, 0x27, 0x27)), "Root"));
+        open.Setters.Add(new Setter(Border.BackgroundProperty, hoverBackground, "Root"));
 
         var topLevel = new Trigger { Property = MenuItem.RoleProperty, Value = MenuItemRole.TopLevelHeader };
-        topLevel.Setters.Add(new Setter(Control.ForegroundProperty, new SolidColorBrush(Color.FromRgb(0x4E, 0x4E, 0x4E))));
+        topLevel.Setters.Add(new Setter(Control.ForegroundProperty, secondaryBrush));
         topLevel.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Collapsed, "Arrow"));
         topLevel.Setters.Add(new Setter(FrameworkElement.MinWidthProperty, 0.0, "Dock"));
         topLevel.Setters.Add(new Setter(Popup.PlacementProperty, PlacementMode.Bottom, "PART_Popup"));
@@ -646,18 +671,17 @@ public partial class MainWindow
         return style;
     }
 
-    private static void ApplyDarkButtonFeedbackStyle(Color idleColor, params Button[] buttons)
+    private static void ApplyDarkButtonFeedbackStyle(Brush idleBrush, params Button[] buttons)
     {
         foreach (var button in buttons)
         {
-            button.Style = CreateDarkButtonFeedbackStyle(SettingsService.Current.UseButtonScanlineEffect, idleColor);
+            button.Style = CreateDarkButtonFeedbackStyle(SettingsService.Current.UseButtonScanlineEffect, idleBrush);
             button.FocusVisualStyle = null;
         }
     }
 
-    private static Style CreateDarkButtonFeedbackStyle(bool useScanlineEffect, Color idleColor)
+    private static Style CreateDarkButtonFeedbackStyle(bool useScanlineEffect, Brush idleBrush)
     {
-        var idleBrush = new SolidColorBrush(idleColor);
         var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x38, 0x38, 0x38));
         var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x30, 0x30, 0x30));
         var buttonTextBrush = ThemeService.GetBrush("Theme.Brush.ButtonText", Colors.White);
@@ -730,6 +754,11 @@ public partial class MainWindow
             }
         });
         return style;
+    }
+
+    private static Color GetBrushColor(Brush brush, Color fallback)
+    {
+        return brush is SolidColorBrush solid ? solid.Color : fallback;
     }
 
     private static Style CreateCrabCuteButtonFeedbackStyle(bool useScanlineEffect)

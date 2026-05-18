@@ -52,6 +52,7 @@ public partial class SettingsWindow : Window
         RbThemeLegacy.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeModern.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeDark.Checked += (_, _) => UpdateSplashVideoEnabled();
+        RbThemeModernLight.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeHighContrast.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeCrabCute.Checked += (_, _) => UpdateSplashVideoEnabled();
 
@@ -78,11 +79,12 @@ public partial class SettingsWindow : Window
 
         LblAppearance.Text = T("Vzhled", "Appearance");
         LblTheme.Text = T("Téma aplikace:", "Application theme:");
-        RbThemeLegacy.Content = "Legacy";
-        RbThemeModern.Content = "Modern";
-        RbThemeDark.Content = "Dark";
-        RbThemeHighContrast.Content = T("Vysok\u00FD kontrast", "High Contrast");
-        RbThemeCrabCute.Content = "CrabCute";
+        RbThemeLegacy.Content = L10n.Get("Str_Theme_Legacy");
+        RbThemeModern.Content = L10n.Get("Str_Theme_Standard");
+        RbThemeDark.Content = L10n.Get("Str_Theme_ModernDark");
+        RbThemeModernLight.Content = L10n.Get("Str_Theme_ModernLight");
+        RbThemeHighContrast.Content = L10n.Get("Str_Theme_HighContrast");
+        RbThemeCrabCute.Content = L10n.Get("Str_Theme_CrabCute");
         ChkUseSplashVideo.Content = T("SplashScreen animace p\u0159i startu", "SplashScreen startup animation");
         ChkUseButtonScanlineEffect.Content = T("Efekt \u0159\u00E1dkov\u00E1n\u00ED tla\u010D\u00EDtek", "Button scanline effect");
         TxtThemeHint.Text = T("Zm\u011Bna t\u00E9matu se projev\u00ED po ulo\u017Een\u00ED. Video je aktivn\u00ED ve v\u0161ech modern\u00EDch t\u00E9matech.", "Theme changes after saving. Video is active in all modern-style themes.");
@@ -128,6 +130,9 @@ public partial class SettingsWindow : Window
             case AppTheme.Dark:
                 RbThemeDark.IsChecked = true;
                 break;
+            case AppTheme.ModernLight:
+                RbThemeModernLight.IsChecked = true;
+                break;
             case AppTheme.HighContrast:
                 RbThemeHighContrast.IsChecked = true;
                 break;
@@ -166,6 +171,7 @@ public partial class SettingsWindow : Window
     {
         if (RbThemeModern.IsChecked == true) return AppTheme.Modern;
         if (RbThemeDark.IsChecked == true) return AppTheme.Dark;
+        if (RbThemeModernLight.IsChecked == true) return AppTheme.ModernLight;
         if (RbThemeHighContrast.IsChecked == true) return AppTheme.HighContrast;
         if (RbThemeCrabCute.IsChecked == true) return AppTheme.CrabCute;
         return AppTheme.Legacy;

@@ -37,6 +37,7 @@ public static class ThemeService
         { AppTheme.Legacy, "/Resources/Themes/Theme.Legacy.xaml" },
         { AppTheme.Modern, "/Resources/Themes/Theme.Modern.xaml" },
         { AppTheme.Dark, "/Resources/Themes/Theme.Dark.xaml" },
+        { AppTheme.ModernLight, "/Resources/Themes/Theme.ModernLight.xaml" },
         { AppTheme.HighContrast, "/Resources/Themes/Theme.HighContrast.xaml" },
         { AppTheme.CrabCute, "/Resources/Themes/Theme.CrabCute.xaml" },
     };
@@ -48,6 +49,7 @@ public static class ThemeService
         { AppTheme.Legacy, "" },         // Legacy nemá PNG ikony (používá emoji)
         { AppTheme.Modern, "Modern" },
         { AppTheme.Dark, "Modern" },
+        { AppTheme.ModernLight, "Modern" },
         { AppTheme.HighContrast, "Modern" },
         { AppTheme.CrabCute, "CrabCute" },
     };

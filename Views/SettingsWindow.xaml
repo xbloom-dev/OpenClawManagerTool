@@ -23,13 +23,14 @@
 
                 <TextBlock x:Name="LblAppearance" Text="Appearance" FontWeight="Bold" Margin="0,0,0,6" />
                 <TextBlock x:Name="LblTheme" Text="Theme:" Margin="0,0,0,4" />
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                <WrapPanel Margin="0,0,0,6">
                     <RadioButton x:Name="RbThemeLegacy" Content="Legacy" GroupName="Theme" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbThemeModern" Content="Modern" GroupName="Theme" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbThemeDark" Content="Dark" GroupName="Theme" Margin="0,0,16,0" />
+                    <RadioButton x:Name="RbThemeModernLight" Content="Modern Light" GroupName="Theme" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbThemeHighContrast" Content="High Contrast" GroupName="Theme" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbThemeCrabCute" Content="CrabCute" GroupName="Theme" />
-                </StackPanel>
+                </WrapPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                     <CheckBox x:Name="ChkUseSplashVideo" Content="SplashScreen startup animation" Margin="0,0,16,0" />
                     <CheckBox x:Name="ChkUseButtonScanlineEffect" Content="Button scanline effect" />

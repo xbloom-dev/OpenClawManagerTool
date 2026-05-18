@@ -58,6 +58,12 @@
     <sys:String x:Key="Str_Tip_Reset">Obnoví všechny hodnoty na výchozí.</sys:String>
     <sys:String x:Key="Str_Tip_Cancel">Zavře bez uložení.</sys:String>
     <sys:String x:Key="Str_Tip_Browse">Vybere složku ze systému.</sys:String>
+    <sys:String x:Key="Str_Theme_Legacy">Legacy</sys:String>
+    <sys:String x:Key="Str_Theme_Standard">Standardní</sys:String>
+    <sys:String x:Key="Str_Theme_ModernDark">Moderní tmavé</sys:String>
+    <sys:String x:Key="Str_Theme_ModernLight">Moderní světlé</sys:String>
+    <sys:String x:Key="Str_Theme_HighContrast">Vysoký kontrast</sys:String>
+    <sys:String x:Key="Str_Theme_CrabCute">CrabCute</sys:String>
 
     <!-- About -->
     <sys:String x:Key="Str_Tip_AboutClose">Zavře dialog.</sys:String>

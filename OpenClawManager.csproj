@@ -32,6 +32,7 @@
     <Resource Include="Resources\Themes\Theme.Legacy.xaml" />
     <Resource Include="Resources\Themes\Theme.Modern.xaml" />
     <Resource Include="Resources\Themes\Theme.Dark.xaml" />
+    <Resource Include="Resources\Themes\Theme.ModernLight.xaml" />
     <Resource Include="Resources\Themes\Theme.HighContrast.xaml" />
     <Resource Include="Resources\Themes\Theme.CrabCute.xaml" />
 

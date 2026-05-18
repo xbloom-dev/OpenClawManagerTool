@@ -58,6 +58,12 @@
     <sys:String x:Key="Str_Tip_Reset">Restores all values to defaults.</sys:String>
     <sys:String x:Key="Str_Tip_Cancel">Closes without saving.</sys:String>
     <sys:String x:Key="Str_Tip_Browse">Selects folder from filesystem.</sys:String>
+    <sys:String x:Key="Str_Theme_Legacy">Legacy</sys:String>
+    <sys:String x:Key="Str_Theme_Standard">Standard</sys:String>
+    <sys:String x:Key="Str_Theme_ModernDark">Modern Dark</sys:String>
+    <sys:String x:Key="Str_Theme_ModernLight">Modern Light</sys:String>
+    <sys:String x:Key="Str_Theme_HighContrast">High Contrast</sys:String>
+    <sys:String x:Key="Str_Theme_CrabCute">CrabCute</sys:String>
 
     <!-- About -->
     <sys:String x:Key="Str_Tip_AboutClose">Closes dialog.</sys:String>
