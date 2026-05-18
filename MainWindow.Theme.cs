@@ -292,6 +292,7 @@ public partial class MainWindow
         Terminal.Background = background;
         ApplyDarkMenuVisuals();
         ApplyDarkButtonText();
+        ApplyDarkMainWindowText();
         AlignToolButtonsLeft();
 
         var captionText = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
@@ -472,6 +473,45 @@ public partial class MainWindow
         }
     }
 
+    private void ApplyDarkMainWindowText()
+    {
+        var text = new SolidColorBrush(Color.FromRgb(0x27, 0x27, 0x27));
+
+        foreach (var textBlock in new[]
+        {
+            TxtGatewayLabel,
+            TxtSectionOpen,
+            TxtSectionTools,
+            TxtSectionMaintenance,
+            TxtLatencyLast,
+            TxtLatencyAvg,
+            TxtLatencyMax,
+            TxtLatencyCount,
+            LatencyLast,
+            LatencyAvg,
+            LatencyMax,
+            LatencyCount,
+            StatusGatewayText,
+            StatusGatewayPid,
+            StatusGatewayUptime,
+            StatusRam,
+            StatusVram,
+            StatusCpu
+        })
+        {
+            textBlock.Foreground = text;
+        }
+
+        foreach (var item in EnumerateVisualChildren(MainStatusBar).OfType<TextBlock>())
+            item.Foreground = text;
+
+        GrpActions.Foreground = text;
+        GrpLatency.Foreground = text;
+        GrpAppLog.Foreground = text;
+        AppLog.Foreground = text;
+        MainStatusBar.Foreground = text;
+    }
+
     private void AlignToolButtonsLeft()
     {
         foreach (var button in new[]
@@ -489,6 +529,18 @@ public partial class MainWindow
                 stack.HorizontalAlignment = HorizontalAlignment.Left;
                 stack.VerticalAlignment = VerticalAlignment.Center;
             }
+        }
+    }
+
+    private static IEnumerable<DependencyObject> EnumerateVisualChildren(DependencyObject root)
+    {
+        var count = VisualTreeHelper.GetChildrenCount(root);
+        for (var i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            yield return child;
+            foreach (var descendant in EnumerateVisualChildren(child))
+                yield return descendant;
         }
     }
 
