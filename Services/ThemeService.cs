@@ -48,14 +48,44 @@ public static class ThemeService
     {
         { AppTheme.Legacy, "" },         // Legacy nemá PNG ikony (používá emoji)
         { AppTheme.Modern, "Modern" },
-        { AppTheme.Dark, "Modern" },
-        { AppTheme.ModernLight, "Modern" },
+        { AppTheme.Dark, "ModernDark" },
+        { AppTheme.ModernLight, "ModernLight" },
         { AppTheme.HighContrast, "Modern" },
         { AppTheme.CrabCute, "CrabCute" },
     };
 
     private static readonly Dictionary<AppTheme, Dictionary<string, string>> _iconFileNames = new()
     {
+        {
+            AppTheme.Dark,
+            new Dictionary<string, string>
+            {
+                { "start", "Start.png" },
+                { "stop", "Stop.png" },
+                { "restart", "Restart.png" },
+                { "powershell", "PowerShell.png" },
+                { "gateway-log", "GatewayLog.png" },
+                { "cleaning-tool", "CleaningTool.png" },
+                { "token-manager", "TokenManager.png" },
+                { "doctor-fix", "DoctorFix.png" },
+                { "tui", "StartTUI.png" },
+            }
+        },
+        {
+            AppTheme.ModernLight,
+            new Dictionary<string, string>
+            {
+                { "start", "Start.png" },
+                { "stop", "Stop.png" },
+                { "restart", "Restart.png" },
+                { "powershell", "PowerShell.png" },
+                { "gateway-log", "GatewayLog.png" },
+                { "cleaning-tool", "CleaningTool.png" },
+                { "token-manager", "TokenManager.png" },
+                { "doctor-fix", "DoctorFix.png" },
+                { "tui", "StartTUI.png" },
+            }
+        },
         {
             AppTheme.CrabCute,
             new Dictionary<string, string>

@@ -45,6 +45,8 @@
     <Resource Include="Resources\Icons\Modern\cleaning-tool.png" />
     <Resource Include="Resources\Icons\Modern\token-manager.png" />
     <Resource Include="Resources\Icons\Modern\doctor-fix.png" />
+    <Resource Include="Resources\Icons\ModernLight\*.png" />
+    <Resource Include="Resources\Icons\ModernDark\*.png" />
     <Resource Include="Resources\Icons\CrabCute\*.png" />
 
     <!-- v1.0: Offline xterm.js assets for embedded terminal -->
@@ -71,6 +73,14 @@
     <Page Remove="TokenService.Tests\**\*.xaml" />
     <EmbeddedResource Remove="TokenService.Tests\**" />
     <None Remove="TokenService.Tests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Lokální pracovní výstupy agentů nesmí vstupovat do WPF buildu. -->
+    <Compile Remove=".codex\**\*.cs;handoff\**\*.cs;dist\**\*.cs" />
+    <Page Remove=".codex\**\*.xaml;handoff\**\*.xaml;dist\**\*.xaml" />
+    <EmbeddedResource Remove=".codex\**;handoff\**;dist\**" />
+    <None Remove=".codex\**;handoff\**;dist\**" />
   </ItemGroup>
 
 </Project>

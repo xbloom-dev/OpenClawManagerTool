@@ -10,7 +10,7 @@
         Panely/GroupBox: #191919
         Akcent:          #383838    neutrální, bez barevného akcentu
         Text primární:   #FFFFFF
-        Text sekundární: #272727
+        Text sekundární: #9E9E9E
         Ohraničení:      #4E4E4E
         Button idle:     #272727
         Button hover:    #383838
@@ -30,12 +30,12 @@
     <Color x:Key="Theme.Color.Chrome">#121212</Color>
     <Color x:Key="Theme.Color.Accent">#383838</Color>
     <Color x:Key="Theme.Color.Text.Primary">#FFFFFF</Color>
-    <Color x:Key="Theme.Color.Text.Secondary">#272727</Color>
+    <Color x:Key="Theme.Color.Text.Secondary">#9E9E9E</Color>
     <Color x:Key="Theme.Color.Border">#4E4E4E</Color>
     <Color x:Key="Theme.Color.Hover">#383838</Color>
     <Color x:Key="Theme.Color.Pressed">#303030</Color>
     <Color x:Key="Theme.Color.Disabled">#272727</Color>
-    <Color x:Key="Theme.Color.ButtonText">#FFFFFF</Color>
+    <Color x:Key="Theme.Color.ButtonText">#9E9E9E</Color>
     <Color x:Key="Theme.Color.Success">#383838</Color>
     <Color x:Key="Theme.Color.Danger">#383838</Color>
     <Color x:Key="Theme.Color.Warning">#383838</Color>

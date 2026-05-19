@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Web.WebView2.Core;
 using OpenClawManager.Services;
@@ -34,6 +35,7 @@ public partial class TerminalControl : UserControl
     private readonly object _bufferLock = new();
     private DispatcherTimer? _flushTimer;
     private DispatcherTimer? _webViewReadyTimeoutTimer;
+    private string _shellBackgroundHex = "#191919";
 
     public event Action<bool>? TuiStateChanged;
 
@@ -66,6 +68,38 @@ public partial class TerminalControl : UserControl
         WebView.Visibility = Visibility.Visible;
     }
 
+    public void SetShellBackground(Brush brush)
+    {
+        Background = brush;
+        SplashBorder.Background = brush;
+
+        if (brush is SolidColorBrush solid)
+        {
+            _shellBackgroundHex = ToHex(solid.Color);
+            ApplyWebViewBackground();
+        }
+    }
+
+    public void ResetShellBackground()
+    {
+        var brush = new SolidColorBrush(Color.FromRgb(0x19, 0x19, 0x19));
+        Background = brush;
+        SplashBorder.Background = brush;
+        _shellBackgroundHex = "#191919";
+        ApplyWebViewBackground();
+    }
+
+    private static string ToHex(Color color) => $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+
+    private void ApplyWebViewBackground()
+    {
+        if (WebView.CoreWebView2 == null) return;
+
+        var background = JsonSerializer.Serialize(_shellBackgroundHex);
+        _ = WebView.CoreWebView2.ExecuteScriptAsync(
+            $"window.openClawApplyTheme && window.openClawApplyTheme({background});");
+    }
+
     /// <summary>
     /// Sestaví HTML stránku s lokálním xterm.js + bridge na C#.
     ///
@@ -75,7 +109,7 @@ public partial class TerminalControl : UserControl
     /// bez BOM, a inline text v script bloku se může interpretovat chybně
     /// pokud obsahuje raw UTF-8 multi-byte sekvence.
     /// </summary>
-    private static string BuildTerminalHtml(string xtermJs, string xtermCss) => $$"""
+    private string BuildTerminalHtml(string xtermJs, string xtermCss) => $$"""
         <!DOCTYPE html>
         <html>
         <head>
@@ -85,7 +119,7 @@ public partial class TerminalControl : UserControl
                 html, body {
                     margin: 0;
                     padding: 0;
-                    background: #191919;
+                    background: {{_shellBackgroundHex}};
                     overflow: hidden;
                     height: 100vh;
                     display: flex;
@@ -111,7 +145,7 @@ public partial class TerminalControl : UserControl
                     fontFamily: 'Consolas, "Courier New", monospace',
                     fontSize: 14,
                     theme: {
-                        background: '#191919',
+                        background: '{{_shellBackgroundHex}}',
                         foreground: '#dcdcdc',
                         cursor: '#dcdcdc'
                     },
@@ -119,6 +153,12 @@ public partial class TerminalControl : UserControl
                     scrollback: 5000
                 });
                 term.open(document.getElementById('terminal'));
+                window.openClawTerminal = term;
+                window.openClawApplyTheme = (background) => {
+                    document.documentElement.style.background = background;
+                    document.body.style.background = background;
+                    term.options.theme = Object.assign({}, term.options.theme, { background });
+                };
 
                 // \u010cek\u00e1 se na ConPTY... = "Čeká se na ConPTY..."
                 // Unicode escape nutný — viz komentář u BuildTerminalHtml
@@ -156,7 +196,7 @@ public partial class TerminalControl : UserControl
         return reader.ReadToEnd();
     }
 
-    private static string BuildTerminalHtmlFromResources()
+    private string BuildTerminalHtmlFromResources()
     {
         var css = LoadTerminalResource("Resources/Terminal/xterm.min.css");
         var js  = LoadTerminalResource("Resources/Terminal/xterm.min.js")

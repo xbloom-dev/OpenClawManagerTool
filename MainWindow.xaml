@@ -218,7 +218,7 @@
             <!-- Vrstva 0: TerminalControl (TUI)                               -->
             <!-- Vrstva 1: SplashOverlay (video/PNG nad TUI, moderní pozadí)  -->
             <!-- ════════════════════════════════════════════════════════════ -->
-            <Grid Grid.Column="2">
+            <Grid x:Name="RightPanel" Grid.Column="2">
 
                 <!-- Vrstva 0: Embedded TUI terminál (vždy přítomný) -->
                 <views:TerminalControl x:Name="Terminal" />
