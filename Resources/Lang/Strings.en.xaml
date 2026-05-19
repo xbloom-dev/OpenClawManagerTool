@@ -60,6 +60,7 @@
     <sys:String x:Key="Str_Tip_Browse">Selects folder from filesystem.</sys:String>
     <sys:String x:Key="Str_Theme_Legacy">Legacy</sys:String>
     <sys:String x:Key="Str_Theme_Standard">Standard</sys:String>
+    <sys:String x:Key="Str_Theme_StandardDark">Standard Dark</sys:String>
     <sys:String x:Key="Str_Theme_ModernDark">Modern Dark</sys:String>
     <sys:String x:Key="Str_Theme_ModernLight">Modern Light</sys:String>
     <sys:String x:Key="Str_Theme_HighContrast">High Contrast</sys:String>

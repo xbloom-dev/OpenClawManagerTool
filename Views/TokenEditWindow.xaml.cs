@@ -15,7 +15,7 @@ public partial class TokenEditWindow : Window
     public TokenEditWindow(string title, TokenEntry? token = null, bool idReadOnly = false, bool rotateOnly = false)
     {
         InitializeComponent();
-        DarkThemeRuntimeStyles.ApplyIfDark(this);
+        ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
 
         Title = title;
         ApplyLocalization(token != null, rotateOnly);

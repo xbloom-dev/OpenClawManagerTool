@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shell;
 using System.Windows.Threading;
 using OpenClawManager.Models;
 using OpenClawManager.Services;
@@ -57,6 +58,12 @@ public partial class MainWindow : Window
         MnuAbout.Click += (_, _) => ShowAbout();
         MnuOpenClawWeb.Click += (_, _) => OpenUrl("https://docs.openclaw.ai/");
 
+        TitleBarDragSurface.MouseLeftButtonDown += TitleBarDragSurface_MouseLeftButtonDown;
+        BtnWindowMinimize.Click += (_, _) => WindowState = WindowState.Minimized;
+        BtnWindowMaximize.Click += (_, _) => ToggleWindowMaximized();
+        BtnWindowClose.Click += (_, _) => Close();
+        StateChanged += (_, _) => UpdateMaximizeGlyph();
+
         PreviewKeyDown += MainWindow_PreviewKeyDown;
 
         _statusTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
@@ -72,12 +79,39 @@ public partial class MainWindow : Window
         InitSplash();
     }
 
+    private void TitleBarDragSurface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (CaptionButtons.Visibility != Visibility.Visible) return;
+
+        if (e.ClickCount == 2)
+        {
+            ToggleWindowMaximized();
+            return;
+        }
+
+        if (e.ButtonState == MouseButtonState.Pressed)
+            DragMove();
+    }
+
+    private void ToggleWindowMaximized()
+    {
+        WindowState = WindowState == WindowState.Maximized
+            ? WindowState.Normal
+            : WindowState.Maximized;
+    }
+
+    private void UpdateMaximizeGlyph()
+    {
+        BtnWindowMaximize.Content = WindowState == WindowState.Maximized ? "❐" : "□";
+    }
+
     // ==================== LOKALIZACE ====================
 
     public void ApplyLocalization()
     {
         // Sekce headers
         GrpActions.Header = L10n.Get("Str_Group_Actions");
+        GrpTools.Header = L10n.Get("Str_Section_Tools").TrimEnd(':');
         GrpLatency.Header = L10n.Get("Str_Group_Latency");
         GrpAppLog.Header = L10n.Get("Str_Group_AppLog");
 
@@ -672,6 +706,8 @@ public partial class MainWindow : Window
         {
             Terminal.StopTui();
         }
+
+        Terminal.Shutdown();
 
         // v0.5: odhlásit event handler
         ThemeService.ThemeChanged -= OnThemeChanged;

@@ -10,7 +10,7 @@ using OpenClawManager.Services;
 
 namespace OpenClawManager.Views;
 
-internal static class DarkThemeRuntimeStyles
+internal static class ModernPaletteRuntimeStyles
 {
     private const int DwmwaBorderColor = 34;
     private const int DwmwaCaptionColor = 35;
@@ -19,23 +19,25 @@ internal static class DarkThemeRuntimeStyles
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
 
-    public static void ApplyIfDark(Window window)
+    public static void ApplyIfModernPalette(Window window)
     {
-        if (SettingsService.Current.Theme != AppTheme.Dark) return;
+        if (SettingsService.Current.Theme != AppTheme.Modern &&
+            !ThemeService.IsModernPaletteTheme(SettingsService.Current.Theme)) return;
 
-        window.Background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
+        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
+        window.Background = ThemeService.GetBrush("Theme.Brush.WindowBackground", GetBrushColor(background, Color.FromRgb(0x19, 0x19, 0x19)));
         window.Foreground = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        window.Resources[typeof(Button)] = CreateDarkButtonStyle(SettingsService.Current.UseButtonScanlineEffect);
+        window.Resources[typeof(Button)] = CreateModernPaletteButtonStyle(SettingsService.Current.UseButtonScanlineEffect);
         ApplyCaption(window);
         window.Loaded += (_, _) => ApplyLoadedVisuals(window);
     }
 
     private static void ApplyLoadedVisuals(Window window)
     {
-        var white = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
+        var primary = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
         var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x4E, 0x4E, 0x4E));
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
-        var panel = ThemeService.GetBrush("Theme.Brush.Disabled", Color.FromRgb(0x27, 0x27, 0x27));
+        var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x27, 0x27, 0x27));
         var border = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0x4E, 0x4E, 0x4E));
 
         foreach (var element in EnumerateVisualChildren(window))
@@ -43,40 +45,48 @@ internal static class DarkThemeRuntimeStyles
             switch (element)
             {
                 case TextBlock textBlock:
-                    textBlock.Foreground = white;
+                    textBlock.Foreground = IsSecondaryText(textBlock) ? secondary : primary;
+                    break;
+                case Label label:
+                    label.Foreground = primary;
+                    break;
+                case GroupBox groupBox:
+                    groupBox.Background = surface;
+                    groupBox.Foreground = primary;
+                    groupBox.BorderBrush = border;
                     break;
                 case CheckBox checkBox:
-                    checkBox.Foreground = white;
+                    checkBox.Foreground = primary;
                     break;
                 case RadioButton radioButton:
-                    radioButton.Foreground = white;
+                    radioButton.Foreground = primary;
                     break;
                 case TextBox textBox:
-                    textBox.Background = background;
-                    textBox.Foreground = white;
+                    textBox.Background = surface;
+                    textBox.Foreground = primary;
                     textBox.BorderBrush = border;
-                    textBox.CaretBrush = white;
+                    textBox.CaretBrush = primary;
                     break;
                 case PasswordBox passwordBox:
-                    passwordBox.Background = background;
-                    passwordBox.Foreground = white;
+                    passwordBox.Background = surface;
+                    passwordBox.Foreground = primary;
                     passwordBox.BorderBrush = border;
-                    passwordBox.CaretBrush = white;
+                    passwordBox.CaretBrush = primary;
                     break;
                 case ComboBox comboBox:
-                    comboBox.Background = panel;
-                    comboBox.Foreground = white;
+                    comboBox.Background = surface;
+                    comboBox.Foreground = primary;
                     comboBox.BorderBrush = border;
                     break;
                 case DataGrid dataGrid:
-                    dataGrid.Background = background;
-                    dataGrid.Foreground = white;
+                    dataGrid.Background = surface;
+                    dataGrid.Foreground = primary;
                     dataGrid.BorderBrush = border;
                     dataGrid.HorizontalGridLinesBrush = border;
                     dataGrid.VerticalGridLinesBrush = border;
                     break;
                 case Border { Name: "ShortcutFrame" } shortcutFrame:
-                    shortcutFrame.Background = panel;
+                    shortcutFrame.Background = surface;
                     shortcutFrame.BorderBrush = border;
                     break;
                 case Border borderElement when borderElement.BorderThickness != new Thickness(0):
@@ -88,6 +98,38 @@ internal static class DarkThemeRuntimeStyles
                     break;
             }
         }
+    }
+
+    private static bool IsSecondaryText(TextBlock textBlock)
+    {
+        if (IsInside<StatusBar>(textBlock)) return true;
+        if (textBlock.FontWeight.ToOpenTypeWeight() >= FontWeights.SemiBold.ToOpenTypeWeight()) return false;
+        if (textBlock.FontSize <= 11.5) return true;
+        return IsMutedBrush(textBlock.Foreground);
+    }
+
+    private static bool IsMutedBrush(Brush brush)
+    {
+        if (brush is not SolidColorBrush solid) return false;
+
+        var color = solid.Color;
+        var max = Math.Max(color.R, Math.Max(color.G, color.B));
+        var min = Math.Min(color.R, Math.Min(color.G, color.B));
+
+        return max - min <= 10 && max is >= 80 and <= 190;
+    }
+
+    private static bool IsInside<T>(DependencyObject element)
+        where T : DependencyObject
+    {
+        var current = VisualTreeHelper.GetParent(element);
+        while (current != null)
+        {
+            if (current is T) return true;
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
     }
 
     private static IEnumerable<DependencyObject> EnumerateVisualChildren(DependencyObject root)
@@ -102,8 +144,10 @@ internal static class DarkThemeRuntimeStyles
         }
     }
 
-    private static Style CreateDarkButtonStyle(bool useScanlineEffect)
+    private static Style CreateModernPaletteButtonStyle(bool useScanlineEffect)
     {
+        var noShift = ThemeService.GetCurrentButtonInteraction()
+            .Equals("PressScanlineNoShift", StringComparison.OrdinalIgnoreCase);
         var idleBrush = ThemeService.GetBrush("Theme.Brush.Disabled", Color.FromRgb(0x27, 0x27, 0x27));
         var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x38, 0x38, 0x38));
         var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x30, 0x30, 0x30));
@@ -147,11 +191,13 @@ internal static class DarkThemeRuntimeStyles
 
         var hover = new Trigger { Property = Button.IsMouseOverProperty, Value = true };
         hover.Setters.Add(new Setter(Border.BackgroundProperty, hoverBrush, "Root"));
-        hover.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(2, 2), "ContentGrid"));
+        if (!noShift)
+            hover.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(2, 2), "ContentGrid"));
 
         var pressed = new Trigger { Property = Button.IsPressedProperty, Value = true };
         pressed.Setters.Add(new Setter(Border.BackgroundProperty, pressedBrush, "Root"));
-        pressed.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(3, 3), "ContentGrid"));
+        if (!noShift)
+            pressed.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(3, 3), "ContentGrid"));
         pressed.Setters.Add(new Setter(UIElement.OpacityProperty, useScanlineEffect ? 0.62 : 0.0, "PressedOverlay"));
 
         template.Triggers.Add(hover);
@@ -206,9 +252,13 @@ internal static class DarkThemeRuntimeStyles
             var hwnd = new WindowInteropHelper(window).Handle;
             if (hwnd == IntPtr.Zero) return;
 
-            var caption = ToColorRef(Color.FromRgb(0x12, 0x12, 0x12));
+            var caption = ToColorRef(GetBrushColor(
+                ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12)),
+                Color.FromRgb(0x12, 0x12, 0x12)));
             var border = caption;
-            var text = ToColorRef(Colors.White);
+            var text = ToColorRef(GetBrushColor(
+                ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White),
+                Colors.White));
 
             _ = DwmSetWindowAttribute(hwnd, DwmwaCaptionColor, ref caption, sizeof(int));
             _ = DwmSetWindowAttribute(hwnd, DwmwaBorderColor, ref border, sizeof(int));
@@ -224,5 +274,10 @@ internal static class DarkThemeRuntimeStyles
     private static int ToColorRef(Color color)
     {
         return color.R | (color.G << 8) | (color.B << 16);
+    }
+
+    private static Color GetBrushColor(Brush brush, Color fallback)
+    {
+        return brush is SolidColorBrush solid ? solid.Color : fallback;
     }
 }

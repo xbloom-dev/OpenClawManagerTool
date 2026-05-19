@@ -26,6 +26,7 @@
                 <WrapPanel Margin="0,0,0,6">
                     <RadioButton x:Name="RbThemeLegacy" Content="Legacy" GroupName="Theme" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbThemeModern" Content="Modern" GroupName="Theme" Margin="0,0,16,0" />
+                    <RadioButton x:Name="RbThemeStandardDark" Content="Standard Dark" GroupName="Theme" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbThemeDark" Content="Dark" GroupName="Theme" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbThemeModernLight" Content="Modern Light" GroupName="Theme" Margin="0,0,16,0" />
                     <RadioButton x:Name="RbThemeHighContrast" Content="High Contrast" GroupName="Theme" Margin="0,0,16,0" />

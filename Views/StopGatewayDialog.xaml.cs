@@ -24,7 +24,7 @@ public partial class StopGatewayDialog : Window
     public StopGatewayDialog()
     {
         InitializeComponent();
-        DarkThemeRuntimeStyles.ApplyIfDark(this);
+        ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
 
         BtnYes.Click += (_, _) => { DialogResult = true; Close(); };
         BtnNo.Click += (_, _) => { DialogResult = false; Close(); };

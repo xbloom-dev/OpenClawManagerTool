@@ -9,31 +9,57 @@
         WindowStartupLocation="CenterScreen">
 
     <DockPanel>
-        <Menu x:Name="MainMenu" DockPanel.Dock="Top">
-            <MenuItem x:Name="MnuMenuOpen" Header="_Otevřít">
-                <MenuItem x:Name="MnuOpenOpenClawFolder" Header="_OpenClaw složku" />
-                <MenuItem x:Name="MnuOpenTempFolder" Header="_Temp složku (Gateway logy)" />
-                <MenuItem x:Name="MnuOpenGatewayLog" Header="_Gateway log">
-                    <MenuItem x:Name="MnuOpenLog10" Header="Posledních 10 řádků" Tag="10" />
-                    <MenuItem x:Name="MnuOpenLog20" Header="Posledních 20 řádků" Tag="20" />
-                    <MenuItem x:Name="MnuOpenLog30" Header="Posledních 30 řádků" Tag="30" />
-                    <MenuItem x:Name="MnuOpenLog50" Header="Posledních 50 řádků" Tag="50" />
-                    <MenuItem x:Name="MnuOpenLog100" Header="Posledních 100 řádků" Tag="100" />
-                    <Separator />
-                    <MenuItem x:Name="MnuOpenLogAll" Header="Celý log" Tag="0" />
-                </MenuItem>
-                <MenuItem x:Name="MnuOpenPowerShell" Header="_PowerShell" />
-                <Separator />
-                <MenuItem x:Name="MnuExit" Header="_Konec" InputGestureText="Alt+F4" />
-            </MenuItem>
-            <MenuItem x:Name="MnuMenuSettings" Header="_Nastavení">
-                <MenuItem x:Name="MnuSettings" Header="Otevřít _Nastavení..." InputGestureText="Ctrl+," />
-            </MenuItem>
-            <MenuItem x:Name="MnuMenuHelp" Header="_Nápověda">
-                <MenuItem x:Name="MnuAbout" Header="_O aplikaci..." InputGestureText="F1" />
-                <MenuItem x:Name="MnuOpenClawWeb" Header="Otevřít web OpenClaw" />
-            </MenuItem>
-        </Menu>
+        <Border x:Name="TitleBarHost" DockPanel.Dock="Top">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <Menu x:Name="MainMenu" Grid.Column="0">
+                    <MenuItem x:Name="MnuMenuOpen" Header="_Otevřít">
+                        <MenuItem x:Name="MnuOpenOpenClawFolder" Header="_OpenClaw složku" />
+                        <MenuItem x:Name="MnuOpenTempFolder" Header="_Temp složku (Gateway logy)" />
+                        <MenuItem x:Name="MnuOpenGatewayLog" Header="_Gateway log">
+                            <MenuItem x:Name="MnuOpenLog10" Header="Posledních 10 řádků" Tag="10" />
+                            <MenuItem x:Name="MnuOpenLog20" Header="Posledních 20 řádků" Tag="20" />
+                            <MenuItem x:Name="MnuOpenLog30" Header="Posledních 30 řádků" Tag="30" />
+                            <MenuItem x:Name="MnuOpenLog50" Header="Posledních 50 řádků" Tag="50" />
+                            <MenuItem x:Name="MnuOpenLog100" Header="Posledních 100 řádků" Tag="100" />
+                            <Separator />
+                            <MenuItem x:Name="MnuOpenLogAll" Header="Celý log" Tag="0" />
+                        </MenuItem>
+                        <MenuItem x:Name="MnuOpenPowerShell" Header="_PowerShell" />
+                        <Separator />
+                        <MenuItem x:Name="MnuExit" Header="_Konec" InputGestureText="Alt+F4" />
+                    </MenuItem>
+                    <MenuItem x:Name="MnuMenuSettings" Header="_Nastavení">
+                        <MenuItem x:Name="MnuSettings" Header="Otevřít _Nastavení..." InputGestureText="Ctrl+," />
+                    </MenuItem>
+                    <MenuItem x:Name="MnuMenuHelp" Header="_Nápověda">
+                        <MenuItem x:Name="MnuAbout" Header="_O aplikaci..." InputGestureText="F1" />
+                        <MenuItem x:Name="MnuOpenClawWeb" Header="Otevřít web OpenClaw" />
+                    </MenuItem>
+                </Menu>
+
+                <Border x:Name="TitleBarDragSurface"
+                        Grid.Column="1"
+                        Background="Transparent" />
+
+                <StackPanel x:Name="CaptionButtons"
+                            Grid.Column="2"
+                            Orientation="Horizontal"
+                            Visibility="Collapsed">
+                    <Button x:Name="BtnWindowMinimize" Width="58" Height="60" Content="_"
+                            Padding="0" FocusVisualStyle="{x:Null}" />
+                    <Button x:Name="BtnWindowMaximize" Width="58" Height="60" Content="□"
+                            Padding="0" FocusVisualStyle="{x:Null}" />
+                    <Button x:Name="BtnWindowClose" Width="58" Height="60" Content="X"
+                            Padding="0" FocusVisualStyle="{x:Null}" />
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <StatusBar x:Name="MainStatusBar" DockPanel.Dock="Bottom" Height="24">
             <StatusBarItem>
@@ -83,12 +109,13 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
                 <!-- Sekce Akce -->
                 <GroupBox x:Name="GrpActions" Grid.Row="0" Header="Akce" Margin="8,8,8,4" Padding="8">
-                    <StackPanel>
+                    <StackPanel x:Name="ActionsStack">
 
                         <!-- Dynamické TUI tlačítko -->
                         <Button x:Name="BtnStartTui" Height="48" FontWeight="Bold" FontSize="13"
@@ -174,8 +201,14 @@
                     </StackPanel>
                 </GroupBox>
 
+                <!-- Sekce Nástroje — používá se pro StandardDark layout. -->
+                <GroupBox x:Name="GrpTools" Grid.Row="1" Header="Nástroje" Margin="8,4,8,4" Padding="8"
+                          Visibility="Collapsed">
+                    <StackPanel x:Name="ToolsStack" />
+                </GroupBox>
+
                 <!-- Sekce Měření latence -->
-                <GroupBox x:Name="GrpLatency" Grid.Row="1" Header="Měření latence" Margin="8,4,8,4" Padding="8"
+                <GroupBox x:Name="GrpLatency" Grid.Row="2" Header="Měření latence" Margin="8,4,8,4" Padding="8"
                           ToolTip="Měřeno z Gateway logu (res záznamy). Resetuje se při restartu Gateway.">
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -200,7 +233,7 @@
                 </GroupBox>
 
                 <!-- Sekce Log aplikace -->
-                <GroupBox x:Name="GrpAppLog" Grid.Row="2" Header="Log aplikace" Margin="8,4,8,8" Padding="8">
+                <GroupBox x:Name="GrpAppLog" Grid.Row="3" Header="Log aplikace" Margin="8,4,8,8" Padding="8">
                     <ListBox x:Name="AppLog"
                              FontFamily="Consolas" FontSize="11"
                              BorderThickness="0"

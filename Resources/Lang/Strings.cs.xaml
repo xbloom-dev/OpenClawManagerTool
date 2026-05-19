@@ -60,6 +60,7 @@
     <sys:String x:Key="Str_Tip_Browse">Vybere složku ze systému.</sys:String>
     <sys:String x:Key="Str_Theme_Legacy">Legacy</sys:String>
     <sys:String x:Key="Str_Theme_Standard">Standardní</sys:String>
+    <sys:String x:Key="Str_Theme_StandardDark">StandardDark</sys:String>
     <sys:String x:Key="Str_Theme_ModernDark">Moderní tmavé</sys:String>
     <sys:String x:Key="Str_Theme_ModernLight">Moderní světlé</sys:String>
     <sys:String x:Key="Str_Theme_HighContrast">Vysoký kontrast</sys:String>

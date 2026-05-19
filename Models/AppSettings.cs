@@ -8,6 +8,7 @@ namespace OpenClawManager.Models;
 /// Vizuální téma aplikace (v0.5+).
 /// Legacy = původní tmavé WPF téma s ASCII ART splashem.
 /// Modern = standardní Modern paleta (C) s video/PNG splash overlay.
+/// StandardDark = tmavá varianta Standard tématu s původními Modern ikonami.
 /// Dark = moderní tmavé téma.
 /// ModernLight = moderní světlé téma odvozené z Dark layoutu.
 /// </summary>
@@ -15,6 +16,7 @@ public enum AppTheme
 {
     Legacy,
     Modern,
+    StandardDark,
     Dark,
     ModernLight,
     HighContrast,

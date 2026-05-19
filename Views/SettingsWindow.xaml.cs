@@ -17,7 +17,7 @@ public partial class SettingsWindow : Window
     public SettingsWindow()
     {
         InitializeComponent();
-        DarkThemeRuntimeStyles.ApplyIfDark(this);
+        ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
 
         // Klon aktuálních nastavení (uživatel pak může Cancel bez změny originálu)
         var current = SettingsService.Current;
@@ -51,6 +51,7 @@ public partial class SettingsWindow : Window
         // v0.5: Theme přepínač řídí dostupnost video checkboxu
         RbThemeLegacy.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeModern.Checked += (_, _) => UpdateSplashVideoEnabled();
+        RbThemeStandardDark.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeDark.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeModernLight.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeHighContrast.Checked += (_, _) => UpdateSplashVideoEnabled();
@@ -81,6 +82,7 @@ public partial class SettingsWindow : Window
         LblTheme.Text = T("Téma aplikace:", "Application theme:");
         RbThemeLegacy.Content = L10n.Get("Str_Theme_Legacy");
         RbThemeModern.Content = L10n.Get("Str_Theme_Standard");
+        RbThemeStandardDark.Content = L10n.Get("Str_Theme_StandardDark");
         RbThemeDark.Content = L10n.Get("Str_Theme_ModernDark");
         RbThemeModernLight.Content = L10n.Get("Str_Theme_ModernLight");
         RbThemeHighContrast.Content = L10n.Get("Str_Theme_HighContrast");
@@ -127,6 +129,9 @@ public partial class SettingsWindow : Window
             case AppTheme.Modern:
                 RbThemeModern.IsChecked = true;
                 break;
+            case AppTheme.StandardDark:
+                RbThemeStandardDark.IsChecked = true;
+                break;
             case AppTheme.Dark:
                 RbThemeDark.IsChecked = true;
                 break;
@@ -170,6 +175,7 @@ public partial class SettingsWindow : Window
     private AppTheme GetSelectedTheme()
     {
         if (RbThemeModern.IsChecked == true) return AppTheme.Modern;
+        if (RbThemeStandardDark.IsChecked == true) return AppTheme.StandardDark;
         if (RbThemeDark.IsChecked == true) return AppTheme.Dark;
         if (RbThemeModernLight.IsChecked == true) return AppTheme.ModernLight;
         if (RbThemeHighContrast.IsChecked == true) return AppTheme.HighContrast;

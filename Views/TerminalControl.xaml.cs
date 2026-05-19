@@ -29,6 +29,7 @@ public partial class TerminalControl : UserControl
     private ConPtyProcess? _conpty;
     private bool _webViewReady = false;
     private bool _webViewFailed = false;
+    private bool _isDisposed;
 
     // Buffering — sbíráme output z ConPTY do bufferu a flushujeme dávkově (10ms timer).
     private readonly System.Text.StringBuilder _outputBuffer = new();
@@ -285,30 +286,7 @@ public partial class TerminalControl : UserControl
             WebView.CoreWebView2.WebMessageReceived += OnWebMessageReceived;
             WebView.CoreWebView2.Settings.IsWebMessageEnabled = true;
 
-            WebView.CoreWebView2.NavigationCompleted += async (_, e) =>
-            {
-                if (!e.IsSuccess)
-                {
-                    _webViewFailed = true;
-                    StatusText.Text = $"Chyba načítání: {e.WebErrorStatus}";
-                    return;
-                }
-
-                var ready = await WebView.CoreWebView2.ExecuteScriptAsync(
-                    "Boolean(window.Terminal && document.querySelector('.xterm'))");
-
-                if (string.Equals(ready, "true", StringComparison.OrdinalIgnoreCase))
-                {
-                    OnWebViewReady();
-                }
-                else
-                {
-                    _webViewFailed = true;
-                    StatusText.Text = L10n.IsCzech
-                        ? "Terminál se nenačetl. Lokální xterm.js se nespustil."
-                        : "Terminal did not load. Local xterm.js did not start.";
-                }
-            };
+            WebView.CoreWebView2.NavigationCompleted += OnNavigationCompleted;
 
             StatusText.Text = L10n.IsCzech
                 ? "Načítám lokální xterm.js..."
@@ -362,6 +340,33 @@ public partial class TerminalControl : UserControl
         StatusText.Text = L10n.IsCzech
             ? "Klikni na \"OpenClaw TUI\" pro spuštění."
             : "Click \"OpenClaw TUI\" to start.";
+    }
+
+    private async void OnNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
+    {
+        if (_isDisposed) return;
+
+        if (!e.IsSuccess)
+        {
+            _webViewFailed = true;
+            StatusText.Text = $"Chyba načítání: {e.WebErrorStatus}";
+            return;
+        }
+
+        var ready = await WebView.CoreWebView2.ExecuteScriptAsync(
+            "Boolean(window.Terminal && document.querySelector('.xterm'))");
+
+        if (string.Equals(ready, "true", StringComparison.OrdinalIgnoreCase))
+        {
+            OnWebViewReady();
+        }
+        else
+        {
+            _webViewFailed = true;
+            StatusText.Text = L10n.IsCzech
+                ? "Terminál se nenačetl. Lokální xterm.js se nespustil."
+                : "Terminal did not load. Local xterm.js did not start.";
+        }
     }
 
     private void OnWebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
@@ -471,11 +476,27 @@ public partial class TerminalControl : UserControl
 
     private void Cleanup()
     {
+        if (_isDisposed) return;
+        _isDisposed = true;
+
         _flushTimer?.Stop();
         _flushTimer = null;
         _webViewReadyTimeoutTimer?.Stop();
         _webViewReadyTimeoutTimer = null;
         _conpty?.Dispose();
         _conpty = null;
+
+        if (WebView.CoreWebView2 != null)
+        {
+            WebView.CoreWebView2.WebMessageReceived -= OnWebMessageReceived;
+            WebView.CoreWebView2.NavigationCompleted -= OnNavigationCompleted;
+        }
+
+        WebView.Dispose();
+    }
+
+    public void Shutdown()
+    {
+        Cleanup();
     }
 }

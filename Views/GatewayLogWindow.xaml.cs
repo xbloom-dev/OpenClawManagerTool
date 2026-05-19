@@ -19,7 +19,7 @@ public partial class GatewayLogWindow : Window
     public GatewayLogWindow(string logPath, int defaultLines = 20)
     {
         InitializeComponent();
-        DarkThemeRuntimeStyles.ApplyIfDark(this);
+        ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
         _logPath = logPath;
 
         SelectLineCount(defaultLines);

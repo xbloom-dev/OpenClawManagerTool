@@ -23,6 +23,13 @@ namespace OpenClawManager.Services;
 
 public static class ThemeService
 {
+    public sealed record ThemeMetadata(
+        string Name,
+        string Variant,
+        string IconSet,
+        string PaletteFamily,
+        string ButtonInteraction);
+
     // ── Event — přihlásit se v MainWindow ────────────────────────────────────
     /// <summary>
     /// Emitováno po úspěšném přepnutí tématu.
@@ -36,6 +43,7 @@ public static class ThemeService
     {
         { AppTheme.Legacy, "/Resources/Themes/Theme.Legacy.xaml" },
         { AppTheme.Modern, "/Resources/Themes/Theme.Modern.xaml" },
+        { AppTheme.StandardDark, "/Resources/Themes/Theme.StandardDark.xaml" },
         { AppTheme.Dark, "/Resources/Themes/Theme.Dark.xaml" },
         { AppTheme.ModernLight, "/Resources/Themes/Theme.ModernLight.xaml" },
         { AppTheme.HighContrast, "/Resources/Themes/Theme.HighContrast.xaml" },
@@ -48,6 +56,7 @@ public static class ThemeService
     {
         { AppTheme.Legacy, "" },         // Legacy nemá PNG ikony (používá emoji)
         { AppTheme.Modern, "Modern" },
+        { AppTheme.StandardDark, "Modern" },
         { AppTheme.Dark, "ModernDark" },
         { AppTheme.ModernLight, "ModernLight" },
         { AppTheme.HighContrast, "Modern" },
@@ -125,8 +134,33 @@ public static class ThemeService
     /// </summary>
     public static string GetIconFolder(AppTheme theme)
     {
+        if (theme == SettingsService.Current.Theme)
+        {
+            var iconSet = GetString("Theme.Meta.IconSet", "");
+            if (!string.IsNullOrWhiteSpace(iconSet)) return iconSet;
+        }
+
         return _iconFolderNames.TryGetValue(theme, out var folder) ? folder : "";
     }
+
+    public static bool IsModernPaletteTheme(AppTheme theme)
+    {
+        return theme is AppTheme.StandardDark or AppTheme.Dark or AppTheme.ModernLight;
+    }
+
+    public static ThemeMetadata GetCurrentMetadata()
+    {
+        return new ThemeMetadata(
+            GetString("Theme.Meta.Name", ""),
+            GetString("Theme.Meta.Variant", ""),
+            GetString("Theme.Meta.IconSet", GetIconFolder(SettingsService.Current.Theme)),
+            GetString("Theme.Meta.PaletteFamily", ""),
+            GetString("Theme.Meta.ButtonInteraction", "HoverScanline"));
+    }
+
+    public static string GetCurrentVariant() => GetCurrentMetadata().Variant;
+
+    public static string GetCurrentButtonInteraction() => GetCurrentMetadata().ButtonInteraction;
 
     /// <summary>
     /// Vrátí pack:// URI pro ikonu daného tématu a jména.
@@ -151,6 +185,11 @@ public static class ThemeService
     {
         return Application.Current?.TryFindResource(key) as Brush
             ?? new SolidColorBrush(fallback);
+    }
+
+    private static string GetString(string key, string fallback)
+    {
+        return Application.Current?.TryFindResource(key) as string ?? fallback;
     }
 
     // ── Interní: swap ResourceDictionary ─────────────────────────────────────

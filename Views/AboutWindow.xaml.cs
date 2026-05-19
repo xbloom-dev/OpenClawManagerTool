@@ -9,7 +9,7 @@ public partial class AboutWindow : Window
     public AboutWindow()
     {
         InitializeComponent();
-        DarkThemeRuntimeStyles.ApplyIfDark(this);
+        ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
         BtnClose.Click += (_, _) => Close();
         ApplyLocalization();
         _ = InitWebViewAsync();
