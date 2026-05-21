@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+      - "codex/**"
+      - "claude/**"
+      - "bloom/**"
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  build-and-tests:
+    name: Build and token tests
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore .\OpenClawManager.sln
+
+      - name: Build
+        run: dotnet build .\OpenClawManager.sln --configuration Release --no-restore
+
+      - name: TokenService tests
+        run: dotnet run --project .\TokenService.Tests\TokenService.Tests.csproj --configuration Release
