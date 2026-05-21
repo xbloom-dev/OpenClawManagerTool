@@ -109,7 +109,7 @@ public partial class MainWindow
     {
         _activeTheme = theme;
         RestoreThemeBaseline();
-        ApplyThemeTitleBarMode(theme is AppTheme.Dark or AppTheme.ModernLight);
+        ApplyThemeTitleBarMode(theme is AppTheme.Dark or AppTheme.ModernLight or AppTheme.StandardDark);
 
         switch (theme)
         {
@@ -120,7 +120,7 @@ public partial class MainWindow
                 break;
             case AppTheme.StandardDark:
                 ApplyStandardUi();
-                ApplyStandardToolLayout();
+                ApplyStandardDarkToolLayout();
                 ApplyStandardDarkShell();
                 break;
             case AppTheme.HighContrast:
@@ -368,45 +368,92 @@ public partial class MainWindow
 
     private void ApplyStandardDarkShell()
     {
-        var chrome = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12));
-        var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x28, 0x28, 0x28));
-        var border = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0x46, 0x46, 0x46));
-        var primaryText = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        var secondaryText = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0xA0, 0xA0, 0xA0));
-        var hover = ThemeService.GetBrush("Theme.Brush.Menu.Hover", Color.FromRgb(0x46, 0x46, 0x46));
+        // Všechny barvy z XAML tokenů — žádné hardcoded hodnoty
+        var chrome    = ThemeService.GetBrush("Theme.Brush.Chrome",         Color.FromRgb(0x12, 0x12, 0x12));
+        var bg        = ThemeService.GetBrush("Theme.Brush.Background",     Color.FromRgb(0x28, 0x28, 0x28));
+        var active    = ThemeService.GetBrush("Theme.Brush.Active",         Color.FromRgb(0x38, 0x38, 0x38));
+        var hover     = ThemeService.GetBrush("Theme.Brush.Hover",          Color.FromRgb(0x46, 0x46, 0x46));
+        var pressed   = ThemeService.GetBrush("Theme.Brush.Pressed",        Color.FromRgb(0x53, 0x53, 0x53));
+        var separator = ThemeService.GetBrush("Theme.Brush.Separator",      Color.FromRgb(0x1E, 0x1E, 0x1E));
+        var primary   = ThemeService.GetBrush("Theme.Brush.Text.Primary",   Colors.White);
+        var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x78, 0x78, 0x78));
+        var menuHover = ThemeService.GetBrush("Theme.Brush.Menu.Hover",     Color.FromRgb(0x38, 0x38, 0x38));
 
-        Background = surface;
-        Foreground = primaryText;
+        // ── Okno ─────────────────────────────────────────────────────────────
+        Background = bg;
+        Foreground = secondary;
 
+        // ── Title bar (custom chrome aktivní přes ApplyThemeTitleBarMode) ───
+        TitleBarHost.Background = chrome;
+        ApplyCaptionButtonVisuals(primary, hover, pressed);
+
+        // ── Menu ─────────────────────────────────────────────────────────────
         MainMenu.Background = chrome;
-        MainMenu.Foreground = secondaryText;
-        MainStatusBar.Background = chrome;
-        MainStatusBar.Foreground = secondaryText;
-        MainStatusBar.Resources[typeof(Separator)] = CreateStandardSeparatorStyle(border);
-        MainGridSplitter.Background = border;
+        MainMenu.Foreground = secondary;
+        ApplyModernPaletteMenuVisuals(primary, secondary, chrome, bg, menuHover);
 
-        foreach (var group in new[] { GrpActions, GrpTools, GrpLatency, GrpAppLog })
+        // ── Status bar ───────────────────────────────────────────────────────
+        MainStatusBar.Background = chrome;
+        MainStatusBar.Foreground = secondary;
+        MainStatusBar.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
+
+        // ── GridSplitter — 2px, decentní ─────────────────────────────────────
+        MainGridSplitter.Width = 2;
+        MainGridSplitter.Background = separator;
+
+        // ── GrpActions — průhledný, bez headeru ──────────────────────────────
+        GrpActions.Style          = CreateStandardHiddenGroupBoxStyle();
+        GrpActions.Background     = Brushes.Transparent;
+        GrpActions.BorderBrush    = Brushes.Transparent;
+        GrpActions.BorderThickness = new Thickness(0);
+
+        // ── GrpTools — průhledný, bez headeru (Nástroje splývají s bg) ───────
+        GrpTools.Style          = CreateStandardHiddenGroupBoxStyle();
+        GrpTools.Background     = Brushes.Transparent;
+        GrpTools.BorderBrush    = Brushes.Transparent;
+        GrpTools.BorderThickness = new Thickness(0);
+
+        // ── GrpLatency + GrpAppLog — flat Active (#383838), bez headeru ──────
+        foreach (var grp in new[] { GrpLatency, GrpAppLog })
         {
-            group.Style = CreateStandardSimpleGroupBoxStyle(primaryText, border, surface);
-            group.Background = surface;
-            group.Foreground = primaryText;
-            group.BorderBrush = border;
-            group.BorderThickness = new Thickness(1);
+            grp.Style          = CreateStandardFlatGroupBoxStyle(secondary, active);
+            grp.Background     = active;
+            grp.Foreground     = secondary;
+            grp.BorderBrush    = Brushes.Transparent;
+            grp.BorderThickness = new Thickness(0);
         }
 
-        AppLog.Background = surface;
-        AppLog.Foreground = primaryText;
-        AppLog.BorderBrush = border;
-        AppLog.BorderThickness = new Thickness(1);
+        AppLog.Background      = active;
+        AppLog.Foreground      = secondary;
+        AppLog.BorderBrush     = Brushes.Transparent;
+        AppLog.BorderThickness = new Thickness(0);
 
-        RightPanel.Background = surface;
-        SplashOverlay.Background = surface;
-        SplashProgress.Foreground = border;
-        Terminal.SetShellBackground(surface);
+        // ── TUI okno — nejtmavší (#121212 = Chrome) ───────────────────────────
+        RightPanel.Background    = chrome;
+        SplashOverlay.Background = chrome;
+        Terminal.SetShellBackground(chrome);
+        SplashProgress.Foreground = hover;
 
-        ApplyModernPaletteMenuVisuals(primaryText, secondaryText, chrome, surface, hover);
-        ApplyStandardMainWindowText(primaryText, secondaryText, primaryText);
-        ApplyWindowCaptionColor(GetBrushColor(chrome, Color.FromRgb(0x12, 0x12, 0x12)), GetBrushColor(primaryText, Colors.White));
+        // ── Akce tlačítka (TUI + Gateway + Open) — výrazná idle ─────────────
+        ApplyStandardActiveButtonStyle(active, hover, pressed, primary,
+            BtnStartTui,
+            BtnGatewayStart,
+            BtnGatewayStop,
+            BtnGatewayRestart,
+            BtnOpenPowerShell,
+            BtnOpenGatewayLog);
+
+        // ── Nástroje tlačítka (Cleaning + Token + Doctor) — splývají ─────────
+        ApplyStandardToolButtonStyle(bg, active, primary,
+            BtnCleaningTool,
+            BtnTokenManager,
+            BtnDoctorFix);
+
+        // ── Texty ─────────────────────────────────────────────────────────────
+        ApplyStandardMainWindowText(secondary, secondary, primary);
+        ApplyWindowCaptionColor(
+            GetBrushColor(chrome, Color.FromRgb(0x12, 0x12, 0x12)),
+            GetBrushColor(primary, Colors.White));
     }
 
     private void ApplyModernPaletteMenuVisuals(
@@ -861,7 +908,161 @@ public partial class MainWindow
         }
     }
 
-    private void ApplyModernToolLayout()
+    // ── StandardDark layout ───────────────────────────────────────────────────
+
+    private void ApplyStandardDarkToolLayout()
+    {
+        // Základ: přesunout Nástroje tlačítka do GrpTools, skrýt nadpisy sekcí
+        ApplyStandardToolLayout();
+
+        // StandardDark-specifické marginy
+        BtnStartTui.Margin       = new Thickness(6, 6, 6, 4);
+        BtnGatewayStart.Margin   = new Thickness(6, 0, 3, 3);
+        BtnGatewayStop.Margin    = new Thickness(3, 0, 6, 3);
+        BtnGatewayRestart.Margin = new Thickness(6, 0, 6, 6);
+        BtnOpenPowerShell.Margin = new Thickness(6, 0, 6, 2);
+        BtnOpenGatewayLog.Margin = new Thickness(6, 0, 6, 6);
+        BtnCleaningTool.Margin   = new Thickness(6, 0, 6, 2);
+        BtnTokenManager.Margin   = new Thickness(6, 0, 6, 2);
+        BtnDoctorFix.Margin      = new Thickness(6, 0, 6, 6);
+
+        GrpLatency.Margin = new Thickness(0, 4, 0, 2);
+        GrpAppLog.Margin  = new Thickness(0, 2, 0, 0);
+    }
+
+    // Akce tlačítka — výrazná idle, hover, pressed
+    private static void ApplyStandardActiveButtonStyle(
+        Brush idle, Brush hover, Brush pressed, Brush textBrush,
+        params Button[] buttons)
+    {
+        var style = CreateStandardFlatButtonStyle(idle, hover, pressed, textBrush);
+        foreach (var btn in buttons)
+        {
+            btn.Style = style;
+            btn.Background = idle;
+            btn.Foreground = textBrush;
+            btn.BorderBrush = Brushes.Transparent;
+            btn.BorderThickness = new Thickness(0);
+            btn.FocusVisualStyle = null;
+        }
+    }
+
+    // Nástroje tlačítka — splývají s bg idle, hover = active
+    private static void ApplyStandardToolButtonStyle(
+        Brush idle, Brush hoverColor, Brush textBrush,
+        params Button[] buttons)
+    {
+        var style = CreateStandardFlatButtonStyle(idle, hoverColor, hoverColor, textBrush);
+        foreach (var btn in buttons)
+        {
+            btn.Style = style;
+            btn.Background = idle;
+            btn.Foreground = textBrush;
+            btn.BorderBrush = Brushes.Transparent;
+            btn.BorderThickness = new Thickness(0);
+            btn.FocusVisualStyle = null;
+        }
+    }
+
+    // Flat button bez WPF Aero chrome
+    private static Style CreateStandardFlatButtonStyle(
+        Brush idle, Brush hover, Brush pressed, Brush textBrush)
+    {
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.Name = "Root";
+        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Button.BackgroundProperty));
+        root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
+        root.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
+
+        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty,
+            new TemplateBindingExtension(Control.HorizontalContentAlignmentProperty));
+        presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+        presenter.SetValue(ContentPresenter.MarginProperty,
+            new TemplateBindingExtension(Control.PaddingProperty));
+        presenter.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
+        root.AppendChild(presenter);
+
+        var template = new ControlTemplate(typeof(Button)) { VisualTree = root };
+
+        var hoverTrigger = new Trigger { Property = Button.IsMouseOverProperty, Value = true };
+        hoverTrigger.Setters.Add(new Setter(Border.BackgroundProperty, hover, "Root"));
+
+        var pressedTrigger = new Trigger { Property = Button.IsPressedProperty, Value = true };
+        pressedTrigger.Setters.Add(new Setter(Border.BackgroundProperty, pressed, "Root"));
+
+        template.Triggers.Add(hoverTrigger);
+        template.Triggers.Add(pressedTrigger);
+
+        var style = new Style(typeof(Button));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, idle));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(10, 6, 10, 6)));
+        style.Setters.Add(new Setter(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Left));
+        style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
+        style.Setters.Add(new Setter(Control.TemplateProperty, template));
+        style.Triggers.Add(new Trigger
+        {
+            Property = UIElement.IsEnabledProperty,
+            Value    = false,
+            Setters  = { new Setter(UIElement.OpacityProperty, 0.4) }
+        });
+        return style;
+    }
+
+    // GroupBox bez headeru a border (GrpActions, GrpTools v StandardDark)
+    private static Style CreateStandardHiddenGroupBoxStyle()
+    {
+        var border = new FrameworkElementFactory(typeof(Border));
+        border.SetValue(Border.BackgroundProperty, Brushes.Transparent);
+        border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
+        border.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+        border.SetValue(Border.PaddingProperty, new Thickness(0));
+
+        var content = new FrameworkElementFactory(typeof(ContentPresenter));
+        content.SetValue(ContentPresenter.ContentProperty,
+            new TemplateBindingExtension(ContentControl.ContentProperty));
+        border.AppendChild(content);
+
+        var style = new Style(typeof(GroupBox));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.TemplateProperty,
+            new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
+        return style;
+    }
+
+    // GroupBox flat panel Active (#383838), bez headeru (GrpLatency, GrpAppLog)
+    private static Style CreateStandardFlatGroupBoxStyle(Brush textBrush, Brush backgroundBrush)
+    {
+        var border = new FrameworkElementFactory(typeof(Border));
+        border.SetValue(Border.BackgroundProperty, backgroundBrush);
+        border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
+        border.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+        border.SetValue(Border.PaddingProperty, new Thickness(8));
+
+        var content = new FrameworkElementFactory(typeof(ContentPresenter));
+        content.SetValue(ContentPresenter.ContentProperty,
+            new TemplateBindingExtension(ContentControl.ContentProperty));
+        border.AppendChild(content);
+
+        var style = new Style(typeof(GroupBox));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, backgroundBrush));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.TemplateProperty,
+            new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
+        return style;
+    }
+
+        private void ApplyModernToolLayout()
     {
         TxtGatewayLabel.Visibility = Visibility.Collapsed;
         TxtSectionOpen.Text = L10n.Get("Str_Section_Tools");
@@ -948,8 +1149,10 @@ public partial class MainWindow
 
     private void ReapplyCurrentThemeLayoutAfterLocalization()
     {
-        if (SettingsService.Current.Theme is AppTheme.Modern or AppTheme.StandardDark)
+        if (SettingsService.Current.Theme == AppTheme.Modern)
             ApplyStandardToolLayout();
+        else if (SettingsService.Current.Theme == AppTheme.StandardDark)
+            ApplyStandardDarkToolLayout();
         else if (ThemeService.IsModernPaletteTheme(SettingsService.Current.Theme) || SettingsService.Current.Theme == AppTheme.HighContrast)
             ApplyModernToolLayout();
         else if (SettingsService.Current.Theme == AppTheme.CrabCute)
