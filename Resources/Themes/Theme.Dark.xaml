@@ -44,7 +44,7 @@
     <Color x:Key="Theme.Color.Menu.Hover">#272727</Color>
     <Color x:Key="Theme.Color.Pressed">#303030</Color>
     <Color x:Key="Theme.Color.Disabled">#272727</Color>
-    <Color x:Key="Theme.Color.ButtonText">#9E9E9E</Color>
+    <Color x:Key="Theme.Color.ButtonText">#FFFFFF</Color>
     <Color x:Key="Theme.Color.Success">#383838</Color>
     <Color x:Key="Theme.Color.Danger">#383838</Color>
     <Color x:Key="Theme.Color.Warning">#383838</Color>

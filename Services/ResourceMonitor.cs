@@ -12,8 +12,10 @@ public static class ResourceMonitor
 {
     private static readonly SemaphoreSlim MeasureLock = new(1, 1);
     private static readonly TimeSpan WmiCacheDuration = TimeSpan.FromSeconds(4);
+    private static readonly TimeSpan VramCacheDuration = TimeSpan.FromSeconds(4);
     private static ResourceSnapshot? _lastSnapshot;
     private static DateTime _lastWmiMeasureUtc = DateTime.MinValue;
+    private static DateTime _lastVramMeasureUtc = DateTime.MinValue;
 
     /// <summary>
     /// Snapshot všech aktuálních hodnot zdrojů.
@@ -55,7 +57,24 @@ public static class ResourceMonitor
                 _lastWmiMeasureUtc = now;
             }
 
-            var (vramUsed, vramTotal) = await MeasureVramAsync(cancellationToken).ConfigureAwait(false);
+            // VRAM cache: nvidia-smi je externí proces, neměřit při každém ticku.
+            var useVramCache = _lastSnapshot != null &&
+                (now - _lastVramMeasureUtc) < VramCacheDuration;
+
+            double? vramUsed;
+            double? vramTotal;
+
+            if (useVramCache)
+            {
+                vramUsed = _lastSnapshot!.VramUsedGb;
+                vramTotal = _lastSnapshot.VramTotalGb;
+            }
+            else
+            {
+                (vramUsed, vramTotal) = await MeasureVramAsync(cancellationToken).ConfigureAwait(false);
+                _lastVramMeasureUtc = now;
+            }
+
             var snapshot = new ResourceSnapshot(ramUsed, ramTotal, cpu, vramUsed, vramTotal);
             _lastSnapshot = snapshot;
 

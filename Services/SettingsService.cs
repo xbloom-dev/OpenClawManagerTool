@@ -154,6 +154,26 @@ public static class SettingsService
 
         var options = new JsonSerializerOptions { WriteIndented = true };
         var json = JsonSerializer.Serialize(settings, options);
-        File.WriteAllText(SettingsFilePath, json);
+
+        // Atomic write: zapsat do .tmp, pak Replace.
+        // Při crash mezi truncate a write zůstane původní settings.json nedotčen.
+        var tmpPath = SettingsFilePath + ".tmp";
+        File.WriteAllText(tmpPath, json);
+
+        if (File.Exists(SettingsFilePath))
+        {
+            // File.Replace je atomic (NTFS): cíl bude buď zcela starý, nebo zcela nový.
+            // Backup vytváří .bak pro případ že by Replace selhal mid-operation.
+            var backupPath = SettingsFilePath + ".bak";
+            File.Replace(tmpPath, SettingsFilePath, backupPath);
+
+            // .bak je už nepotřebný — uchování pouze pro debugging; smazat.
+            try { File.Delete(backupPath); } catch { /* best effort */ }
+        }
+        else
+        {
+            // První save — žádný target k nahrazení, jen rename.
+            File.Move(tmpPath, SettingsFilePath);
+        }
     }
 }

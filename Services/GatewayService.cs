@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Management;
+using System.Security.Principal;
 
 namespace OpenClawManager.Services;
 
@@ -148,12 +149,19 @@ public static class GatewayService
 
     private static void KillPowerShellGatewayWrappers()
     {
+        var currentUserSid = GetCurrentUserSid();
+        if (currentUserSid == null) return; // bezpečně neudělat nic
+
         var query = "SELECT ProcessId, CommandLine FROM Win32_Process WHERE Name='powershell.exe'";
         using var searcher = new ManagementObjectSearcher(query);
         using var results = searcher.Get();
 
         foreach (ManagementObject psProc in results)
         {
+            // Vlastník procesu — killovat jen vlastní procesy
+            var ownerSid = GetProcessOwnerSid(psProc);
+            if (ownerSid != currentUserSid) continue;
+
             var commandLine = psProc["CommandLine"]?.ToString() ?? "";
 
             if (commandLine.Contains("openclaw") && commandLine.Contains("gateway"))
@@ -172,12 +180,18 @@ public static class GatewayService
 
     private static void KillPowerShellTuiWrappers()
     {
+        var currentUserSid = GetCurrentUserSid();
+        if (currentUserSid == null) return;
+
         var query = "SELECT ProcessId, CommandLine FROM Win32_Process WHERE Name='powershell.exe'";
         using var searcher = new ManagementObjectSearcher(query);
         using var results = searcher.Get();
 
         foreach (ManagementObject psProc in results)
         {
+            var ownerSid = GetProcessOwnerSid(psProc);
+            if (ownerSid != currentUserSid) continue;
+
             var commandLine = psProc["CommandLine"]?.ToString() ?? "";
 
             if (commandLine.Contains("openclaw") &&
@@ -194,6 +208,45 @@ public static class GatewayService
                 catch { }
             }
         }
+    }
+
+    // ── Helper metody pro identifikaci vlastníka procesu ──────────────────────
+
+    /// <summary>
+    /// Vrátí SID aktuálního uživatele (přihlášený user pod kterým běží aplikace).
+    /// Vrátí null pokud SID nelze získat.
+    /// </summary>
+    private static string? GetCurrentUserSid()
+    {
+        try
+        {
+            using var identity = WindowsIdentity.GetCurrent();
+            return identity.User?.Value;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
+    /// Získá SID vlastníka procesu přes WMI metodu GetOwnerSid.
+    /// Vrátí null pokud SID nelze získat (proces už neexistuje, access denied atd.).
+    /// </summary>
+    private static string? GetProcessOwnerSid(ManagementObject process)
+    {
+        try
+        {
+            var args = new object[] { string.Empty };
+            var result = process.InvokeMethod("GetOwnerSid", args);
+            if (result is uint ret && ret == 0)
+                return args[0] as string;
+        }
+        catch
+        {
+            // proces už neexistuje nebo access denied
+        }
+        return null;
     }
 
     public static Process? Restart()
