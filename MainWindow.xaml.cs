@@ -430,10 +430,8 @@ public partial class MainWindow : Window
 
         try
         {
-            GatewayService.Stop();
-            await Task.Delay(2500);
             SetGatewayUiState(GatewayUiState.Starting, null);
-            GatewayService.Start();
+            await GatewayService.RestartAsync();
             _ = WatchForGatewayReady();
         }
         catch (Exception ex)

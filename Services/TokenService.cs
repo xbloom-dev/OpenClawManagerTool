@@ -137,7 +137,39 @@ public static class TokenService
 
         var protectedVault = CreateProtectedVault(vault);
         var json = JsonSerializer.Serialize(protectedVault, WriteJsonOptions);
-        File.WriteAllText(path, json, new UTF8Encoding(encoderShouldEmitUTF8Identifier: false));
+        var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+        var tmpPath = path + ".tmp";
+
+        File.WriteAllText(tmpPath, json, encoding);
+
+        if (File.Exists(path))
+        {
+            ReplaceExistingFile(tmpPath, path);
+        }
+        else
+        {
+            File.Move(tmpPath, path);
+        }
+    }
+
+    private static void ReplaceExistingFile(string tmpPath, string targetPath)
+    {
+        var backupPath = targetPath + ".bak";
+
+        try
+        {
+            if (File.Exists(backupPath))
+                File.Delete(backupPath);
+
+            File.Replace(tmpPath, targetPath, backupPath);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            File.Copy(targetPath, backupPath, overwrite: true);
+            File.Move(tmpPath, targetPath, overwrite: true);
+        }
+
+        try { File.Delete(backupPath); } catch { }
     }
 
     public static TokenEntry AddToken(string vaultPath, string id, string value, string description)

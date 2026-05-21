@@ -162,18 +162,33 @@ public static class SettingsService
 
         if (File.Exists(SettingsFilePath))
         {
-            // File.Replace je atomic (NTFS): cíl bude buď zcela starý, nebo zcela nový.
-            // Backup vytváří .bak pro případ že by Replace selhal mid-operation.
-            var backupPath = SettingsFilePath + ".bak";
-            File.Replace(tmpPath, SettingsFilePath, backupPath);
-
-            // .bak je už nepotřebný — uchování pouze pro debugging; smazat.
-            try { File.Delete(backupPath); } catch { /* best effort */ }
+            ReplaceExistingFile(tmpPath, SettingsFilePath);
         }
         else
         {
             // První save — žádný target k nahrazení, jen rename.
             File.Move(tmpPath, SettingsFilePath);
         }
+    }
+
+    private static void ReplaceExistingFile(string tmpPath, string targetPath)
+    {
+        var backupPath = targetPath + ".bak";
+
+        try
+        {
+            if (File.Exists(backupPath))
+                File.Delete(backupPath);
+
+            // File.Replace je atomic (NTFS): cíl bude buď zcela starý, nebo zcela nový.
+            File.Replace(tmpPath, targetPath, backupPath);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            File.Copy(targetPath, backupPath, overwrite: true);
+            File.Move(tmpPath, targetPath, overwrite: true);
+        }
+
+        try { File.Delete(backupPath); } catch { /* best effort */ }
     }
 }

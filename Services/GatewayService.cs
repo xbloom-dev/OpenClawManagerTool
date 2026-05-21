@@ -249,10 +249,10 @@ public static class GatewayService
         return null;
     }
 
-    public static Process? Restart()
+    public static async Task<Process?> RestartAsync()
     {
         Stop();
-        Thread.Sleep(2000);
+        await Task.Delay(2000);
         return Start();
     }
 
