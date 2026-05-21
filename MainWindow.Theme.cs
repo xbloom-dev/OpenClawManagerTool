@@ -48,6 +48,9 @@ public partial class MainWindow
     private readonly Dictionary<FrameworkElement, ElementLayoutState> _layoutElementStates = new();
     private readonly Dictionary<TextBlock, Brush> _textBlockForegroundStates = new();
     private readonly Dictionary<MenuItem, object?> _menuItemIcons = new();
+    private static readonly Dictionary<string, Style> _themeStyleCache = new();
+    private static readonly Dictionary<string, ImageSource> _themeIconSourceCache = new();
+    private static Brush? _pressedScanlineBrush;
     private AppTheme _activeTheme = AppTheme.Legacy;
 
     [DllImport("dwmapi.dll")]
@@ -523,6 +526,9 @@ public partial class MainWindow
 
     private static Style CreateCaptionButtonStyle(Brush hoverBackground, Brush pressedBackground)
     {
+        var cacheKey = $"caption|{BrushCacheKey(hoverBackground)}|{BrushCacheKey(pressedBackground)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var root = new FrameworkElementFactory(typeof(Border));
         root.Name = "Root";
         root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Button.BackgroundProperty));
@@ -552,26 +558,37 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
         style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
         return style;
+        });
     }
 
     private static Style CreateHiddenSeparatorStyle()
     {
+        return GetCachedStyle("separator|hidden", () =>
+        {
         var style = new Style(typeof(Separator));
         style.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Collapsed));
         return style;
+        });
     }
 
     private static Style CreateStandardSeparatorStyle(Brush brush)
     {
+        var cacheKey = $"separator|standard|{BrushCacheKey(brush)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var style = new Style(typeof(Separator));
         style.Setters.Add(new Setter(Control.BackgroundProperty, brush));
         style.Setters.Add(new Setter(Control.BorderBrushProperty, brush));
         style.Setters.Add(new Setter(UIElement.OpacityProperty, 1.0));
         return style;
+        });
     }
 
     private static Style CreateStandardSimpleGroupBoxStyle(Brush textBrush, Brush borderBrush, Brush backgroundBrush)
     {
+        var cacheKey = $"group|standard-simple|{BrushCacheKey(textBrush)}|{BrushCacheKey(borderBrush)}|{BrushCacheKey(backgroundBrush)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var root = new FrameworkElementFactory(typeof(Grid));
         root.SetValue(UIElement.SnapsToDevicePixelsProperty, true);
 
@@ -614,6 +631,7 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
         style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = root }));
         return style;
+        });
     }
 
     private static Style CreateModernPaletteMenuItemStyle(
@@ -623,6 +641,9 @@ public partial class MainWindow
         Brush popupBackground,
         Brush hoverBackground)
     {
+        var cacheKey = $"menu|modern-palette|{BrushCacheKey(foreground)}|{BrushCacheKey(topLevelForeground)}|{BrushCacheKey(background)}|{BrushCacheKey(popupBackground)}|{BrushCacheKey(hoverBackground)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var style = new Style(typeof(MenuItem));
         style.Setters.Add(new Setter(Control.ForegroundProperty, foreground));
         style.Setters.Add(new Setter(Control.BackgroundProperty, background));
@@ -630,6 +651,7 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(8, 4, 8, 4)));
         style.Setters.Add(new Setter(Control.TemplateProperty, CreateDarkMenuItemTemplate(topLevelForeground, popupBackground, hoverBackground)));
         return style;
+        });
     }
 
     private static Style CreateDarkFramedGroupBoxStyle()
@@ -637,6 +659,9 @@ public partial class MainWindow
         var textBrush = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x9E, 0x9E, 0x9E));
         var borderBrush = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0x4E, 0x4E, 0x4E));
         var backgroundBrush = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x19, 0x19, 0x19));
+        var cacheKey = $"group|dark-framed|{BrushCacheKey(textBrush)}|{BrushCacheKey(borderBrush)}|{BrushCacheKey(backgroundBrush)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
 
         var border = new FrameworkElementFactory(typeof(Border));
         border.Name = "Border";
@@ -669,6 +694,7 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
         style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
         return style;
+        });
     }
 
     private static ControlTemplate CreateDarkMenuItemTemplate(Brush secondaryBrush, Brush popupBackground, Brush hoverBackground)
@@ -968,6 +994,9 @@ public partial class MainWindow
     private static Style CreateStandardFlatButtonStyle(
         Brush idle, Brush hover, Brush pressed, Brush textBrush)
     {
+        var cacheKey = $"button|standard-flat|{BrushCacheKey(idle)}|{BrushCacheKey(hover)}|{BrushCacheKey(pressed)}|{BrushCacheKey(textBrush)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var root = new FrameworkElementFactory(typeof(Border));
         root.Name = "Root";
         root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Button.BackgroundProperty));
@@ -1011,11 +1040,14 @@ public partial class MainWindow
             Setters  = { new Setter(UIElement.OpacityProperty, 0.4) }
         });
         return style;
+        });
     }
 
     // GroupBox bez headeru a border (GrpActions, GrpTools v StandardDark)
     private static Style CreateStandardHiddenGroupBoxStyle()
     {
+        return GetCachedStyle("group|standard-hidden", () =>
+        {
         var border = new FrameworkElementFactory(typeof(Border));
         border.SetValue(Border.BackgroundProperty, Brushes.Transparent);
         border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
@@ -1035,11 +1067,15 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.TemplateProperty,
             new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
         return style;
+        });
     }
 
     // GroupBox flat panel Active (#383838), bez headeru (GrpLatency, GrpAppLog)
     private static Style CreateStandardFlatGroupBoxStyle(Brush textBrush, Brush backgroundBrush)
     {
+        var cacheKey = $"group|standard-flat|{BrushCacheKey(textBrush)}|{BrushCacheKey(backgroundBrush)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var border = new FrameworkElementFactory(typeof(Border));
         border.SetValue(Border.BackgroundProperty, backgroundBrush);
         border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
@@ -1060,6 +1096,7 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.TemplateProperty,
             new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
         return style;
+        });
     }
 
         private void ApplyModernToolLayout()
@@ -1207,6 +1244,25 @@ public partial class MainWindow
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    private static Style GetCachedStyle(string key, Func<Style> factory)
+    {
+        if (_themeStyleCache.TryGetValue(key, out var cached))
+            return cached;
+
+        var style = factory();
+        _themeStyleCache[key] = style;
+        return style;
+    }
+
+    private static string BrushCacheKey(Brush brush)
+    {
+        return brush switch
+        {
+            SolidColorBrush solid => $"solid:{solid.Color}:{solid.Opacity:F3}",
+            _ => $"{brush.GetType().FullName}:{brush.GetHashCode()}:{brush.Opacity:F3}"
+        };
+    }
+
     /// <summary>
     /// Nastaví obsah tlačítka na PNG ikonu (Modern téma).
     /// Ikona je načtena z Resources/Icons/Modern/{name}.png jako embedded resource.
@@ -1214,14 +1270,14 @@ public partial class MainWindow
     /// </summary>
     private void SetButtonIcon(Button btn, string iconName)
     {
-        var uri = ThemeService.GetIconUri(_activeTheme, iconName);
-        if (uri == null) return;
-
         try
         {
+            var source = GetThemeIconSource(iconName);
+            if (source == null) return;
+
             var img = new Image
             {
-                Source = new BitmapImage(uri),
+                Source = source,
                 Width  = 28,
                 Height = 28,
                 Margin = new Thickness(0, 0, 6, 0),
@@ -1315,6 +1371,9 @@ public partial class MainWindow
         var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x46, 0x46, 0x46));
         var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x53, 0x53, 0x53));
         var buttonTextBrush = ThemeService.GetBrush("Theme.Brush.ButtonText", Colors.White);
+        var cacheKey = $"button|standard-feedback|{useScanlineEffect}|{BrushCacheKey(idleBrush)}|{BrushCacheKey(hoverBrush)}|{BrushCacheKey(pressedBrush)}|{BrushCacheKey(buttonTextBrush)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var pressedOverlayBrush = CreatePressedScanlineBrush();
 
         var root = new FrameworkElementFactory(typeof(Border));
@@ -1379,6 +1438,7 @@ public partial class MainWindow
             }
         });
         return style;
+        });
     }
 
     private static Style CreateModernButtonFeedbackStyle(bool useScanlineEffect)
@@ -1387,6 +1447,9 @@ public partial class MainWindow
         var hoverBorderBrush = new SolidColorBrush(Color.FromRgb(0xB8, 0xC2, 0xCF));
         var pressedBrush = new SolidColorBrush(Color.FromRgb(0xD2, 0xD9, 0xE2));
         var pressedBorderBrush = new SolidColorBrush(Color.FromRgb(0x8E, 0x9A, 0xAA));
+        var cacheKey = $"button|modern-feedback|{useScanlineEffect}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var pressedOverlayBrush = CreatePressedScanlineBrush();
 
         var root = new FrameworkElementFactory(typeof(Border));
@@ -1450,6 +1513,7 @@ public partial class MainWindow
             Setters = { new Setter(UIElement.OpacityProperty, 0.55) }
         });
         return style;
+        });
     }
 
     private static void ApplyDarkButtonFeedbackStyle(Brush idleBrush, params Button[] buttons)
@@ -1466,6 +1530,9 @@ public partial class MainWindow
         var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x38, 0x38, 0x38));
         var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x30, 0x30, 0x30));
         var buttonTextBrush = ThemeService.GetBrush("Theme.Brush.ButtonText", Colors.White);
+        var cacheKey = $"button|dark-feedback|{useScanlineEffect}|{BrushCacheKey(idleBrush)}|{BrushCacheKey(hoverBrush)}|{BrushCacheKey(pressedBrush)}|{BrushCacheKey(buttonTextBrush)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var pressedOverlayBrush = CreatePressedScanlineBrush();
 
         var root = new FrameworkElementFactory(typeof(Border));
@@ -1535,6 +1602,7 @@ public partial class MainWindow
             }
         });
         return style;
+        });
     }
 
     private static Color GetBrushColor(Brush brush, Color fallback)
@@ -1544,6 +1612,9 @@ public partial class MainWindow
 
     private static Style CreateCrabCuteButtonFeedbackStyle(bool useScanlineEffect)
     {
+        var cacheKey = $"button|crabcute-feedback|{useScanlineEffect}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var pressedOverlayBrush = CreatePressedScanlineBrush();
 
         var root = new FrameworkElementFactory(typeof(Border));
@@ -1601,10 +1672,13 @@ public partial class MainWindow
             Setters = { new Setter(UIElement.OpacityProperty, 0.55) }
         });
         return style;
+        });
     }
 
     private static Style CreateModernHiddenGroupBoxStyle()
     {
+        return GetCachedStyle("group|modern-hidden", () =>
+        {
         var border = new FrameworkElementFactory(typeof(Border));
         border.SetValue(Border.BackgroundProperty, Brushes.Transparent);
         border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
@@ -1621,10 +1695,14 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
         style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
         return style;
+        });
     }
 
     private static Style CreateModernPanelGroupBoxStyle(Brush textBrush, Brush backgroundBrush)
     {
+        var cacheKey = $"group|modern-panel|{BrushCacheKey(textBrush)}|{BrushCacheKey(backgroundBrush)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var border = new FrameworkElementFactory(typeof(Border));
         border.SetValue(Border.BackgroundProperty, backgroundBrush);
         border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
@@ -1655,10 +1733,14 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
         style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
         return style;
+        });
     }
 
     private static Style CreateModernVariantImageButtonFeedbackStyle(bool useScanlineEffect, bool lightInteraction)
     {
+        var cacheKey = $"button|modern-variant-image|{useScanlineEffect}|{lightInteraction}";
+        return GetCachedStyle(cacheKey, () =>
+        {
         var hoverOverlayBrush = CreatePressedScanlineBrush();
 
         var root = new FrameworkElementFactory(typeof(Border));
@@ -1733,10 +1815,13 @@ public partial class MainWindow
             Setters = { new Setter(UIElement.OpacityProperty, 0.55) }
         });
         return style;
+        });
     }
 
     private static Brush CreatePressedScanlineBrush()
     {
+        if (_pressedScanlineBrush != null) return _pressedScanlineBrush;
+
         var drawingGroup = new DrawingGroup();
         drawingGroup.Children.Add(new GeometryDrawing(
             new SolidColorBrush(Color.FromArgb(0x32, 0x00, 0x00, 0x00)),
@@ -1747,7 +1832,7 @@ public partial class MainWindow
             null,
             new RectangleGeometry(new Rect(0, 0, 1, 0.22))));
 
-        return new DrawingBrush(drawingGroup)
+        var brush = new DrawingBrush(drawingGroup)
         {
             TileMode = TileMode.Tile,
             Viewport = new Rect(0, 0, 1, 3),
@@ -1755,18 +1840,22 @@ public partial class MainWindow
             Stretch = Stretch.None,
             Opacity = 1.0
         };
+
+        if (brush.CanFreeze) brush.Freeze();
+        _pressedScanlineBrush = brush;
+        return brush;
     }
 
     private Image? CreateThemeImage(string iconName, double height)
     {
-        var uri = ThemeService.GetIconUri(_activeTheme, iconName);
-        if (uri == null) return null;
-
         try
         {
+            var source = GetThemeIconSource(iconName);
+            if (source == null) return null;
+
             var image = new Image
             {
-                Source = new BitmapImage(uri),
+                Source = source,
                 Height = height,
                 Stretch = Stretch.Uniform,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -1780,6 +1869,26 @@ public partial class MainWindow
             Log($"[Theme] Ikona {iconName} se nenačetla: {ex.Message}");
             return null;
         }
+    }
+
+    private ImageSource? GetThemeIconSource(string iconName)
+    {
+        var uri = ThemeService.GetIconUri(_activeTheme, iconName);
+        if (uri == null) return null;
+
+        var cacheKey = $"{_activeTheme}|{iconName}|{uri}";
+        if (_themeIconSourceCache.TryGetValue(cacheKey, out var cached))
+            return cached;
+
+        var bitmap = new BitmapImage();
+        bitmap.BeginInit();
+        bitmap.UriSource = uri;
+        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+        bitmap.EndInit();
+        if (bitmap.CanFreeze) bitmap.Freeze();
+
+        _themeIconSourceCache[cacheKey] = bitmap;
+        return bitmap;
     }
 
     private void SetMenuIcon(MenuItem item, string iconName)

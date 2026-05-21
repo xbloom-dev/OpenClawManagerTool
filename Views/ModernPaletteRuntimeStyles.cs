@@ -15,6 +15,8 @@ internal static class ModernPaletteRuntimeStyles
     private const int DwmwaBorderColor = 34;
     private const int DwmwaCaptionColor = 35;
     private const int DwmwaTextColor = 36;
+    private static readonly Dictionary<string, Style> StyleCache = new();
+    private static Brush? _pressedScanlineBrush;
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
@@ -27,7 +29,7 @@ internal static class ModernPaletteRuntimeStyles
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
         window.Background = ThemeService.GetBrush("Theme.Brush.WindowBackground", GetBrushColor(background, Color.FromRgb(0x19, 0x19, 0x19)));
         window.Foreground = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        window.Resources[typeof(Button)] = CreateModernPaletteButtonStyle(SettingsService.Current.UseButtonScanlineEffect);
+        window.Resources[typeof(Button)] = GetModernPaletteButtonStyle(SettingsService.Current.UseButtonScanlineEffect);
         ApplyCaption(window);
         window.Loaded += (_, _) => ApplyLoadedVisuals(window);
     }
@@ -223,8 +225,21 @@ internal static class ModernPaletteRuntimeStyles
         return style;
     }
 
+    private static Style GetModernPaletteButtonStyle(bool useScanlineEffect)
+    {
+        var key = $"{SettingsService.Current.Theme}|{ThemeService.GetCurrentButtonInteraction()}|{useScanlineEffect}";
+        if (StyleCache.TryGetValue(key, out var cached))
+            return cached;
+
+        var style = CreateModernPaletteButtonStyle(useScanlineEffect);
+        StyleCache[key] = style;
+        return style;
+    }
+
     private static Brush CreatePressedScanlineBrush()
     {
+        if (_pressedScanlineBrush != null) return _pressedScanlineBrush;
+
         var drawingGroup = new DrawingGroup();
         drawingGroup.Children.Add(new GeometryDrawing(
             new SolidColorBrush(Color.FromArgb(0x32, 0x00, 0x00, 0x00)),
@@ -235,7 +250,7 @@ internal static class ModernPaletteRuntimeStyles
             null,
             new RectangleGeometry(new Rect(0, 0, 1, 0.22))));
 
-        return new DrawingBrush(drawingGroup)
+        var brush = new DrawingBrush(drawingGroup)
         {
             TileMode = TileMode.Tile,
             Viewport = new Rect(0, 0, 1, 3),
@@ -243,6 +258,10 @@ internal static class ModernPaletteRuntimeStyles
             Stretch = Stretch.None,
             Opacity = 1.0
         };
+
+        if (brush.CanFreeze) brush.Freeze();
+        _pressedScanlineBrush = brush;
+        return brush;
     }
 
     private static void ApplyCaption(Window window)
