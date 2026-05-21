@@ -116,23 +116,19 @@ public partial class AboutWindow : Window
         var candidates = new[]
         {
             Path.Combine(exeDir, "Sync-OpenClaw.bat"),
-            Path.Combine(exeDir, "Sync-OpenClawWorkspaces.bat"),
             Path.Combine(exeDir, "scripts", "Sync-OpenClaw.bat"),
-            Path.Combine(exeDir, "scripts", "Sync-OpenClawWorkspaces.bat"),
             Path.Combine(exeDir, "..", "..", "..", "scripts", "Sync-OpenClaw.bat"),
-            Path.Combine(exeDir, "..", "Sync-OpenClawWorkspaces.bat"),
             @"E:\OpenClaw\OpenClawManager\scripts\Sync-OpenClaw.bat",
-            @"E:\OpenClaw\OpenClawManager\Sync-OpenClawWorkspaces.bat",
             @"E:\OpenClaw\CodexWorkspace\scripts\Sync-OpenClaw.bat",
             @"E:\OpenClaw\ClaudeWorkspace\scripts\Sync-OpenClaw.bat",
-            @"E:\OpenClaw\Sync-OpenClawWorkspaces.bat",
+            @"E:\OpenClaw\Sync-OpenClaw.bat",
         };
 
         var batPath = candidates.FirstOrDefault(File.Exists);
         if (batPath == null)
         {
             MessageBox.Show(
-                "Sync-OpenClawWorkspaces.bat nenalezen.\n" +
+                "Sync-OpenClaw.bat nenalezen.\n" +
                 "Očekáváno vedle EXE nebo ve složce scripts.",
                 "OpenClaw Sync", MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
