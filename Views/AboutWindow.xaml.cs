@@ -1,15 +1,32 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 using OpenClawManager.Services;
 
 namespace OpenClawManager.Views;
 
 public partial class AboutWindow : Window
 {
+    // ── Easter Egg — 5× klik na logo Craba ────────────────────────────────────
+    private int _logoClickCount = 0;
+    private DateTime _lastLogoClick = DateTime.MinValue;
+    private DispatcherTimer? _progressFadeTimer;
+
+    // Hvězdičky — vizuální odpočet kliků
+    private static readonly string[] _progressStages =
+    {
+        "",           // 0 kliků — skrytý
+        "★ ☆ ☆ ☆ ☆",  // 1
+        "★ ★ ☆ ☆ ☆",  // 2
+        "★ ★ ★ ☆ ☆",  // 3
+        "★ ★ ★ ★ ☆",  // 4
+        "🚀",          // 5 — spuštění
+    };
+
     public AboutWindow()
     {
         InitializeComponent();
-        ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
         BtnClose.Click += (_, _) => Close();
         ApplyLocalization();
         _ = InitWebViewAsync();
@@ -32,6 +49,116 @@ public partial class AboutWindow : Window
         Title = cs ? "OpenClaw Manager — O aplikaci" : "OpenClaw Manager — About";
     }
 
+    // ── Logo overlay click handler ─────────────────────────────────────────────
+    private void LogoClickArea_MouseLeftButtonDown(object sender,
+        System.Windows.Input.MouseButtonEventArgs e)
+    {
+        var now = DateTime.Now;
+
+        // Reset čítače pokud uplynulo více než 2 sekundy od posledního kliku
+        if ((now - _lastLogoClick).TotalSeconds > 2)
+        {
+            _logoClickCount = 0;
+            HideProgress();
+        }
+
+        _lastLogoClick = now;
+        _logoClickCount++;
+
+        if (_logoClickCount >= 5)
+        {
+            // Spuštění!
+            _logoClickCount = 0;
+            ShowProgress(5);
+            // Krátká pauza před spuštěním aby uživatel viděl 🚀
+            var launchTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(400) };
+            launchTimer.Tick += (_, _) =>
+            {
+                launchTimer.Stop();
+                HideProgress();
+                LaunchSyncWorkspaces();
+            };
+            launchTimer.Start();
+        }
+        else
+        {
+            ShowProgress(_logoClickCount);
+            // Auto-hide po 2 sekundách pokud uživatel nekliká dál
+            _progressFadeTimer?.Stop();
+            _progressFadeTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+            _progressFadeTimer.Tick += (_, _) =>
+            {
+                _progressFadeTimer?.Stop();
+                _progressFadeTimer = null;
+                _logoClickCount = 0;
+                HideProgress();
+            };
+            _progressFadeTimer.Start();
+        }
+    }
+
+    private void ShowProgress(int count)
+    {
+        TxtEasterEggProgress.Text       = _progressStages[count];
+        TxtEasterEggProgress.Visibility = Visibility.Visible;
+    }
+
+    private void HideProgress()
+    {
+        TxtEasterEggProgress.Visibility = Visibility.Hidden;
+        TxtEasterEggProgress.Text       = "";
+    }
+
+    // ── Sync spouštěč ─────────────────────────────────────────────────────────
+    private static void LaunchSyncWorkspaces()
+    {
+        var exeDir = AppContext.BaseDirectory;
+        var candidates = new[]
+        {
+            Path.Combine(exeDir, "Sync-OpenClaw.bat"),
+            Path.Combine(exeDir, "Sync-OpenClawWorkspaces.bat"),
+            Path.Combine(exeDir, "scripts", "Sync-OpenClaw.bat"),
+            Path.Combine(exeDir, "scripts", "Sync-OpenClawWorkspaces.bat"),
+            Path.Combine(exeDir, "..", "..", "..", "scripts", "Sync-OpenClaw.bat"),
+            Path.Combine(exeDir, "..", "Sync-OpenClawWorkspaces.bat"),
+            @"E:\OpenClaw\OpenClawManager\scripts\Sync-OpenClaw.bat",
+            @"E:\OpenClaw\OpenClawManager\Sync-OpenClawWorkspaces.bat",
+            @"E:\OpenClaw\CodexWorkspace\scripts\Sync-OpenClaw.bat",
+            @"E:\OpenClaw\ClaudeWorkspace\scripts\Sync-OpenClaw.bat",
+            @"E:\OpenClaw\Sync-OpenClawWorkspaces.bat",
+        };
+
+        var batPath = candidates.FirstOrDefault(File.Exists);
+        if (batPath == null)
+        {
+            MessageBox.Show(
+                "Sync-OpenClawWorkspaces.bat nenalezen.\n" +
+                "Očekáváno vedle EXE nebo ve složce scripts.",
+                "OpenClaw Sync", MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName        = batPath,
+                UseShellExecute = true,
+                Verb            = "runas",   // UAC — skript potřebuje admin
+            });
+        }
+        catch (OperationCanceledException)
+        {
+            // Uživatel zamítl UAC — tiché zrušení
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Sync selhal: {ex.Message}",
+                "OpenClaw Sync", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+    }
+
+    // ── WebView2 logo ─────────────────────────────────────────────────────────
     private async Task InitWebViewAsync()
     {
         try
@@ -60,17 +187,13 @@ public partial class AboutWindow : Window
 
     private static string BuildHtml(string svgContent)
     {
-        var background = SettingsService.Current.Theme == OpenClawManager.Models.AppTheme.Dark
-            ? "#191919"
-            : "#F0F0F0";
-
         return $@"<!DOCTYPE html>
 <html>
 <head>
 <style>
   html, body {{
     margin: 0; padding: 0;
-    background: {background};
+    background: #F0F0F0;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -15,7 +15,16 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <wv2:WebView2 x:Name="SvgView" Grid.Row="0" />
+        <Grid Grid.Row="0"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Center">
+            <wv2:WebView2 x:Name="SvgView" Width="140" Height="140" />
+            <Border x:Name="LogoClickArea"
+                    Background="Transparent"
+                    Cursor="Hand"
+                    ToolTip="OpenClaw Manager"
+                    MouseLeftButtonDown="LogoClickArea_MouseLeftButtonDown" />
+        </Grid>
 
         <StackPanel Grid.Row="1" Margin="24,12,24,8">
 
@@ -30,6 +39,13 @@
                 <TextBlock Text=".NET 8  |  WPF  |  WebView2 + ConPTY"
                            Foreground="Gray" FontSize="12" />
             </StackPanel>
+
+            <TextBlock x:Name="TxtEasterEggProgress"
+                       HorizontalAlignment="Center"
+                       FontSize="16"
+                       Visibility="Hidden"
+                       Foreground="#888888"
+                       Margin="0,-6,0,8" />
 
             <Border x:Name="ShortcutFrame"
                     Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1"
