@@ -114,11 +114,11 @@ public static class GatewayService
             return false;
         }
 
-        char[] forbidden = ['\r', '\n', '"', '\'', ';', '&', '|', '`'];
+        char[] forbidden = ['\r', '\n', '"', '\'', ';', '&', '|', '`', '<', '>', '%', '^'];
         var found = command.IndexOfAny(forbidden);
         if (found >= 0)
         {
-            error = $"OpenClaw command contains an unsafe character: {command[found]}";
+            error = "The path or command contains disallowed special characters (<, >, %, ^, &, |).";
             return false;
         }
 

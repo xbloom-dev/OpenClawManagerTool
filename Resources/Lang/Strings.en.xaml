@@ -118,7 +118,7 @@
     <sys:String x:Key="Str_Log_StoppingGatewayTui">Stopping Gateway and closing all OpenClaw windows...</sys:String>
 
     <!-- Token Manager -->
-    <sys:String x:Key="Str_Token_Title">OpenClaw Manager - Token Manager</sys:String>
+    <sys:String x:Key="Str_Token_Title">Token Manager</sys:String>
     <sys:String x:Key="Str_Token_GroupVault">Vault</sys:String>
     <sys:String x:Key="Str_Token_VaultLabel">secrets.json:</sys:String>
     <sys:String x:Key="Str_Token_InitVault">Initialize</sys:String>

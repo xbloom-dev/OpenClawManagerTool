@@ -22,7 +22,7 @@ public partial class CleaningWindow : Window
     {
         InitializeComponent();
         ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
-        Title = L10n.IsCzech ? "OpenClaw Manager — Vyčistit soubory" : "OpenClaw Manager — Cleaning Tool";
+        Title = L10n.IsCzech ? "Vyčistit soubory" : "Cleaning Tool";
 
         BtnDryRun.Click += (_, _) => RunCleanup(dryRun: true);
         BtnRun.Click += BtnRun_Click;

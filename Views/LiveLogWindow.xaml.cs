@@ -64,7 +64,7 @@ public partial class LiveLogWindow : Window
     private void ApplyLocalization()
     {
         bool cs = L10n.Current == L10n.Language.CS;
-        Title              = cs ? "OpenClaw Manager — Živý log" : "OpenClaw Manager — Live log";
+        Title              = cs ? "Živý log" : "Live log";
         BtnCopy.Content    = cs ? "Kopírovat" : "Copy";
         BtnClose.Content   = cs ? "Zavřít" : "Close";
         BtnCopy.ToolTip    = cs ? "Zkopíruje celý zobrazený log do schránky." : "Copies displayed log to clipboard.";

@@ -23,6 +23,8 @@ internal static class ModernPaletteRuntimeStyles
 
     public static void ApplyIfModernPalette(Window window)
     {
+        window.Icon = null;
+
         if (SettingsService.Current.Theme != AppTheme.Modern &&
             !ThemeService.IsModernPaletteTheme(SettingsService.Current.Theme)) return;
 

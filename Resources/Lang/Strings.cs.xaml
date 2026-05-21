@@ -118,7 +118,7 @@
     <sys:String x:Key="Str_Log_StoppingGatewayTui">Zastavuji Gateway a zavírám všechna OpenClaw okna...</sys:String>
 
     <!-- Správce API klíčů -->
-    <sys:String x:Key="Str_Token_Title">OpenClaw Manager - Správce API klíčů</sys:String>
+    <sys:String x:Key="Str_Token_Title">Správce API klíčů</sys:String>
     <sys:String x:Key="Str_Token_GroupVault">Trezor (vault)</sys:String>
     <sys:String x:Key="Str_Token_VaultLabel">secrets.json:</sys:String>
     <sys:String x:Key="Str_Token_InitVault">Inicializovat</sys:String>

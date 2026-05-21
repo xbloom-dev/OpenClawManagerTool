@@ -51,11 +51,11 @@
                             Grid.Column="2"
                             Orientation="Horizontal"
                             Visibility="Collapsed">
-                    <Button x:Name="BtnWindowMinimize" Width="58" Height="60" Content="_"
+                    <Button x:Name="BtnWindowMinimize" Width="46" Height="32" Content="_"
                             Padding="0" FocusVisualStyle="{x:Null}" />
-                    <Button x:Name="BtnWindowMaximize" Width="58" Height="60" Content="□"
+                    <Button x:Name="BtnWindowMaximize" Width="46" Height="32" Content="□"
                             Padding="0" FocusVisualStyle="{x:Null}" />
-                    <Button x:Name="BtnWindowClose" Width="58" Height="60" Content="X"
+                    <Button x:Name="BtnWindowClose" Width="46" Height="32" Content="X"
                             Padding="0" FocusVisualStyle="{x:Null}" />
                 </StackPanel>
             </Grid>

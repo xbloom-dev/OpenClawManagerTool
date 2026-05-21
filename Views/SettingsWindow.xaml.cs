@@ -65,7 +65,7 @@ public partial class SettingsWindow : Window
 
     private void ApplyLocalization()
     {
-        Title = T("OpenClaw Manager - Nastavení", "OpenClaw Manager - Settings");
+        Title = T("Nastavení", "Settings");
         BtnSave.Content = T("Uložit", "Save");
         BtnReset.Content = T("Reset na výchozí", "Reset to defaults");
         BtnCancel.Content = T("Zrušit", "Cancel");

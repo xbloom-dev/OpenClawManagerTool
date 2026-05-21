@@ -707,9 +707,12 @@ public partial class MainWindow : Window
 
         Terminal.Shutdown();
 
-        // v0.5: odhlásit event handler
-        ThemeService.ThemeChanged -= OnThemeChanged;
-
         base.OnClosing(e);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        ThemeService.ThemeChanged -= OnThemeChanged;
+        base.OnClosed(e);
     }
 }

@@ -112,7 +112,7 @@ public partial class MainWindow
     {
         _activeTheme = theme;
         RestoreThemeBaseline();
-        ApplyThemeTitleBarMode(theme is AppTheme.Dark or AppTheme.ModernLight or AppTheme.StandardDark);
+        ApplyThemeTitleBarMode(theme != AppTheme.Legacy);
 
         switch (theme)
         {
@@ -129,6 +129,7 @@ public partial class MainWindow
             case AppTheme.HighContrast:
                 ApplyModernUi();
                 ApplyModernToolLayout();
+                ApplyModernPaletteShell();
                 break;
             case AppTheme.Dark:
             case AppTheme.ModernLight:
@@ -252,6 +253,9 @@ public partial class MainWindow
         Background = background;
         Foreground = text;
 
+        TitleBarHost.Background = surface;
+        ApplyCaptionButtonVisuals(text, border, border);
+
         MainMenu.Background = surface;
         MainMenu.Foreground = text;
         MainStatusBar.Background = surface;
@@ -337,6 +341,9 @@ public partial class MainWindow
 
         Background = background;
         Foreground = primaryText;
+
+        TitleBarHost.Background = chrome;
+        ApplyCaptionButtonVisuals(primaryText, hover, border);
 
         MainMenu.Background = chrome;
         MainMenu.Foreground = secondaryText;
@@ -437,17 +444,17 @@ public partial class MainWindow
         Terminal.SetShellBackground(chrome);
         SplashProgress.Foreground = hover;
 
-        // ── Akce tlačítka (TUI + Gateway + Open) — výrazná idle ─────────────
+        // ── Akce tlačítka (TUI + Gateway) — výrazná idle ────────────────────
         ApplyStandardActiveButtonStyle(active, hover, pressed, primary,
             BtnStartTui,
             BtnGatewayStart,
             BtnGatewayStop,
-            BtnGatewayRestart,
-            BtnOpenPowerShell,
-            BtnOpenGatewayLog);
+            BtnGatewayRestart);
 
-        // ── Nástroje tlačítka (Cleaning + Token + Doctor) — splývají ─────────
+        // ── Nástroje tlačítka — splývají s pozadím a zesílí až na hover ──────
         ApplyStandardToolButtonStyle(bg, active, primary,
+            BtnOpenPowerShell,
+            BtnOpenGatewayLog,
             BtnCleaningTool,
             BtnTokenManager,
             BtnDoctorFix);
@@ -490,7 +497,7 @@ public partial class MainWindow
                 UseAeroCaptionButtons = false
             });
 
-            TitleBarHost.Height = 60;
+            TitleBarHost.Height = 32;
             CaptionButtons.Visibility = Visibility.Visible;
             MainMenu.VerticalAlignment = VerticalAlignment.Stretch;
             MainMenu.Padding = new Thickness(0);
