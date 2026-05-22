@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Windows;
+using System.Windows.Media;
 using Microsoft.Web.WebView2.Core;
 using OpenClawManager.Services;
 
@@ -76,11 +78,8 @@ public partial class AboutWindow : Window
             }
 
             var actionArgs = string.IsNullOrWhiteSpace(action) ? "" : $" -Action {QuoteArgument(action)}";
-            var psArguments = $"-NoExit -NoProfile -ExecutionPolicy Bypass -File {QuoteArgument(scriptPath)}{actionArgs}";
+            var psArguments = $"-NoProfile -ExecutionPolicy Bypass -File {QuoteArgument(scriptPath)}{actionArgs}";
             var scriptDirectory = Path.GetDirectoryName(scriptPath) ?? AppContext.BaseDirectory;
-
-            if (TryStartWindowsTerminal(psArguments, scriptDirectory))
-                return;
 
             Process.Start(new ProcessStartInfo
             {
@@ -88,6 +87,7 @@ public partial class AboutWindow : Window
                 Arguments = psArguments,
                 UseShellExecute = true,
                 WorkingDirectory = scriptDirectory,
+                WindowStyle = ProcessWindowStyle.Normal,
             });
         }
         catch (Exception ex)
@@ -97,25 +97,6 @@ public partial class AboutWindow : Window
                 "OpenClaw Tools",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
-        }
-    }
-
-    private static bool TryStartWindowsTerminal(string powershellArguments, string workingDirectory)
-    {
-        try
-        {
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "wt.exe",
-                Arguments = $"-w new powershell.exe {powershellArguments}",
-                UseShellExecute = true,
-                WorkingDirectory = workingDirectory,
-            });
-            return true;
-        }
-        catch
-        {
-            return false;
         }
     }
 
@@ -132,7 +113,7 @@ public partial class AboutWindow : Window
             var svgContent = svgPath != null
                 ? await File.ReadAllTextAsync(svgPath)
                 : FallbackSvg();
-            SvgView.NavigateToString(BuildHtml(svgContent));
+            SvgView.NavigateToString(BuildHtml(svgContent, GetLogoBackgroundCss()));
         }
         catch { }
     }
@@ -188,14 +169,32 @@ public partial class AboutWindow : Window
         return candidates.FirstOrDefault(File.Exists);
     }
 
-    private static string BuildHtml(string svgContent)
+    private string GetLogoBackgroundCss()
     {
-        var darkLogoBackground = SettingsService.Current.Theme is
-            OpenClawManager.Models.AppTheme.Dark or
-            OpenClawManager.Models.AppTheme.StandardDark or
-            OpenClawManager.Models.AppTheme.HighContrast;
-        var background = darkLogoBackground ? "#191919" : "#F0F0F0";
+        if (Background is SolidColorBrush windowBrush)
+            return ToCssColor(windowBrush.Color);
 
+        var themedBrush = ThemeService.GetBrush("Theme.Brush.WindowBackground", Colors.Transparent);
+        if (themedBrush is SolidColorBrush solidBrush)
+            return ToCssColor(solidBrush.Color);
+
+        return "#000000";
+    }
+
+    private static string ToCssColor(Color color)
+    {
+        if (color.A == 0)
+            return "transparent";
+
+        if (color.A == 255)
+            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
+
+        var alpha = (color.A / 255.0).ToString("0.###", CultureInfo.InvariantCulture);
+        return $"rgba({color.R},{color.G},{color.B},{alpha})";
+    }
+
+    private static string BuildHtml(string svgContent, string background)
+    {
         return $@"<!DOCTYPE html>
 <html>
 <head>
@@ -278,8 +277,6 @@ public partial class AboutWindow : Window
     buffer = (buffer + event.key.toLowerCase()).slice(-maxCommandLength);
     renderPrompt(buffer);
     resetPromptSoon(3000);
-
-    if (commands.has(buffer)) executeCommand(buffer);
   }});
 
   function executeCommand(command) {{
