@@ -8,7 +8,7 @@ namespace OpenClawManager.Views;
 
 public partial class AboutWindow : Window
 {
-    private const string AdminToolsWebMessage = "open-admin-tools";
+    private const string CommandPrefix = "command:";
 
     public AboutWindow()
     {
@@ -36,11 +36,11 @@ public partial class AboutWindow : Window
         Title = cs ? "O aplikaci" : "About";
     }
 
-    private static void LaunchAdminTools()
+    private static void LaunchOpenClawTools(string action = "")
     {
         try
         {
-            var scriptPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "Admin-Tools.ps1");
+            var scriptPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "OpenClaw-Tools.ps1");
 
             if (!File.Exists(scriptPath))
             {
@@ -50,7 +50,7 @@ public partial class AboutWindow : Window
                     "..",
                     "..",
                     "Scripts",
-                    "Admin-Tools.ps1"));
+                    "OpenClaw-Tools.ps1"));
             }
 
             if (!File.Exists(scriptPath))
@@ -62,40 +62,64 @@ public partial class AboutWindow : Window
                     "..",
                     "..",
                     "Scripts",
-                    "Admin-Tools.ps1"));
+                    "OpenClaw-Tools.ps1"));
             }
 
             if (!File.Exists(scriptPath))
             {
                 MessageBox.Show(
-                    $"Admin tools script was not found at path:\n{scriptPath}",
-                    "OpenClaw Admin Tools",
+                    $"OpenClaw tools script was not found at path:\n{scriptPath}",
+                    "OpenClaw Tools",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return;
             }
 
+            var actionArgs = string.IsNullOrWhiteSpace(action) ? "" : $" -Action {QuoteArgument(action)}";
+            var psArguments = $"-NoExit -NoProfile -ExecutionPolicy Bypass -File {QuoteArgument(scriptPath)}{actionArgs}";
+            var scriptDirectory = Path.GetDirectoryName(scriptPath) ?? AppContext.BaseDirectory;
+
+            if (TryStartWindowsTerminal(psArguments, scriptDirectory))
+                return;
+
             Process.Start(new ProcessStartInfo
             {
                 FileName = "powershell.exe",
-                Arguments = $"-NoExit -NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\"",
+                Arguments = psArguments,
                 UseShellExecute = true,
-                Verb = "runas",
+                WorkingDirectory = scriptDirectory,
             });
-        }
-        catch (OperationCanceledException)
-        {
-            // User cancelled UAC.
         }
         catch (Exception ex)
         {
             MessageBox.Show(
-                $"Error while starting admin tools:\n{ex.Message}",
-                "OpenClaw Admin Tools",
+                $"Error while starting OpenClaw tools:\n{ex.Message}",
+                "OpenClaw Tools",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
     }
+
+    private static bool TryStartWindowsTerminal(string powershellArguments, string workingDirectory)
+    {
+        try
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "wt.exe",
+                Arguments = $"-w new powershell.exe {powershellArguments}",
+                UseShellExecute = true,
+                WorkingDirectory = workingDirectory,
+            });
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string QuoteArgument(string value) => "\"" + value.Replace("\"", "\\\"") + "\"";
 
     // ── WebView2 logo ─────────────────────────────────────────────────────────
     private async Task InitWebViewAsync()
@@ -115,9 +139,40 @@ public partial class AboutWindow : Window
 
     private void SvgView_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
-        if (e.TryGetWebMessageAsString().Equals(AdminToolsWebMessage, StringComparison.Ordinal))
+        var message = e.TryGetWebMessageAsString();
+        if (!message.StartsWith(CommandPrefix, StringComparison.Ordinal))
+            return;
+
+        var command = message[CommandPrefix.Length..].Trim().ToLowerInvariant();
+        switch (command)
         {
-            LaunchAdminTools();
+            case "admin":
+            case "root":
+                LaunchOpenClawTools();
+                break;
+            case "sync":
+                LaunchOpenClawTools("sync");
+                break;
+            case "diag":
+            case "status":
+                LaunchOpenClawTools("diag");
+                break;
+            case "acl":
+                LaunchOpenClawTools("acl");
+                break;
+            case "build":
+                LaunchOpenClawTools("build");
+                break;
+            case "test":
+                LaunchOpenClawTools("test");
+                break;
+            case "check":
+                LaunchOpenClawTools("check");
+                break;
+            default:
+                if (Owner is MainWindow mainWindow)
+                    mainWindow.ExecuteAboutCommand(command);
+                break;
         }
     }
 
@@ -166,9 +221,14 @@ public partial class AboutWindow : Window
   }}
 </style>
 <script>
+  const commands = new Set([
+    'admin', 'root', 'sync', 'diag', 'status', 'acl', 'build', 'test', 'check',
+    'replay', 'exit', 'legacy', 'dark', 'light', 'modern', 'crab', 'logs',
+    'tokens', 'settings', 'help'
+  ]);
+  const maxCommandLength = Math.max(...Array.from(commands).map(command => command.length));
   let buffer = '';
   let resetTimer = null;
-  const secret = 'admin';
 
   function renderPrompt(text) {{
     const prompt = document.querySelector('#terminal text');
@@ -192,6 +252,12 @@ public partial class AboutWindow : Window
 
   document.addEventListener('pointerdown', () => document.body.focus());
   document.addEventListener('keydown', (event) => {{
+    if (event.key === 'Enter') {{
+      executeCommand(buffer);
+      event.preventDefault();
+      return;
+    }}
+
     if (event.key === 'Backspace') {{
       buffer = buffer.slice(0, -1);
       renderPrompt(buffer);
@@ -207,18 +273,23 @@ public partial class AboutWindow : Window
       return;
     }}
 
-    if (event.key.length !== 1 || !/^[a-zA-Z]$/.test(event.key)) return;
+    if (event.key.length !== 1 || !/^[a-zA-Z0-9_-]$/.test(event.key)) return;
 
-    buffer = (buffer + event.key.toLowerCase()).slice(-secret.length);
+    buffer = (buffer + event.key.toLowerCase()).slice(-maxCommandLength);
     renderPrompt(buffer);
     resetPromptSoon(3000);
 
-    if (buffer === secret) {{
-      renderPrompt('admin');
-      window.chrome.webview.postMessage('{AdminToolsWebMessage}');
-      resetPromptSoon(1200);
-    }}
+    if (commands.has(buffer)) executeCommand(buffer);
   }});
+
+  function executeCommand(command) {{
+    command = (command || '').trim().toLowerCase();
+    if (!commands.has(command)) return;
+    renderPrompt(command);
+    window.chrome.webview.postMessage('{CommandPrefix}' + command);
+    buffer = '';
+    resetPromptSoon(1200);
+  }}
 </script>
 </head>
 <body>

@@ -661,6 +661,100 @@ public partial class MainWindow : Window
         dialog.ShowDialog();
     }
 
+    internal void ExecuteAboutCommand(string command)
+    {
+        switch (command.Trim().ToLowerInvariant())
+        {
+            case "replay":
+                ReplaySplashFromAboutCommand();
+                break;
+            case "exit":
+                Close();
+                break;
+            case "legacy":
+                ApplyThemeFromAboutCommand(AppTheme.Legacy);
+                break;
+            case "dark":
+                ApplyThemeFromAboutCommand(AppTheme.StandardDark);
+                break;
+            case "light":
+                ApplyThemeFromAboutCommand(AppTheme.ModernLight);
+                break;
+            case "modern":
+                ApplyThemeFromAboutCommand(AppTheme.Modern);
+                break;
+            case "crab":
+                ApplyThemeFromAboutCommand(AppTheme.CrabCute);
+                break;
+            case "logs":
+                OpenGatewayLog(20);
+                break;
+            case "tokens":
+                BtnTokenManager_Click(this, new RoutedEventArgs());
+                break;
+            case "settings":
+                OpenSettings();
+                break;
+            case "help":
+                ShowAboutCommandHelp();
+                break;
+        }
+    }
+
+    private void ReplaySplashFromAboutCommand()
+    {
+        if (Terminal.IsTuiRunning)
+        {
+            Log("[About] Splash replay skipped because OpenClaw TUI is running.");
+            return;
+        }
+
+        Log("[About] Replaying splash screen.");
+        StopSplashVideo();
+        InitSplash();
+    }
+
+    private void ApplyThemeFromAboutCommand(AppTheme theme)
+    {
+        var settings = SettingsService.Current;
+        if (settings.Theme == theme)
+        {
+            Log($"[About] Theme already active: {theme}.");
+            return;
+        }
+
+        settings.Theme = theme;
+        if (!SettingsService.Save(settings))
+        {
+            Log($"[CHYBA] Theme switch failed: {theme}.");
+            return;
+        }
+
+        ThemeService.Apply(theme);
+        ApplyLocalization();
+        ReapplyCurrentThemeLayoutAfterLocalization();
+        Log($"[About] Theme switched to {theme}.");
+    }
+
+    private static void ShowAboutCommandHelp()
+    {
+        MessageBox.Show(
+            "admin/root - Open OpenClaw Tools\n" +
+            "sync - Run workspace sync\n" +
+            "diag/status - Diagnose workspace status\n" +
+            "acl - Git ACL repair menu\n" +
+            "build/test/check - Project checks\n" +
+            "replay - Replay splash when TUI is stopped\n" +
+            "legacy/dark/light/modern/crab - Switch theme\n" +
+            "logs - Open Gateway log\n" +
+            "tokens - Open token manager\n" +
+            "settings - Open settings\n" +
+            "exit - Close application",
+            "OpenClaw prompt commands",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
+    }
+
     private void OpenUrl(string url)
     {
         try { Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true }); }
