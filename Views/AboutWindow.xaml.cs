@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -70,31 +71,35 @@ public partial class AboutWindow : Window
             if (!File.Exists(scriptPath))
             {
                 MessageBox.Show(
-                    $"OpenClaw tools script was not found at path:\n{scriptPath}",
-                    "OpenClaw Tools",
+                    L10n.Format("Str_About_ToolsScriptMissing", scriptPath),
+                    L10n.Get("Str_About_ToolsTitle"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return;
             }
 
             var actionArgs = string.IsNullOrWhiteSpace(action) ? "" : $" -Action {QuoteArgument(action)}";
-            var psArguments = $"-NoProfile -ExecutionPolicy Bypass -File {QuoteArgument(scriptPath)}{actionArgs}";
+            var psArguments = $"-NoProfile -ExecutionPolicy Bypass -File {QuoteArgument(scriptPath)} -NoAdminPrompt{actionArgs}";
             var scriptDirectory = Path.GetDirectoryName(scriptPath) ?? AppContext.BaseDirectory;
 
             Process.Start(new ProcessStartInfo
             {
                 FileName = "powershell.exe",
                 Arguments = psArguments,
+                Verb = "runas",
                 UseShellExecute = true,
                 WorkingDirectory = scriptDirectory,
                 WindowStyle = ProcessWindowStyle.Normal,
             });
         }
+        catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
+        {
+        }
         catch (Exception ex)
         {
             MessageBox.Show(
-                $"Error while starting OpenClaw tools:\n{ex.Message}",
-                "OpenClaw Tools",
+                L10n.Format("Str_About_ToolsStartError", ex.Message),
+                L10n.Get("Str_About_ToolsTitle"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }

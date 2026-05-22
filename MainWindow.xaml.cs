@@ -739,18 +739,8 @@ public partial class MainWindow : Window
     private static void ShowAboutCommandHelp()
     {
         MessageBox.Show(
-            "admin/root - Open OpenClaw Tools\n" +
-            "sync - Run workspace sync\n" +
-            "diag/status - Diagnose workspace status\n" +
-            "acl - Git ACL repair menu\n" +
-            "build/test/check - Project checks\n" +
-            "replay - Replay splash when TUI is stopped\n" +
-            "legacy/dark/light/modern/crab - Switch theme\n" +
-            "logs - Open Gateway log\n" +
-            "tokens - Open token manager\n" +
-            "settings - Open settings\n" +
-            "exit - Close application",
-            "OpenClaw prompt commands",
+            L10n.Get("Str_About_CommandHelpText"),
+            L10n.Get("Str_About_CommandHelpTitle"),
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }
