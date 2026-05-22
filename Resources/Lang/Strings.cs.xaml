@@ -52,6 +52,7 @@
     <!-- Settings -->
     <sys:String x:Key="Str_BtnSave">Uložit</sys:String>
     <sys:String x:Key="Str_BtnReset">Reset na výchozí</sys:String>
+    <sys:String x:Key="Str_BtnOK">OK</sys:String>
     <sys:String x:Key="Str_BtnCancel">Zrušit</sys:String>
     <sys:String x:Key="Str_BtnBrowse">Procházet...</sys:String>
     <sys:String x:Key="Str_Tip_Save">Uloží nastavení a zavře dialog.</sys:String>
@@ -131,6 +132,10 @@
     <sys:String x:Key="Str_Token_Folder">Složka</sys:String>
     <sys:String x:Key="Str_Token_TipOpenVaultFolder">Otevře složku trezoru.</sys:String>
     <sys:String x:Key="Str_Token_TipAddGitIgnore">Přidá cestu k trezoru do nejbližšího .gitignore.</sys:String>
+    <sys:String x:Key="Str_Token_BackupVault">Zálohovat</sys:String>
+    <sys:String x:Key="Str_Token_RestoreVault">Obnovit</sys:String>
+    <sys:String x:Key="Str_Token_TipBackupVault">Exportuje trezor do zašifrované .ocvault zálohy chráněné heslem.</sys:String>
+    <sys:String x:Key="Str_Token_TipRestoreVault">Importuje zašifrovanou .ocvault zálohu a znovu ji uloží přes DPAPI.</sys:String>
     <sys:String x:Key="Str_Token_TipInitVault">Vytvoří trezor API klíčů a ochrání ho přes Windows DPAPI.</sys:String>
     <sys:String x:Key="Str_Token_TipRefresh">Znovu načte tokeny a bezpečnostní stav trezoru.</sys:String>
     <sys:String x:Key="Str_Token_GroupTokens">Tokeny</sys:String>
@@ -233,5 +238,21 @@
     <sys:String x:Key="Str_Token_ImportMissingValue">Označ v textu hodnotu tokenu.</sys:String>
     <sys:String x:Key="Str_Token_TipEditSave">Uloží token a zavře dialog.</sys:String>
     <sys:String x:Key="Str_Token_TipEditCancel">Zavře dialog bez uložení změn.</sys:String>
+    <sys:String x:Key="Str_Token_BackupDialogTitle">Uložit zálohu trezoru</sys:String>
+    <sys:String x:Key="Str_Token_RestoreDialogTitle">Otevřít zálohu trezoru</sys:String>
+    <sys:String x:Key="Str_Token_BackupFileFilter">OpenClaw záloha trezoru (*.ocvault)|*.ocvault|JSON soubory (*.json)|*.json|Všechny soubory (*.*)|*.*</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordTitle">Heslo zálohy</sys:String>
+    <sys:String x:Key="Str_Token_RestorePasswordTitle">Heslo pro obnovu</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordMessage">Zadej heslo pro tuto přenosnou zálohu. Bude potřeba při obnově trezoru na jiném Windows profilu.</sys:String>
+    <sys:String x:Key="Str_Token_RestorePasswordMessage">Zadej heslo použité při vytvoření této zálohy trezoru.</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordLabel">Heslo:</sys:String>
+    <sys:String x:Key="Str_Token_BackupConfirmPasswordLabel">Potvrzení hesla:</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordRequired">Heslo nesmí být prázdné.</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordMismatch">Hesla se neshodují.</sys:String>
+    <sys:String x:Key="Str_Token_BackupExported">Záloha trezoru exportována: {0}</sys:String>
+    <sys:String x:Key="Str_Token_BackupImported">Záloha trezoru importována: {0}</sys:String>
+    <sys:String x:Key="Str_Token_BackupExportedMessage">Záloha trezoru byla úspěšně vytvořena.</sys:String>
+    <sys:String x:Key="Str_Token_BackupImportedMessage">Záloha trezoru byla úspěšně obnovena.</sys:String>
+    <sys:String x:Key="Str_Token_RestoreVaultConfirm">Obnova nahradí aktuální trezor tokeny z vybrané zálohy. Pokračovat?</sys:String>
 
 </ResourceDictionary>

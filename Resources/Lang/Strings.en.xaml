@@ -52,6 +52,7 @@
     <!-- Settings -->
     <sys:String x:Key="Str_BtnSave">Save</sys:String>
     <sys:String x:Key="Str_BtnReset">Reset to defaults</sys:String>
+    <sys:String x:Key="Str_BtnOK">OK</sys:String>
     <sys:String x:Key="Str_BtnCancel">Cancel</sys:String>
     <sys:String x:Key="Str_BtnBrowse">Browse...</sys:String>
     <sys:String x:Key="Str_Tip_Save">Saves settings and closes dialog.</sys:String>
@@ -131,6 +132,10 @@
     <sys:String x:Key="Str_Token_Folder">Folder</sys:String>
     <sys:String x:Key="Str_Token_TipOpenVaultFolder">Opens the vault folder.</sys:String>
     <sys:String x:Key="Str_Token_TipAddGitIgnore">Adds the vault path to the nearest .gitignore.</sys:String>
+    <sys:String x:Key="Str_Token_BackupVault">Backup</sys:String>
+    <sys:String x:Key="Str_Token_RestoreVault">Restore</sys:String>
+    <sys:String x:Key="Str_Token_TipBackupVault">Exports the vault to an encrypted .ocvault backup protected by a password.</sys:String>
+    <sys:String x:Key="Str_Token_TipRestoreVault">Imports an encrypted .ocvault backup and saves it back through DPAPI.</sys:String>
     <sys:String x:Key="Str_Token_TipInitVault">Creates the API key vault and protects it with Windows DPAPI.</sys:String>
     <sys:String x:Key="Str_Token_TipRefresh">Reloads tokens and the vault safety status.</sys:String>
     <sys:String x:Key="Str_Token_GroupTokens">Tokens</sys:String>
@@ -233,5 +238,21 @@
     <sys:String x:Key="Str_Token_ImportMissingValue">Select the token value in the text.</sys:String>
     <sys:String x:Key="Str_Token_TipEditSave">Saves the token and closes the dialog.</sys:String>
     <sys:String x:Key="Str_Token_TipEditCancel">Closes the dialog without saving changes.</sys:String>
+    <sys:String x:Key="Str_Token_BackupDialogTitle">Save vault backup</sys:String>
+    <sys:String x:Key="Str_Token_RestoreDialogTitle">Open vault backup</sys:String>
+    <sys:String x:Key="Str_Token_BackupFileFilter">OpenClaw vault backup (*.ocvault)|*.ocvault|JSON files (*.json)|*.json|All files (*.*)|*.*</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordTitle">Backup password</sys:String>
+    <sys:String x:Key="Str_Token_RestorePasswordTitle">Restore password</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordMessage">Enter a password for this portable backup. You will need it to restore the vault on another Windows profile.</sys:String>
+    <sys:String x:Key="Str_Token_RestorePasswordMessage">Enter the password used when this vault backup was created.</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordLabel">Password:</sys:String>
+    <sys:String x:Key="Str_Token_BackupConfirmPasswordLabel">Confirm password:</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordRequired">Password must not be empty.</sys:String>
+    <sys:String x:Key="Str_Token_BackupPasswordMismatch">Passwords do not match.</sys:String>
+    <sys:String x:Key="Str_Token_BackupExported">Vault backup exported: {0}</sys:String>
+    <sys:String x:Key="Str_Token_BackupImported">Vault backup imported: {0}</sys:String>
+    <sys:String x:Key="Str_Token_BackupExportedMessage">Vault backup was created successfully.</sys:String>
+    <sys:String x:Key="Str_Token_BackupImportedMessage">Vault backup was restored successfully.</sys:String>
+    <sys:String x:Key="Str_Token_RestoreVaultConfirm">Restore will replace the current vault with tokens from the selected backup. Continue?</sys:String>
 
 </ResourceDictionary>

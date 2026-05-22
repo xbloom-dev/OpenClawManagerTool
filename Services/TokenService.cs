@@ -35,11 +35,29 @@ public record GitIgnoreResult(string RepoPath, string GitIgnorePath, bool Added,
 
 public record VaultSafetyResult(bool IsSafe, IReadOnlyList<string> Warnings);
 
+internal sealed record VaultBackupFile(
+    int Version,
+    string Kdf,
+    int Iterations,
+    string Cipher,
+    string Salt,
+    string Nonce,
+    string Tag,
+    string Ciphertext);
+
 public static class TokenService
 {
     private static readonly Regex IdRegex = new("^[a-zA-Z0-9_]{1,64}$", RegexOptions.Compiled);
     private static readonly Regex PlaceholderRegex = new(@"\[REDACTED_([a-zA-Z0-9_]{1,64})\]", RegexOptions.Compiled);
     private static readonly byte[] DpapiEntropy = SHA256.HashData(Encoding.UTF8.GetBytes("OpenClawManager.TokenVault.v1"));
+    private const int BackupFormatVersion = 1;
+    private const int BackupSaltSize = 16;
+    private const int BackupNonceSize = 12;
+    private const int BackupTagSize = 16;
+    private const int BackupKeySize = 32;
+    private const int BackupPbkdf2Iterations = 200_000;
+    private const string BackupKdf = "PBKDF2-SHA256";
+    private const string BackupCipher = "AES-256-GCM";
 
     /// <summary>
     /// Aktuální verze schématu vaultu.
@@ -149,6 +167,123 @@ public static class TokenService
         else
         {
             File.Move(tmpPath, path);
+        }
+    }
+
+    public static async Task ExportVaultAsync(string vaultPath, string filePath, string password)
+    {
+        filePath = NormalizePath(filePath);
+        ValidateBackupPassword(password);
+
+        var vault = LoadVault(vaultPath);
+        var portableVault = CreatePortableVault(vault);
+        var payload = JsonSerializer.SerializeToUtf8Bytes(portableVault, WriteJsonOptions);
+        var salt = RandomNumberGenerator.GetBytes(BackupSaltSize);
+        var nonce = RandomNumberGenerator.GetBytes(BackupNonceSize);
+        var ciphertext = new byte[payload.Length];
+        var tag = new byte[BackupTagSize];
+        var key = DeriveBackupKey(password, salt, BackupPbkdf2Iterations);
+
+        try
+        {
+            using var aes = new AesGcm(key, BackupTagSize);
+            aes.Encrypt(nonce, payload, ciphertext, tag);
+
+            var backup = new VaultBackupFile(
+                BackupFormatVersion,
+                BackupKdf,
+                BackupPbkdf2Iterations,
+                BackupCipher,
+                Convert.ToBase64String(salt),
+                Convert.ToBase64String(nonce),
+                Convert.ToBase64String(tag),
+                Convert.ToBase64String(ciphertext));
+
+            var directory = Path.GetDirectoryName(filePath);
+            if (!string.IsNullOrWhiteSpace(directory))
+                Directory.CreateDirectory(directory);
+
+            var json = JsonSerializer.Serialize(backup, WriteJsonOptions);
+            await File.WriteAllTextAsync(filePath, json, new UTF8Encoding(false));
+            AppendAudit(vaultPath, "export-backup", filePath, vault.Tokens.Count, vault.Tokens.Count, vault.Tokens.Select(t => t.Id));
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+            CryptographicOperations.ZeroMemory(payload);
+        }
+    }
+
+    public static async Task ImportVaultAsync(string vaultPath, string filePath, string password)
+    {
+        filePath = NormalizeExistingFile(filePath);
+        ValidateBackupPassword(password);
+
+        VaultBackupFile? backup;
+        try
+        {
+            var json = await File.ReadAllTextAsync(filePath, Encoding.UTF8);
+            backup = JsonSerializer.Deserialize<VaultBackupFile>(json, ReadJsonOptions);
+        }
+        catch (JsonException ex)
+        {
+            throw new TokenServiceException($"Vault backup is not valid JSON: {ex.Message}");
+        }
+
+        if (backup == null)
+            throw new TokenServiceException("Vault backup is empty or unreadable.");
+
+        ValidateBackupHeader(backup);
+
+        byte[] salt;
+        byte[] nonce;
+        byte[] tag;
+        byte[] ciphertext;
+        try
+        {
+            salt = Convert.FromBase64String(backup.Salt);
+            nonce = Convert.FromBase64String(backup.Nonce);
+            tag = Convert.FromBase64String(backup.Tag);
+            ciphertext = Convert.FromBase64String(backup.Ciphertext);
+        }
+        catch (FormatException ex)
+        {
+            throw new TokenServiceException($"Vault backup contains invalid Base64 data: {ex.Message}");
+        }
+
+        ValidateBackupBinary(salt, nonce, tag, ciphertext);
+
+        var key = DeriveBackupKey(password, salt, backup.Iterations);
+        var plaintext = new byte[ciphertext.Length];
+
+        try
+        {
+            using var aes = new AesGcm(key, BackupTagSize);
+            aes.Decrypt(nonce, ciphertext, tag, plaintext);
+
+            var vault = JsonSerializer.Deserialize<TokenVault>(plaintext, ReadJsonOptions)
+                ?? throw new TokenServiceException("Vault backup payload is empty or unreadable.");
+
+            vault.Tokens ??= new List<TokenEntry>();
+            foreach (var token in vault.Tokens)
+                token.ProtectedValue = "";
+
+            ValidateVault(vault);
+            SaveVault(vaultPath, vault);
+            AppendAudit(vaultPath, "import-backup", filePath, vault.Tokens.Count, vault.Tokens.Count, vault.Tokens.Select(t => t.Id));
+        }
+        catch (JsonException ex)
+        {
+            throw new TokenServiceException($"Vault backup payload is not valid JSON: {ex.Message}");
+        }
+        catch (CryptographicException ex)
+        {
+            throw new TokenServiceException($"Backup password is incorrect or the backup file is corrupted: {ex.Message}");
+        }
+        finally
+        {
+            CryptographicOperations.ZeroMemory(key);
+            CryptographicOperations.ZeroMemory(plaintext);
         }
     }
 
@@ -572,6 +707,64 @@ public static class TokenService
                 CreatedAt = token.CreatedAt
             }).ToList()
         };
+    }
+
+    private static TokenVault CreatePortableVault(TokenVault vault)
+    {
+        return new TokenVault
+        {
+            Version = vault.Version,
+            Tokens = vault.Tokens.Select(token => new TokenEntry
+            {
+                Id = token.Id,
+                Value = token.Value,
+                ProtectedValue = "",
+                Description = token.Description,
+                CreatedAt = token.CreatedAt
+            }).ToList()
+        };
+    }
+
+    private static byte[] DeriveBackupKey(string password, byte[] salt, int iterations)
+    {
+        using var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithmName.SHA256);
+        return pbkdf2.GetBytes(BackupKeySize);
+    }
+
+    private static void ValidateBackupPassword(string password)
+    {
+        if (string.IsNullOrWhiteSpace(password))
+            throw new TokenServiceException("Backup password must not be empty.");
+    }
+
+    private static void ValidateBackupHeader(VaultBackupFile backup)
+    {
+        if (backup.Version != BackupFormatVersion)
+            throw new TokenServiceException($"Unsupported vault backup version: {backup.Version}.");
+
+        if (!string.Equals(backup.Kdf, BackupKdf, StringComparison.Ordinal))
+            throw new TokenServiceException($"Unsupported vault backup KDF: {backup.Kdf}.");
+
+        if (!string.Equals(backup.Cipher, BackupCipher, StringComparison.Ordinal))
+            throw new TokenServiceException($"Unsupported vault backup cipher: {backup.Cipher}.");
+
+        if (backup.Iterations < 100_000)
+            throw new TokenServiceException("Vault backup PBKDF2 iteration count is too low.");
+    }
+
+    private static void ValidateBackupBinary(byte[] salt, byte[] nonce, byte[] tag, byte[] ciphertext)
+    {
+        if (salt.Length < BackupSaltSize)
+            throw new TokenServiceException("Vault backup salt is too short.");
+
+        if (nonce.Length != BackupNonceSize)
+            throw new TokenServiceException("Vault backup nonce has invalid size.");
+
+        if (tag.Length != BackupTagSize)
+            throw new TokenServiceException("Vault backup authentication tag has invalid size.");
+
+        if (ciphertext.Length == 0)
+            throw new TokenServiceException("Vault backup ciphertext is empty.");
     }
 
     private static string ProtectString(string value)

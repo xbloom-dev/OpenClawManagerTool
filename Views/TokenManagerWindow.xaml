@@ -26,6 +26,8 @@
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <TextBlock x:Name="TxtVaultLabel" Grid.Column="0"
@@ -45,6 +47,12 @@
                         Margin="6,0,0,0" />
                 <Button Grid.Column="5" x:Name="BtnAddGitIgnore"
                         Content=".gitignore" Width="85" Height="26"
+                        Margin="6,0,0,0" />
+                <Button Grid.Column="6" x:Name="BtnBackupVault"
+                        Width="90" Height="26"
+                        Margin="6,0,0,0" />
+                <Button Grid.Column="7" x:Name="BtnRestoreVault"
+                        Width="90" Height="26"
                         Margin="6,0,0,0" />
             </Grid>
         </GroupBox>

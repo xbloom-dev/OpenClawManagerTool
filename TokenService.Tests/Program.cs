@@ -14,6 +14,7 @@ try
     GitIgnoreHelperAddsVaultPath();
     AuditLogDoesNotContainSecretValues();
     VaultIsEncryptedAtRest();
+    VaultBackupRoundTripsWithPassword();
     VaultSafetyDetectsRiskyPaths();
     OpenClawCommandValidationRejectsShellCharacters();
     AppSettingsMigrationFillsMissingValues();
@@ -144,6 +145,36 @@ void VaultIsEncryptedAtRest()
     Assert(TokenService.LoadVault(vaultPath).Tokens.Single().Value == secret, "Encrypted vault should decrypt transparently.");
 }
 
+void VaultBackupRoundTripsWithPassword()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+    var backupPath = Path.Combine(caseDir, "backup.ocvault");
+    var restoredVaultPath = Path.Combine(caseDir, "restored.json");
+    var password = "correct horse battery staple";
+    var secret = "secret-value-123";
+
+    TokenService.EnsureVaultExists(vaultPath);
+    TokenService.AddToken(vaultPath, "api_key", secret, "test backup");
+
+    TokenService.ExportVaultAsync(vaultPath, backupPath, password).GetAwaiter().GetResult();
+    Assert(File.Exists(backupPath), "Vault backup file should be created.");
+    Assert(!File.ReadAllText(backupPath, Encoding.UTF8).Contains(secret, StringComparison.Ordinal), "Vault backup must not contain plaintext token values.");
+
+    TokenService.EnsureVaultExists(restoredVaultPath);
+    TokenService.ImportVaultAsync(restoredVaultPath, backupPath, password).GetAwaiter().GetResult();
+
+    var restored = TokenService.LoadVault(restoredVaultPath);
+    var restoredToken = restored.Tokens.Single(t => t.Id == "api_key");
+    Assert(restoredToken.Value == secret, "Vault backup import should restore token value.");
+    Assert(restoredToken.Description == "test backup", "Vault backup import should restore token metadata.");
+    Assert(TokenService.IsVaultEncryptedAtRest(restoredVaultPath), "Imported vault should be encrypted at rest through DPAPI.");
+
+    AssertThrows(() =>
+        TokenService.ImportVaultAsync(restoredVaultPath, backupPath, "wrong password").GetAwaiter().GetResult(),
+        "Wrong vault backup password must fail.");
+}
+
 void VaultSafetyDetectsRiskyPaths()
 {
     var repo = Path.Combine(NewCase(), "repo");
@@ -212,5 +243,19 @@ static void Assert(bool condition, string message)
 {
     if (!condition)
         throw new Exception(message);
+}
+
+static void AssertThrows(Action action, string message)
+{
+    try
+    {
+        action();
+    }
+    catch
+    {
+        return;
+    }
+
+    throw new Exception(message);
 }
 

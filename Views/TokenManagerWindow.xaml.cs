@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -37,6 +37,8 @@ public partial class TokenManagerWindow : Window
         BtnRefresh.Click += (_, _) => LoadTokens(forceGitCheck: true);
         BtnOpenVaultFolder.Click += (_, _) => OpenVaultFolder();
         BtnAddGitIgnore.Click += (_, _) => AddVaultToGitIgnore();
+        BtnBackupVault.Click += async (_, _) => await BackupVaultAsync();
+        BtnRestoreVault.Click += async (_, _) => await RestoreVaultAsync();
         BtnAdd.Click += (_, _) => AddToken();
         BtnImport.Click += (_, _) => ImportTokenFromFile();
         BtnEdit.Click += (_, _) => EditSelectedToken();
@@ -72,6 +74,10 @@ public partial class TokenManagerWindow : Window
         BtnOpenVaultFolder.Content = S("Str_Token_Folder");
         BtnOpenVaultFolder.ToolTip = S("Str_Token_TipOpenVaultFolder");
         BtnAddGitIgnore.ToolTip = S("Str_Token_TipAddGitIgnore");
+        BtnBackupVault.Content = S("Str_Token_BackupVault");
+        BtnBackupVault.ToolTip = S("Str_Token_TipBackupVault");
+        BtnRestoreVault.Content = S("Str_Token_RestoreVault");
+        BtnRestoreVault.ToolTip = S("Str_Token_TipRestoreVault");
         GrpTokens.Header = S("Str_Token_GroupTokens");
         ColDescription.Header = S("Str_Token_Description");
         ColCreated.Header = S("Str_Token_Created");
@@ -237,6 +243,80 @@ public partial class TokenManagerWindow : Window
             if (string.IsNullOrWhiteSpace(directory)) return;
             Directory.CreateDirectory(directory);
             Process.Start(new ProcessStartInfo { FileName = "explorer.exe", Arguments = $"\"{directory}\"", UseShellExecute = true });
+        }
+        catch (Exception ex) { ShowError(ex.Message); }
+    }
+
+    private async Task BackupVaultAsync()
+    {
+        if (!File.Exists(VaultPath)) { ShowError(S("Str_Token_VaultMissingError")); return; }
+
+        var saveDialog = new SaveFileDialog
+        {
+            Title = S("Str_Token_BackupDialogTitle"),
+            DefaultExt = ".ocvault",
+            Filter = S("Str_Token_BackupFileFilter"),
+            FileName = "openclaw-token-vault.ocvault",
+            AddExtension = true,
+            OverwritePrompt = true
+        };
+
+        if (saveDialog.ShowDialog(this) != true) return;
+
+        var passwordDialog = new PasswordPromptWindow(
+            S("Str_Token_BackupPasswordTitle"),
+            S("Str_Token_BackupPasswordMessage"),
+            requireConfirmation: true)
+        {
+            Owner = this
+        };
+
+        if (passwordDialog.ShowDialog() != true) return;
+
+        try
+        {
+            await TokenService.ExportVaultAsync(VaultPath, saveDialog.FileName, passwordDialog.Password);
+            AppendOutput(F("Str_Token_BackupExported", saveDialog.FileName));
+            MessageBox.Show(S("Str_Token_BackupExportedMessage"), S("Str_Token_BackupVault"), MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception ex) { ShowError(ex.Message); }
+    }
+
+    private async Task RestoreVaultAsync()
+    {
+        var openDialog = new OpenFileDialog
+        {
+            Title = S("Str_Token_RestoreDialogTitle"),
+            DefaultExt = ".ocvault",
+            Filter = S("Str_Token_BackupFileFilter"),
+            CheckFileExists = true
+        };
+
+        if (openDialog.ShowDialog(this) != true) return;
+
+        var confirm = MessageBox.Show(
+            S("Str_Token_RestoreVaultConfirm"),
+            S("Str_Token_RestoreVault"),
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Warning);
+        if (confirm != MessageBoxResult.Yes) return;
+
+        var passwordDialog = new PasswordPromptWindow(
+            S("Str_Token_RestorePasswordTitle"),
+            S("Str_Token_RestorePasswordMessage"),
+            requireConfirmation: false)
+        {
+            Owner = this
+        };
+
+        if (passwordDialog.ShowDialog() != true) return;
+
+        try
+        {
+            await TokenService.ImportVaultAsync(VaultPath, openDialog.FileName, passwordDialog.Password);
+            AppendOutput(F("Str_Token_BackupImported", openDialog.FileName));
+            LoadTokens(forceGitCheck: true);
+            MessageBox.Show(S("Str_Token_BackupImportedMessage"), S("Str_Token_RestoreVault"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
         catch (Exception ex) { ShowError(ex.Message); }
     }
