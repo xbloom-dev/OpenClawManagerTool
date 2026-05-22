@@ -8,7 +8,7 @@ namespace OpenClawManager.Views;
 
 public partial class AboutWindow : Window
 {
-    private const string SyncWebMessage = "sync-workspaces";
+    private const string AdminToolsWebMessage = "open-admin-tools";
 
     public AboutWindow()
     {
@@ -36,41 +36,40 @@ public partial class AboutWindow : Window
         Title = cs ? "O aplikaci" : "About";
     }
 
-    // Sync launcher
-    private static void LaunchSyncWorkspaces()
+    private static void LaunchAdminTools()
     {
         try
         {
-            var batPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "Sync-Workspaces.bat");
+            var scriptPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "Admin-Tools.ps1");
 
-            if (!File.Exists(batPath))
+            if (!File.Exists(scriptPath))
             {
-                batPath = Path.GetFullPath(Path.Combine(
+                scriptPath = Path.GetFullPath(Path.Combine(
                     AppContext.BaseDirectory,
                     "..",
                     "..",
                     "..",
                     "Scripts",
-                    "Sync-Workspaces.bat"));
+                    "Admin-Tools.ps1"));
             }
 
-            if (!File.Exists(batPath))
+            if (!File.Exists(scriptPath))
             {
-                batPath = Path.GetFullPath(Path.Combine(
+                scriptPath = Path.GetFullPath(Path.Combine(
                     AppContext.BaseDirectory,
                     "..",
                     "..",
                     "..",
                     "..",
                     "Scripts",
-                    "Sync-Workspaces.bat"));
+                    "Admin-Tools.ps1"));
             }
 
-            if (!File.Exists(batPath))
+            if (!File.Exists(scriptPath))
             {
                 MessageBox.Show(
-                    $"Script was not found at path:\n{batPath}",
-                    "OpenClaw Sync",
+                    $"Admin tools script was not found at path:\n{scriptPath}",
+                    "OpenClaw Admin Tools",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return;
@@ -78,8 +77,10 @@ public partial class AboutWindow : Window
 
             Process.Start(new ProcessStartInfo
             {
-                FileName = batPath,
+                FileName = "powershell.exe",
+                Arguments = $"-NoExit -NoProfile -ExecutionPolicy Bypass -File \"{scriptPath}\"",
                 UseShellExecute = true,
+                Verb = "runas",
             });
         }
         catch (OperationCanceledException)
@@ -89,8 +90,8 @@ public partial class AboutWindow : Window
         catch (Exception ex)
         {
             MessageBox.Show(
-                $"Error while starting sync script:\n{ex.Message}",
-                "OpenClaw Sync",
+                $"Error while starting admin tools:\n{ex.Message}",
+                "OpenClaw Admin Tools",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
         }
@@ -114,9 +115,9 @@ public partial class AboutWindow : Window
 
     private void SvgView_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
-        if (e.TryGetWebMessageAsString().Equals(SyncWebMessage, StringComparison.Ordinal))
+        if (e.TryGetWebMessageAsString().Equals(AdminToolsWebMessage, StringComparison.Ordinal))
         {
-            LaunchSyncWorkspaces();
+            LaunchAdminTools();
         }
     }
 
@@ -160,17 +161,8 @@ public partial class AboutWindow : Window
     height: 140px;
     filter: drop-shadow(0 2px 6px rgba(0,0,0,0.15));
   }}
-  #secretPrompt {{
-    position: fixed;
-    left: 49px;
-    top: 69px;
-    width: 46px;
-    height: 18px;
-    color: #9cf18a;
-    font: 11px Consolas, monospace;
-    white-space: pre;
-    outline: none;
-    user-select: none;
+  #terminal rect[x='20'][y='26'] {{
+    opacity: 0;
   }}
 </style>
 <script>
@@ -179,8 +171,9 @@ public partial class AboutWindow : Window
   const secret = 'admin';
 
   function renderPrompt(text) {{
-    const prompt = document.getElementById('secretPrompt');
-    if (prompt) prompt.textContent = '> ' + text + '_';
+    const prompt = document.querySelector('#terminal text');
+    if (!prompt) return;
+    prompt.textContent = text ? '> ' + text + '_' : '>_';
   }}
 
   function resetPromptSoon(delay) {{
@@ -221,8 +214,8 @@ public partial class AboutWindow : Window
     resetPromptSoon(3000);
 
     if (buffer === secret) {{
-      renderPrompt('admin sync');
-      window.chrome.webview.postMessage('{SyncWebMessage}');
+      renderPrompt('admin');
+      window.chrome.webview.postMessage('{AdminToolsWebMessage}');
       resetPromptSoon(1200);
     }}
   }});
@@ -230,7 +223,6 @@ public partial class AboutWindow : Window
 </head>
 <body>
 {svgContent}
-<div id='secretPrompt' aria-hidden='true'></div>
 </body>
 </html>";
     }
