@@ -34,9 +34,14 @@ public partial class MainWindow : Window
         ThemeService.GetBrush("Brush.ActionDanger", Color.FromRgb(0xFF, 0xD0, 0xD0));
 
     public MainWindow()
+        : this(new SettingsService())
+    {
+    }
+
+    private MainWindow(ISettingsService settingsService)
         : this(
-            new SettingsService(),
-            new GatewayServiceAdapter(),
+            settingsService,
+            new GatewayService(settingsService),
             new ResourceMonitorAdapter(),
             new ProcessDetectorAdapter())
     {

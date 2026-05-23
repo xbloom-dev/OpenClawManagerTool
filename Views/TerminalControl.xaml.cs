@@ -417,7 +417,7 @@ public partial class TerminalControl : UserControl
             _conpty.OutputReceived += OnConPtyOutput;
             _conpty.ProcessExited  += OnConPtyExited;
 
-            _conpty.Start(GatewayService.BuildCmdExeCommand("tui"));
+            _conpty.Start(App.GetService<IGatewayService>().BuildCmdExeCommand("tui"));
 
             // Zajistit že WebView je Visible (mohl zůstat Hidden)
             WebView.Visibility = Visibility.Visible;

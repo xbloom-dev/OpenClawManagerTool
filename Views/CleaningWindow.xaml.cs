@@ -68,12 +68,12 @@ public partial class CleaningWindow : Window
                 // Zastavit Gateway + embedded TUI + PowerShell wrappery
                 if (Owner is MainWindow main)
                     main.Terminal.StopTui();
-                GatewayService.StopAndCloseTui();
+                App.GetService<IGatewayService>().StopAndCloseTui();
                 AppendLog("  ✓ Gateway zastaven, všechna OpenClaw okna zavřena");
             }
             else
             {
-                GatewayService.Stop();
+                App.GetService<IGatewayService>().Stop();
                 AppendLog("  ✓ Gateway zastaven");
             }
 

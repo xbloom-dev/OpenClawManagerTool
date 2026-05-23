@@ -5,14 +5,21 @@ using System.Security.Principal;
 namespace OpenClawManager.Services;
 
 /// <summary>
-/// Správa OpenClaw Gateway procesu — start, stop, restart, doctor --fix, start TUI.
+/// Manages the OpenClaw Gateway process: start, stop, restart, doctor --fix, and TUI startup.
 ///
-/// Cesta k openclaw příkazu se čerpá z ISettingsService.
-/// Stop SE NEDOTÝKÁ Scheduled Task — task se zastaví přirozeně tím že zabijeme node.exe.
+/// The OpenClaw command path is read from ISettingsService.
+/// Stop does not touch the scheduled task; it stops naturally when the node.exe process is killed.
 /// </summary>
-public static class GatewayService
+public sealed class GatewayService : IGatewayService
 {
-    public static Process? Start()
+    private readonly ISettingsService _settingsService;
+
+    public GatewayService(ISettingsService settingsService)
+    {
+        _settingsService = settingsService;
+    }
+
+    public Process? Start()
     {
         try
         {
@@ -32,7 +39,7 @@ public static class GatewayService
         }
     }
 
-    public static Process? StartTui()
+    public Process? StartTui()
     {
         try
         {
@@ -52,7 +59,7 @@ public static class GatewayService
         }
     }
 
-    public static bool Stop()
+    public bool Stop()
     {
         bool processKilled = false;
 
@@ -81,17 +88,17 @@ public static class GatewayService
         }
         catch
         {
-            // selhání úklidu PowerShell oken není fatální
+            // PowerShell wrapper cleanup failure is not fatal.
         }
 
         return processKilled;
     }
 
     /// <summary>
-    /// Zastaví Gateway a navíc zavře všechna TUI okna.
-    /// Voláno z dialogu Stop Gateway když uživatel zaškrtl "Zavřít také TUI okna".
+    /// Stops Gateway and also closes all TUI windows.
+    /// Called from the Stop Gateway dialog when the user chooses to close TUI windows too.
     /// </summary>
-    public static bool StopAndCloseTui()
+    public bool StopAndCloseTui()
     {
         var ok = Stop();
 
@@ -105,7 +112,7 @@ public static class GatewayService
     }
 
 
-    public static bool TryValidateOpenClawCommand(string command, out string error)
+    public bool TryValidateOpenClawCommand(string command, out string error)
     {
         error = "";
         if (string.IsNullOrWhiteSpace(command))
@@ -125,21 +132,21 @@ public static class GatewayService
         return true;
     }
 
-    public static string BuildPowerShellArguments(string openClawSubCommand)
+    public string BuildPowerShellArguments(string openClawSubCommand)
     {
         var openclawCmd = GetValidatedOpenClawCommand();
         return $"-NoExit -NoProfile -Command \"& '{EscapePowerShellSingleQuotedString(openclawCmd)}' {openClawSubCommand}\"";
     }
 
-    public static string BuildCmdExeCommand(string openClawSubCommand)
+    public string BuildCmdExeCommand(string openClawSubCommand)
     {
         var openclawCmd = GetValidatedOpenClawCommand();
         return $"cmd.exe /c \"\"{openclawCmd}\" {openClawSubCommand}\"";
     }
 
-    private static string GetValidatedOpenClawCommand()
+    private string GetValidatedOpenClawCommand()
     {
-        var command = OpenClawManager.App.GetService<ISettingsService>().Settings.OpenClawCommand;
+        var command = _settingsService.Settings.OpenClawCommand;
         if (!TryValidateOpenClawCommand(command, out var error))
             throw new InvalidOperationException(error);
         return command;
@@ -147,38 +154,7 @@ public static class GatewayService
 
     private static string EscapePowerShellSingleQuotedString(string value) => value.Replace("'", "''");
 
-    private static void KillPowerShellGatewayWrappers()
-    {
-        var currentUserSid = GetCurrentUserSid();
-        if (currentUserSid == null) return; // bezpečně neudělat nic
-
-        var query = "SELECT ProcessId, CommandLine FROM Win32_Process WHERE Name='powershell.exe'";
-        using var searcher = new ManagementObjectSearcher(query);
-        using var results = searcher.Get();
-
-        foreach (ManagementObject psProc in results)
-        {
-            // Vlastník procesu — killovat jen vlastní procesy
-            var ownerSid = GetProcessOwnerSid(psProc);
-            if (ownerSid != currentUserSid) continue;
-
-            var commandLine = psProc["CommandLine"]?.ToString() ?? "";
-
-            if (commandLine.Contains("openclaw") && commandLine.Contains("gateway"))
-            {
-                try
-                {
-                    var pid = (uint)psProc["ProcessId"];
-                    var proc = Process.GetProcessById((int)pid);
-                    proc.Kill(entireProcessTree: true);
-                    proc.WaitForExit(2000);
-                }
-                catch { }
-            }
-        }
-    }
-
-    private static void KillPowerShellTuiWrappers()
+    private void KillPowerShellGatewayWrappers()
     {
         var currentUserSid = GetCurrentUserSid();
         if (currentUserSid == null) return;
@@ -189,32 +165,65 @@ public static class GatewayService
 
         foreach (ManagementObject psProc in results)
         {
-            var ownerSid = GetProcessOwnerSid(psProc);
-            if (ownerSid != currentUserSid) continue;
-
-            var commandLine = psProc["CommandLine"]?.ToString() ?? "";
-
-            if (commandLine.Contains("openclaw") &&
-                commandLine.Contains(" tui") &&
-                !commandLine.Contains("gateway"))
+            using (psProc)
             {
-                try
+                var ownerSid = GetProcessOwnerSid(psProc);
+                if (ownerSid != currentUserSid) continue;
+
+                var commandLine = psProc["CommandLine"]?.ToString() ?? "";
+
+                if (commandLine.Contains("openclaw") && commandLine.Contains("gateway"))
                 {
-                    var pid = (uint)psProc["ProcessId"];
-                    var proc = Process.GetProcessById((int)pid);
-                    proc.Kill(entireProcessTree: true);
-                    proc.WaitForExit(2000);
+                    try
+                    {
+                        var pid = (uint)psProc["ProcessId"];
+                        using var proc = Process.GetProcessById((int)pid);
+                        proc.Kill(entireProcessTree: true);
+                        proc.WaitForExit(2000);
+                    }
+                    catch { }
                 }
-                catch { }
             }
         }
     }
 
-    // ── Helper metody pro identifikaci vlastníka procesu ──────────────────────
+    private void KillPowerShellTuiWrappers()
+    {
+        var currentUserSid = GetCurrentUserSid();
+        if (currentUserSid == null) return;
+
+        var query = "SELECT ProcessId, CommandLine FROM Win32_Process WHERE Name='powershell.exe'";
+        using var searcher = new ManagementObjectSearcher(query);
+        using var results = searcher.Get();
+
+        foreach (ManagementObject psProc in results)
+        {
+            using (psProc)
+            {
+                var ownerSid = GetProcessOwnerSid(psProc);
+                if (ownerSid != currentUserSid) continue;
+
+                var commandLine = psProc["CommandLine"]?.ToString() ?? "";
+
+                if (commandLine.Contains("openclaw") &&
+                    commandLine.Contains(" tui") &&
+                    !commandLine.Contains("gateway"))
+                {
+                    try
+                    {
+                        var pid = (uint)psProc["ProcessId"];
+                        using var proc = Process.GetProcessById((int)pid);
+                        proc.Kill(entireProcessTree: true);
+                        proc.WaitForExit(2000);
+                    }
+                    catch { }
+                }
+            }
+        }
+    }
 
     /// <summary>
-    /// Vrátí SID aktuálního uživatele (přihlášený user pod kterým běží aplikace).
-    /// Vrátí null pokud SID nelze získat.
+    /// Returns the current user's SID, or null when it cannot be read.
     /// </summary>
     private static string? GetCurrentUserSid()
     {
@@ -230,8 +239,8 @@ public static class GatewayService
     }
 
     /// <summary>
-    /// Získá SID vlastníka procesu přes WMI metodu GetOwnerSid.
-    /// Vrátí null pokud SID nelze získat (proces už neexistuje, access denied atd.).
+    /// Reads the process owner SID through WMI GetOwnerSid.
+    /// Returns null when the process no longer exists or access is denied.
     /// </summary>
     private static string? GetProcessOwnerSid(ManagementObject process)
     {
@@ -244,19 +253,19 @@ public static class GatewayService
         }
         catch
         {
-            // proces už neexistuje nebo access denied
+            // The process no longer exists or access is denied.
         }
         return null;
     }
 
-    public static async Task<Process?> RestartAsync()
+    public async Task<Process?> RestartAsync()
     {
         Stop();
         await Task.Delay(2000);
         return Start();
     }
 
-    public static Process? RunDoctorFix()
+    public Process? RunDoctorFix()
     {
         try
         {
