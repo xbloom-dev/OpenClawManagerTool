@@ -20,19 +20,13 @@
 - Test špatného hesla při importu
 
 ### Developer workflow
-- About EasterEgg prompt podporuje admin/root, sync, diagnostiku, build/test/check, replay splash, přepínání témat a rychlé otevření logů/tokenů/nastavení
-- `admin/root` otevírá admin PowerShell menu přes UAC
-- `Scripts\OpenClaw-Tools.bat` je hlavní ruční vstup do nástrojového menu
-- `Scripts\OpenClaw-Tools.ps1` drží okno otevřené po akcích a při chybě čeká na klávesu
-- `Scripts\Sync-Workspaces.ps1` umí ověřit/fetchnout všechny tři workspace
+- About EasterEgg prompt podporuje replay splash, přepínání témat a rychlé otevření logů/tokenů/nastavení
 - GitHub Actions CI ověřeno pro build i TokenService testy na aktuální větvi
 - GitHub Actions aktualizováno na Node 24 kompatibilní akce (`actions/checkout@v6`, `actions/setup-dotnet@v5`) a pevný runner `windows-2025`
 
 ### Dokumentace
-- `STATUS.md` aktualizován jako živý stav v1.1
-- Připraven `HANDOFF_CLAUDE_TODO_README_PUBLIC.md` pro aktualizaci TODO a public README polish
-- Changelog doplněn o stav v1.1 před public/release přípravou
-- `README.md` aktualizován pro v1.1 a vault backup/restore workflow
+- Public `README.md` aktualizován pro v1.1 a vault backup/restore workflow
+- Changelog a release notes doplněny o stav v1.1 před public/release přípravou
 
 ### Refactoring
 - Centralizované theme resource tokeny: `Brush.ActionPositive`, `Brush.ActionDanger`, `Brush.ActionUtility`, `Brush.SplashModernBackground`

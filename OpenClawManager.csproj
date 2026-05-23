@@ -84,11 +84,4 @@
     <None Remove=".codex\**;handoff\**;dist\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Interní workspace sync skripty pro Easter Egg v About okně. -->
-    <None Update="scripts\*.bat;scripts\*.ps1">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

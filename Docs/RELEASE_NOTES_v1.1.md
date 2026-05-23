@@ -7,7 +7,7 @@ Release date: 2026-05-23
 - Added password-protected Token Vault backup and restore through portable `.ocvault` files.
 - Added PBKDF2-SHA256 key derivation and AES-256-GCM encryption for vault backups.
 - Improved command validation for OpenClaw Gateway startup commands.
-- Finalized the About window Easter Egg admin tools prompt and workspace sync menu.
+- Finalized the About window Easter Egg prompt for public-safe app commands.
 - Polished Modern Dark, Standard Dark, and secondary window theme behavior.
 - Updated GitHub Actions CI to Node 24 compatible actions.
 

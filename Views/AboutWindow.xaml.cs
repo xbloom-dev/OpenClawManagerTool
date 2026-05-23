@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Windows;
@@ -39,74 +37,6 @@ public partial class AboutWindow : Window
         Title = cs ? "O aplikaci" : "About";
     }
 
-    private static void LaunchOpenClawTools(string action = "")
-    {
-        try
-        {
-            var scriptPath = Path.Combine(AppContext.BaseDirectory, "Scripts", "OpenClaw-Tools.ps1");
-
-            if (!File.Exists(scriptPath))
-            {
-                scriptPath = Path.GetFullPath(Path.Combine(
-                    AppContext.BaseDirectory,
-                    "..",
-                    "..",
-                    "..",
-                    "Scripts",
-                    "OpenClaw-Tools.ps1"));
-            }
-
-            if (!File.Exists(scriptPath))
-            {
-                scriptPath = Path.GetFullPath(Path.Combine(
-                    AppContext.BaseDirectory,
-                    "..",
-                    "..",
-                    "..",
-                    "..",
-                    "Scripts",
-                    "OpenClaw-Tools.ps1"));
-            }
-
-            if (!File.Exists(scriptPath))
-            {
-                MessageBox.Show(
-                    L10n.Format("Str_About_ToolsScriptMissing", scriptPath),
-                    L10n.Get("Str_About_ToolsTitle"),
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
-                return;
-            }
-
-            var actionArgs = string.IsNullOrWhiteSpace(action) ? "" : $" -Action {QuoteArgument(action)}";
-            var psArguments = $"-NoProfile -ExecutionPolicy Bypass -File {QuoteArgument(scriptPath)} -NoAdminPrompt{actionArgs}";
-            var scriptDirectory = Path.GetDirectoryName(scriptPath) ?? AppContext.BaseDirectory;
-
-            Process.Start(new ProcessStartInfo
-            {
-                FileName = "powershell.exe",
-                Arguments = psArguments,
-                Verb = "runas",
-                UseShellExecute = true,
-                WorkingDirectory = scriptDirectory,
-                WindowStyle = ProcessWindowStyle.Normal,
-            });
-        }
-        catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
-        {
-        }
-        catch (Exception ex)
-        {
-            MessageBox.Show(
-                L10n.Format("Str_About_ToolsStartError", ex.Message),
-                L10n.Get("Str_About_ToolsTitle"),
-                MessageBoxButton.OK,
-                MessageBoxImage.Error);
-        }
-    }
-
-    private static string QuoteArgument(string value) => "\"" + value.Replace("\"", "\\\"") + "\"";
-
     // ── WebView2 logo ─────────────────────────────────────────────────────────
     private async Task InitWebViewAsync()
     {
@@ -130,36 +60,8 @@ public partial class AboutWindow : Window
             return;
 
         var command = message[CommandPrefix.Length..].Trim().ToLowerInvariant();
-        switch (command)
-        {
-            case "admin":
-            case "root":
-                LaunchOpenClawTools();
-                break;
-            case "sync":
-                LaunchOpenClawTools("sync");
-                break;
-            case "diag":
-            case "status":
-                LaunchOpenClawTools("diag");
-                break;
-            case "acl":
-                LaunchOpenClawTools("acl");
-                break;
-            case "build":
-                LaunchOpenClawTools("build");
-                break;
-            case "test":
-                LaunchOpenClawTools("test");
-                break;
-            case "check":
-                LaunchOpenClawTools("check");
-                break;
-            default:
-                if (Owner is MainWindow mainWindow)
-                    mainWindow.ExecuteAboutCommand(command);
-                break;
-        }
+        if (Owner is MainWindow mainWindow)
+            mainWindow.ExecuteAboutCommand(command);
     }
 
     private static string? FindSvgPath()
@@ -226,7 +128,6 @@ public partial class AboutWindow : Window
 </style>
 <script>
   const commands = new Set([
-    'admin', 'root', 'sync', 'diag', 'status', 'acl', 'build', 'test', 'check',
     'replay', 'exit', 'legacy', 'dark', 'light', 'modern', 'crab', 'logs',
     'tokens', 'settings', 'help'
   ]);
