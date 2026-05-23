@@ -188,15 +188,17 @@ void VaultSafetyDetectsRiskyPaths()
 
 void OpenClawCommandValidationRejectsShellCharacters()
 {
-    Assert(GatewayService.TryValidateOpenClawCommand("openclaw", out _), "Plain openclaw command should be valid.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw; calc", out _), "Semicolon should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw & calc", out _), "Ampersand should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw | more", out _), "Pipe should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw < input.txt", out _), "Input redirect should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw > output.txt", out _), "Output redirect should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw %TEMP%", out _), "Environment variable expansion should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw ^& calc", out _), "Caret escaping should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("C:\\Tools\\bad\"path.cmd", out _), "Quote should be rejected.");
+    var gatewayService = new GatewayService(new SettingsService());
+
+    Assert(gatewayService.TryValidateOpenClawCommand("openclaw", out _), "Plain openclaw command should be valid.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw; calc", out _), "Semicolon should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw & calc", out _), "Ampersand should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw | more", out _), "Pipe should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw < input.txt", out _), "Input redirect should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw > output.txt", out _), "Output redirect should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw %TEMP%", out _), "Environment variable expansion should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw ^& calc", out _), "Caret escaping should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("C:\\Tools\\bad\"path.cmd", out _), "Quote should be rejected.");
 }
 
 void AppSettingsMigrationFillsMissingValues()

@@ -199,7 +199,7 @@ public partial class SettingsWindow : Window
     {
         ReadFromUi();
 
-        if (!GatewayService.TryValidateOpenClawCommand(_settings.OpenClawCommand, out var commandError))
+        if (!App.GetService<IGatewayService>().TryValidateOpenClawCommand(_settings.OpenClawCommand, out var commandError))
         {
             MessageBox.Show(
                 T("OpenClaw příkaz není bezpečný nebo platný:\n", "OpenClaw command is not safe or valid:\n") + commandError,

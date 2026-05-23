@@ -4,22 +4,6 @@ using static OpenClawManager.Services.ResourceMonitor;
 
 namespace OpenClawManager.Services;
 
-internal sealed class GatewayServiceAdapter : IGatewayService
-{
-    public Process? Start() => GatewayService.Start();
-    public Process? StartTui() => GatewayService.StartTui();
-    public bool Stop() => GatewayService.Stop();
-    public bool StopAndCloseTui() => GatewayService.StopAndCloseTui();
-    public bool TryValidateOpenClawCommand(string command, out string error) =>
-        GatewayService.TryValidateOpenClawCommand(command, out error);
-    public string BuildPowerShellArguments(string openClawSubCommand) =>
-        GatewayService.BuildPowerShellArguments(openClawSubCommand);
-    public string BuildCmdExeCommand(string openClawSubCommand) =>
-        GatewayService.BuildCmdExeCommand(openClawSubCommand);
-    public Task<Process?> RestartAsync() => GatewayService.RestartAsync();
-    public Process? RunDoctorFix() => GatewayService.RunDoctorFix();
-}
-
 internal sealed class ResourceMonitorAdapter : IResourceMonitor
 {
     public Task<ResourceSnapshot> MeasureAsync(CancellationToken cancellationToken = default) =>
