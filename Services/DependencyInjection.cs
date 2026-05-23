@@ -15,7 +15,9 @@ public static class DependencyInjection
         services.AddSingleton<ICleanupService, CleanupServiceAdapter>();
         services.AddSingleton<ITokenService, TokenServiceAdapter>();
         services.AddTransient<AboutViewModel>();
+        services.AddTransient<SettingsViewModel>();
         services.AddTransient<AboutWindow>();
+        services.AddTransient<SettingsWindow>();
 
         return services;
     }

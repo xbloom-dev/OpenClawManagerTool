@@ -671,7 +671,8 @@ public partial class MainWindow : Window
 
     private void OpenSettings()
     {
-        var dialog = new SettingsWindow { Owner = this };
+        var dialog = App.Services.GetRequiredService<SettingsWindow>();
+        dialog.Owner = this;
         if (dialog.ShowDialog() == true)
         {
             var lang = _settingsService.Settings.Language == "EN"
