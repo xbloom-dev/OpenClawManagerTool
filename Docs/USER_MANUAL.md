@@ -1,434 +1,467 @@
-# Uživatelský manuál — OpenClaw Manager Tool by Bloom
+# User Manual — OpenClaw Manager Tool by Bloom
 
-**Verze aplikace:** v1.0
-**Datum:** 13. května 2026
+*English · [Czech version](USER_MANUAL.cs.md)*
+
+**App version:** v1.1
+**Date:** 23 May 2026
 
 ---
 
-## Obsah
+## Contents
 
-1. [Co je OpenClaw Manager](#1-co-je-openclaw-manager)
-2. [Instalace a spuštění](#2-instalace-a-spuštění)
-3. [Témata a splash screen](#3-témata-a-splash-screen)
-4. [Hlavní okno](#4-hlavní-okno)
-5. [Klávesové zkratky](#5-klávesové-zkratky)
-6. [Spuštění OpenClaw TUI](#6-spuštění-openclaw-tui)
-7. [Řízení Gateway](#7-řízení-gateway)
-8. [Měření latencí](#8-měření-latencí)
+1. [What OpenClaw Manager is](#1-what-openclaw-manager-is)
+2. [Installation and startup](#2-installation-and-startup)
+3. [Themes and splash screen](#3-themes-and-splash-screen)
+4. [Main window](#4-main-window)
+5. [Keyboard shortcuts](#5-keyboard-shortcuts)
+6. [Starting the OpenClaw TUI](#6-starting-the-openclaw-tui)
+7. [Gateway control](#7-gateway-control)
+8. [Latency measurement](#8-latency-measurement)
 9. [Gateway log](#9-gateway-log)
-10. [Správce API klíčů (Token Manager)](#10-správce-api-klíčů-token-manager)
-11. [Cleaning Tool — Vyčistit soubory](#11-cleaning-tool--vyčistit-soubory)
-12. [Nastavení](#12-nastavení)
-13. [O aplikaci](#13-o-aplikaci)
-14. [Časté situace a řešení](#14-časté-situace-a-řešení)
+10. [Token Manager](#10-token-manager)
+11. [Cleaning Tool](#11-cleaning-tool)
+12. [Settings](#12-settings)
+13. [About](#13-about)
+14. [Troubleshooting](#14-troubleshooting)
 
 ---
 
-## 1. Co je OpenClaw Manager
+## 1. What OpenClaw Manager is
 
-OpenClaw Manager je diagnostický a údržbový nástroj pro OpenClaw prostředí. Slouží hlavně tehdy, **když něco nefunguje správně** — umožňuje rychle restartovat Gateway, vyčistit staré soubory, změřit latence a diagnostikovat problém.
+OpenClaw Manager is a diagnostic and maintenance tool for an [OpenClaw](https://github.com/openclaw/openclaw) environment. It is most useful **when something is not working correctly** — it lets you quickly restart the Gateway, clean up old files, measure latency, and diagnose problems.
 
-**Není** to náhrada za každodenní `OpenClaw.bat` — pro normální provoz stačí zástupce na ploše nebo Scheduled Task. OpenClaw Manager se hodí, když potřebuješ:
+> **What is OpenClaw?** OpenClaw is an open-source AI-agent framework. Its **Gateway** is a local daemon that connects agents to AI providers (Anthropic, OpenAI, Ollama, …), and its **TUI** is a terminal dashboard for monitoring sessions, logs, and model usage. This tool is an independent wrapper — it manages an existing OpenClaw installation through a Windows GUI and is not affiliated with the OpenClaw project.
 
-- Restartovat Gateway po update nebo havárii
-- Zjistit jak rychle Gateway odpovídá (měření latencí)
-- Vyčistit staré logy a session soubory
-- Bezpečně spravovat API klíče a tokeny
-- Opravit poškozenou konfiguraci
+It is **not** a replacement for launching OpenClaw day to day — a shortcut or Scheduled Task is enough for normal use. OpenClaw Manager is handy when you need to:
+
+- Restart the Gateway after an update or crash
+- Check how fast the Gateway responds (latency measurement)
+- Clean up old logs and session files
+- Securely manage API keys and tokens (including a portable backup)
+- Repair a broken configuration
 
 ---
 
-## 2. Instalace a spuštění
+## 2. Installation and startup
 
-### Požadavky
+### Requirements
 
-- Windows 10 nebo 11
-- WebView2 Runtime (součást Windows 11; pro Windows 10 stáhnout z microsoft.com)
-- OpenClaw nainstalovaný a funkční
+- Windows 10 or 11 (x64)
+- WebView2 Runtime (included in Windows 11; for Windows 10 download from microsoft.com)
+- A working OpenClaw installation
 
-### Spuštění
+### Startup
 
-Spusť `OpenClawManager.exe` z runtime balíčku. Žádná instalace není potřeba — aplikace je přenositelná (portable). Terminál používá lokální xterm.js soubory — internet ani CDN nejsou potřeba.
+Run `OpenClawManager.exe` from the runtime package. No installation is required — the app is portable. The terminal uses local xterm.js files, so no internet or CDN is needed.
 
-### Nastavení cest při prvním spuštění
+### Configuring paths on first run
 
-Při prvním spuštění zkontroluj v **Nastavení** (Ctrl+,) že cesty odpovídají tvému prostředí:
+On first run, open **Settings** (Ctrl+,) and confirm the paths match your environment:
 
-| Položka | Výchozí hodnota |
+| Item | Default value |
 |---|---|
-| OpenClaw složka | `~\.openclaw` |
-| Temp složka (Gateway logy) | `%LOCALAPPDATA%\Temp\openclaw` |
-| openclaw příkaz | `openclaw` (PATH lookup) |
-| PowerShell pracovní adresář | `%APPDATA%\npm` |
-| Trezor (vault) | `%USERPROFILE%\.token-manager\secrets.json` |
+| OpenClaw folder | `~\.openclaw` |
+| Temp folder (Gateway logs) | `%LOCALAPPDATA%\Temp\openclaw` |
+| openclaw command | `openclaw` (PATH lookup) |
+| PowerShell working directory | `%APPDATA%\npm` |
+| Vault | `%USERPROFILE%\.token-manager\secrets.json` |
 
-Pokud OpenClaw nespustíš přes `openclaw` v PATH, uprav "openclaw příkaz" na plnou cestu, například `C:\Users\jmeno\AppData\Roaming\npm\openclaw.cmd`.
-
----
-
-## 3. Témata a splash screen
-
-Téma změníš v **Nastavení**. K dispozici jsou dvě témata:
-
-### Legacy
-
-Jednodušší klasické rozhraní s emoji ikonami v tlačítkách. Při startu aplikace se v pravém panelu zobrazí ASCII art splash screen — zmizí po kliknutí na **OpenClaw TUI**.
-
-### Modern
-
-Bitmap ikony v tlačítkách. Splash panel při startu se chová takto:
-1. Přehraje se `splash.mp4` (pokud existuje v `Resources/`)
-2. Po doběhnutí videa zůstane statický `splash.png` jako freeze frame
-3. Overlay zmizí po kliknutí na **OpenClaw TUI**
-
-Pokud `splash.mp4` chybí nebo selže přehrávání, zobrazí se rovnou `splash.png`. Pokud chybí i `splash.png`, zobrazí se ASCII art jako fallback.
-
-### Přepínání za běhu
-
-Změna tématu se projeví okamžitě po uložení Nastavení:
-- **Modern → Legacy:** video se zastaví, overlay zmizí, zobrazí se ASCII art
-- **Legacy → Modern:** ASCII art zmizí, zobrazí se PNG splash
+If you do not run OpenClaw via `openclaw` on the PATH, set the "openclaw command" to the full path, for example `C:\Users\name\AppData\Roaming\npm\openclaw.cmd`.
 
 ---
 
-## 4. Hlavní okno
+## 3. Themes and splash screen
 
-Okno je rozděleno na dvě části:
+Change the theme in **Settings**. OpenClaw Manager v1.1 offers **seven themes**:
 
-**Levý panel (330 px)** — ovládání, měření latencí, log aplikace
-**Pravý panel** — embedded terminál (OpenClaw TUI)
+| Theme | Description |
+|---|---|
+| **Legacy** | Classic, simpler layout with emoji icons on buttons. Splash is ASCII art. |
+| **Modern** | Bitmap icons, dark-purple splash background, themed secondary windows. |
+| **Standard Dark** | Dark variant of the default look. |
+| **Modern Dark** | Dark theme with the modern icon set. |
+| **Modern Light** | Light modern theme. |
+| **High Contrast** | High contrast for better readability. |
+| **Crab Cute** | Playful icon and color set. |
 
-### Sekce Akce
+Modern themes use bitmap icons and themed secondary windows; Legacy keeps the simpler classic layout.
 
-#### Tlačítko OpenClaw TUI
+### Splash screen
 
-Hlavní tlačítko aplikace. Má **3 režimy** podle aktuálního stavu:
+The splash panel behavior at startup depends on the theme:
 
-| Stav | Barva | Co udělá |
+**Legacy:** an ASCII-art splash appears in the right panel and disappears when you click **OpenClaw TUI**.
+
+**Modern (and derived themes):**
+1. `splash.mp4` plays (if present in `Resources/`)
+2. After the video finishes, a static `splash.png` remains as a freeze frame
+3. The overlay disappears when you click **OpenClaw TUI**
+
+If `splash.mp4` is missing or fails to play, `splash.png` is shown directly. If `splash.png` is also missing, ASCII art is shown as a fallback.
+
+### Switching at runtime
+
+A theme change takes effect immediately after you save Settings. When switching between splash styles (Modern ↔ Legacy) before starting the TUI, the video stops / ASCII art switches according to the new theme.
+
+---
+
+## 4. Main window
+
+The window is split into two parts:
+
+**Left panel (330 px)** — controls, latency measurement, application log
+**Right panel** — embedded terminal (OpenClaw TUI)
+
+### Actions section
+
+#### OpenClaw TUI button
+
+The app's main button. It has **3 modes** depending on the current state:
+
+| State | Color | Action |
 |---|---|---|
-| Gateway neběží | 🟢 zelená | Spustí Gateway + počká na ready + spustí TUI |
-| Gateway běží | 🟢 zelená | Spustí jen TUI (Gateway nechá běžet) |
-| TUI běží | 🔴 červená | Zastaví TUI (Gateway nechá běžet) |
+| Gateway not running | 🟢 green | Starts Gateway + waits for ready + starts the TUI |
+| Gateway running | 🟢 green | Starts only the TUI (leaves Gateway running) |
+| TUI running | 🔴 red | Stops the TUI (leaves Gateway running) |
 
-#### Gateway tlačítka
+#### Gateway buttons
 
-- **Start** — spustí `openclaw gateway` na pozadí v novém PowerShell okně
-- **Stop** — zastaví běžící Gateway (zobrazí potvrzovací dialog)
-- **Restart** — zastaví a znovu spustí Gateway; TUI se odpojí
+- **Start** — runs `openclaw gateway` in the background in a new PowerShell window
+- **Stop** — stops the running Gateway (shows a confirmation dialog)
+- **Restart** — stops and restarts the Gateway; the TUI disconnects
 
-#### Otevřít
+#### Open
 
-- **PowerShell** — otevře PowerShell v pracovním adresáři nastaveném v Nastavení
-- **Gateway log** — otevře dialog s výpisem Gateway logu
-- **Živá data** (Ctrl+L) — otevře živé sledování Gateway logu
+- **PowerShell** — opens PowerShell in the working directory set in Settings
+- **Gateway log** — opens a dialog showing the Gateway log
+- **Live data** (Ctrl+L) — opens live monitoring of the Gateway log
 
-#### Nástroje
+#### Tools
 
-- **Vyčistit soubory** — otevře Cleaning Tool
-- **Správce API klíčů** — správa trezoru tokenů a API klíčů
+- **Clean files** — opens the Cleaning Tool
+- **Token Manager** — manage the token and API-key vault
 
-#### Údržba
+#### Maintenance
 
-- **Opravit konfiguraci** — spustí `openclaw "doctor --fix"` v PowerShellu
+- **Repair configuration** — runs `openclaw "doctor --fix"` in PowerShell
 
-### Status bar (dole)
+### Status bar (bottom)
 
-`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v1.0`
+`Gateway: ● state | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v1.1`
 
-| Barva tečky | Stav |
+| Dot color | State |
 |---|---|
-| 🟢 zelená | Gateway běží |
-| 🟠 oranžová | Gateway se spouští |
-| 🔴 červená | Gateway selhalo |
-| ⚫ šedá | Gateway neběží |
+| 🟢 green | Gateway running |
+| 🟠 orange | Gateway starting |
+| 🔴 red | Gateway failed |
+| ⚫ gray | Gateway not running |
 
-RAM, CPU a VRAM se aktualizují každé 2 sekundy na pozadí — UI se nezasekává.
+RAM, CPU, and VRAM refresh every 2 seconds in the background — the UI does not freeze.
 
 ---
 
-## 5. Klávesové zkratky
+## 5. Keyboard shortcuts
 
-| Zkratka | Akce |
+| Shortcut | Action |
 |---|---|
 | **Ctrl+T** | Start/Stop OpenClaw TUI |
-| **Ctrl+G** | Start nebo Stop Gateway |
+| **Ctrl+G** | Start or Stop Gateway |
 | **Ctrl+R** | Restart Gateway |
-| **Ctrl+L** | Živá data Gateway logu |
-| **Ctrl+Shift+C** | Otevřít Vyčistit soubory |
-| **Ctrl+,** | Otevřít Nastavení |
-| **F1** | O aplikaci |
-| **Alt+F4** | Konec |
+| **Ctrl+L** | Gateway log live data |
+| **Ctrl+Shift+C** | Open Clean files |
+| **Ctrl+,** | Open Settings |
+| **F1** | About |
+| **Alt+F4** | Quit |
 
 ---
 
-## 6. Spuštění OpenClaw TUI
+## 6. Starting the OpenClaw TUI
 
-### Standardní postup
+### Standard procedure
 
-1. Klikni na tlačítko **▶ OpenClaw TUI** (nebo Ctrl+T)
-2. Aplikace automaticky:
-   - Smaže starý Gateway log (pro čisté měření latencí)
-   - Spustí Gateway
-   - Čeká na "gateway ready" (max 3 minuty)
-   - Spustí TUI v embedded terminálu vpravo
-3. Průběh sleduj v "Log aplikace" vlevo dole
+1. Click the **▶ OpenClaw TUI** button (or Ctrl+T)
+2. The app automatically:
+   - Deletes the old Gateway log (for clean latency measurement)
+   - Starts the Gateway
+   - Waits for "gateway ready" (up to 3 minutes)
+   - Starts the TUI in the embedded terminal on the right
+3. Follow progress in "Application log" at the bottom left
 
-### Pokud Gateway již běží
+### If the Gateway is already running
 
-Kliknutí spustí TUI přímo bez restartu Gateway.
+Clicking starts the TUI directly without restarting the Gateway.
 
-### Zastavení TUI
+### Stopping the TUI
 
-Klikni na tlačítko **■ Zastavit OpenClaw TUI** (červené). Gateway zůstane běžet.
+Click the **■ Stop OpenClaw TUI** button (red). The Gateway keeps running.
 
-### Zavření aplikace s běžícím Gateway
+### Closing the app with the Gateway running
 
-Při zavření se zobrazí dialog se třemi možnostmi:
-- **Ano** — zastaví Gateway a zavře aplikaci
-- **Ne** — zavře aplikaci, Gateway nechá běžet na pozadí
-- **Zrušit** — vrátí se zpět do aplikace
-
----
-
-## 7. Řízení Gateway
-
-### Spuštění Gateway
-
-Tlačítko **Start** nebo Ctrl+G. Gateway se spustí v novém PowerShell okně. Aplikace čeká na "gateway ready" — status bar zobrazuje "spouští se..." dokud Gateway není připraven.
-
-### Zastavení Gateway
-
-Tlačítko **Stop** nebo Ctrl+G (pokud Gateway běží). Zobrazí se potvrzovací dialog.
-
-**Poznámka:** Zastavení Gateway přeruší všechny aktivní TUI sessions. Scheduled Task pro automatické spouštění při přihlášení se **nezmění** — Gateway se znovu spustí při příštím přihlášení.
-
-### Restart Gateway
-
-Tlačítko **Restart** nebo Ctrl+R. TUI se odpojí, Gateway se zastaví a znovu spustí. Po úspěšném restartu se TUI automaticky znovu spustí.
+On close, a dialog with three options appears:
+- **Yes** — stops the Gateway and closes the app
+- **No** — closes the app, leaves the Gateway running in the background
+- **Cancel** — returns to the app
 
 ---
 
-## 8. Měření latencí
+## 7. Gateway control
 
-Sekce **Měření latence** v levém panelu zobrazuje rychlost odpovědí Gateway:
+### Starting the Gateway
 
-| Hodnota | Popis |
+The **Start** button or Ctrl+G. The Gateway starts in a new PowerShell window. The app waits for "gateway ready" — the status bar shows "starting…" until the Gateway is ready.
+
+### Stopping the Gateway
+
+The **Stop** button or Ctrl+G (if the Gateway is running). A confirmation dialog appears.
+
+**Note:** Stopping the Gateway interrupts all active TUI sessions. The Scheduled Task that auto-starts it at logon is **not** changed — the Gateway will start again at the next logon.
+
+### Restarting the Gateway
+
+The **Restart** button or Ctrl+R. The TUI disconnects, the Gateway stops and restarts. After a successful restart, the TUI restarts automatically.
+
+---
+
+## 8. Latency measurement
+
+The **Latency** section in the left panel shows how fast the Gateway responds:
+
+| Value | Description |
 |---|---|
-| Poslední | Latence posledního requestu |
-| Průměr 10× | Klouzavý průměr posledních 10 requestů |
-| Maximum | Nejvyšší naměřená latence od startu/restartu |
-| Requestů | Celkový počet requestů od startu/restartu |
+| Last | Latency of the last request |
+| Avg 10× | Moving average of the last 10 requests |
+| Maximum | Highest latency measured since start/restart |
+| Requests | Total request count since start/restart |
 
-**Jak číst hodnoty:**
-- 🟢 zelená — pod 1 000 ms (rychlá odpověď)
-- černá — 1 000–5 000 ms (normální)
-- 🔴 červená — nad 5 000 ms (pomalá odpověď, možná přetížení)
+**How to read the values:**
+- 🟢 green — under 1,000 ms (fast response)
+- black — 1,000–5,000 ms (normal)
+- 🔴 red — over 5,000 ms (slow response, possible overload)
 
-Hodnoty se začnou zobrazovat až po prvním requestu odeslaném přes TUI.
+Values start appearing only after the first request sent through the TUI.
 
 ---
 
 ## 9. Gateway log
 
-Otevři přes **Gateway log** tlačítko nebo přes menu **Otevřít → Gateway log**.
+Open it via the **Gateway log** button or the **Open → Gateway log** menu.
 
-### Zobrazení logu
+### Viewing the log
 
-Vyber počet zobrazených řádků (výchozí: posledních 20) a klikni **Aktualizovat**. Nahoře se zobrazuje cesta k souboru, velikost a počet řádků.
+Choose the number of lines shown (default: last 20) and click **Refresh**. The file path, size, and line count are shown at the top.
 
-### Kopírování do schránky
+### Copy to clipboard
 
-Klikni **Kopírovat** — celý obsah se zkopíruje do schránky. Po kliknutí se na 2 sekundy zobrazí "✓ Zkopírováno".
+Click **Copy** — the entire content is copied to the clipboard. After clicking, "✓ Copied" appears for 2 seconds.
 
-### Živé sledování (Ctrl+L)
+### Live monitoring (Ctrl+L)
 
-Klikni **Živá data** pro otevření živého okna:
+Click **Live data** to open the live window:
 
-- Otevře se vedle hlavní aplikace (nezamkne ovládání)
-- Automaticky detekuje nové záznamy
-- Nejstarší záznamy se průběžně odstraňují (vždy N posledních řádků)
-- Nové řádky jsou označeny `► ` po dobu 2 sekund
-- Tlačítko **Kopírovat** zkopíruje čistý obsah (bez `► ` prefixů)
+- Opens next to the main app (does not lock the controls)
+- Automatically detects new entries
+- Oldest entries are continuously removed (always the last N lines)
+- New lines are marked `► ` for 2 seconds
+- The **Copy** button copies clean content (without the `► ` prefixes)
 
 ---
 
-## 10. Správce API klíčů (Token Manager)
+## 10. Token Manager
 
-Otevři tlačítkem **Správce API klíčů** v levém panelu. Slouží k bezpečnému ukládání API klíčů a citlivých hodnot a k maskování souborů před jejich sdílením.
+Open it with the **Token Manager** button in the left panel. It securely stores API keys and sensitive values, redacts files before you share them, and provides a portable vault backup.
 
-### Trezor (vault) a bezpečnost
+### The vault and security
 
-Trezor je soubor `secrets.json` v cestě nastavené v Nastavení (výchozí `%USERPROFILE%\.token-manager\`). Hodnoty tokenů jsou šifrované přes **Windows DPAPI** pro aktuálního uživatele. Trezor zkopírovaný na jiný počítač nebo pod jiný účet nelze dešifrovat.
+The vault is a `secrets.json` file at the path set in Settings (default `%USERPROFILE%\.token-manager\`). Token values are encrypted with **Windows DPAPI** for the current user. A vault copied to another computer or another account cannot be decrypted.
 
-Správce API klíčů zobrazí varování, pokud trezor leží v rizikovém umístění:
-- uvnitř Git repozitáře
-- uvnitř `.openclaw`
-- v cloud-synchronizované složce (OneDrive, Dropbox, iCloud)
-- ve sdílené nebo projektové složce
+Token Manager warns if the vault is in a risky location:
+- inside a Git repository
+- inside `.openclaw`
+- in a cloud-synced folder (OneDrive, Dropbox, iCloud)
+- in a shared or project folder
 
-**Doporučení:** používej `%USERPROFILE%\.token-manager\` mimo projekt, Git a cloud sync.
+**Recommendation:** use `%USERPROFILE%\.token-manager\` outside projects, Git, and cloud sync.
 
-### Inicializace trezoru
+### Initializing the vault
 
-Při prvním otevření klikni **Inicializovat trezor**. Pokud existuje starší nešifrovaný trezor, aplikace ho automaticky zmigruje na šifrovanou verzi při prvním uložení.
+On first open, click **Initialize vault**. If an older unencrypted vault exists, the app automatically migrates it to the encrypted version on the first save.
 
-### Přidání a správa tokenů
+### Adding and managing tokens
 
-Klikni **Přidat** a vyplň:
-- **ID** — unikátní identifikátor bez mezer (např. `OPENAI_KEY`) — používá se jako zastupný text `[REDACTED_OPENAI_KEY]`
-- **Hodnota** — samotný tajný klíč
-- **Popis** — volitelná poznámka
+Click **Add** and fill in:
+- **ID** — a unique identifier without spaces (e.g. `OPENAI_KEY`) — used as the placeholder `[REDACTED_OPENAI_KEY]`
+- **Value** — the secret itself
+- **Description** — an optional note
 
-**Upravit** — nechej Hodnotu prázdnou pokud chceš zachovat stávající hodnotu.
-**Rotovat** — zadá novou hodnotu bez ztráty ID a popisu.
-**Odstranit** — odstraní token z trezoru.
+**Edit** — leave Value empty to keep the existing value.
+**Rotate** — sets a new value without losing the ID and description.
+**Delete** — removes the token from the vault.
 
-### Maskování a obnova souborů
+### Vault backup and restore (`.ocvault`) — new in v1.1
 
-**Workflow maskování:**
-1. Vyber token a klikni **Náhled** — zobrazí jak bude soubor vypadat po maskování
-2. Klikni **[REDACT]** — nahradí hodnoty zastupným textem `[REDACTED_ID]`
-3. Před odesláním klikni **Ověřit** — zkontroluje že soubor neobsahuje žádnou plaintext hodnotu
+The vault is bound to your Windows profile (DPAPI), so it cannot simply be copied to another machine. For transfer or a safety backup, use the portable `.ocvault` format:
 
-**Obnova:** klikni **Obnovit** — nahradí zastupné texty zpět hodnotami. Automaticky se vytvoří záložní `.bak` soubor.
+- **Backup** — exports the vault to an `.ocvault` file protected by a **password** you choose. The file is encrypted with **PBKDF2-SHA256** (200,000 iterations) and **AES-256-GCM** — independent of DPAPI, so it can be restored on another computer.
+- **Restore** — loads an `.ocvault` after you enter the password and re-saves it into the local DPAPI vault for the current Windows profile.
 
-### Tlačítka přehled
+You enter the password in a separate dialog (`PasswordPromptWindow`). Both export and import use Save/Open dialogs to choose the `.ocvault` file.
 
-| Tlačítko | Barva | Funkce |
+> ⚠️ **Backup security:** keep the `.ocvault` file and its password separate and in a safe place. Anyone with both gets access to your tokens. Do not store the backup in a Git repository or a cloud-sync folder next to the password.
+
+### File redaction and restore
+
+**Redaction workflow:**
+1. Select a token and click **Preview** — shows how the file will look after redaction
+2. Click **[REDACT]** — replaces values with the placeholder `[REDACTED_ID]`
+3. Before sharing, click **Verify** — checks that the file contains no plaintext value
+
+**Un-redact:** click **Restore** — replaces placeholders back with values. A `.bak` backup is created automatically.
+
+### Button overview
+
+| Button | Color | Function |
 |---|---|---|
-| **[REDACT]** | 🟢 zelené, tučné | Maskuje citlivé hodnoty v souboru |
-| **Ověřit** | 🔵 modré, tučné | Ověří že soubor neobsahuje plaintext hodnotu |
-| **Náhled** | 🔵 modré | Zobrazí náhled maskování bez zápisu |
-| **Procházet** | 🔵 modré | Výběr souboru |
-| **Obnovit** | 🔴 červené | Obnoví zastupné texty na hodnoty |
-| **Zavřít** | 🔴 červené | Zavře okno |
+| **[REDACT]** | 🟢 green, bold | Masks sensitive values in a file |
+| **Verify** | 🔵 blue, bold | Checks that a file contains no plaintext value |
+| **Preview** | 🔵 blue | Shows a redaction preview without writing |
+| **Browse** | 🔵 blue | File selection |
+| **Backup** | 🔵 blue | Exports the vault to a password-protected `.ocvault` |
+| **Restore (vault)** | 🔵 blue | Restores the vault from an `.ocvault` |
+| **Restore (file)** | 🔴 red | Replaces placeholders back with values |
+| **Close** | 🔴 red | Closes the window |
 
-### Pomocné funkce
+### Helper functions
 
-- **Zastupný text** — zkopíruje `[REDACTED_ID]` do schránky pro ruční vložení
-- **Složka** — otevře adresář trezoru v Průzkumníku
-- **.gitignore** — přidá cestu k trezoru do nejbližšího `.gitignore`
-- **Import** — načte tokeny ze souboru (JSON nebo `KLÍČ=HODNOTA`)
+- **Placeholder** — copies `[REDACTED_ID]` to the clipboard for manual pasting
+- **Folder** — opens the vault directory in Explorer
+- **.gitignore** — adds the vault path to the nearest `.gitignore`
+- **Import** — loads tokens from a file (JSON or `KEY=VALUE`)
 
 ---
 
-## 11. Cleaning Tool — Vyčistit soubory
+## 11. Cleaning Tool
 
-Otevři přes tlačítko **Vyčistit soubory** nebo Ctrl+Shift+C.
+Open it via the **Clean files** button or Ctrl+Shift+C.
 
-### Co lze vyčistit
+### What can be cleaned
 
-| Krok | Co maže | Výchozí |
+| Step | What it deletes | Default |
 |---|---|---|
-| 1 — Gateway logy | Staré log soubory (ne dnešní) | ✅ zapnuto |
-| 2 — Zálohy konfigurace | `.bak` soubory (ponechá 2 nejnovější) | ✅ zapnuto |
-| 3 — Stability logy | Logy starší než 3 dny | ❌ vypnuto |
-| 4 — Browser cache | Cache starší než 1 den | ✅ zapnuto |
-| 5 — Session locky | Zámkové soubory sessions | ✅ zapnuto |
-| 6 — sessions.json | Stará session data (ponechá N nejnovějších) | ✅ zapnuto |
-| 7 — Zálohy trezoru | `*.bak` v Token Manager složce | ❌ vypnuto (opt-in) |
+| 1 — Gateway logs | Old log files (not today's) | ✅ on |
+| 2 — Config backups | `.bak` files (keeps the 2 newest) | ✅ on |
+| 3 — Stability logs | Logs older than 3 days | ❌ off |
+| 4 — Browser cache | Cache older than 1 day | ✅ on |
+| 5 — Session locks | Session lock files | ✅ on |
+| 6 — sessions.json | Old session data (keeps the N newest) | ✅ on |
+| 7 — Vault backups | `*.bak` in the Token Manager folder | ❌ off (opt-in) |
 
-Posuvníkem u kroku 6 nastav kolik sessions zachovat (výchozí: 10). Krok 7 je záměrně vypnutý — zálohy trezoru jsou záchrana při selhání obnovy.
+Use the slider at step 6 to set how many sessions to keep (default: 10). Step 7 is intentionally off — vault backups are your safety net if a restore fails.
 
-### Doporučený postup
+### Recommended procedure
 
-1. Klikni **Náhled** (modré tlačítko) — zobrazí co by se smazalo, nic neudělá
-2. Zkontroluj výpis
-3. Klikni **Spustit** (zelené tlačítko) — skutečné smazání
+1. Click **Preview** (blue button) — shows what would be deleted, does nothing
+2. Review the output
+3. Click **Run** (green button) — actual deletion
 
-> ⚠️ **Upozornění:** Spustit trvale smaže vybrané soubory. Akci nelze vrátit.
+> ⚠️ **Warning:** Run permanently deletes the selected files. The action cannot be undone.
 
 ---
 
-## 12. Nastavení
+## 12. Settings
 
-Otevři přes menu **Nastavení → Otevřít Nastavení...** nebo Ctrl+,.
+Open via the **Settings → Open Settings…** menu or Ctrl+,.
 
-### Jazyk / Language
+### Language
 
-Přepni mezi **Čeština** a **English**. Změna se projeví po uložení.
+Switch between **Čeština** and **English**. The change takes effect after saving.
 
-### Cesty
+### Paths
 
-| Pole | Popis |
+| Field | Description |
 |---|---|
-| OpenClaw složka | Kde OpenClaw ukládá konfiguraci (`~\.openclaw`) |
-| Temp složka | Kde jsou uloženy Gateway logy |
-| openclaw příkaz | Příkaz nebo cesta k `openclaw` spustitelnému souboru |
-| PowerShell pracovní adresář | Adresář kde se otevře PowerShell |
-| Trezor (vault) | Cesta k `secrets.json` — šifrováno přes Windows DPAPI |
+| OpenClaw folder | Where OpenClaw stores its configuration (`~\.openclaw`) |
+| Temp folder | Where Gateway logs are stored |
+| openclaw command | The command or path to the `openclaw` executable |
+| PowerShell working directory | The directory where PowerShell opens |
+| Vault | Path to `secrets.json` — encrypted with Windows DPAPI |
 
-Tlačítka **Procházet...** otevřou dialog pro výběr složky. Pole "openclaw příkaz" validuje zakázané znaky — taková hodnota nejde uložit.
+The **Browse…** buttons open a folder picker. The "openclaw command" field validates forbidden characters — a value with forbidden shell characters (`<`, `>`, `%`, `^`, `&`, `|`) cannot be saved.
 
-### Téma
+### Theme
 
-Přepni mezi **Legacy** a **Modern**. Změna se projeví okamžitě — viz kapitola [3. Témata a splash screen](#3-témata-a-splash-screen).
+Switch between the seven themes (Legacy, Modern, Standard Dark, Modern Dark, Modern Light, High Contrast, Crab Cute). The change takes effect immediately — see [3. Themes and splash screen](#3-themes-and-splash-screen).
 
-### Tlačítka
+### Buttons
 
-- **Uložit** — uloží a zavře
-- **Reset na výchozí** — obnoví výchozí hodnoty (vyžaduje potvrzení)
-- **Zrušit** — zavře bez uložení
+- **Save** — saves and closes
+- **Reset to defaults** — restores default values (requires confirmation)
+- **Cancel** — closes without saving
 
-Nastavení se ukládá do `%APPDATA%\OpenClawManager\settings.json`.
-
----
-
-## 13. O aplikaci
-
-Otevři přes menu **Nápověda → O aplikaci...** nebo F1. Zobrazuje logo, verzi, technický stack a přehled klávesových zkratek.
+Settings are stored in `%APPDATA%\OpenClawManager\settings.json`.
 
 ---
 
-## 14. Časté situace a řešení
+## 13. About
 
-### Gateway se nespustí
-
-**Příznak:** Status bar zůstane na "spouští se..." déle než 3 minuty.
-
-**Řešení:**
-1. Otevři **Gateway log** a zkontroluj poslední řádky
-2. Zkontroluj v Nastavení zda je správný "openclaw příkaz"
-3. Spusť **Opravit konfiguraci**
-4. Zkus restartovat Gateway
-
-### TUI se nezobrazí (prázdná černá plocha vpravo)
-
-**Řešení:**
-1. Počkej 2–3 sekundy — TUI se inicializuje
-2. Klikni do oblasti terminálu vpravo
-3. Pokud pořád prázdné — zastav TUI a spusť znovu
-
-### Latence se nezobrazují (pomlčky)
-
-**Příčina:** Latence se měří až po prvním requestu odeslaném v TUI.
-
-**Řešení:** Napiš zprávu do TUI a počkej na odpověď.
-
-### Správce API klíčů hlásí "trezor nenalezen"
-
-**Řešení:** Klikni **Inicializovat trezor**. Pokud ses přihlásil pod jiným Windows účtem, trezor nelze dešifrovat — vytvoř nový a přidej tokeny znovu.
-
-### Správce API klíčů zobrazí varování o rizikovém umístění
-
-**Řešení:** Otevři Nastavení → změň cestu k trezoru → uložit.
-
-### Aplikace hlásí "Složka neexistuje"
-
-**Řešení:** Otevři Nastavení (Ctrl+,) a oprav cestu tlačítkem **Procházet...**
-
-### Gateway log je prázdný nebo nenalezen
-
-**Příčina:** Gateway nebyl spuštěn přes tuto aplikaci.
-
-**Řešení:** Spusť Gateway přes tlačítko **Start** nebo přes hlavní TUI tlačítko.
-
-### Po restartu PC Gateway neběží
-
-**Příčina:** Scheduled Task "OpenClaw Gateway" je zakázaný nebo nebyl vytvořen.
-
-**Řešení:** Otevři Cleaning Tool → sekce "OpenClaw Gateway" → Enable Scheduled Task.
+Open via the **Help → About…** menu or F1. Shows the logo, version, technical stack, and a list of keyboard shortcuts.
 
 ---
 
-**Konec dokumentu — verze aplikace v1.0**
+## 14. Troubleshooting
+
+### The Gateway will not start
+
+**Symptom:** The status bar stays on "starting…" for more than 3 minutes.
+
+**Solution:**
+1. Open the **Gateway log** and check the last lines
+2. Check in Settings whether the "openclaw command" is correct
+3. Run **Repair configuration**
+4. Try restarting the Gateway
+
+### The TUI does not appear (blank black area on the right)
+
+**Solution:**
+1. Wait 2–3 seconds — the TUI is initializing
+2. Click into the terminal area on the right
+3. If still blank — stop the TUI and start it again
+
+### Latency values do not appear (dashes)
+
+**Cause:** Latency is measured only after the first request sent in the TUI.
+
+**Solution:** Send a message in the TUI and wait for the response.
+
+### Token Manager reports "vault not found"
+
+**Solution:** Click **Initialize vault**. If you signed in under a different Windows account, the vault cannot be decrypted — restore it from an `.ocvault` backup (Restore) or create a new one and add the tokens again.
+
+### `.ocvault` restore reports a wrong password
+
+**Cause:** The password does not match the one the backup was created with.
+
+**Solution:** Check the password. An `.ocvault` cannot be restored without the correct password — there is no back door.
+
+### Token Manager shows a risky-location warning
+
+**Solution:** Open Settings → change the vault path → save.
+
+### The app reports "Folder does not exist"
+
+**Solution:** Open Settings (Ctrl+,) and fix the path with the **Browse…** button.
+
+### The Gateway log is empty or not found
+
+**Cause:** The Gateway was not started through this app.
+
+**Solution:** Start the Gateway via the **Start** button or the main TUI button.
+
+### The Gateway is not running after a PC restart
+
+**Cause:** The "OpenClaw Gateway" Scheduled Task is disabled or was never created.
+
+**Solution:** Open the Cleaning Tool → "OpenClaw Gateway" section → Enable Scheduled Task.
+
+---
+
+**End of document — app version v1.1**

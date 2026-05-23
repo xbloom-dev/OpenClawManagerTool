@@ -126,7 +126,4 @@ This project is built by Bloom with assistance from AI coding agents. Code, test
 
 ## License
 
-<!-- TODO: doplnit po výběru licence. Bez LICENSE souboru je repo právně "all rights reserved"
-     a nikdo ho nesmí legálně použít ani forknout. Viz poznámka níže v odpovědi. -->
-
-This project is released under the terms of the `LICENSE` file in this repository.
+This project is released under the terms of the [MIT License](LICENSE).

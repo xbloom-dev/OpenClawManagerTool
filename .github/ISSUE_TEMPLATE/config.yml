@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/xbloom-dev/OpenClawManagerTool/security/advisories/new
+    about: Please report security issues privately. Do not open a public issue. See SECURITY.md.
+  - name: OpenClaw itself (Gateway / TUI)
+    url: https://github.com/openclaw/openclaw/issues
+    about: Issues with OpenClaw itself belong in the OpenClaw project, not this manager tool.
