@@ -1,4 +1,4 @@
-# OpenClaw Manager Tool by Bloom
+# OpenClaw Manager Tool by Bloom v1.1
 
 Windows WPF utility for managing an OpenClaw environment: Gateway/TUI control, embedded terminal, logs, cleanup, settings, themes, and Token Manager.
 
@@ -25,7 +25,7 @@ The embedded terminal uses local xterm.js files included under `Resources/Termin
 
 ## Smoke Test
 
-- Start the app and confirm the status bar shows `v1.0`.
+- Start the app and confirm the status bar shows `v1.1`.
 - Start Gateway.
 - Open OpenClaw TUI.
 - Open Gateway Log and Live Log.
@@ -41,17 +41,6 @@ dotnet run --project TokenService.Tests\TokenService.Tests.csproj
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ```
 
-## Branch Model
+## Release Notes
 
-```
-master          ← stable releases only (v1.0, v1.1, ...)
-develop/v1.1    ← shared development branch
-codex/v1.1-*    ← Codex working branches
-claude/v1.1-*   ← Claude working branches
-```
-
-See [Docs/COLLABORATION.md](Docs/COLLABORATION.md) for full details on the AI collaboration model.
-
-## Development
-
-This project is developed by Bloom with assistance from two AI agents — Claude (Anthropic) and Codex (OpenAI). Claude handles documentation, architecture review, and release notes. Codex handles code, refactoring, builds, and tests.
+See `Docs/RELEASE_NOTES_v1.1.md` and `Docs/CHANGELOG.md` for the v1.1 release summary.
