@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shell;
 using System.Windows.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using OpenClawManager.Models;
 using OpenClawManager.Services;
 using OpenClawManager.Views;
@@ -679,7 +680,8 @@ public partial class MainWindow : Window
 
     private void ShowAbout()
     {
-        var dialog = new AboutWindow { Owner = this };
+        var dialog = App.Services.GetRequiredService<AboutWindow>();
+        dialog.Owner = this;
         dialog.ShowDialog();
     }
 
