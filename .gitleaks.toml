@@ -1,0 +1,7 @@
+title = "OpenClaw Manager Tool gitleaks configuration"
+
+[[allowlists]]
+description = "xterm.js minified FourKeyMap symbol trips the generic API key rule."
+paths = ['''Resources/Terminal/xterm\.min\.js''']
+regexes = ['''FourKeyMap''']
+condition = "AND"
