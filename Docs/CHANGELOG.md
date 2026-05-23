@@ -4,6 +4,34 @@
 
 ## v1.1 (vývoj — větev develop/v1.1)
 
+### Bezpečnost
+- Export/import Token Vaultu do přenosného `.ocvault` souboru chráněného heslem
+- `.ocvault` používá PBKDF2-SHA256 (`200 000` iterací) a AES-256-GCM
+- Import zálohy znovu ukládá vault přes Windows DPAPI pro aktuální profil
+- Přidán `PasswordPromptWindow` s WPF `PasswordBox` pro zadání hesla
+- Rozšířená validace OpenClaw příkazu odmítá shell znaky `<`, `>`, `%`, `^`, `&`, `|`
+- P0 security scan Git historie dokončen přes Gitleaks a doplňkový high-confidence scan bez nálezů
+- Přidán `.gitleaks.toml` s úzkou allowlistou pro známý false positive v minifikovaném xterm.js
+
+### Token Manager
+- Tlačítka **Backup** / **Restore** pro ruční zálohu a obnovu vaultu
+- Save/Open dialogy pro `.ocvault`
+- Test export/import roundtripu v `TokenService.Tests`
+- Test špatného hesla při importu
+
+### Developer workflow
+- About EasterEgg prompt podporuje admin/root, sync, diagnostiku, build/test/check, replay splash, přepínání témat a rychlé otevření logů/tokenů/nastavení
+- `admin/root` otevírá admin PowerShell menu přes UAC
+- `Scripts\OpenClaw-Tools.bat` je hlavní ruční vstup do nástrojového menu
+- `Scripts\OpenClaw-Tools.ps1` drží okno otevřené po akcích a při chybě čeká na klávesu
+- `Scripts\Sync-Workspaces.ps1` umí ověřit/fetchnout všechny tři workspace
+- GitHub Actions CI ověřeno pro build i TokenService testy na aktuální větvi
+
+### Dokumentace
+- `STATUS.md` aktualizován jako živý stav v1.1
+- Připraven `HANDOFF_CLAUDE_TODO_README_PUBLIC.md` pro aktualizaci TODO a public README polish
+- Changelog doplněn o stav v1.1 před public/release přípravou
+
 ### Refactoring
 - Centralizované theme resource tokeny: `Brush.ActionPositive`, `Brush.ActionDanger`, `Brush.ActionUtility`, `Brush.SplashModernBackground`
 - Tlačítka v hlavních oknech přepnutá z přímých HEX hodnot na theme resources
