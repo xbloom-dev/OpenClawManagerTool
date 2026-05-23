@@ -65,7 +65,7 @@ Finální stabilizační vydání po v0.99.
 
 ### Lokalizace a UI
 - Kompletní lokalizace hlavních UI stringů (EN/CS)
-- Token Manager lokalizován — terminologie dle `DEVELOPER_MANUAL_v1.0.md`
+- Token Manager localized with consistent vault terminology
 - Opravena česká diakritika — odstraněny garbled znaky
 - Tooltipy pro tlačítka
 - Barevné zvýraznění tlačítek (zelená / červená / modrá)
