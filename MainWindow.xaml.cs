@@ -616,7 +616,8 @@ public partial class MainWindow : Window
     private void BtnCleaningTool_Click(object? sender, RoutedEventArgs e)
     {
         Log(L10n.Get("Str_Log_OpeningCleaningTool"));
-        var dialog = new CleaningWindow { Owner = this };
+        var dialog = App.GetService<CleaningWindow>();
+        dialog.Owner = this;
         dialog.ShowDialog();
         Log(L10n.Get("Str_Log_ClosedCleaningTool"));
     }
