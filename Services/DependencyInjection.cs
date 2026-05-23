@@ -1,4 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
+using OpenClawManager.Views;
+using OpenClawManager.ViewModels;
 
 namespace OpenClawManager.Services;
 
@@ -12,6 +14,8 @@ public static class DependencyInjection
         services.AddSingleton<IProcessDetector, ProcessDetectorAdapter>();
         services.AddSingleton<ICleanupService, CleanupServiceAdapter>();
         services.AddSingleton<ITokenService, TokenServiceAdapter>();
+        services.AddTransient<AboutViewModel>();
+        services.AddTransient<AboutWindow>();
 
         return services;
     }
