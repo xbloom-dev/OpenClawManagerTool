@@ -7,7 +7,7 @@ namespace OpenClawManager.Services;
 public interface ISettingsService
 {
     string SettingsFilePath { get; }
-    AppSettings Current { get; }
+    AppSettings Settings { get; }
     event EventHandler? SettingsChanged;
     bool Save(AppSettings settings);
     AppSettings MigrateSettings(AppSettings settings, out bool changed);

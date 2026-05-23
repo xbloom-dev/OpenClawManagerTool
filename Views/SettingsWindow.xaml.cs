@@ -1,4 +1,4 @@
-using System.Windows;
+﻿using System.Windows;
 using Microsoft.Win32;
 using OpenClawManager.Models;
 using OpenClawManager.Services;
@@ -20,7 +20,7 @@ public partial class SettingsWindow : Window
         ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
 
         // Klon aktuálních nastavení (uživatel pak může Cancel bez změny originálu)
-        var current = SettingsService.Current;
+        var current = OpenClawManager.App.GetService<ISettingsService>().Settings;
         _settings = new AppSettings
         {
             OpenClawPath            = current.OpenClawPath,
@@ -57,7 +57,7 @@ public partial class SettingsWindow : Window
         RbThemeHighContrast.Checked += (_, _) => UpdateSplashVideoEnabled();
         RbThemeCrabCute.Checked += (_, _) => UpdateSplashVideoEnabled();
 
-        TxtSettingsPath.Text = SettingsService.SettingsFilePath;
+        TxtSettingsPath.Text = OpenClawManager.App.GetService<ISettingsService>().SettingsFilePath;
     }
 
     private bool Cs => L10n.IsCzech;
@@ -209,11 +209,11 @@ public partial class SettingsWindow : Window
             return;
         }
 
-        var ok = SettingsService.Save(_settings);
+        var ok = OpenClawManager.App.GetService<ISettingsService>().Save(_settings);
         if (!ok)
         {
             MessageBox.Show(
-                T("Uložení nastavení selhalo.\nZkontroluj, zda máš oprávnění zapisovat do ", "Saving settings failed.\nCheck write permissions for ") + SettingsService.SettingsFilePath,
+                T("Uložení nastavení selhalo.\nZkontroluj, zda máš oprávnění zapisovat do ", "Saving settings failed.\nCheck write permissions for ") + OpenClawManager.App.GetService<ISettingsService>().SettingsFilePath,
                 T("Chyba", "Error"), MessageBoxButton.OK, MessageBoxImage.Error);
             return;
         }

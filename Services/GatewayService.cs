@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Management;
 using System.Security.Principal;
 
@@ -7,7 +7,7 @@ namespace OpenClawManager.Services;
 /// <summary>
 /// Správa OpenClaw Gateway procesu — start, stop, restart, doctor --fix, start TUI.
 ///
-/// Cesta k openclaw příkazu se čerpá z SettingsService.Current.OpenClawCommand.
+/// Cesta k openclaw příkazu se čerpá z ISettingsService.
 /// Stop SE NEDOTÝKÁ Scheduled Task — task se zastaví přirozeně tím že zabijeme node.exe.
 /// </summary>
 public static class GatewayService
@@ -139,7 +139,7 @@ public static class GatewayService
 
     private static string GetValidatedOpenClawCommand()
     {
-        var command = SettingsService.Current.OpenClawCommand;
+        var command = OpenClawManager.App.GetService<ISettingsService>().Settings.OpenClawCommand;
         if (!TryValidateOpenClawCommand(command, out var error))
             throw new InvalidOperationException(error);
         return command;

@@ -4,23 +4,6 @@ using static OpenClawManager.Services.ResourceMonitor;
 
 namespace OpenClawManager.Services;
 
-internal sealed class SettingsServiceAdapter : ISettingsService
-{
-    public string SettingsFilePath => SettingsService.SettingsFilePath;
-    public AppSettings Current => SettingsService.Current;
-
-    public event EventHandler? SettingsChanged
-    {
-        add => SettingsService.SettingsChanged += value;
-        remove => SettingsService.SettingsChanged -= value;
-    }
-
-    public bool Save(AppSettings settings) => SettingsService.Save(settings);
-
-    public AppSettings MigrateSettings(AppSettings settings, out bool changed) =>
-        SettingsService.MigrateSettings(settings, out changed);
-}
-
 internal sealed class GatewayServiceAdapter : IGatewayService
 {
     public Process? Start() => GatewayService.Start();

@@ -1,4 +1,4 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -25,13 +25,13 @@ internal static class ModernPaletteRuntimeStyles
     {
         window.Icon = null;
 
-        if (SettingsService.Current.Theme != AppTheme.Modern &&
-            !ThemeService.IsModernPaletteTheme(SettingsService.Current.Theme)) return;
+        if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme != AppTheme.Modern &&
+            !ThemeService.IsModernPaletteTheme(OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)) return;
 
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
         window.Background = ThemeService.GetBrush("Theme.Brush.WindowBackground", GetBrushColor(background, Color.FromRgb(0x19, 0x19, 0x19)));
         window.Foreground = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        window.Resources[typeof(Button)] = GetModernPaletteButtonStyle(SettingsService.Current.UseButtonScanlineEffect);
+        window.Resources[typeof(Button)] = GetModernPaletteButtonStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect);
         ApplyCaption(window);
         window.Loaded += (_, _) => ApplyLoadedVisuals(window);
     }
@@ -284,7 +284,7 @@ internal static class ModernPaletteRuntimeStyles
 
     private static Style GetModernPaletteButtonStyle(bool useScanlineEffect)
     {
-        var key = $"{SettingsService.Current.Theme}|{ThemeService.GetCurrentButtonInteraction()}|{useScanlineEffect}";
+        var key = $"{OpenClawManager.App.GetService<ISettingsService>().Settings.Theme}|{ThemeService.GetCurrentButtonInteraction()}|{useScanlineEffect}";
         if (StyleCache.TryGetValue(key, out var cached))
             return cached;
 

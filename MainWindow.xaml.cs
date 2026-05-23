@@ -34,7 +34,7 @@ public partial class MainWindow : Window
 
     public MainWindow()
         : this(
-            new SettingsServiceAdapter(),
+            new SettingsService(),
             new GatewayServiceAdapter(),
             new ResourceMonitorAdapter(),
             new ProcessDetectorAdapter())
@@ -66,8 +66,8 @@ public partial class MainWindow : Window
 
         Terminal.TuiStateChanged += OnTuiStateChanged;
 
-        MnuOpenOpenClawFolder.Click += (_, _) => OpenInExplorer(_settingsService.Current.OpenClawPath);
-        MnuOpenTempFolder.Click += (_, _) => OpenInExplorer(_settingsService.Current.TempPath);
+        MnuOpenOpenClawFolder.Click += (_, _) => OpenInExplorer(_settingsService.Settings.OpenClawPath);
+        MnuOpenTempFolder.Click += (_, _) => OpenInExplorer(_settingsService.Settings.TempPath);
         MnuOpenPowerShell.Click += (_, _) => OpenPowerShell();
         MnuExit.Click += (_, _) => Close();
         MnuOpenLog10.Click += OpenLogMenuItem_Click;
@@ -304,7 +304,7 @@ public partial class MainWindow : Window
 
     private void UpdateLatencyStats()
     {
-        var logPath = _settingsService.Current.GetTodayGatewayLogPath();
+        var logPath = _settingsService.Settings.GetTodayGatewayLogPath();
         LatencyTracker.Poll(logPath);
 
         var stats = LatencyTracker.GetStats();
@@ -465,7 +465,7 @@ public partial class MainWindow : Window
 
     private async Task WatchForGatewayReady()
     {
-        var logPath = _settingsService.Current.GetTodayGatewayLogPath();
+        var logPath = _settingsService.Settings.GetTodayGatewayLogPath();
         try
         {
             var ready = await LogMonitor.WaitForGatewayReady(logPath, 180);
@@ -513,7 +513,7 @@ public partial class MainWindow : Window
             }
 
             _waitingForGatewayReady = true;
-            var logPath = _settingsService.Current.GetTodayGatewayLogPath();
+            var logPath = _settingsService.Settings.GetTodayGatewayLogPath();
 
             Log(L10n.Get("Str_Log_DeletingLog"));
             LogMonitor.DeleteLogIfExists(logPath);
@@ -636,7 +636,7 @@ public partial class MainWindow : Window
 
     private void OpenPowerShell()
     {
-        var workDir = _settingsService.Current.PowerShellWorkingDir;
+        var workDir = _settingsService.Settings.PowerShellWorkingDir;
         if (!Directory.Exists(workDir)) workDir = "";
         try { Process.Start(new ProcessStartInfo { FileName = "powershell.exe", Arguments = "-NoExit -NoProfile", UseShellExecute = true, WorkingDirectory = workDir }); }
         catch (Exception ex) { Log($"[CHYBA] {ex.Message}"); }
@@ -644,14 +644,14 @@ public partial class MainWindow : Window
 
     private void OpenGatewayLog(int lines)
     {
-        var logPath = _settingsService.Current.GetTodayGatewayLogPath();
+        var logPath = _settingsService.Settings.GetTodayGatewayLogPath();
         var dialog = new GatewayLogWindow(logPath, lines) { Owner = this };
         dialog.ShowDialog();
     }
 
     private void OpenLiveGatewayLog(int lines)
     {
-        var logPath = _settingsService.Current.GetTodayGatewayLogPath();
+        var logPath = _settingsService.Settings.GetTodayGatewayLogPath();
         var live = new LiveLogWindow(logPath, lines) { Owner = this };
         live.Show();
     }
@@ -668,7 +668,7 @@ public partial class MainWindow : Window
         var dialog = new SettingsWindow { Owner = this };
         if (dialog.ShowDialog() == true)
         {
-            var lang = _settingsService.Current.Language == "EN"
+            var lang = _settingsService.Settings.Language == "EN"
                 ? L10n.Language.EN : L10n.Language.CS;
             L10n.Apply(lang);
             ApplyLocalization();
@@ -738,7 +738,7 @@ public partial class MainWindow : Window
 
     private void ApplyThemeFromAboutCommand(AppTheme theme)
     {
-        var settings = _settingsService.Current;
+        var settings = _settingsService.Settings;
         if (settings.Theme == theme)
         {
             Log($"[About] Theme already active: {theme}.");
@@ -746,7 +746,7 @@ public partial class MainWindow : Window
         }
 
         settings.Theme = theme;
-        if (!SettingsService.Save(settings))
+        if (!_settingsService.Save(settings))
         {
             Log($"[CHYBA] Theme switch failed: {theme}.");
             return;

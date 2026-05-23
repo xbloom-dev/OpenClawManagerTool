@@ -14,6 +14,9 @@ public partial class App : Application
         ((App)Current)._host?.Services
         ?? throw new InvalidOperationException("The application service provider is not initialized.");
 
+    public static T GetService<T>() where T : notnull =>
+        Services.GetRequiredService<T>();
+
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
@@ -26,13 +29,13 @@ public partial class App : Application
         var settingsService = Services.GetRequiredService<ISettingsService>();
 
         // Jazyk
-        var lang = settingsService.Current.Language == "EN"
+        var lang = settingsService.Settings.Language == "EN"
             ? L10n.Language.EN
             : L10n.Language.CS;
         L10n.Apply(lang);
 
         // Téma — musí být před otevřením oken
-        ThemeService.Apply(settingsService.Current.Theme);
+        ThemeService.Apply(settingsService.Settings.Theme);
 
         // Favicon pro všechna okna aplikace — registrujeme globální handler
         // který nastaví ikonu při Loaded eventu každého Window.

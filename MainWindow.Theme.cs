@@ -1,4 +1,4 @@
-// MainWindow.Theme.cs
+﻿// MainWindow.Theme.cs
 // Partial class — theme switching + ikony v tlačítkách (v0.5+)
 // Umístění: OpenClawManager/ (vedle MainWindow.xaml.cs)
 
@@ -65,7 +65,7 @@ public partial class MainWindow
         ThemeService.ThemeChanged += OnThemeChanged;
 
         // Aplikovat téma z nastavení
-        var theme = SettingsService.Current.Theme;
+        var theme = OpenClawManager.App.GetService<ISettingsService>().Settings.Theme;
         ThemeService.Apply(theme);
     }
 
@@ -1125,7 +1125,7 @@ public partial class MainWindow
     {
         TxtGatewayLabel.Visibility = Visibility.Collapsed;
         TxtSectionOpen.Text = L10n.Get("Str_Section_Tools");
-        TxtSectionOpen.Visibility = ThemeService.IsModernPaletteTheme(SettingsService.Current.Theme)
+        TxtSectionOpen.Visibility = ThemeService.IsModernPaletteTheme(OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)
             ? Visibility.Collapsed
             : Visibility.Visible;
         TxtSectionTools.Visibility = Visibility.Collapsed;
@@ -1208,13 +1208,13 @@ public partial class MainWindow
 
     private void ReapplyCurrentThemeLayoutAfterLocalization()
     {
-        if (SettingsService.Current.Theme == AppTheme.Modern)
+        if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme == AppTheme.Modern)
             ApplyStandardToolLayout();
-        else if (SettingsService.Current.Theme == AppTheme.StandardDark)
+        else if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme == AppTheme.StandardDark)
             ApplyStandardDarkToolLayout();
-        else if (ThemeService.IsModernPaletteTheme(SettingsService.Current.Theme) || SettingsService.Current.Theme == AppTheme.HighContrast)
+        else if (ThemeService.IsModernPaletteTheme(OpenClawManager.App.GetService<ISettingsService>().Settings.Theme) || OpenClawManager.App.GetService<ISettingsService>().Settings.Theme == AppTheme.HighContrast)
             ApplyModernToolLayout();
-        else if (SettingsService.Current.Theme == AppTheme.CrabCute)
+        else if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme == AppTheme.CrabCute)
             ApplyCrabCuteToolLayout();
     }
 
@@ -1331,7 +1331,7 @@ public partial class MainWindow
         if (image == null) return;
 
         btn.Content = image;
-        btn.Style = CreateCrabCuteButtonFeedbackStyle(SettingsService.Current.UseButtonScanlineEffect);
+        btn.Style = CreateCrabCuteButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect);
         btn.Height = height;
         btn.Margin = btn == BtnStartTui ? new Thickness(0, 0, 0, 8) : btn.Margin;
         btn.Padding = new Thickness(0);
@@ -1350,7 +1350,7 @@ public partial class MainWindow
 
         btn.Content = image;
         btn.Style = CreateModernVariantImageButtonFeedbackStyle(
-            SettingsService.Current.UseButtonScanlineEffect,
+            OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect,
             ThemeService.GetCurrentButtonInteraction().Equals("PressScanline", StringComparison.OrdinalIgnoreCase));
         btn.Height = height;
         btn.Padding = new Thickness(0);
@@ -1365,14 +1365,14 @@ public partial class MainWindow
     {
         foreach (var button in buttons)
         {
-            button.Style = CreateModernButtonFeedbackStyle(SettingsService.Current.UseButtonScanlineEffect);
+            button.Style = CreateModernButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect);
             button.FocusVisualStyle = null;
         }
     }
 
     private static void ApplyStandardButtonFeedbackStyle(params Button[] buttons)
     {
-        var style = CreateStandardButtonFeedbackStyle(SettingsService.Current.UseButtonScanlineEffect);
+        var style = CreateStandardButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect);
         var idleBrush = ThemeService.GetBrush("Theme.Brush.Disabled", Color.FromRgb(0x28, 0x28, 0x28));
         var buttonTextBrush = ThemeService.GetBrush("Theme.Brush.ButtonText", Colors.White);
 
@@ -1542,7 +1542,7 @@ public partial class MainWindow
     {
         foreach (var button in buttons)
         {
-            button.Style = CreateDarkButtonFeedbackStyle(SettingsService.Current.UseButtonScanlineEffect, idleBrush);
+            button.Style = CreateDarkButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect, idleBrush);
             button.FocusVisualStyle = null;
         }
     }

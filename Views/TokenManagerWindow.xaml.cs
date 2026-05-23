@@ -1,4 +1,4 @@
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -15,7 +15,7 @@ public partial class TokenManagerWindow : Window
     private string? _gitCheckPath;
     private bool? _isTrackedByGit;
 
-    private string VaultPath => SettingsService.Current.TokenManagerSecretsPath;
+    private string VaultPath => OpenClawManager.App.GetService<ISettingsService>().Settings.TokenManagerSecretsPath;
     private static string S(string key) => L10n.Get(key);
     private static string F(string key, params object[] args) => L10n.Format(key, args);
     private static Brush ActionPositiveBrush =>
@@ -52,8 +52,8 @@ public partial class TokenManagerWindow : Window
         BtnVerify.Click += (_, _) => VerifySelectedFile();
         BtnClose.Click += (_, _) => Close();
 
-        SettingsService.SettingsChanged += SettingsService_SettingsChanged;
-        Closed += (_, _) => SettingsService.SettingsChanged -= SettingsService_SettingsChanged;
+        OpenClawManager.App.GetService<ISettingsService>().SettingsChanged += SettingsService_SettingsChanged;
+        Closed += (_, _) => OpenClawManager.App.GetService<ISettingsService>().SettingsChanged -= SettingsService_SettingsChanged;
 
         ApplyLocalization();
         TxtVaultPath.Text = VaultPath;
@@ -140,7 +140,7 @@ public partial class TokenManagerWindow : Window
 
     private bool ConfirmRiskyVaultLocation()
     {
-        var safety = TokenService.AnalyzeVaultPath(VaultPath, SettingsService.Current.OpenClawPath);
+        var safety = TokenService.AnalyzeVaultPath(VaultPath, OpenClawManager.App.GetService<ISettingsService>().Settings.OpenClawPath);
         if (safety.IsSafe) return true;
         var message = F("Str_Token_RiskyVaultMessage", string.Join("\n", safety.Warnings));
         return MessageBox.Show(message, S("Str_Token_RiskyVaultTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
@@ -179,7 +179,7 @@ public partial class TokenManagerWindow : Window
 
     private void UpdateVaultSafetyBanner()
     {
-        var safety = TokenService.AnalyzeVaultPath(VaultPath, SettingsService.Current.OpenClawPath);
+        var safety = TokenService.AnalyzeVaultPath(VaultPath, OpenClawManager.App.GetService<ISettingsService>().Settings.OpenClawPath);
         VaultWarningBanner.Visibility = safety.IsSafe ? Visibility.Collapsed : Visibility.Visible;
         TxtVaultWarning.Text = safety.IsSafe ? "" : S("Str_Token_SecurityWarningPrefix") + string.Join(" ", safety.Warnings);
     }
