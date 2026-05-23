@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +14,10 @@ namespace OpenClawManager;
 
 public partial class MainWindow : Window
 {
+    private readonly ISettingsService _settingsService;
+    private readonly IGatewayService _gatewayService;
+    private readonly IResourceMonitor _resourceMonitor;
+    private readonly IProcessDetector _processDetector;
     private readonly DispatcherTimer _statusTimer;
     private DateTime? _gatewayStartTime;
     private int? _lastKnownGatewayPid;
@@ -29,7 +33,25 @@ public partial class MainWindow : Window
         ThemeService.GetBrush("Brush.ActionDanger", Color.FromRgb(0xFF, 0xD0, 0xD0));
 
     public MainWindow()
+        : this(
+            new SettingsServiceAdapter(),
+            new GatewayServiceAdapter(),
+            new ResourceMonitorAdapter(),
+            new ProcessDetectorAdapter())
     {
+    }
+
+    public MainWindow(
+        ISettingsService settingsService,
+        IGatewayService gatewayService,
+        IResourceMonitor resourceMonitor,
+        IProcessDetector processDetector)
+    {
+        _settingsService = settingsService;
+        _gatewayService = gatewayService;
+        _resourceMonitor = resourceMonitor;
+        _processDetector = processDetector;
+
         InitializeComponent();
 
         BtnStartTui.Click += BtnStartTui_Click;
@@ -44,8 +66,8 @@ public partial class MainWindow : Window
 
         Terminal.TuiStateChanged += OnTuiStateChanged;
 
-        MnuOpenOpenClawFolder.Click += (_, _) => OpenInExplorer(SettingsService.Current.OpenClawPath);
-        MnuOpenTempFolder.Click += (_, _) => OpenInExplorer(SettingsService.Current.TempPath);
+        MnuOpenOpenClawFolder.Click += (_, _) => OpenInExplorer(_settingsService.Current.OpenClawPath);
+        MnuOpenTempFolder.Click += (_, _) => OpenInExplorer(_settingsService.Current.TempPath);
         MnuOpenPowerShell.Click += (_, _) => OpenPowerShell();
         MnuExit.Click += (_, _) => Close();
         MnuOpenLog10.Click += OpenLogMenuItem_Click;
@@ -225,7 +247,7 @@ public partial class MainWindow : Window
         _isStatusUpdateRunning = true;
         try
         {
-            var snap = await ResourceMonitor.MeasureAsync();
+            var snap = await _resourceMonitor.MeasureAsync();
             StatusRam.Text = $"RAM: {snap.RamUsedGb:F1}/{snap.RamTotalGb:F1} GB";
             StatusCpu.Text = $"CPU: {snap.CpuPercent}%";
 
@@ -254,7 +276,7 @@ public partial class MainWindow : Window
 
     private void UpdateGatewayStatus()
     {
-        var gateway = ProcessDetector.FindGatewayProcess();
+        var gateway = _processDetector.FindGatewayProcess();
 
         if (gateway != null)
         {
@@ -282,7 +304,7 @@ public partial class MainWindow : Window
 
     private void UpdateLatencyStats()
     {
-        var logPath = SettingsService.Current.GetTodayGatewayLogPath();
+        var logPath = _settingsService.Current.GetTodayGatewayLogPath();
         LatencyTracker.Poll(logPath);
 
         var stats = LatencyTracker.GetStats();
@@ -394,7 +416,7 @@ public partial class MainWindow : Window
         Log(L10n.Get("Str_Log_GatewayStarting"));
         _waitingForGatewayReady = true;
         SetGatewayUiState(GatewayUiState.Starting, null);
-        GatewayService.Start();
+        _gatewayService.Start();
         _ = WatchForGatewayReady();
     }
 
@@ -410,12 +432,12 @@ public partial class MainWindow : Window
         if (dialog.CloseTui)
         {
             Log(L10n.Get("Str_Log_StoppingGatewayTui"));
-            GatewayService.StopAndCloseTui();
+            _gatewayService.StopAndCloseTui();
         }
         else
         {
             Log(L10n.Get("Str_Log_GatewayStopping"));
-            GatewayService.Stop();
+            _gatewayService.Stop();
         }
         Log(L10n.Get("Str_Log_GatewayStopped"));
     }
@@ -431,7 +453,7 @@ public partial class MainWindow : Window
         try
         {
             SetGatewayUiState(GatewayUiState.Starting, null);
-            await GatewayService.RestartAsync();
+            await _gatewayService.RestartAsync();
             _ = WatchForGatewayReady();
         }
         catch (Exception ex)
@@ -443,7 +465,7 @@ public partial class MainWindow : Window
 
     private async Task WatchForGatewayReady()
     {
-        var logPath = SettingsService.Current.GetTodayGatewayLogPath();
+        var logPath = _settingsService.Current.GetTodayGatewayLogPath();
         try
         {
             var ready = await LogMonitor.WaitForGatewayReady(logPath, 180);
@@ -452,7 +474,7 @@ public partial class MainWindow : Window
             if (ready)
             {
                 Log(L10n.Get("Str_Log_GatewayReady"));
-                var gw = ProcessDetector.FindGatewayProcess();
+                var gw = _processDetector.FindGatewayProcess();
                 SetGatewayUiState(GatewayUiState.Running, gw);
                 Log(L10n.Get("Str_Log_TuiStarting"));
                 Terminal.StartTui();
@@ -491,22 +513,22 @@ public partial class MainWindow : Window
             }
 
             _waitingForGatewayReady = true;
-            var logPath = SettingsService.Current.GetTodayGatewayLogPath();
+            var logPath = _settingsService.Current.GetTodayGatewayLogPath();
 
             Log(L10n.Get("Str_Log_DeletingLog"));
             LogMonitor.DeleteLogIfExists(logPath);
             LatencyTracker.Reset();
 
-            if (ProcessDetector.IsGatewayRunning())
+            if (_processDetector.IsGatewayRunning())
             {
                 Log(L10n.Get("Str_Log_GatewayStopping"));
-                GatewayService.Stop();
+                _gatewayService.Stop();
                 await Task.Delay(2000);
             }
 
             Log(L10n.Get("Str_Log_GatewayStarting"));
             SetGatewayUiState(GatewayUiState.Starting, null);
-            var proc = GatewayService.Start();
+            var proc = _gatewayService.Start();
             if (proc == null)
             {
                 _waitingForGatewayReady = false;
@@ -529,7 +551,7 @@ public partial class MainWindow : Window
             }
 
             Log($"{L10n.Get("Str_Log_GatewayReadyIn")} {elapsed:F1}s.");
-            var gw = ProcessDetector.FindGatewayProcess();
+            var gw = _processDetector.FindGatewayProcess();
             SetGatewayUiState(GatewayUiState.Running, gw);
 
             Log(L10n.Get("Str_Log_TuiStarting"));
@@ -602,7 +624,7 @@ public partial class MainWindow : Window
     private void BtnDoctorFix_Click(object? sender, RoutedEventArgs e)
     {
         Log(L10n.Get("Str_Log_DoctorFix"));
-        GatewayService.RunDoctorFix();
+        _gatewayService.RunDoctorFix();
     }
 
     private void OpenInExplorer(string path)
@@ -614,7 +636,7 @@ public partial class MainWindow : Window
 
     private void OpenPowerShell()
     {
-        var workDir = SettingsService.Current.PowerShellWorkingDir;
+        var workDir = _settingsService.Current.PowerShellWorkingDir;
         if (!Directory.Exists(workDir)) workDir = "";
         try { Process.Start(new ProcessStartInfo { FileName = "powershell.exe", Arguments = "-NoExit -NoProfile", UseShellExecute = true, WorkingDirectory = workDir }); }
         catch (Exception ex) { Log($"[CHYBA] {ex.Message}"); }
@@ -622,14 +644,14 @@ public partial class MainWindow : Window
 
     private void OpenGatewayLog(int lines)
     {
-        var logPath = SettingsService.Current.GetTodayGatewayLogPath();
+        var logPath = _settingsService.Current.GetTodayGatewayLogPath();
         var dialog = new GatewayLogWindow(logPath, lines) { Owner = this };
         dialog.ShowDialog();
     }
 
     private void OpenLiveGatewayLog(int lines)
     {
-        var logPath = SettingsService.Current.GetTodayGatewayLogPath();
+        var logPath = _settingsService.Current.GetTodayGatewayLogPath();
         var live = new LiveLogWindow(logPath, lines) { Owner = this };
         live.Show();
     }
@@ -646,7 +668,7 @@ public partial class MainWindow : Window
         var dialog = new SettingsWindow { Owner = this };
         if (dialog.ShowDialog() == true)
         {
-            var lang = SettingsService.Current.Language == "EN"
+            var lang = _settingsService.Current.Language == "EN"
                 ? L10n.Language.EN : L10n.Language.CS;
             L10n.Apply(lang);
             ApplyLocalization();
@@ -716,7 +738,7 @@ public partial class MainWindow : Window
 
     private void ApplyThemeFromAboutCommand(AppTheme theme)
     {
-        var settings = SettingsService.Current;
+        var settings = _settingsService.Current;
         if (settings.Theme == theme)
         {
             Log($"[About] Theme already active: {theme}.");
@@ -761,7 +783,7 @@ public partial class MainWindow : Window
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
     {
-        if (ProcessDetector.IsGatewayRunning())
+        if (_processDetector.IsGatewayRunning())
         {
             bool cs = L10n.Current == L10n.Language.CS;
             var result = MessageBox.Show(
@@ -774,7 +796,7 @@ public partial class MainWindow : Window
             {
                 case MessageBoxResult.Yes:
                     Terminal.StopTui();
-                    GatewayService.StopAndCloseTui();
+                    _gatewayService.StopAndCloseTui();
                     break;
                 case MessageBoxResult.No:
                     Terminal.StopTui();
