@@ -3,3 +3,5 @@
 *.xaml text eol=crlf
 *.csproj text eol=crlf
 *.md text eol=lf
+*.yml text eol=lf
+LICENSE text eol=lf
