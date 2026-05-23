@@ -112,7 +112,7 @@ public partial class MainWindow
     {
         _activeTheme = theme;
         RestoreThemeBaseline();
-        ApplyThemeTitleBarMode(theme != AppTheme.Legacy);
+        ApplyThemeTitleBarMode(theme != AppTheme.Legacy && theme != AppTheme.StandardDark);
 
         switch (theme)
         {
@@ -210,11 +210,11 @@ public partial class MainWindow
         SetModernVariantButtonImage(BtnGatewayStart,   "start", 44, HorizontalAlignment.Center);
         SetModernVariantButtonImage(BtnGatewayStop,    "stop", 44, HorizontalAlignment.Center);
         SetModernVariantButtonImage(BtnGatewayRestart, "restart", 44, HorizontalAlignment.Center);
-        SetModernVariantButtonImage(BtnOpenPowerShell, "powershell", 44, HorizontalAlignment.Center);
-        SetModernVariantButtonImage(BtnOpenGatewayLog, "gateway-log", 44, HorizontalAlignment.Center);
-        SetModernVariantButtonImage(BtnCleaningTool,   "cleaning-tool", 44, HorizontalAlignment.Center);
-        SetModernVariantButtonImage(BtnTokenManager,   "token-manager", 44, HorizontalAlignment.Center);
-        SetModernVariantButtonImage(BtnDoctorFix,      "doctor-fix", 44, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnOpenPowerShell, "powershell", 56, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnOpenGatewayLog, "gateway-log", 56, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnCleaningTool,   "cleaning-tool", 56, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnTokenManager,   "token-manager", 56, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnDoctorFix,      "doctor-fix", 56, HorizontalAlignment.Center);
 
         UpdateStartTuiButton(Terminal.IsTuiRunning);
     }
@@ -287,13 +287,16 @@ public partial class MainWindow
         Background = chrome;
         Foreground = text;
 
-        MainMenu.Background = chrome;
-        MainMenu.Foreground = text;
-        TitleBarHost.Background = chrome;
-        MainStatusBar.Background = chrome;
+        var titleBar = ThemeService.GetBrush("Theme.Brush.TitleBar",       Color.FromRgb(0x20, 0x20, 0x20));
+        var menuBg   = ThemeService.GetBrush("Theme.Brush.MenuBackground", Color.FromRgb(0x18, 0x18, 0x18));
+
+        MainMenu.Background      = menuBg;
+        MainMenu.Foreground      = text;
+        TitleBarHost.Background  = titleBar;
+        MainStatusBar.Background = titleBar;
         MainStatusBar.Foreground = secondary;
         MainStatusBar.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
-        MainGridSplitter.Background = chrome;
+        MainGridSplitter.Background = new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x20));
 
         GrpActions.Background = Brushes.Transparent;
         GrpActions.Foreground = text;
@@ -315,7 +318,7 @@ public partial class MainWindow
         AppLog.BorderBrush = Brushes.Transparent;
         AppLog.BorderThickness = new Thickness(0);
         RightPanel.Background = chrome;
-        SplashOverlay.Background = chrome;
+        SplashOverlay.Background = menuBg;
         Terminal.SetShellBackground(chrome);
 
         var hoverBackground = ThemeService.GetBrush("Theme.Brush.Menu.Hover", Color.FromRgb(0x27, 0x27, 0x27));
@@ -325,7 +328,7 @@ public partial class MainWindow
         ApplyModernPaletteMainWindowText(primaryText, secondary);
 
         var captionText = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        ApplyWindowCaptionColor(GetBrushColor(chrome, Color.FromRgb(0x12, 0x12, 0x12)), GetBrushColor(captionText, Colors.White));
+        ApplyWindowCaptionColor(GetBrushColor(titleBar, Color.FromRgb(0x20, 0x20, 0x20)), GetBrushColor(captionText, Colors.White));
     }
 
     private void ApplyStandardShell()
@@ -604,6 +607,7 @@ public partial class MainWindow
         border.SetValue(Border.BackgroundProperty, backgroundBrush);
         border.SetValue(Border.BorderBrushProperty, borderBrush);
         border.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
         border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
         border.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 7, 0, 0));
         border.SetValue(UIElement.SnapsToDevicePixelsProperty, true);
@@ -675,6 +679,7 @@ public partial class MainWindow
         border.SetValue(Border.BackgroundProperty, backgroundBrush);
         border.SetValue(Border.BorderBrushProperty, borderBrush);
         border.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
         border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
 
         var dock = new FrameworkElementFactory(typeof(DockPanel));
@@ -711,6 +716,8 @@ public partial class MainWindow
         root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
         root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
         root.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
+        root.SetValue(Border.MarginProperty, new Thickness(2, 1, 2, 1));
 
         var dock = new FrameworkElementFactory(typeof(DockPanel));
         dock.Name = "Dock";
@@ -766,6 +773,7 @@ public partial class MainWindow
 
         var hover = new Trigger { Property = MenuItem.IsHighlightedProperty, Value = true };
         hover.Setters.Add(new Setter(Border.BackgroundProperty, hoverBackground, "Root"));
+        hover.Setters.Add(new Setter(Control.ForegroundProperty, Brushes.White));
 
         var submenu = new Trigger { Property = MenuItem.RoleProperty, Value = MenuItemRole.SubmenuHeader };
         submenu.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Visible, "Arrow"));
@@ -780,10 +788,16 @@ public partial class MainWindow
         topLevel.Setters.Add(new Setter(FrameworkElement.MinWidthProperty, 0.0, "Dock"));
         topLevel.Setters.Add(new Setter(Popup.PlacementProperty, PlacementMode.Bottom, "PART_Popup"));
 
+        var openTopLevel = new MultiTrigger();
+        openTopLevel.Conditions.Add(new Condition(MenuItem.RoleProperty, MenuItemRole.TopLevelHeader));
+        openTopLevel.Conditions.Add(new Condition(MenuItem.IsSubmenuOpenProperty, true));
+        openTopLevel.Setters.Add(new Setter(Control.ForegroundProperty, Brushes.White));
+
         template.Triggers.Add(hover);
         template.Triggers.Add(submenu);
         template.Triggers.Add(open);
         template.Triggers.Add(topLevel);
+        template.Triggers.Add(openTopLevel);
         return template;
     }
 
@@ -1087,6 +1101,7 @@ public partial class MainWindow
         border.SetValue(Border.BackgroundProperty, backgroundBrush);
         border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
         border.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
         border.SetValue(Border.PaddingProperty, new Thickness(8));
 
         var content = new FrameworkElementFactory(typeof(ContentPresenter));
@@ -1116,12 +1131,12 @@ public partial class MainWindow
         TxtSectionTools.Visibility = Visibility.Collapsed;
         TxtSectionMaintenance.Visibility = Visibility.Collapsed;
 
-        BtnStartTui.Margin = new Thickness(0, 0, 0, 6);
+        BtnStartTui.Margin = new Thickness(0, 0, 0, 8);
         BtnGatewayRestart.Margin = new Thickness(0, 0, 0, 8);
-        BtnOpenPowerShell.Margin = new Thickness(0, 0, 0, 2);
-        BtnOpenGatewayLog.Margin = new Thickness(0, 0, 0, 2);
-        BtnCleaningTool.Margin = new Thickness(0, 0, 0, 2);
-        BtnTokenManager.Margin = new Thickness(0, 0, 0, 2);
+        BtnOpenPowerShell.Margin = new Thickness(0, 0, 0, 8);
+        BtnOpenGatewayLog.Margin = new Thickness(0, 0, 0, 8);
+        BtnCleaningTool.Margin = new Thickness(0, 0, 0, 8);
+        BtnTokenManager.Margin = new Thickness(0, 0, 0, 8);
     }
 
     private void ApplyStandardToolLayout()
@@ -1184,10 +1199,10 @@ public partial class MainWindow
 
     private void ApplyModernVariantToolLayout()
     {
-        BtnOpenPowerShell.Margin = new Thickness(0, 0, 0, 6);
-        BtnOpenGatewayLog.Margin = new Thickness(0, 0, 0, 6);
-        BtnCleaningTool.Margin = new Thickness(0, 0, 0, 6);
-        BtnTokenManager.Margin = new Thickness(0, 0, 0, 6);
+        BtnOpenPowerShell.Margin = new Thickness(0, 0, 0, 8);
+        BtnOpenGatewayLog.Margin = new Thickness(0, 0, 0, 8);
+        BtnCleaningTool.Margin = new Thickness(0, 0, 0, 8);
+        BtnTokenManager.Margin = new Thickness(0, 0, 0, 8);
         BtnDoctorFix.Margin = new Thickness(0, 0, 0, 0);
     }
 
@@ -1714,6 +1729,7 @@ public partial class MainWindow
         border.SetValue(Border.BackgroundProperty, backgroundBrush);
         border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
         border.SetValue(Border.BorderThicknessProperty, new Thickness(0));
+        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
         border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
 
         var dock = new FrameworkElementFactory(typeof(DockPanel));

@@ -39,7 +39,7 @@ internal static class ModernPaletteRuntimeStyles
     private static void ApplyLoadedVisuals(Window window)
     {
         var primary = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x4E, 0x4E, 0x4E));
+        var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x78, 0x78, 0x78));
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
         var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x27, 0x27, 0x27));
         var border = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0x4E, 0x4E, 0x4E));
@@ -58,6 +58,7 @@ internal static class ModernPaletteRuntimeStyles
                     groupBox.Background = surface;
                     groupBox.Foreground = primary;
                     groupBox.BorderBrush = border;
+                    groupBox.Style = GetModernPaletteGroupBoxStyle(primary, surface, border);
                     break;
                 case CheckBox checkBox:
                     checkBox.Foreground = primary;
@@ -95,6 +96,8 @@ internal static class ModernPaletteRuntimeStyles
                     break;
                 case Border borderElement when borderElement.BorderThickness != new Thickness(0):
                     borderElement.BorderBrush = border;
+                    if (borderElement.CornerRadius == new CornerRadius(0))
+                        borderElement.CornerRadius = new CornerRadius(6);
                     break;
                 case StatusBar statusBar:
                     statusBar.Background = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12));
@@ -148,12 +151,64 @@ internal static class ModernPaletteRuntimeStyles
         }
     }
 
+    private static Style GetModernPaletteGroupBoxStyle(Brush textBrush, Brush backgroundBrush, Brush borderBrush)
+    {
+        var key = $"group|modern-palette|{BrushCacheKey(textBrush)}|{BrushCacheKey(backgroundBrush)}|{BrushCacheKey(borderBrush)}";
+        if (StyleCache.TryGetValue(key, out var cached))
+            return cached;
+
+        var root = new FrameworkElementFactory(typeof(Grid));
+        root.SetValue(UIElement.SnapsToDevicePixelsProperty, true);
+
+        var border = new FrameworkElementFactory(typeof(Border));
+        border.Name = "SectionBorder";
+        border.SetValue(Border.BackgroundProperty, backgroundBrush);
+        border.SetValue(Border.BorderBrushProperty, borderBrush);
+        border.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
+        border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
+        border.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 7, 0, 0));
+        root.AppendChild(border);
+
+        var content = new FrameworkElementFactory(typeof(ContentPresenter));
+        content.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(ContentControl.ContentProperty));
+        content.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
+        content.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Stretch);
+        border.AppendChild(content);
+
+        var headerShell = new FrameworkElementFactory(typeof(Border));
+        headerShell.SetValue(Border.BackgroundProperty, backgroundBrush);
+        headerShell.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
+        headerShell.SetValue(Border.PaddingProperty, new Thickness(4, 0, 4, 0));
+        headerShell.SetValue(FrameworkElement.MarginProperty, new Thickness(7, 0, 0, 0));
+        headerShell.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Left);
+        headerShell.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Top);
+        headerShell.SetValue(Panel.ZIndexProperty, 1);
+
+        var header = new FrameworkElementFactory(typeof(ContentPresenter));
+        header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
+        header.SetValue(TextElement.ForegroundProperty, textBrush);
+        header.SetValue(TextElement.FontWeightProperty, FontWeights.SemiBold);
+        header.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
+        headerShell.AppendChild(header);
+        root.AppendChild(headerShell);
+
+        var style = new Style(typeof(GroupBox));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, backgroundBrush));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, borderBrush));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
+        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = root }));
+        StyleCache[key] = style;
+        return style;
+    }
+
     private static Style CreateModernPaletteButtonStyle(bool useScanlineEffect)
     {
         var noShift = ThemeService.GetCurrentButtonInteraction()
             .Equals("PressScanlineNoShift", StringComparison.OrdinalIgnoreCase);
-        var idleBrush = ThemeService.GetBrush("Theme.Brush.Disabled", Color.FromRgb(0x27, 0x27, 0x27));
-        var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x38, 0x38, 0x38));
+        var idleBrush = ThemeService.GetBrush("Theme.Brush.SecondaryButton", Color.FromRgb(0x2E, 0x2E, 0x2E));
+        var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x46, 0x46, 0x46));
         var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x30, 0x30, 0x30));
         var buttonTextBrush = ThemeService.GetBrush("Theme.Brush.ButtonText", Colors.White);
         var pressedOverlayBrush = CreatePressedScanlineBrush();
@@ -274,8 +329,8 @@ internal static class ModernPaletteRuntimeStyles
             if (hwnd == IntPtr.Zero) return;
 
             var caption = ToColorRef(GetBrushColor(
-                ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12)),
-                Color.FromRgb(0x12, 0x12, 0x12)));
+                ThemeService.GetBrush("Theme.Brush.TitleBar", Color.FromRgb(0x20, 0x20, 0x20)),
+                Color.FromRgb(0x20, 0x20, 0x20)));
             var border = caption;
             var text = ToColorRef(GetBrushColor(
                 ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White),
@@ -300,5 +355,12 @@ internal static class ModernPaletteRuntimeStyles
     private static Color GetBrushColor(Brush brush, Color fallback)
     {
         return brush is SolidColorBrush solid ? solid.Color : fallback;
+    }
+
+    private static string BrushCacheKey(Brush brush)
+    {
+        return brush is SolidColorBrush solid
+            ? solid.Color.ToString()
+            : brush.GetHashCode().ToString(System.Globalization.CultureInfo.InvariantCulture);
     }
 }
