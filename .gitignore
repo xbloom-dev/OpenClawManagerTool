@@ -14,6 +14,7 @@ WebView2Data/
 **/.token-manager/
 **/secrets.json
 PROJECT_FILE_LIST.txt
+handoff/
 
 # Claude Code — lokální nastavení (nepatří do repo)
 .claude/settings.local.json

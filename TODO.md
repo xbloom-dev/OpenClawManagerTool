@@ -13,11 +13,11 @@ Priority:
 
 ### P0 — bezpečnost a release jistota
 
-- **Security scan Git historie** — před přepnutím repozitáře na public prohledat historii na tokeny, API klíče, hesla a další tajné hodnoty; při nálezu řešit rotaci klíčů a případné čištění historie.
+- ✅ **Security scan Git historie** — `gitleaks detect --source . --config .gitleaks.toml --redact` prošel bez nálezů po v1.1 release polish změnách.
 
 ### P1 — data, výkon a testovatelnost
 
-- **Export/import DPAPI vaultu chráněný heslem** — DPAPI je bezpečné, ale je navázané na Windows profil; přidat ruční zálohu vaultu chráněnou heslem pro obnovu při ztrátě profilu.
+- ✅ **Export/import DPAPI vaultu chráněný heslem** — hotovo ve v1.1; `.ocvault` používá PBKDF2-SHA256 a AES-256-GCM.
 - **Audit UI thread blockingu** — projít Gateway/TUI/logy/resource monitor a ověřit, že IO a delší operace neběží na UI vlákně; blokující místa převést na `async/await` nebo bezpečně přesunout mimo UI vlákno.
 - **Zapouzdření cest a souborového IO** — zavést malé rozhraní pro aplikační prostředí/cesty (např. `IAppEnvironment`) a postupně přes něj vést `%APPDATA%`, temp složky a testovací cesty.
 
@@ -44,7 +44,7 @@ Po dokončení / smazání by všechny aktivní větve měly používat nový po
 
 ## Před release v1.1 — přechod na public + monetizace
 
-1. **Projít historii** — ověřit že v Git historii nejsou citlivé údaje (tokeny, API klíče, hesla)
+1. ✅ **Projít historii** — `gitleaks` scan čistý; po případném merge do cílové větve spustit ještě jednou na finální historii
 2. **Změnit visibility** — Settings → Danger Zone → Change visibility → Public
 3. **Aktivovat GitHub branch protection** (po public funguje zdarma):
    - `master`: require PR, require 1 approval, block force push, restrict deletions
@@ -56,7 +56,7 @@ Po dokončení / smazání by všechny aktivní větve měly používat nový po
    custom: ["https://paypal.me/..."]
    ```
 5. **GitHub Release** — vytvořit release `v1.1` s ZIP balíčky (build artefakty)
-6. **README pro veřejnost** — screenshots, jak nainstalovat, jak používat
+6. **README pro veřejnost** — základní v1.1 popis hotový; doplnit screenshots a distribuční instrukce
 7. **`CONTRIBUTING.md`** — jak přispět
 8. **`CODE_OF_CONDUCT.md`** — pravidla komunity
 9. **Issue/PR templates** v `.github/ISSUE_TEMPLATE/` a `.github/pull_request_template.md`

@@ -106,7 +106,7 @@
     <sys:String x:Key="Str_Status_Stopped">neběží</sys:String>
 
     <!-- Log zprávy -->
-    <sys:String x:Key="Str_Log_AppStarted">Aplikace spuštěna (v1.0).</sys:String>
+    <sys:String x:Key="Str_Log_AppStarted">Aplikace spuštěna (v1.1).</sys:String>
     <sys:String x:Key="Str_Log_GatewayStarting">Spouštím Gateway...</sys:String>
     <sys:String x:Key="Str_Log_GatewayReady">Gateway ready.</sys:String>
     <sys:String x:Key="Str_Log_GatewayStopping">Zastavuji Gateway...</sys:String>

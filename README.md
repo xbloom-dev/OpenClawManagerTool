@@ -1,6 +1,6 @@
-# OpenClaw Manager Tool by Bloom v1.0
+# OpenClaw Manager Tool by Bloom v1.1
 
-Windows WPF utility for managing an OpenClaw environment: Gateway/TUI control, embedded terminal, logs, cleanup, settings, themes, and Token Manager.
+Windows WPF utility for managing an OpenClaw environment: Gateway/TUI control, embedded terminal, logs, cleanup, settings, themes, and a DPAPI-protected Token Manager.
 
 ## First Run
 
@@ -15,9 +15,11 @@ Token values are stored with Windows DPAPI for the current Windows user. A copie
 
 Use `%USERPROFILE%\.token-manager\secrets.json` or another private, non-synced folder for the vault. Avoid project folders, `.openclaw`, Git repositories, cloud sync folders, and shared folders.
 
+OpenClaw Manager v1.1 adds manual vault backup and restore through portable `.ocvault` files. Backups are protected with a user password using PBKDF2-SHA256 and AES-256-GCM, then restored back into the local DPAPI vault for the current Windows profile.
+
 ## Themes
 
-Settings lets you switch between Legacy and Modern themes. Modern shows the splash panel and bitmap icons; Legacy keeps the simpler classic layout. Language, theme, paths, and Token Manager vault path are saved in `%APPDATA%\OpenClawManager\settings.json`.
+Settings lets you switch between Legacy, Modern, Standard Dark, Modern Dark, Modern Light, High Contrast, and Crab Cute themes. Modern themes use bitmap icons and themed secondary windows; Legacy keeps the simpler classic layout. Language, theme, paths, and Token Manager vault path are saved in `%APPDATA%\OpenClawManager\settings.json`.
 
 ## Offline Terminal
 
@@ -25,10 +27,12 @@ The embedded terminal uses local xterm.js files included under `Resources/Termin
 
 ## Smoke Test
 
-- Start the app and confirm the status bar shows `v1.0`.
+- Git history security scan: `gitleaks detect --source . --config .gitleaks.toml --redact`
+- Start the app and confirm the status bar shows `v1.1`.
 - Start Gateway.
 - Open OpenClaw TUI.
 - Open Gateway Log and Live Log.
 - Run Cleaning Tool in preview mode.
 - In Token Manager, add a token, redact a sample file, verify the redacted file, then restore it.
+- In Token Manager, export a `.ocvault` backup and restore it with the correct password.
 - Open Settings and About.

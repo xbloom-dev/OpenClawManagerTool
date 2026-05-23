@@ -94,7 +94,7 @@
                 <TextBlock x:Name="StatusCpu" Text="CPU: —" />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="v1.0" Foreground="Gray" />
+                <TextBlock Text="v1.1" Foreground="Gray" />
             </StatusBarItem>
         </StatusBar>
 

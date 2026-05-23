@@ -2,7 +2,7 @@
 
 ---
 
-## v1.1 (vývoj — větev develop/v1.1)
+## v1.1 — 23. května 2026
 
 ### Bezpečnost
 - Export/import Token Vaultu do přenosného `.ocvault` souboru chráněného heslem
@@ -26,11 +26,13 @@
 - `Scripts\OpenClaw-Tools.ps1` drží okno otevřené po akcích a při chybě čeká na klávesu
 - `Scripts\Sync-Workspaces.ps1` umí ověřit/fetchnout všechny tři workspace
 - GitHub Actions CI ověřeno pro build i TokenService testy na aktuální větvi
+- GitHub Actions aktualizováno na Node 24 kompatibilní akce (`actions/checkout@v6`, `actions/setup-dotnet@v5`) a pevný runner `windows-2025`
 
 ### Dokumentace
 - `STATUS.md` aktualizován jako živý stav v1.1
 - Připraven `HANDOFF_CLAUDE_TODO_README_PUBLIC.md` pro aktualizaci TODO a public README polish
 - Changelog doplněn o stav v1.1 před public/release přípravou
+- `README.md` aktualizován pro v1.1 a vault backup/restore workflow
 
 ### Refactoring
 - Centralizované theme resource tokeny: `Brush.ActionPositive`, `Brush.ActionDanger`, `Brush.ActionUtility`, `Brush.SplashModernBackground`
