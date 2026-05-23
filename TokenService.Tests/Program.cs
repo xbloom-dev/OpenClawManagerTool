@@ -213,7 +213,7 @@ void AppSettingsMigrationFillsMissingValues()
         Language = "en"
     };
 
-    var migrated = SettingsService.MigrateSettings(settings, out var changed);
+    var migrated = new SettingsService().MigrateSettings(settings, out var changed);
 
     Assert(changed, "Migration should report changes for legacy settings.");
     Assert(migrated.SchemaVersion == AppSettings.CurrentSchemaVersion, "Migration should set current schema version.");

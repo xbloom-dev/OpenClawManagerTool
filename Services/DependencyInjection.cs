@@ -6,7 +6,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddOpenClawManagerServices(this IServiceCollection services)
     {
-        services.AddSingleton<ISettingsService, SettingsServiceAdapter>();
+        services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IGatewayService, GatewayServiceAdapter>();
         services.AddSingleton<IResourceMonitor, ResourceMonitorAdapter>();
         services.AddSingleton<IProcessDetector, ProcessDetectorAdapter>();

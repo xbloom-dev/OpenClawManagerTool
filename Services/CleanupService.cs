@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
@@ -53,7 +53,7 @@ public static class CleanupService
         Action<string> logCallback,
         int keepSessions = 10)
     {
-        var settings = SettingsService.Current;
+        var settings = OpenClawManager.App.GetService<ISettingsService>().Settings;
 
         try
         {

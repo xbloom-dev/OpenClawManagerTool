@@ -1,4 +1,4 @@
-// MainWindow.Splash.cs — splash screen logika (v0.5)
+﻿// MainWindow.Splash.cs — splash screen logika (v0.5)
 
 using System.IO;
 using System.Windows;
@@ -15,7 +15,7 @@ public partial class MainWindow
 
     private void InitSplash()
     {
-        var settings = SettingsService.Current;
+        var settings = OpenClawManager.App.GetService<ISettingsService>().Settings;
 
         if (settings.Theme == AppTheme.Legacy)
         {
