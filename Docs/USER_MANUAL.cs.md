@@ -297,7 +297,7 @@ Klikni **Přidat** a vyplň:
 **Rotovat** — zadá novou hodnotu bez ztráty ID a popisu.
 **Odstranit** — odstraní token z trezoru.
 
-### Záloha a obnova trezoru (`.ocvault`) — novinka ve v1.1
+### Záloha a obnova trezoru (`.ocvault`)
 
 Trezor je svázaný s tvým Windows profilem (DPAPI), takže ho nejde jen tak zkopírovat na jiný počítač. Pro přenos nebo bezpečnostní zálohu slouží přenosný formát `.ocvault`:
 

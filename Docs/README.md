@@ -17,7 +17,7 @@ Use `%USERPROFILE%\.token-manager\secrets.json` or another private, non-synced f
 
 ## Themes
 
-Settings lets you switch between Legacy and Modern themes. Modern shows the splash panel and bitmap icons; Legacy keeps the simpler classic layout. Language, theme, paths, and Token Manager vault path are saved in `%APPDATA%\OpenClawManager\settings.json`.
+Seven themes are available: Legacy, Modern, Standard Dark, Modern Dark, Modern Light, High Contrast, and Crab Cute. Language, theme, paths, and Token Manager vault path are saved in `%APPDATA%\OpenClawManager\settings.json`.
 
 ## Offline Terminal
 
@@ -32,6 +32,7 @@ The embedded terminal uses local xterm.js files included under `Resources/Termin
 - Run Cleaning Tool in preview mode.
 - In Token Manager, add a token, redact a sample file, verify the redacted file, then restore it.
 - Open Settings and About.
+- Switch between at least 2 themes and confirm correct appearance.
 
 ## Build
 
