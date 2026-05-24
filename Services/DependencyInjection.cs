@@ -14,13 +14,11 @@ public static class DependencyInjection
         services.AddSingleton<IProcessDetector, ProcessDetectorAdapter>();
         services.AddSingleton<ICleanupService, CleanupServiceAdapter>();
         services.AddSingleton<ITokenService, TokenServiceAdapter>();
-        
-        // Registrace ViewModelů
+
         services.AddTransient<AboutViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<CleaningViewModel>();
-        
-        // Registrace oken
+
         services.AddTransient<AboutWindow>();
         services.AddTransient<SettingsWindow>();
         services.AddTransient<CleaningWindow>();
