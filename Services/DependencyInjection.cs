@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddTransient<AboutViewModel>();
         services.AddTransient<SettingsViewModel>();
         services.AddTransient<CleaningViewModel>();
+        services.AddSingleton<MainViewModel>();
 
         services.AddTransient<AboutWindow>();
         services.AddTransient<SettingsWindow>();

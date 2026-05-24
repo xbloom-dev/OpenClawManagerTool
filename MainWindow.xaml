@@ -8,6 +8,10 @@
         MinHeight="500" MinWidth="900"
         WindowStartupLocation="CenterScreen">
 
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </Window.Resources>
+
     <DockPanel>
         <Border x:Name="TitleBarHost" DockPanel.Dock="Top">
             <Grid>
@@ -66,32 +70,33 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Gateway: " />
                     <Ellipse x:Name="StatusGatewayDot" Width="10" Height="10"
-                             Fill="Gray" Margin="2,0,4,0" VerticalAlignment="Center" />
-                    <TextBlock x:Name="StatusGatewayText" Text="neběží" />
+                             Fill="{Binding GatewayStatusColor}" Margin="2,0,4,0" VerticalAlignment="Center" />
+                    <TextBlock x:Name="StatusGatewayText" Text="{Binding GatewayStatusText}" />
                 </StackPanel>
             </StatusBarItem>
-            <Separator x:Name="StatusGatewayDetailsSep" Visibility="Collapsed" />
-            <StatusBarItem x:Name="StatusGatewayPidItem" Visibility="Collapsed">
-                <TextBlock x:Name="StatusGatewayPid" Text="PID: —" />
+            <Separator x:Name="StatusGatewayDetailsSep" Visibility="{Binding IsPidVisible, Converter={StaticResource BoolToVisibility}}" />
+            <StatusBarItem x:Name="StatusGatewayPidItem" Visibility="{Binding IsPidVisible, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock x:Name="StatusGatewayPid" Text="{Binding GatewayPidText}" />
             </StatusBarItem>
-            <Separator x:Name="StatusGatewayUptimeSep" Visibility="Collapsed" />
-            <StatusBarItem x:Name="StatusGatewayUptimeItem" Visibility="Collapsed">
-                <TextBlock x:Name="StatusGatewayUptime" Text="uptime: —" />
+            <Separator x:Name="StatusGatewayUptimeSep" Visibility="{Binding IsUptimeVisible, Converter={StaticResource BoolToVisibility}}" />
+            <StatusBarItem x:Name="StatusGatewayUptimeItem" Visibility="{Binding IsUptimeVisible, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock x:Name="StatusGatewayUptime" Text="{Binding GatewayUptimeText}" />
             </StatusBarItem>
             <StatusBarItem>
                 <TextBlock Text=" " Width="20" />
             </StatusBarItem>
             <Separator />
             <StatusBarItem>
-                <TextBlock x:Name="StatusRam" Text="RAM: —" />
+                <TextBlock x:Name="StatusRam" Text="{Binding RamText}" />
             </StatusBarItem>
             <Separator />
             <StatusBarItem>
-                <TextBlock x:Name="StatusVram" Text="VRAM: —" />
+                <TextBlock x:Name="StatusVram" Text="{Binding VramText}"
+                           Visibility="{Binding IsVramVisible, Converter={StaticResource BoolToVisibility}}" />
             </StatusBarItem>
             <Separator />
             <StatusBarItem>
-                <TextBlock x:Name="StatusCpu" Text="CPU: —" />
+                <TextBlock x:Name="StatusCpu" Text="{Binding CpuText}" />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
                 <TextBlock Text="v1.1" Foreground="Gray" />
@@ -114,7 +119,7 @@
                 </Grid.RowDefinitions>
 
                 <!-- Sekce Akce -->
-                <GroupBox x:Name="GrpActions" Grid.Row="0" Header="Akce" Margin="8,8,8,4" Padding="8">
+                <GroupBox x:Name="GrpActions" Grid.Row="0" Header="{Binding GrpActionsHeader}" Margin="8,8,8,4" Padding="8">
                     <StackPanel x:Name="ActionsStack">
 
                         <!-- Dynamické TUI tlačítko -->
@@ -132,69 +137,80 @@
                         </Button>
 
                         <!-- Gateway tlačítka -->
-                        <TextBlock x:Name="TxtGatewayLabel" Text="Gateway:" FontWeight="Bold" Margin="0,4,0,4" />
+                        <TextBlock x:Name="TxtGatewayLabel" Text="{Binding GatewayLabel}" FontWeight="Bold" Margin="0,4,0,4" />
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="4" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Button x:Name="BtnGatewayStart" Grid.Column="0" Height="28">
+                            <Button x:Name="BtnGatewayStart" Grid.Column="0" Height="28"
+                                    IsEnabled="{Binding BtnGatewayStartEnabled}"
+                                    ToolTip="{Binding BtnGatewayStartToolTip}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="▶" Foreground="Green" FontWeight="Bold" Margin="0,0,6,0" />
-                                    <TextBlock x:Name="BtnGatewayStartLabel" Text="Start" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="BtnGatewayStartLabel" Text="{Binding BtnGatewayStartLabel}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="BtnGatewayStop" Grid.Column="2" Height="28" IsEnabled="False">
+                            <Button x:Name="BtnGatewayStop" Grid.Column="2" Height="28"
+                                    IsEnabled="{Binding BtnGatewayStopEnabled}"
+                                    ToolTip="{Binding BtnGatewayStopToolTip}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="■" Foreground="Red" FontWeight="Bold" Margin="0,0,6,0" />
-                                    <TextBlock x:Name="BtnGatewayStopLabel" Text="Stop" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="BtnGatewayStopLabel" Text="{Binding BtnGatewayStopLabel}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </Grid>
-                        <Button x:Name="BtnGatewayRestart" Height="28" Margin="0,0,0,8" IsEnabled="False">
+                        <Button x:Name="BtnGatewayRestart" Height="28" Margin="0,0,0,8"
+                                IsEnabled="{Binding BtnGatewayRestartEnabled}"
+                                ToolTip="{Binding BtnGatewayRestartToolTip}">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <TextBlock Text="↻" Foreground="Orange" FontWeight="Bold" FontSize="14" Margin="0,0,6,0" />
-                                <TextBlock x:Name="BtnGatewayRestartLabel" Text="Restart" VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnGatewayRestartLabel" Text="{Binding BtnGatewayRestartLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
                         <!-- Otevřít -->
-                        <TextBlock x:Name="TxtSectionOpen" Text="Otevřít:" FontWeight="Bold" Margin="0,4,0,4" />
-                        <Button x:Name="BtnOpenPowerShell" Height="28" Margin="0,0,0,4">
+                        <TextBlock x:Name="TxtSectionOpen" Text="{Binding SectionOpenLabel}" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Button x:Name="BtnOpenPowerShell" Height="28" Margin="0,0,0,4"
+                                ToolTip="{Binding BtnPowerShellToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="⚡" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnPowerShellLabel" Text="PowerShell" VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnPowerShellLabel" Text="{Binding BtnPowerShellLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="BtnOpenGatewayLog" Height="28" Margin="0,0,0,8">
+                        <Button x:Name="BtnOpenGatewayLog" Height="28" Margin="0,0,0,8"
+                                ToolTip="{Binding BtnGatewayLogToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="📄" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnGatewayLogLabel" Text="Gateway log" VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnGatewayLogLabel" Text="{Binding BtnGatewayLogLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
                         <!-- Nástroje -->
-                        <TextBlock x:Name="TxtSectionTools" Text="Nástroje:" FontWeight="Bold" Margin="0,4,0,4" />
-                        <Button x:Name="BtnCleaningTool" Height="28" Margin="0,0,0,4">
+                        <TextBlock x:Name="TxtSectionTools" Text="{Binding SectionToolsLabel}" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Button x:Name="BtnCleaningTool" Height="28" Margin="0,0,0,4"
+                                ToolTip="{Binding BtnCleaningToolToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🧹" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnCleaningToolLabel" Text="Vyčistit soubory" VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnCleaningToolLabel" Text="{Binding BtnCleaningToolLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="BtnTokenManager" Height="28" Margin="0,0,0,8">
+                        <Button x:Name="BtnTokenManager" Height="28" Margin="0,0,0,8"
+                                ToolTip="{Binding BtnTokenManagerToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🔑" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnTokenManagerLabel" Text="Správce API klíčů" VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnTokenManagerLabel" Text="{Binding BtnTokenManagerLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
                         <!-- Údržba -->
-                        <TextBlock x:Name="TxtSectionMaintenance" Text="Údržba:" FontWeight="Bold" Margin="0,4,0,4" />
-                        <Button x:Name="BtnDoctorFix" Height="28" Background="{DynamicResource Brush.ActionDanger}">
+                        <TextBlock x:Name="TxtSectionMaintenance" Text="{Binding SectionMaintenanceLabel}" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Button x:Name="BtnDoctorFix" Height="28" Background="{DynamicResource Brush.ActionDanger}"
+                                ToolTip="{Binding BtnDoctorFixToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🩺" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnDoctorFixLabel" Text="Opravit konfiguraci" VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnDoctorFixLabel" Text="{Binding BtnDoctorFixLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
@@ -202,14 +218,14 @@
                 </GroupBox>
 
                 <!-- Sekce Nástroje — používá se pro StandardDark layout. -->
-                <GroupBox x:Name="GrpTools" Grid.Row="1" Header="Nástroje" Margin="8,4,8,4" Padding="8"
+                <GroupBox x:Name="GrpTools" Grid.Row="1" Header="{Binding GrpToolsHeader}" Margin="8,4,8,4" Padding="8"
                           Visibility="Collapsed">
                     <StackPanel x:Name="ToolsStack" />
                 </GroupBox>
 
                 <!-- Sekce Měření latence -->
-                <GroupBox x:Name="GrpLatency" Grid.Row="2" Header="Měření latence" Margin="8,4,8,4" Padding="8"
-                          ToolTip="Měřeno z Gateway logu (res záznamy). Resetuje se při restartu Gateway.">
+                <GroupBox x:Name="GrpLatency" Grid.Row="2" Header="{Binding GrpLatencyHeader}" Margin="8,4,8,4" Padding="8"
+                          ToolTip="{Binding GrpLatencyToolTip}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -221,19 +237,20 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <TextBlock x:Name="TxtLatencyLast" Grid.Row="0" Grid.Column="0" Text="Poslední:" />
-                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="LatencyLast" Text="—" />
-                        <TextBlock x:Name="TxtLatencyAvg" Grid.Row="1" Grid.Column="0" Text="Průměr 10×:" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="LatencyAvg" Text="—" />
-                        <TextBlock x:Name="TxtLatencyMax" Grid.Row="2" Grid.Column="0" Text="Maximum:" />
-                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="LatencyMax" Text="—" />
-                        <TextBlock x:Name="TxtLatencyCount" Grid.Row="3" Grid.Column="0" Text="Requestů:" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" x:Name="LatencyCount" Text="—" />
+                        <TextBlock x:Name="TxtLatencyLast" Grid.Row="0" Grid.Column="0" Text="{Binding LatencyLastLabel}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="LatencyLast" Text="{Binding LatencyLastText}"
+                                   Foreground="{Binding LatencyLastColor}" />
+                        <TextBlock x:Name="TxtLatencyAvg" Grid.Row="1" Grid.Column="0" Text="{Binding LatencyAvgLabel}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="LatencyAvg" Text="{Binding LatencyAvgText}" />
+                        <TextBlock x:Name="TxtLatencyMax" Grid.Row="2" Grid.Column="0" Text="{Binding LatencyMaxLabel}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="LatencyMax" Text="{Binding LatencyMaxText}" />
+                        <TextBlock x:Name="TxtLatencyCount" Grid.Row="3" Grid.Column="0" Text="{Binding LatencyCountLabel}" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" x:Name="LatencyCount" Text="{Binding LatencyCountText}" />
                     </Grid>
                 </GroupBox>
 
                 <!-- Sekce Log aplikace -->
-                <GroupBox x:Name="GrpAppLog" Grid.Row="3" Header="Log aplikace" Margin="8,4,8,8" Padding="8">
+                <GroupBox x:Name="GrpAppLog" Grid.Row="3" Header="{Binding GrpAppLogHeader}" Margin="8,4,8,8" Padding="8">
                     <ListBox x:Name="AppLog"
                              FontFamily="Consolas" FontSize="11"
                              BorderThickness="0"

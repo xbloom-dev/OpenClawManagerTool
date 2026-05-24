@@ -10,24 +10,19 @@ using Microsoft.Extensions.DependencyInjection;
 using OpenClawManager.Models;
 using OpenClawManager.Services;
 using OpenClawManager.Views;
+using OpenClawManager.ViewModels;
 
 namespace OpenClawManager;
 
-public partial class MainWindow : Window
+public partial class MainWindow : Window, IMainWindowCallback
 {
     private readonly ISettingsService _settingsService;
     private readonly IGatewayService _gatewayService;
-    private readonly IResourceMonitor _resourceMonitor;
     private readonly IProcessDetector _processDetector;
     private readonly IAppEnvironment _env;
+    private readonly MainViewModel _vm;
     private readonly DispatcherTimer _statusTimer;
-    private DateTime? _gatewayStartTime;
-    private int? _lastKnownGatewayPid;
-    private bool _isStatusUpdateRunning;
-
-    private enum GatewayUiState { Stopped, Starting, Running, Failed }
-    private GatewayUiState _gatewayState = GatewayUiState.Stopped;
-    private bool _waitingForGatewayReady = false;
+    private Action<string> Log => _vm.Log;
 
     private static Brush ActionPositiveBrush =>
         ThemeService.GetBrush("Brush.ActionPositive", Color.FromRgb(0xD0, 0xFF, 0xD0));
@@ -50,7 +45,12 @@ public partial class MainWindow : Window
             new GatewayService(settingsService, new ProcessDetector()),
             new ResourceMonitor(),
             new ProcessDetector(),
-            env)
+            env,
+            new MainViewModel(
+                new GatewayService(settingsService, new ProcessDetector()),
+                new ResourceMonitor(),
+                new ProcessDetector(),
+                settingsService))
     {
     }
 
@@ -59,15 +59,22 @@ public partial class MainWindow : Window
         IGatewayService gatewayService,
         IResourceMonitor resourceMonitor,
         IProcessDetector processDetector,
-        IAppEnvironment env)
+        IAppEnvironment env,
+        MainViewModel viewModel)
     {
         _settingsService = settingsService;
         _gatewayService = gatewayService;
-        _resourceMonitor = resourceMonitor;
         _processDetector = processDetector;
         _env = env;
+        _vm = viewModel;
 
         InitializeComponent();
+        DataContext = _vm;
+
+        AppLog.ItemsSource = _vm.AppLogItems;
+        _vm.LogAppended += OnViewModelLogAppended;
+        _vm.GatewayReadyForTui += OnViewModelGatewayReadyForTui;
+        _vm.GatewayStateChanged += OnViewModelGatewayStateChanged;
 
         BtnStartTui.Click += BtnStartTui_Click;
         BtnGatewayStart.Click += BtnGatewayStart_Click;
@@ -108,12 +115,38 @@ public partial class MainWindow : Window
         _statusTimer.Start();
 
         ApplyLocalization();
-        _ = UpdateStatusAsync();
-        Log(L10n.Get("Str_Log_AppStarted"));
+        _ = _vm.UpdateStatusAsync();
+        _vm.Log(L10n.Get("Str_Log_AppStarted"));
 
         // v0.5: tema + splash screen (pořadí důležité: theme před splash)
         InitTheme();
         InitSplash();
+    }
+
+    void IMainWindowCallback.StartTui() => Terminal.StartTui();
+    void IMainWindowCallback.StopTui() => Terminal.StopTui();
+    bool IMainWindowCallback.IsTuiRunning => Terminal.IsTuiRunning;
+    void IMainWindowCallback.DisposeSplash() => DisposeSplash();
+    void IMainWindowCallback.RefreshLocalizationAndLayout()
+    {
+        ApplyLocalization();
+        ReapplyCurrentThemeLayoutAfterLocalization();
+    }
+
+    private void OnViewModelLogAppended(object? sender, EventArgs e)
+    {
+        if (AppLog.Items.Count > 0)
+            AppLog.ScrollIntoView(AppLog.Items[AppLog.Items.Count - 1]);
+    }
+
+    private void OnViewModelGatewayReadyForTui(object? sender, EventArgs e)
+    {
+        Terminal.StartTui();
+    }
+
+    private void OnViewModelGatewayStateChanged(object? sender, EventArgs e)
+    {
+        UpdateStartTuiButton(Terminal.IsTuiRunning);
     }
 
     private void TitleBarDragSurface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -146,43 +179,7 @@ public partial class MainWindow : Window
 
     public void ApplyLocalization()
     {
-        // Sekce headers
-        GrpActions.Header = L10n.Get("Str_Group_Actions");
-        GrpTools.Header = L10n.Get("Str_Section_Tools").TrimEnd(':');
-        GrpLatency.Header = L10n.Get("Str_Group_Latency");
-        GrpAppLog.Header = L10n.Get("Str_Group_AppLog");
-
-        // Latency labels
-        TxtLatencyLast.Text = L10n.Get("Str_Latency_Last");
-        TxtLatencyAvg.Text = L10n.Get("Str_Latency_Avg");
-        TxtLatencyMax.Text = L10n.Get("Str_Latency_Max");
-        TxtLatencyCount.Text = L10n.Get("Str_Latency_Count");
-
-        // Sekce labels
-        TxtGatewayLabel.Text = L10n.Get("Str_Gateway_Label");
-        TxtSectionOpen.Text = L10n.Get("Str_Section_Open");
-        TxtSectionTools.Text = L10n.Get("Str_Section_Tools");
-        TxtSectionMaintenance.Text = L10n.Get("Str_Section_Maintenance");
-
-        // Tlačítka — popisky
-        BtnGatewayStartLabel.Text = L10n.Get("Str_BtnGatewayStart");
-        BtnGatewayStopLabel.Text = L10n.Get("Str_BtnGatewayStop");
-        BtnGatewayRestartLabel.Text = L10n.Get("Str_BtnGatewayRestart");
-        BtnPowerShellLabel.Text = L10n.Get("Str_BtnPowerShell");
-        BtnGatewayLogLabel.Text = L10n.Get("Str_BtnGatewayLog");
-        BtnCleaningToolLabel.Text = L10n.Get("Str_BtnCleaningTool");
-        BtnTokenManagerLabel.Text = L10n.Get("Str_BtnTokenManager");
-        BtnDoctorFixLabel.Text = L10n.Get("Str_BtnDoctorFix");
-
-        // Tlačítka — tooltipy
-        BtnGatewayStart.ToolTip = L10n.Get("Str_Tip_GatewayStart");
-        BtnGatewayStop.ToolTip = L10n.Get("Str_Tip_GatewayStop");
-        BtnGatewayRestart.ToolTip = L10n.Get("Str_Tip_GatewayRestart");
-        BtnOpenPowerShell.ToolTip = L10n.Get("Str_Tip_PowerShell");
-        BtnOpenGatewayLog.ToolTip = L10n.Get("Str_Tip_GatewayLog");
-        BtnCleaningTool.ToolTip = L10n.Get("Str_Tip_CleaningTool");
-        BtnTokenManager.ToolTip = L10n.Get("Str_Tip_TokenManager");
-        BtnDoctorFix.ToolTip = L10n.Get("Str_Tip_DoctorFix");
+        _vm.RefreshLocalization();
 
         // Menu — headers
         MnuMenuOpen.Header = L10n.Get("Str_Menu_Open");
@@ -202,12 +199,6 @@ public partial class MainWindow : Window
         MnuMenuHelp.Header = L10n.Get("Str_Menu_Help");
         MnuAbout.Header = L10n.Get("Str_Menu_About");
         MnuOpenClawWeb.Header = L10n.Get("Str_Menu_OpenClawWeb");
-
-        // Latency section tooltip
-        bool cs = L10n.Current == L10n.Language.CS;
-        GrpLatency.ToolTip = cs
-            ? "Měřeno z Gateway logu (res záznamy). Resetuje se při restartu Gateway."
-            : "Measured from Gateway log (res entries). Resets on Gateway restart.";
 
         // TUI tlačítko — popisek + tooltip (volá UpdateStartTuiButton)
         UpdateStartTuiButton(Terminal.IsTuiRunning);
@@ -233,13 +224,13 @@ public partial class MainWindow : Window
             case Key.T:
                 BtnStartTui_Click(this, new RoutedEventArgs()); e.Handled = true; break;
             case Key.G:
-                if (_gatewayState == GatewayUiState.Running)
+                if (_vm.IsGatewayRunning)
                     BtnGatewayStop_Click(this, new RoutedEventArgs());
-                else if (_gatewayState == GatewayUiState.Stopped || _gatewayState == GatewayUiState.Failed)
+                else if (_vm.IsGatewayStoppedOrFailed)
                     BtnGatewayStart_Click(this, new RoutedEventArgs());
                 e.Handled = true; break;
             case Key.R:
-                if (_gatewayState == GatewayUiState.Running)
+                if (_vm.IsGatewayRunning)
                     BtnGatewayRestart_Click(this, new RoutedEventArgs());
                 e.Handled = true; break;
             case Key.L:
@@ -254,184 +245,13 @@ public partial class MainWindow : Window
 
     // ==================== STATUS UPDATE ====================
 
-    private async void StatusTimer_Tick(object? sender, EventArgs e) => await UpdateStatusAsync();
-
-    private async Task UpdateStatusAsync()
-    {
-        if (_isStatusUpdateRunning) return;
-        _isStatusUpdateRunning = true;
-        try
-        {
-            var snap = await _resourceMonitor.MeasureAsync();
-            StatusRam.Text = $"RAM: {snap.RamUsedGb:F1}/{snap.RamTotalGb:F1} GB";
-            StatusCpu.Text = $"CPU: {snap.CpuPercent}%";
-
-            if (snap.VramUsedGb.HasValue)
-            {
-                StatusVram.Text = $"VRAM: {snap.VramUsedGb.Value:F1}/{snap.VramTotalGb!.Value:F1} GB";
-                StatusVram.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                StatusVram.Visibility = Visibility.Collapsed;
-            }
-
-            var gateway = await _processDetector.FindGatewayProcessAsync();
-            UpdateGatewayStatusWithResult(gateway);
-            await UpdateLatencyStatsAsync();
-        }
-        catch (Exception ex)
-        {
-            Log($"[CHYBA] Status update selhal: {ex.Message}");
-        }
-        finally
-        {
-            _isStatusUpdateRunning = false;
-        }
-    }
-
-    private void UpdateGatewayStatusWithResult(Process? gateway)
-    {
-        if (gateway != null)
-        {
-            if (_lastKnownGatewayPid != gateway.Id)
-            {
-                _lastKnownGatewayPid = gateway.Id;
-                try { _gatewayStartTime = gateway.StartTime; }
-                catch { _gatewayStartTime = DateTime.Now; }
-            }
-
-            if (!_waitingForGatewayReady)
-                SetGatewayUiState(GatewayUiState.Running, gateway);
-        }
-        else
-        {
-            _lastKnownGatewayPid = null;
-            _gatewayStartTime = null;
-
-            if (_gatewayState != GatewayUiState.Starting && _gatewayState != GatewayUiState.Failed)
-                SetGatewayUiState(GatewayUiState.Stopped, null);
-            else
-                SetGatewayUiButtons(_gatewayState);
-        }
-    }
-
-    private async Task UpdateLatencyStatsAsync()
-    {
-        var logPath = _settingsService.Settings.GetTodayGatewayLogPath();
-        await LatencyTracker.PollAsync(logPath);
-
-        var stats = LatencyTracker.GetStats();
-
-        if (stats.Count == 0)
-        {
-            LatencyLast.Text = "—";
-            LatencyAvg.Text = "—";
-            LatencyMax.Text = "—";
-            LatencyCount.Text = "—";
-            LatencyLast.Foreground = SystemColors.ControlTextBrush;
-            return;
-        }
-
-        LatencyLast.Text = stats.LastMs.HasValue ? $"{stats.LastMs} ms" : "—";
-        LatencyAvg.Text = stats.AvgMs.HasValue ? $"{stats.AvgMs:F0} ms" : "—";
-        LatencyMax.Text = stats.MaxMs.HasValue ? $"{stats.MaxMs} ms" : "—";
-        LatencyCount.Text = stats.Count.ToString();
-
-        if (stats.LastMs.HasValue)
-        {
-            LatencyLast.Foreground = stats.LastMs > 5000 ? Brushes.Red
-                                   : stats.LastMs < 1000 ? Brushes.Green
-                                   : SystemColors.ControlTextBrush;
-        }
-    }
-
-    private void SetGatewayUiState(GatewayUiState newState, Process? gateway)
-    {
-        _gatewayState = newState;
-
-        switch (newState)
-        {
-            case GatewayUiState.Running:
-                StatusGatewayDot.Fill = Brushes.LimeGreen;
-                StatusGatewayText.Text = L10n.Get("Str_Status_Running");
-                if (gateway != null)
-                {
-                    StatusGatewayPid.Text = $"PID: {gateway.Id}";
-                    StatusGatewayPidItem.Visibility = Visibility.Visible;
-                    StatusGatewayDetailsSep.Visibility = Visibility.Visible;
-                }
-                if (_gatewayStartTime.HasValue)
-                {
-                    var up = DateTime.Now - _gatewayStartTime.Value;
-                    StatusGatewayUptime.Text = $"uptime: {(int)up.TotalHours}:{up.Minutes:D2}:{up.Seconds:D2}";
-                    StatusGatewayUptimeItem.Visibility = Visibility.Visible;
-                    StatusGatewayUptimeSep.Visibility = Visibility.Visible;
-                }
-                break;
-
-            case GatewayUiState.Starting:
-                StatusGatewayDot.Fill = Brushes.Orange;
-                StatusGatewayText.Text = L10n.Get("Str_Status_Starting");
-                HideGatewayDetails();
-                break;
-
-            case GatewayUiState.Failed:
-                StatusGatewayDot.Fill = Brushes.Red;
-                StatusGatewayText.Text = L10n.Get("Str_Status_Failed");
-                HideGatewayDetails();
-                break;
-
-            default:
-                StatusGatewayDot.Fill = Brushes.Gray;
-                StatusGatewayText.Text = L10n.Get("Str_Status_Stopped");
-                HideGatewayDetails();
-                break;
-        }
-
-        SetGatewayUiButtons(newState);
-        UpdateStartTuiButton(Terminal.IsTuiRunning);
-    }
-
-    private void HideGatewayDetails()
-    {
-        StatusGatewayPidItem.Visibility = Visibility.Collapsed;
-        StatusGatewayDetailsSep.Visibility = Visibility.Collapsed;
-        StatusGatewayUptimeItem.Visibility = Visibility.Collapsed;
-        StatusGatewayUptimeSep.Visibility = Visibility.Collapsed;
-    }
-
-    private void SetGatewayUiButtons(GatewayUiState state)
-    {
-        switch (state)
-        {
-            case GatewayUiState.Running:
-                BtnGatewayStart.IsEnabled = false;
-                BtnGatewayStop.IsEnabled = true;
-                BtnGatewayRestart.IsEnabled = true;
-                break;
-            case GatewayUiState.Starting:
-                BtnGatewayStart.IsEnabled = false;
-                BtnGatewayStop.IsEnabled = false;
-                BtnGatewayRestart.IsEnabled = false;
-                break;
-            default:
-                BtnGatewayStart.IsEnabled = true;
-                BtnGatewayStop.IsEnabled = false;
-                BtnGatewayRestart.IsEnabled = false;
-                break;
-        }
-    }
+    private async void StatusTimer_Tick(object? sender, EventArgs e) => await _vm.UpdateStatusAsync();
 
     // ==================== Gateway tlačítka ====================
 
     private void BtnGatewayStart_Click(object? sender, RoutedEventArgs e)
     {
-        Log(L10n.Get("Str_Log_GatewayStarting"));
-        _waitingForGatewayReady = true;
-        SetGatewayUiState(GatewayUiState.Starting, null);
-        _gatewayService.Start();
-        _ = WatchForGatewayReady();
+        _vm.StartGateway();
     }
 
     private void BtnGatewayStop_Click(object? sender, RoutedEventArgs e)
@@ -439,67 +259,15 @@ public partial class MainWindow : Window
         var dialog = new StopGatewayDialog { Owner = this };
         if (dialog.ShowDialog() != true) return;
 
-        _waitingForGatewayReady = false;
+        _vm.ResetLatencyAndWaiting();
         Terminal.StopTui();
-        LatencyTracker.Reset();
-
-        if (dialog.CloseTui)
-        {
-            Log(L10n.Get("Str_Log_StoppingGatewayTui"));
-            _gatewayService.StopAndCloseTui();
-        }
-        else
-        {
-            Log(L10n.Get("Str_Log_GatewayStopping"));
-            _gatewayService.Stop();
-        }
-        Log(L10n.Get("Str_Log_GatewayStopped"));
+        _vm.StopGateway(dialog.CloseTui);
     }
 
     private async void BtnGatewayRestart_Click(object? sender, RoutedEventArgs e)
     {
-        BtnGatewayRestart.IsEnabled = false;
-        _waitingForGatewayReady = true;
         Terminal.StopTui();
-        LatencyTracker.Reset();
-        Log("Restart Gateway...");
-
-        try
-        {
-            SetGatewayUiState(GatewayUiState.Starting, null);
-            await _gatewayService.RestartAsync();
-            _ = WatchForGatewayReady();
-        }
-        catch (Exception ex)
-        {
-            _waitingForGatewayReady = false;
-            Log($"[CHYBA] Restart selhal: {ex.Message}");
-        }
-    }
-
-    private async Task WatchForGatewayReady()
-    {
-        var logPath = _settingsService.Settings.GetTodayGatewayLogPath();
-        try
-        {
-            var ready = await LogMonitor.WaitForGatewayReady(logPath, 180);
-            _waitingForGatewayReady = false;
-
-            if (ready)
-            {
-                Log(L10n.Get("Str_Log_GatewayReady"));
-                var gw = _processDetector.FindGatewayProcess();
-                SetGatewayUiState(GatewayUiState.Running, gw);
-                Log(L10n.Get("Str_Log_TuiStarting"));
-                Terminal.StartTui();
-            }
-            else
-            {
-                Log(L10n.Get("Str_Log_GatewayTimeout") + " 180s.");
-                SetGatewayUiState(GatewayUiState.Failed, null);
-            }
-        }
-        catch { _waitingForGatewayReady = false; }
+        await _vm.RestartGatewayAsync();
     }
 
     // ==================== TUI tlačítko ====================
@@ -514,67 +282,36 @@ public partial class MainWindow : Window
         {
             if (Terminal.IsTuiRunning)
             {
-                Log(L10n.Get("Str_Log_TuiStopping"));
+                _vm.Log(L10n.Get("Str_Log_TuiStopping"));
                 Terminal.StopTui();
                 return;
             }
 
-            if (_gatewayState == GatewayUiState.Running)
+            if (_vm.IsGatewayRunning)
             {
-                Log(L10n.Get("Str_Log_TuiStarting"));
+                _vm.Log(L10n.Get("Str_Log_TuiStarting"));
                 Terminal.StartTui();
                 return;
             }
 
-            _waitingForGatewayReady = true;
             var logPath = _settingsService.Settings.GetTodayGatewayLogPath();
 
-            Log(L10n.Get("Str_Log_DeletingLog"));
+            _vm.Log(L10n.Get("Str_Log_DeletingLog"));
             LogMonitor.DeleteLogIfExists(logPath);
-            LatencyTracker.Reset();
+            _vm.ResetLatencyAndWaiting();
 
             if (_processDetector.IsGatewayRunning())
             {
-                Log(L10n.Get("Str_Log_GatewayStopping"));
+                _vm.Log(L10n.Get("Str_Log_GatewayStopping"));
                 _gatewayService.Stop();
                 await Task.Delay(2000);
             }
 
-            Log(L10n.Get("Str_Log_GatewayStarting"));
-            SetGatewayUiState(GatewayUiState.Starting, null);
-            var proc = _gatewayService.Start();
-            if (proc == null)
-            {
-                _waitingForGatewayReady = false;
-                Log("[CHYBA] Gateway nebylo možné spustit.");
-                SetGatewayUiState(GatewayUiState.Failed, null);
-                return;
-            }
-
-            Log(L10n.Get("Str_Log_WaitingGatewayReady"));
-            var startTime = DateTime.Now;
-            var ready = await LogMonitor.WaitForGatewayReady(logPath, 180);
-            var elapsed = (DateTime.Now - startTime).TotalSeconds;
-            _waitingForGatewayReady = false;
-
-            if (!ready)
-            {
-                Log($"{L10n.Get("Str_Log_GatewayTimeout")} {elapsed:F1}s.");
-                SetGatewayUiState(GatewayUiState.Failed, null);
-                return;
-            }
-
-            Log($"{L10n.Get("Str_Log_GatewayReadyIn")} {elapsed:F1}s.");
-            var gw = _processDetector.FindGatewayProcess();
-            SetGatewayUiState(GatewayUiState.Running, gw);
-
-            Log(L10n.Get("Str_Log_TuiStarting"));
-            Terminal.StartTui();
+            _vm.StartGateway();
         }
         catch (Exception ex)
         {
-            _waitingForGatewayReady = false;
-            Log($"[CHYBA] {ex.Message}");
+            _vm.Log($"[CHYBA] {ex.Message}");
         }
         finally
         {
@@ -599,7 +336,7 @@ public partial class MainWindow : Window
             BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Stop");
             BtnStartTui.Background = ActionDangerBrush;
         }
-        else if (_gatewayState == GatewayUiState.Running)
+        else if (_vm.IsGatewayRunning)
         {
             BtnStartTuiSymbol.Text = "▶";
             BtnStartTuiSymbol.Foreground = Brushes.Green;
@@ -623,11 +360,11 @@ public partial class MainWindow : Window
 
     private void BtnCleaningTool_Click(object? sender, RoutedEventArgs e)
     {
-        Log(L10n.Get("Str_Log_OpeningCleaningTool"));
+        _vm.Log(L10n.Get("Str_Log_OpeningCleaningTool"));
         var dialog = App.GetService<CleaningWindow>();
         dialog.Owner = this;
         dialog.ShowDialog();
-        Log(L10n.Get("Str_Log_ClosedCleaningTool"));
+        _vm.Log(L10n.Get("Str_Log_ClosedCleaningTool"));
     }
 
     private void BtnTokenManager_Click(object? sender, RoutedEventArgs e)
@@ -638,15 +375,14 @@ public partial class MainWindow : Window
 
     private void BtnDoctorFix_Click(object? sender, RoutedEventArgs e)
     {
-        Log(L10n.Get("Str_Log_DoctorFix"));
-        _gatewayService.RunDoctorFix();
+        _vm.RunDoctorFix();
     }
 
     private void OpenInExplorer(string path)
     {
-        if (!Directory.Exists(path)) { Log($"[CHYBA] Složka neexistuje: {path}"); return; }
+        if (!Directory.Exists(path)) { _vm.Log($"[CHYBA] Složka neexistuje: {path}"); return; }
         try { Process.Start(new ProcessStartInfo { FileName = "explorer.exe", Arguments = $"\"{path}\"", UseShellExecute = true }); }
-        catch (Exception ex) { Log($"[CHYBA] {ex.Message}"); }
+        catch (Exception ex) { _vm.Log($"[CHYBA] {ex.Message}"); }
     }
 
     private void OpenPowerShell()
@@ -654,7 +390,7 @@ public partial class MainWindow : Window
         var workDir = _settingsService.Settings.PowerShellWorkingDir;
         if (!Directory.Exists(workDir)) workDir = "";
         try { Process.Start(new ProcessStartInfo { FileName = "powershell.exe", Arguments = "-NoExit -NoProfile", UseShellExecute = true, WorkingDirectory = workDir }); }
-        catch (Exception ex) { Log($"[CHYBA] {ex.Message}"); }
+        catch (Exception ex) { _vm.Log($"[CHYBA] {ex.Message}"); }
     }
 
     private void OpenGatewayLog(int lines)
@@ -687,9 +423,10 @@ public partial class MainWindow : Window
             var lang = _settingsService.Settings.Language == "EN"
                 ? L10n.Language.EN : L10n.Language.CS;
             L10n.Apply(lang);
+            _vm.RefreshLocalization();
             ApplyLocalization();
             ReapplyCurrentThemeLayoutAfterLocalization();
-            Log(L10n.Get("Str_Log_SettingsSaved"));
+            _vm.Log(L10n.Get("Str_Log_SettingsSaved"));
         }
     }
 
@@ -744,11 +481,11 @@ public partial class MainWindow : Window
     {
         if (Terminal.IsTuiRunning)
         {
-            Log("[About] Splash replay skipped because OpenClaw TUI is running.");
+            _vm.Log("[About] Splash replay skipped because OpenClaw TUI is running.");
             return;
         }
 
-        Log("[About] Replaying splash screen.");
+        _vm.Log("[About] Replaying splash screen.");
         StopSplashVideo();
         InitSplash();
     }
@@ -758,21 +495,21 @@ public partial class MainWindow : Window
         var settings = _settingsService.Settings;
         if (settings.Theme == theme)
         {
-            Log($"[About] Theme already active: {theme}.");
+            _vm.Log($"[About] Theme already active: {theme}.");
             return;
         }
 
         settings.Theme = theme;
         if (!_settingsService.Save(settings))
         {
-            Log($"[CHYBA] Theme switch failed: {theme}.");
+            _vm.Log($"[CHYBA] Theme switch failed: {theme}.");
             return;
         }
 
         ThemeService.Apply(theme);
         ApplyLocalization();
         ReapplyCurrentThemeLayoutAfterLocalization();
-        Log($"[About] Theme switched to {theme}.");
+        _vm.Log($"[About] Theme switched to {theme}.");
     }
 
     private static void ShowAboutCommandHelp()
@@ -788,14 +525,6 @@ public partial class MainWindow : Window
     {
         try { Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true }); }
         catch { }
-    }
-
-    private void Log(string message)
-    {
-        var ts = DateTime.Now.ToString("HH:mm:ss");
-        AppLog.Items.Add($"[{ts}] {message}");
-        while (AppLog.Items.Count > 100) AppLog.Items.RemoveAt(0);
-        if (AppLog.Items.Count > 0) AppLog.ScrollIntoView(AppLog.Items[AppLog.Items.Count - 1]);
     }
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -835,6 +564,9 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        _vm.LogAppended -= OnViewModelLogAppended;
+        _vm.GatewayReadyForTui -= OnViewModelGatewayReadyForTui;
+        _vm.GatewayStateChanged -= OnViewModelGatewayStateChanged;
         ThemeService.ThemeChanged -= OnThemeChanged;
         base.OnClosed(e);
     }
