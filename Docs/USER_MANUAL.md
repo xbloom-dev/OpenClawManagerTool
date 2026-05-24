@@ -297,7 +297,7 @@ Click **Add** and fill in:
 **Rotate** — sets a new value without losing the ID and description.
 **Delete** — removes the token from the vault.
 
-### Vault backup and restore (`.ocvault`) — new in v1.1
+### Vault backup and restore (`.ocvault`)
 
 The vault is bound to your Windows profile (DPAPI), so it cannot simply be copied to another machine. For transfer or a safety backup, use the portable `.ocvault` format:
 
