@@ -8,6 +8,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddOpenClawManagerServices(this IServiceCollection services)
     {
+        services.AddSingleton<IAppEnvironment, AppEnvironment>();
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IGatewayService, GatewayService>();
         services.AddSingleton<IResourceMonitor, ResourceMonitor>();

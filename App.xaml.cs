@@ -3,6 +3,7 @@ using System.Windows.Media.Imaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using OpenClawManager.Services;
+using OpenClawManager.Views;
 
 namespace OpenClawManager;
 
@@ -25,6 +26,10 @@ public partial class App : Application
             .ConfigureServices(ConfigureServices)
             .Build();
         _host.Start();
+
+        var environment = Services.GetRequiredService<IAppEnvironment>();
+        TerminalControl.EnvironmentOverride = environment;
+        TokenService.EnvironmentOverride = environment;
 
         var settingsService = Services.GetRequiredService<ISettingsService>();
 

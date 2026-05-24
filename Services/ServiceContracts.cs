@@ -4,6 +4,13 @@ using static OpenClawManager.Services.ResourceMonitor;
 
 namespace OpenClawManager.Services;
 
+public interface IAppEnvironment
+{
+    string SettingsFilePath { get; }
+    string WebView2DataRoot { get; }
+    string AppBaseDirectory { get; }
+}
+
 public interface ISettingsService
 {
     string SettingsFilePath { get; }

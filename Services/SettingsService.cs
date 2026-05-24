@@ -16,7 +16,12 @@ public sealed class SettingsService : ISettingsService
     public event EventHandler? SettingsChanged;
 
     public SettingsService()
-        : this(GetDefaultSettingsFilePath())
+        : this(new AppEnvironment())
+    {
+    }
+
+    public SettingsService(IAppEnvironment env)
+        : this(env.SettingsFilePath)
     {
     }
 

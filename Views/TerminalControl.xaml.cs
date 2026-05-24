@@ -26,6 +26,8 @@ namespace OpenClawManager.Views;
 /// </summary>
 public partial class TerminalControl : UserControl
 {
+    internal static IAppEnvironment? EnvironmentOverride { get; set; }
+
     private ConPtyProcess? _conpty;
     private bool _webViewReady = false;
     private bool _webViewFailed = false;
@@ -239,15 +241,14 @@ public partial class TerminalControl : UserControl
 
     private static string GetWebViewUserDataFolder()
     {
+        var appEnvironment = EnvironmentOverride ?? new AppEnvironment();
         var processFolder = Process.GetCurrentProcess().Id.ToString();
-        var primary = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "OpenClawManager", "WebView2", processFolder);
+        var primary = Path.Combine(appEnvironment.WebView2DataRoot, processFolder);
 
         if (TryPrepareUserDataFolder(primary))
             return primary;
 
-        var fallback = Path.Combine(AppContext.BaseDirectory, "WebView2Data", processFolder);
+        var fallback = Path.Combine(appEnvironment.AppBaseDirectory, "WebView2Data", processFolder);
         Directory.CreateDirectory(fallback);
         return fallback;
     }

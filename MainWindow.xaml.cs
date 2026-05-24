@@ -19,6 +19,7 @@ public partial class MainWindow : Window
     private readonly IGatewayService _gatewayService;
     private readonly IResourceMonitor _resourceMonitor;
     private readonly IProcessDetector _processDetector;
+    private readonly IAppEnvironment _env;
     private readonly DispatcherTimer _statusTimer;
     private DateTime? _gatewayStartTime;
     private int? _lastKnownGatewayPid;
@@ -34,16 +35,22 @@ public partial class MainWindow : Window
         ThemeService.GetBrush("Brush.ActionDanger", Color.FromRgb(0xFF, 0xD0, 0xD0));
 
     public MainWindow()
-        : this(new SettingsService())
+        : this(new AppEnvironment())
     {
     }
 
-    private MainWindow(ISettingsService settingsService)
+    private MainWindow(IAppEnvironment env)
+        : this(new SettingsService(env), env)
+    {
+    }
+
+    private MainWindow(ISettingsService settingsService, IAppEnvironment env)
         : this(
             settingsService,
             new GatewayService(settingsService, new ProcessDetector()),
             new ResourceMonitor(),
-            new ProcessDetector())
+            new ProcessDetector(),
+            env)
     {
     }
 
@@ -51,12 +58,14 @@ public partial class MainWindow : Window
         ISettingsService settingsService,
         IGatewayService gatewayService,
         IResourceMonitor resourceMonitor,
-        IProcessDetector processDetector)
+        IProcessDetector processDetector,
+        IAppEnvironment env)
     {
         _settingsService = settingsService;
         _gatewayService = gatewayService;
         _resourceMonitor = resourceMonitor;
         _processDetector = processDetector;
+        _env = env;
 
         InitializeComponent();
 
