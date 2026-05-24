@@ -8,14 +8,15 @@ namespace OpenClawManager.Services;
 /// Použité metody přesně odpovídají osvědčeným postupům z PowerShell skriptů
 /// (Win32_OperatingSystem, Win32_Processor, nvidia-smi).
 /// </summary>
-public static class ResourceMonitor
+public sealed class ResourceMonitor : IResourceMonitor
 {
-    private static readonly SemaphoreSlim MeasureLock = new(1, 1);
     private static readonly TimeSpan WmiCacheDuration = TimeSpan.FromSeconds(4);
     private static readonly TimeSpan VramCacheDuration = TimeSpan.FromSeconds(4);
-    private static ResourceSnapshot? _lastSnapshot;
-    private static DateTime _lastWmiMeasureUtc = DateTime.MinValue;
-    private static DateTime _lastVramMeasureUtc = DateTime.MinValue;
+
+    private readonly SemaphoreSlim _measureLock = new(1, 1);
+    private ResourceSnapshot? _lastSnapshot;
+    private DateTime _lastWmiMeasureUtc = DateTime.MinValue;
+    private DateTime _lastVramMeasureUtc = DateTime.MinValue;
 
     /// <summary>
     /// Snapshot všech aktuálních hodnot zdrojů.
@@ -31,9 +32,9 @@ public static class ResourceMonitor
     /// <summary>
     /// Změří aktuální zdroje. Pokud nějaké měření selže, vrátí jen co se podařilo.
     /// </summary>
-    public static async Task<ResourceSnapshot> MeasureAsync(CancellationToken cancellationToken = default)
+    public async Task<ResourceSnapshot> MeasureAsync(CancellationToken cancellationToken = default)
     {
-        await MeasureLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await _measureLock.WaitAsync(cancellationToken).ConfigureAwait(false);
         try
         {
             var now = DateTime.UtcNow;
@@ -82,14 +83,14 @@ public static class ResourceMonitor
         }
         finally
         {
-            MeasureLock.Release();
+            _measureLock.Release();
         }
     }
 
     /// <summary>
     /// Synchronní kompatibilní wrapper. UI má používat MeasureAsync().
     /// </summary>
-    public static ResourceSnapshot Measure()
+    public ResourceSnapshot Measure()
     {
         return MeasureAsync().GetAwaiter().GetResult();
     }
@@ -98,7 +99,7 @@ public static class ResourceMonitor
     /// RAM přes Win32_OperatingSystem (TotalVisibleMemorySize, FreePhysicalMemory).
     /// Vrací GB, zaokrouhleno na 1 desetinné místo.
     /// </summary>
-    private static (double used, double total) MeasureRam()
+    private (double used, double total) MeasureRam()
     {
         try
         {
@@ -131,7 +132,7 @@ public static class ResourceMonitor
     /// CPU přes Win32_Processor (LoadPercentage).
     /// Funguje na české i anglické lokalizaci Windows (na rozdíl od Get-Counter).
     /// </summary>
-    private static int MeasureCpu()
+    private int MeasureCpu()
     {
         try
         {
@@ -158,7 +159,7 @@ public static class ResourceMonitor
     /// <summary>
     /// VRAM přes nvidia-smi. Vrací null pokud GPU nedostupné nebo nvidia-smi chybí.
     /// </summary>
-    private static async Task<(double? used, double? total)> MeasureVramAsync(CancellationToken cancellationToken)
+    private async Task<(double? used, double? total)> MeasureVramAsync(CancellationToken cancellationToken)
     {
         Process? proc = null;
         try
@@ -216,7 +217,7 @@ public static class ResourceMonitor
         }
     }
 
-    private static void KillProcessTree(Process proc)
+    private void KillProcessTree(Process proc)
     {
         try
         {
