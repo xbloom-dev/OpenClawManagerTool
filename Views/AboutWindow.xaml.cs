@@ -11,14 +11,16 @@ namespace OpenClawManager.Views;
 public partial class AboutWindow : Window
 {
     private const string CommandPrefix = "command:";
+    private readonly IAppEnvironment _env;
 
     public AboutWindow()
-        : this(new AboutViewModel())
+        : this(new AboutViewModel(), new AppEnvironment())
     {
     }
 
-    public AboutWindow(AboutViewModel viewModel)
+    public AboutWindow(AboutViewModel viewModel, IAppEnvironment env)
     {
+        _env = env;
         InitializeComponent();
         DataContext = viewModel;
         ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
@@ -53,14 +55,13 @@ public partial class AboutWindow : Window
             mainWindow.ExecuteAboutCommand(command);
     }
 
-    private static string? FindSvgPath()
+    private string? FindSvgPath()
     {
-        var exeDir = AppContext.BaseDirectory;
+        var exeDir = _env.AppBaseDirectory;
         var candidates = new[]
         {
             Path.Combine(exeDir, "Resources", "app-logo.svg"),
-            Path.Combine(exeDir, "app-logo.svg"),
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "app-logo.svg"),
+            Path.Combine(exeDir, "app-logo.svg")
         };
         return candidates.FirstOrDefault(File.Exists);
     }

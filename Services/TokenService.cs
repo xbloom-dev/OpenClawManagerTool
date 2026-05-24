@@ -47,6 +47,8 @@ internal sealed record VaultBackupFile(
 
 public static class TokenService
 {
+    internal static IAppEnvironment? EnvironmentOverride { get; set; }
+
     private static readonly Regex IdRegex = new("^[a-zA-Z0-9_]{1,64}$", RegexOptions.Compiled);
     private static readonly Regex PlaceholderRegex = new(@"\[REDACTED_([a-zA-Z0-9_]{1,64})\]", RegexOptions.Compiled);
     private static readonly byte[] DpapiEntropy = SHA256.HashData(Encoding.UTF8.GetBytes("OpenClawManager.TokenVault.v1"));
@@ -88,7 +90,8 @@ public static class TokenService
         if (!string.IsNullOrWhiteSpace(userProfile))
             return Path.Combine(userProfile, ".token-manager", "secrets.json");
 
-        return Path.Combine(AppContext.BaseDirectory, "secrets.json");
+        var baseDir = (EnvironmentOverride ?? new AppEnvironment()).AppBaseDirectory;
+        return Path.Combine(baseDir, "secrets.json");
     }
 
     public static bool EnsureVaultExists(string path)
