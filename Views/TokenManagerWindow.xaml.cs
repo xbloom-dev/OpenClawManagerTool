@@ -11,11 +11,13 @@ namespace OpenClawManager.Views;
 
 public partial class TokenManagerWindow : Window
 {
+    private readonly ITokenService _tokenService;
+    private readonly ISettingsService _settingsService;
     private readonly ObservableCollection<TokenEntry> _tokens = new();
     private string? _gitCheckPath;
     private bool? _isTrackedByGit;
 
-    private string VaultPath => OpenClawManager.App.GetService<ISettingsService>().Settings.TokenManagerSecretsPath;
+    private string VaultPath => _settingsService.Settings.TokenManagerSecretsPath;
     private static string S(string key) => L10n.Get(key);
     private static string F(string key, params object[] args) => L10n.Format(key, args);
     private static Brush ActionPositiveBrush =>
@@ -26,7 +28,15 @@ public partial class TokenManagerWindow : Window
         ThemeService.GetBrush("Brush.ActionUtility", Color.FromRgb(0xD0, 0xE8, 0xFF));
 
     public TokenManagerWindow()
+        : this(OpenClawManager.App.GetService<ITokenService>(), OpenClawManager.App.GetService<ISettingsService>())
     {
+    }
+
+    public TokenManagerWindow(ITokenService tokenService, ISettingsService settingsService)
+    {
+        _tokenService = tokenService;
+        _settingsService = settingsService;
+
         InitializeComponent();
         ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
 
@@ -52,8 +62,8 @@ public partial class TokenManagerWindow : Window
         BtnVerify.Click += (_, _) => VerifySelectedFile();
         BtnClose.Click += (_, _) => Close();
 
-        OpenClawManager.App.GetService<ISettingsService>().SettingsChanged += SettingsService_SettingsChanged;
-        Closed += (_, _) => OpenClawManager.App.GetService<ISettingsService>().SettingsChanged -= SettingsService_SettingsChanged;
+        _settingsService.SettingsChanged += SettingsService_SettingsChanged;
+        Closed += (_, _) => _settingsService.SettingsChanged -= SettingsService_SettingsChanged;
 
         ApplyLocalization();
         TxtVaultPath.Text = VaultPath;
@@ -131,7 +141,7 @@ public partial class TokenManagerWindow : Window
         if (!ConfirmRiskyVaultLocation()) return;
         try
         {
-            var created = TokenService.EnsureVaultExists(VaultPath);
+            var created = _tokenService.EnsureVaultExists(VaultPath);
             AppendOutput(created ? F("Str_Token_VaultCreated", VaultPath) : F("Str_Token_VaultExists", VaultPath));
             LoadTokens(forceGitCheck: true);
         }
@@ -140,7 +150,7 @@ public partial class TokenManagerWindow : Window
 
     private bool ConfirmRiskyVaultLocation()
     {
-        var safety = TokenService.AnalyzeVaultPath(VaultPath, OpenClawManager.App.GetService<ISettingsService>().Settings.OpenClawPath);
+        var safety = _tokenService.AnalyzeVaultPath(VaultPath, _settingsService.Settings.OpenClawPath);
         if (safety.IsSafe) return true;
         var message = F("Str_Token_RiskyVaultMessage", string.Join("\n", safety.Warnings));
         return MessageBox.Show(message, S("Str_Token_RiskyVaultTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes;
@@ -159,10 +169,10 @@ public partial class TokenManagerWindow : Window
                 UpdateTokenButtons();
                 return;
             }
-            var vault = TokenService.LoadVault(VaultPath);
+            var vault = _tokenService.LoadVault(VaultPath);
             foreach (var token in vault.Tokens.OrderBy(t => t.Id, StringComparer.Ordinal)) _tokens.Add(token);
             AppendOutput(F("Str_Token_LoadedCount", _tokens.Count));
-            AppendOutput(TokenService.IsVaultEncryptedAtRest(VaultPath) ? S("Str_Token_VaultEncrypted") : S("Str_Token_VaultPlainWarning"));
+            AppendOutput(_tokenService.IsVaultEncryptedAtRest(VaultPath) ? S("Str_Token_VaultEncrypted") : S("Str_Token_VaultPlainWarning"));
             if (IsVaultTrackedByGitCached(forceGitCheck)) AppendOutput(S("Str_Token_VaultGitWarning"));
         }
         catch (Exception ex) { ShowError(ex.Message); }
@@ -173,13 +183,13 @@ public partial class TokenManagerWindow : Window
     {
         if (!force && string.Equals(_gitCheckPath, VaultPath, StringComparison.OrdinalIgnoreCase) && _isTrackedByGit.HasValue) return _isTrackedByGit.Value;
         _gitCheckPath = VaultPath;
-        _isTrackedByGit = TokenService.IsVaultTrackedByGit(VaultPath);
+        _isTrackedByGit = _tokenService.IsVaultTrackedByGit(VaultPath);
         return _isTrackedByGit.Value;
     }
 
     private void UpdateVaultSafetyBanner()
     {
-        var safety = TokenService.AnalyzeVaultPath(VaultPath, OpenClawManager.App.GetService<ISettingsService>().Settings.OpenClawPath);
+        var safety = _tokenService.AnalyzeVaultPath(VaultPath, _settingsService.Settings.OpenClawPath);
         VaultWarningBanner.Visibility = safety.IsSafe ? Visibility.Collapsed : Visibility.Visible;
         TxtVaultWarning.Text = safety.IsSafe ? "" : S("Str_Token_SecurityWarningPrefix") + string.Join(" ", safety.Warnings);
     }
@@ -188,7 +198,7 @@ public partial class TokenManagerWindow : Window
     {
         var dialog = new TokenEditWindow(S("Str_Token_AddTitle")) { Owner = this };
         if (dialog.ShowDialog() != true) return;
-        try { TokenService.AddToken(VaultPath, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(F("Str_Token_TokenAdded", dialog.TokenId)); LoadTokens(); }
+        try { _tokenService.AddToken(VaultPath, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(F("Str_Token_TokenAdded", dialog.TokenId)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
@@ -198,7 +208,7 @@ public partial class TokenManagerWindow : Window
         if (fileDialog.ShowDialog() != true) return;
         var dialog = new TokenImportWindow(fileDialog.FileName) { Owner = this };
         if (dialog.ShowDialog() != true) return;
-        try { TokenService.AddToken(VaultPath, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(F("Str_Token_TokenImported", dialog.TokenId)); LoadTokens(); }
+        try { _tokenService.AddToken(VaultPath, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(F("Str_Token_TokenImported", dialog.TokenId)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
@@ -207,7 +217,7 @@ public partial class TokenManagerWindow : Window
         if (TokenGrid.SelectedItem is not TokenEntry token) return;
         var dialog = new TokenEditWindow(S("Str_Token_EditTitle"), token) { Owner = this };
         if (dialog.ShowDialog() != true) return;
-        try { TokenService.UpdateToken(VaultPath, token.Id, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(F("Str_Token_TokenUpdated", dialog.TokenId)); LoadTokens(); }
+        try { _tokenService.UpdateToken(VaultPath, token.Id, dialog.TokenId, dialog.TokenValue, dialog.TokenDescription); AppendOutput(F("Str_Token_TokenUpdated", dialog.TokenId)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
@@ -215,7 +225,7 @@ public partial class TokenManagerWindow : Window
     {
         if (TokenGrid.SelectedItem is not TokenEntry token) return;
         if (MessageBox.Show(F("Str_Token_DeleteConfirm", token.Id), S("Str_Token_DeleteTitle"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
-        try { TokenService.RemoveToken(VaultPath, token.Id); AppendOutput(F("Str_Token_TokenDeleted", token.Id)); LoadTokens(); }
+        try { _tokenService.RemoveToken(VaultPath, token.Id); AppendOutput(F("Str_Token_TokenDeleted", token.Id)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
@@ -224,7 +234,7 @@ public partial class TokenManagerWindow : Window
         if (TokenGrid.SelectedItem is not TokenEntry token) return;
         var dialog = new TokenEditWindow(S("Str_Token_RotateTitle"), token, idReadOnly: true, rotateOnly: true) { Owner = this };
         if (dialog.ShowDialog() != true) return;
-        try { TokenService.RotateToken(VaultPath, token.Id, dialog.TokenValue); AppendOutput(F("Str_Token_TokenRotated", token.Id)); LoadTokens(); }
+        try { _tokenService.RotateToken(VaultPath, token.Id, dialog.TokenValue); AppendOutput(F("Str_Token_TokenRotated", token.Id)); LoadTokens(); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
@@ -275,7 +285,7 @@ public partial class TokenManagerWindow : Window
 
         try
         {
-            await TokenService.ExportVaultAsync(VaultPath, saveDialog.FileName, passwordDialog.Password);
+            await _tokenService.ExportVaultAsync(VaultPath, saveDialog.FileName, passwordDialog.Password);
             AppendOutput(F("Str_Token_BackupExported", saveDialog.FileName));
             MessageBox.Show(S("Str_Token_BackupExportedMessage"), S("Str_Token_BackupVault"), MessageBoxButton.OK, MessageBoxImage.Information);
         }
@@ -313,7 +323,7 @@ public partial class TokenManagerWindow : Window
 
         try
         {
-            await TokenService.ImportVaultAsync(VaultPath, openDialog.FileName, passwordDialog.Password);
+            await _tokenService.ImportVaultAsync(VaultPath, openDialog.FileName, passwordDialog.Password);
             AppendOutput(F("Str_Token_BackupImported", openDialog.FileName));
             LoadTokens(forceGitCheck: true);
             MessageBox.Show(S("Str_Token_BackupImportedMessage"), S("Str_Token_RestoreVault"), MessageBoxButton.OK, MessageBoxImage.Information);
@@ -333,8 +343,8 @@ public partial class TokenManagerWindow : Window
         try
         {
             var inputPath = TxtTargetFile.Text.Trim();
-            var outputPath = TokenService.BuildDefaultOutputPath(inputPath, "redacted");
-            var result = TokenService.RedactFile(VaultPath, inputPath, outputPath, overwrite: true, dryRun: true);
+            var outputPath = _tokenService.BuildDefaultOutputPath(inputPath, "redacted");
+            var result = _tokenService.RedactFile(VaultPath, inputPath, outputPath, overwrite: true, dryRun: true);
             AppendOutput(F("Str_Token_RedactPreviewResult", result.TotalCount, result.UniqueCount));
             AppendOutput(result.TokenIds.Count > 0 ? $"ID: {string.Join(", ", result.TokenIds)}" : S("Str_Token_NoTokensFound"));
             AppendOutput(F("Str_Token_OutputWouldBe", result.OutputPath));
@@ -346,7 +356,7 @@ public partial class TokenManagerWindow : Window
     {
         if (!EnsureVaultAndTarget()) return;
         var inputPath = TxtTargetFile.Text.Trim();
-        var outputPath = TokenService.BuildDefaultOutputPath(inputPath, "redacted");
+        var outputPath = _tokenService.BuildDefaultOutputPath(inputPath, "redacted");
         var overwrite = false;
         if (File.Exists(outputPath))
         {
@@ -354,7 +364,7 @@ public partial class TokenManagerWindow : Window
             if (confirm != MessageBoxResult.Yes) return;
             overwrite = true;
         }
-        try { var result = TokenService.RedactFile(VaultPath, inputPath, outputPath, overwrite); AppendOutput(F("Str_Token_RedactedResult", result.TotalCount, result.UniqueCount)); AppendOutput(F("Str_Token_OutputPath", result.OutputPath)); }
+        try { var result = _tokenService.RedactFile(VaultPath, inputPath, outputPath, overwrite); AppendOutput(F("Str_Token_RedactedResult", result.TotalCount, result.UniqueCount)); AppendOutput(F("Str_Token_OutputPath", result.OutputPath)); }
         catch (Exception ex) { ShowError(ex.Message); }
     }
 
@@ -370,11 +380,11 @@ public partial class TokenManagerWindow : Window
             TokenFileOperationResult result;
             if (inplace)
             {
-                result = TokenService.RestoreFileInPlace(VaultPath, inputPath);
+                result = _tokenService.RestoreFileInPlace(VaultPath, inputPath);
             }
             else
             {
-                var outputPath = TokenService.BuildDefaultOutputPath(inputPath, "restored");
+                var outputPath = _tokenService.BuildDefaultOutputPath(inputPath, "restored");
                 var overwrite = false;
                 if (File.Exists(outputPath))
                 {
@@ -382,7 +392,7 @@ public partial class TokenManagerWindow : Window
                     if (overwriteConfirm != MessageBoxResult.Yes) return;
                     overwrite = true;
                 }
-                result = TokenService.RestoreFile(VaultPath, inputPath, outputPath, overwrite);
+                result = _tokenService.RestoreFile(VaultPath, inputPath, outputPath, overwrite);
             }
             AppendOutput(F("Str_Token_RestoredResult", result.TotalCount, result.UniqueCount));
             AppendOutput(F("Str_Token_OutputPath", result.OutputPath));
@@ -401,7 +411,7 @@ public partial class TokenManagerWindow : Window
         if (!EnsureVaultAndTarget()) return;
         try
         {
-            var result = TokenService.VerifyFile(VaultPath, TxtTargetFile.Text.Trim());
+            var result = _tokenService.VerifyFile(VaultPath, TxtTargetFile.Text.Trim());
             if (result.IsSafe)
             {
                 AppendOutput(S("Str_Token_FileSafeLog"));
@@ -444,7 +454,7 @@ public partial class TokenManagerWindow : Window
     {
         try
         {
-            var result = TokenService.AddVaultToGitIgnore(VaultPath);
+            var result = _tokenService.AddVaultToGitIgnore(VaultPath);
             AppendOutput(result.Added ? F("Str_Token_GitIgnoreAdded", result.Pattern) : F("Str_Token_GitIgnoreExists", result.Pattern));
             AppendOutput(F("Str_Token_RepoPath", result.RepoPath));
             _isTrackedByGit = null;
