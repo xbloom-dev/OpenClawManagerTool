@@ -624,7 +624,7 @@ public partial class MainWindow : Window
 
     private void BtnTokenManager_Click(object? sender, RoutedEventArgs e)
     {
-        var dialog = new TokenManagerWindow { Owner = this };
+        var dialog = new TokenManagerWindow(App.GetService<ITokenService>(), _settingsService) { Owner = this };
         dialog.ShowDialog();
     }
 
