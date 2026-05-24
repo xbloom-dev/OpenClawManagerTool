@@ -299,7 +299,6 @@ public partial class MainWindow : Window, IMainWindowCallback
             _vm.Log(L10n.Get("Str_Log_DeletingLog"));
             LogMonitor.DeleteLogIfExists(logPath);
             _vm.ResetLatencyAndWaiting();
-            _vm.SetWaitingForGatewayReady(true);
 
             if (_processDetector.IsGatewayRunning())
             {
@@ -308,40 +307,10 @@ public partial class MainWindow : Window, IMainWindowCallback
                 await Task.Delay(2000);
             }
 
-            _vm.Log(L10n.Get("Str_Log_GatewayStarting"));
-            _vm.MarkGatewayStarting();
-            var proc = _gatewayService.Start();
-            if (proc == null)
-            {
-                _vm.SetWaitingForGatewayReady(false);
-                _vm.Log("[CHYBA] Gateway nebylo možné spustit.");
-                _vm.MarkGatewayFailed();
-                return;
-            }
-
-            _vm.Log(L10n.Get("Str_Log_WaitingGatewayReady"));
-            var startTime = DateTime.Now;
-            var ready = await LogMonitor.WaitForGatewayReady(logPath, 180);
-            var elapsed = (DateTime.Now - startTime).TotalSeconds;
-            _vm.SetWaitingForGatewayReady(false);
-
-            if (!ready)
-            {
-                _vm.Log($"{L10n.Get("Str_Log_GatewayTimeout")} {elapsed:F1}s.");
-                _vm.MarkGatewayFailed();
-                return;
-            }
-
-            _vm.Log($"{L10n.Get("Str_Log_GatewayReadyIn")} {elapsed:F1}s.");
-            var gw = _processDetector.FindGatewayProcess();
-            _vm.MarkGatewayRunning(gw);
-
-            _vm.Log(L10n.Get("Str_Log_TuiStarting"));
-            Terminal.StartTui();
+            _vm.StartGateway();
         }
         catch (Exception ex)
         {
-            _vm.SetWaitingForGatewayReady(false);
             _vm.Log($"[CHYBA] {ex.Message}");
         }
         finally
