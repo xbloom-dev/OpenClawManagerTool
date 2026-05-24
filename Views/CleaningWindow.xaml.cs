@@ -67,7 +67,7 @@ public partial class CleaningWindow : Window
         return new CleaningViewModel(
             new GatewayService(settingsService, processDetector),
             settingsService,
-            new CleanupServiceAdapter(),
+            new CleanupService(settingsService),
             processDetector);
     }
 }
