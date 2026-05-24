@@ -58,4 +58,27 @@ public interface ITokenService
     void SaveVault(string path, TokenVault vault);
     Task ExportVaultAsync(string vaultPath, string filePath, string password);
     Task ImportVaultAsync(string vaultPath, string filePath, string password);
+    TokenEntry AddToken(string vaultPath, string id, string value, string description);
+    void UpdateToken(string vaultPath, string originalId, string id, string value, string description);
+    void RemoveToken(string vaultPath, string id);
+    void RotateToken(string vaultPath, string id, string newValue);
+    TokenFileOperationResult RedactFile(
+        string vaultPath,
+        string inputPath,
+        string? outputPath = null,
+        bool overwrite = false,
+        bool dryRun = false);
+    TokenFileOperationResult RestoreFile(
+        string vaultPath,
+        string inputPath,
+        string? outputPath = null,
+        bool overwrite = false,
+        bool dryRun = false);
+    TokenFileOperationResult RestoreFileInPlace(string vaultPath, string inputPath);
+    TokenVerifyResult VerifyFile(string vaultPath, string inputPath);
+    VaultSafetyResult AnalyzeVaultPath(string vaultPath, string openClawPath);
+    bool IsVaultEncryptedAtRest(string path);
+    bool IsVaultTrackedByGit(string path);
+    GitIgnoreResult AddVaultToGitIgnore(string vaultPath);
+    string BuildDefaultOutputPath(string inputPath, string marker);
 }

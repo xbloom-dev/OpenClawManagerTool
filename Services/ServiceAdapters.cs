@@ -35,4 +35,37 @@ internal sealed class TokenServiceAdapter : ITokenService
         TokenService.ExportVaultAsync(vaultPath, filePath, password);
     public Task ImportVaultAsync(string vaultPath, string filePath, string password) =>
         TokenService.ImportVaultAsync(vaultPath, filePath, password);
+    public TokenEntry AddToken(string vaultPath, string id, string value, string description) =>
+        TokenService.AddToken(vaultPath, id, value, description);
+    public void UpdateToken(string vaultPath, string originalId, string id, string value, string description) =>
+        TokenService.UpdateToken(vaultPath, originalId, id, value, description);
+    public void RemoveToken(string vaultPath, string id) => TokenService.RemoveToken(vaultPath, id);
+    public void RotateToken(string vaultPath, string id, string newValue) =>
+        TokenService.RotateToken(vaultPath, id, newValue);
+    public TokenFileOperationResult RedactFile(
+        string vaultPath,
+        string inputPath,
+        string? outputPath = null,
+        bool overwrite = false,
+        bool dryRun = false) =>
+        TokenService.RedactFile(vaultPath, inputPath, outputPath, overwrite, dryRun);
+    public TokenFileOperationResult RestoreFile(
+        string vaultPath,
+        string inputPath,
+        string? outputPath = null,
+        bool overwrite = false,
+        bool dryRun = false) =>
+        TokenService.RestoreFile(vaultPath, inputPath, outputPath, overwrite, dryRun);
+    public TokenFileOperationResult RestoreFileInPlace(string vaultPath, string inputPath) =>
+        TokenService.RestoreFileInPlace(vaultPath, inputPath);
+    public TokenVerifyResult VerifyFile(string vaultPath, string inputPath) =>
+        TokenService.VerifyFile(vaultPath, inputPath);
+    public VaultSafetyResult AnalyzeVaultPath(string vaultPath, string openClawPath) =>
+        TokenService.AnalyzeVaultPath(vaultPath, openClawPath);
+    public bool IsVaultEncryptedAtRest(string path) => TokenService.IsVaultEncryptedAtRest(path);
+    public bool IsVaultTrackedByGit(string path) => TokenService.IsVaultTrackedByGit(path);
+    public GitIgnoreResult AddVaultToGitIgnore(string vaultPath) =>
+        TokenService.AddVaultToGitIgnore(vaultPath);
+    public string BuildDefaultOutputPath(string inputPath, string marker) =>
+        TokenService.BuildDefaultOutputPath(inputPath, marker);
 }
