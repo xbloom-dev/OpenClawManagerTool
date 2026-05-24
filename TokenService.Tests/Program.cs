@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 using OpenClawManager.Models;
@@ -16,6 +17,20 @@ try
     VaultIsEncryptedAtRest();
     VaultBackupRoundTripsWithPassword();
     VaultSafetyDetectsRiskyPaths();
+    RemoveTokenDeletesEntry();
+    RemoveTokenNonexistentThrows();
+    RotateTokenChangesValue();
+    RotateTokenNonexistentThrows();
+    RotateTokenAuditDoesNotContainNewValue();
+    UpdateTokenChangesId();
+    UpdateTokenWithRealValueChange();
+    UpdateTokenNonexistentThrows();
+    RedactFileOverwriteProtection();
+    RedactFileNoTokensInInput();
+    RestoreFileUnknownPlaceholdersReported();
+    GitIgnoreIdempotent();
+    VaultSafetyReportsSafePath();
+    IsVaultTrackedByGitDetectsRepo();
     OpenClawCommandValidationRejectsShellCharacters();
     AppSettingsMigrationFillsMissingValues();
 
@@ -25,7 +40,10 @@ try
 finally
 {
     if (Directory.Exists(root))
+    {
+        ResetAttributes(root);
         Directory.Delete(root, recursive: true);
+    }
 }
 
 void RoundTripAndVerify()
@@ -186,17 +204,227 @@ void VaultSafetyDetectsRiskyPaths()
     Assert(result.Warnings.Count >= 2, "Vault safety should report all relevant warnings.");
 }
 
+void RemoveTokenDeletesEntry()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+
+    TokenService.EnsureVaultExists(vaultPath);
+    TokenService.AddToken(vaultPath, "to_remove", "secret-value-remove", "");
+    TokenService.AddToken(vaultPath, "keep", "secret-value-keep", "");
+
+    TokenService.RemoveToken(vaultPath, "to_remove");
+
+    var vault = TokenService.LoadVault(vaultPath);
+    Assert(vault.Tokens.All(t => t.Id != "to_remove"), "RemoveToken should delete the selected token.");
+    Assert(vault.Tokens.Any(t => t.Id == "keep"), "RemoveToken should keep unrelated tokens.");
+}
+
+void RemoveTokenNonexistentThrows()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+
+    TokenService.EnsureVaultExists(vaultPath);
+
+    AssertThrows(
+        () => TokenService.RemoveToken(vaultPath, "nonexistent_id"),
+        "RemoveToken on nonexistent ID should throw.");
+}
+
+void RotateTokenChangesValue()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+
+    TokenService.EnsureVaultExists(vaultPath);
+    TokenService.AddToken(vaultPath, "api_key", "old-secret-value", "");
+    TokenService.RotateToken(vaultPath, "api_key", "new-secret-value");
+
+    var token = TokenService.LoadVault(vaultPath).Tokens.Single();
+    Assert(token.Id == "api_key", "RotateToken should not change token ID.");
+    Assert(token.Value == "new-secret-value", "RotateToken should change token value.");
+}
+
+void RotateTokenNonexistentThrows()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+
+    TokenService.EnsureVaultExists(vaultPath);
+
+    AssertThrows(
+        () => TokenService.RotateToken(vaultPath, "missing_id", "new-secret-value"),
+        "RotateToken on nonexistent ID should throw.");
+}
+
+void RotateTokenAuditDoesNotContainNewValue()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+    var newSecret = "new-secret-value";
+
+    TokenService.EnsureVaultExists(vaultPath);
+    TokenService.AddToken(vaultPath, "api_key", "old-secret-value", "");
+    TokenService.RotateToken(vaultPath, "api_key", newSecret);
+
+    var audit = File.ReadAllText(Path.Combine(caseDir, "audit.log"));
+    Assert(audit.Contains("operation=rotate", StringComparison.Ordinal), "Audit log should record rotate operation.");
+    Assert(!audit.Contains(newSecret, StringComparison.Ordinal), "Audit log must not contain rotated token values.");
+}
+
+void UpdateTokenChangesId()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+
+    TokenService.EnsureVaultExists(vaultPath);
+    TokenService.AddToken(vaultPath, "old_id", "secret-value-123", "desc");
+    TokenService.UpdateToken(vaultPath, "old_id", "new_id", "", "desc");
+
+    var vault = TokenService.LoadVault(vaultPath);
+    Assert(vault.Tokens.All(t => t.Id != "old_id"), "UpdateToken should remove the old ID.");
+    Assert(vault.Tokens.Single(t => t.Id == "new_id").Value == "secret-value-123", "Blank update value should keep the old value.");
+}
+
+void UpdateTokenWithRealValueChange()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+
+    TokenService.EnsureVaultExists(vaultPath);
+    TokenService.AddToken(vaultPath, "api_key", "original-secret", "");
+    TokenService.UpdateToken(vaultPath, "api_key", "api_key", "updated-secret", "");
+
+    Assert(TokenService.LoadVault(vaultPath).Tokens.Single().Value == "updated-secret", "UpdateToken should persist a new token value.");
+}
+
+void UpdateTokenNonexistentThrows()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+
+    TokenService.EnsureVaultExists(vaultPath);
+
+    AssertThrows(
+        () => TokenService.UpdateToken(vaultPath, "missing_id", "missing_id", "", ""),
+        "UpdateToken on nonexistent ID should throw.");
+}
+
+void RedactFileOverwriteProtection()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+    var inputPath = Path.Combine(caseDir, "input.txt");
+    var outputPath = Path.Combine(caseDir, "output.txt");
+
+    TokenService.EnsureVaultExists(vaultPath);
+    TokenService.AddToken(vaultPath, "tok", "secret-value", "");
+    File.WriteAllText(inputPath, "secret-value", new UTF8Encoding(false));
+    File.WriteAllText(outputPath, "existing content", new UTF8Encoding(false));
+
+    AssertThrows(
+        () => TokenService.RedactFile(vaultPath, inputPath, outputPath, overwrite: false),
+        "RedactFile without overwrite should throw when output exists.");
+    Assert(File.ReadAllText(outputPath) == "existing content", "RedactFile should not change an existing output file without overwrite.");
+}
+
+void RedactFileNoTokensInInput()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+    var inputPath = Path.Combine(caseDir, "input.txt");
+    var outputPath = Path.Combine(caseDir, "output.txt");
+    var content = "no tokens here at all";
+
+    TokenService.EnsureVaultExists(vaultPath);
+    TokenService.AddToken(vaultPath, "tok", "secret-value", "");
+    File.WriteAllText(inputPath, content, new UTF8Encoding(false));
+
+    var result = TokenService.RedactFile(vaultPath, inputPath, outputPath, overwrite: true);
+
+    Assert(result.TotalCount == 0, "RedactFile should report zero matches when no tokens are present.");
+    Assert(File.ReadAllText(outputPath) == content, "RedactFile should preserve content when no tokens are present.");
+}
+
+void RestoreFileUnknownPlaceholdersReported()
+{
+    var caseDir = NewCase();
+    var vaultPath = Path.Combine(caseDir, "secrets.json");
+    var redactedPath = Path.Combine(caseDir, "redacted.txt");
+    var restoredPath = Path.Combine(caseDir, "restored.txt");
+
+    TokenService.EnsureVaultExists(vaultPath);
+    TokenService.AddToken(vaultPath, "known", "real-value", "");
+    File.WriteAllText(redactedPath, "[REDACTED_known]\r\n[REDACTED_unknown_token]\r\n", new UTF8Encoding(false));
+
+    var result = TokenService.RestoreFile(vaultPath, redactedPath, restoredPath, overwrite: true);
+    var restored = File.ReadAllText(restoredPath);
+
+    Assert(result.UnknownPlaceholders.Count == 1, "RestoreFile should report unknown placeholders.");
+    Assert(result.UnknownPlaceholders[0].Contains("unknown_token", StringComparison.Ordinal), "Unknown placeholder should identify the missing token.");
+    Assert(restored.Contains("real-value", StringComparison.Ordinal), "RestoreFile should restore known placeholders.");
+    Assert(restored.Contains("[REDACTED_unknown_token]", StringComparison.Ordinal), "RestoreFile should keep unknown placeholders unchanged.");
+}
+
+void GitIgnoreIdempotent()
+{
+    var repo = Path.Combine(NewCase(), "repo");
+    Directory.CreateDirectory(Path.Combine(repo, ".git"));
+    var vaultPath = Path.Combine(repo, ".token-manager", "secrets.json");
+
+    TokenService.EnsureVaultExists(vaultPath);
+
+    var first = TokenService.AddVaultToGitIgnore(vaultPath);
+    var second = TokenService.AddVaultToGitIgnore(vaultPath);
+    var content = File.ReadAllText(Path.Combine(repo, ".gitignore"));
+
+    Assert(first.Added, "First AddVaultToGitIgnore call should add the vault path.");
+    Assert(!second.Added, "Second AddVaultToGitIgnore call should be idempotent.");
+    Assert(CountOccurrences(content, ".token-manager/secrets.json") == 1, "Gitignore helper should not add duplicate vault paths.");
+}
+
+void VaultSafetyReportsSafePath()
+{
+    var safeDir = NewCase();
+    var vaultPath = Path.Combine(safeDir, "secrets.json");
+    var openClawPath = Path.Combine(safeDir, "different_openclaw");
+
+    var result = TokenService.AnalyzeVaultPath(vaultPath, openClawPath);
+
+    Assert(result.IsSafe, "Vault safety should mark unrelated non-repo local paths as safe.");
+    Assert(result.Warnings.Count == 0, "Safe vault paths should not report warnings.");
+}
+
+void IsVaultTrackedByGitDetectsRepo()
+{
+    var repo = Path.Combine(NewCase(), "repo");
+    Directory.CreateDirectory(repo);
+    RunGit(repo, "init");
+
+    var trackedVaultPath = Path.Combine(repo, "secrets.json");
+    File.WriteAllText(trackedVaultPath, "{}", new UTF8Encoding(false));
+    RunGit(repo, "add secrets.json");
+
+    Assert(TokenService.IsVaultTrackedByGit(trackedVaultPath), "IsVaultTrackedByGit should detect files tracked by Git.");
+
+    var safeDir = NewCase();
+    Assert(!TokenService.IsVaultTrackedByGit(Path.Combine(safeDir, "secrets.json")), "IsVaultTrackedByGit should be false outside Git repositories.");
+}
+
 void OpenClawCommandValidationRejectsShellCharacters()
 {
-    Assert(GatewayService.TryValidateOpenClawCommand("openclaw", out _), "Plain openclaw command should be valid.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw; calc", out _), "Semicolon should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw & calc", out _), "Ampersand should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw | more", out _), "Pipe should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw < input.txt", out _), "Input redirect should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw > output.txt", out _), "Output redirect should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw %TEMP%", out _), "Environment variable expansion should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("openclaw ^& calc", out _), "Caret escaping should be rejected.");
-    Assert(!GatewayService.TryValidateOpenClawCommand("C:\\Tools\\bad\"path.cmd", out _), "Quote should be rejected.");
+    var gatewayService = new GatewayService(new SettingsService(), new ProcessDetector());
+
+    Assert(gatewayService.TryValidateOpenClawCommand("openclaw", out _), "Plain openclaw command should be valid.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw; calc", out _), "Semicolon should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw & calc", out _), "Ampersand should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw | more", out _), "Pipe should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw < input.txt", out _), "Input redirect should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw > output.txt", out _), "Output redirect should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw %TEMP%", out _), "Environment variable expansion should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("openclaw ^& calc", out _), "Caret escaping should be rejected.");
+    Assert(!gatewayService.TryValidateOpenClawCommand("C:\\Tools\\bad\"path.cmd", out _), "Quote should be rejected.");
 }
 
 void AppSettingsMigrationFillsMissingValues()
@@ -213,7 +441,7 @@ void AppSettingsMigrationFillsMissingValues()
         Language = "en"
     };
 
-    var migrated = SettingsService.MigrateSettings(settings, out var changed);
+    var migrated = new SettingsService().MigrateSettings(settings, out var changed);
 
     Assert(changed, "Migration should report changes for legacy settings.");
     Assert(migrated.SchemaVersion == AppSettings.CurrentSchemaVersion, "Migration should set current schema version.");
@@ -237,6 +465,51 @@ static string Hash(string path)
 {
     using var sha = SHA256.Create();
     return Convert.ToHexString(sha.ComputeHash(File.ReadAllBytes(path)));
+}
+
+static int CountOccurrences(string text, string value)
+{
+    var count = 0;
+    var index = 0;
+    while ((index = text.IndexOf(value, index, StringComparison.Ordinal)) >= 0)
+    {
+        count++;
+        index += value.Length;
+    }
+
+    return count;
+}
+
+static void RunGit(string workingDirectory, string arguments)
+{
+    var psi = new ProcessStartInfo
+    {
+        FileName = "git",
+        Arguments = arguments,
+        WorkingDirectory = workingDirectory,
+        UseShellExecute = false,
+        CreateNoWindow = true,
+        RedirectStandardError = true,
+        RedirectStandardOutput = true
+    };
+
+    using var process = Process.Start(psi) ?? throw new Exception("git process could not be started.");
+    process.WaitForExit(5000);
+    if (process.ExitCode != 0)
+    {
+        var output = process.StandardOutput.ReadToEnd();
+        var error = process.StandardError.ReadToEnd();
+        throw new Exception($"git {arguments} failed. {output}{error}");
+    }
+}
+
+static void ResetAttributes(string path)
+{
+    foreach (var file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
+        File.SetAttributes(file, FileAttributes.Normal);
+
+    foreach (var directory in Directory.EnumerateDirectories(path, "*", SearchOption.AllDirectories))
+        File.SetAttributes(directory, FileAttributes.Normal);
 }
 
 static void Assert(bool condition, string message)

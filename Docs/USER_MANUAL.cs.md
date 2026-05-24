@@ -2,8 +2,8 @@
 
 *Čeština · [English version](USER_MANUAL.md)*
 
-**Verze aplikace:** v1.1
-**Datum:** 23. května 2026
+**Verze aplikace:** v2.0
+**Datum:** 25. května 2026
 
 ---
 
@@ -72,7 +72,7 @@ Pokud OpenClaw nespustíš přes `openclaw` v PATH, uprav „openclaw příkaz" 
 
 ## 3. Témata a splash screen
 
-Téma změníš v **Nastavení**. OpenClaw Manager v1.1 nabízí **sedm témat**:
+Téma změníš v **Nastavení**. OpenClaw Manager v2.0 nabízí **sedm témat**:
 
 | Téma | Popis |
 |---|---|
@@ -147,7 +147,7 @@ Hlavní tlačítko aplikace. Má **3 režimy** podle aktuálního stavu:
 
 ### Status bar (dole)
 
-`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v1.1`
+`Gateway: ● stav | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v2.0`
 
 | Barva tečky | Stav |
 |---|---|
@@ -464,4 +464,4 @@ Otevři přes menu **Nápověda → O aplikaci...** nebo F1. Zobrazuje logo, ver
 
 ---
 
-**Konec dokumentu — verze aplikace v1.1**
+**Konec dokumentu — verze aplikace v2.0**

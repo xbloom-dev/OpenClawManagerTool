@@ -1,4 +1,4 @@
-// MainWindow.Splash.cs — splash screen logika (v0.5)
+﻿// MainWindow.Splash.cs — splash screen logika (v0.5)
 
 using System.IO;
 using System.Windows;
@@ -15,7 +15,7 @@ public partial class MainWindow
 
     private void InitSplash()
     {
-        var settings = SettingsService.Current;
+        var settings = OpenClawManager.App.GetService<ISettingsService>().Settings;
 
         if (settings.Theme == AppTheme.Legacy)
         {
@@ -30,8 +30,8 @@ public partial class MainWindow
         SplashOverlay.Visibility = Visibility.Visible;
         Terminal.HideSplashBorder();
 
-        var pathInResources = Path.Combine(AppContext.BaseDirectory, "Resources", "splash.mp4");
-        var pathInRoot      = Path.Combine(AppContext.BaseDirectory, "splash.mp4");
+        var pathInResources = Path.Combine(_env.AppBaseDirectory, "Resources", "splash.mp4");
+        var pathInRoot      = Path.Combine(_env.AppBaseDirectory, "splash.mp4");
 
         string? splashMp4 = null;
         if (File.Exists(pathInResources)) splashMp4 = pathInResources;

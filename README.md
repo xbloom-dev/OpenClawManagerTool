@@ -36,7 +36,7 @@ A Windows desktop app for managing a local [OpenClaw](https://github.com/opencla
 ### Option 1 — Download a release (recommended)
 
 1. Go to the [Releases](../../releases) page.
-2. Download `OpenClawManagerTool-v1.1-win-x64.zip`.
+2. Download `OpenClawManagerTool-v2.0-win-x64.zip`.
 3. (Optional) Verify the download against the published `.sha256` file.
 4. Extract anywhere and run `OpenClawManager.exe`.
 
@@ -67,7 +67,7 @@ Recommended vault location:
 
 Avoid project folders, `.openclaw`, Git repositories, cloud-sync folders, and shared folders.
 
-**Portable backups (v1.1).** You can export the vault to a portable `.ocvault` file protected by a password you choose (PBKDF2-SHA256, AES-256-GCM). Importing a backup re-encrypts it into the local DPAPI vault for the current Windows profile. Keep backup files and their passwords somewhere safe and separate.
+**Portable backups.** You can export the vault to a portable `.ocvault` file protected by a password you choose (PBKDF2-SHA256, AES-256-GCM). Importing a backup re-encrypts it into the local DPAPI vault for the current Windows profile. Keep backup files and their passwords somewhere safe and separate.
 
 ---
 
@@ -103,6 +103,17 @@ dotnet run --project TokenService.Tests\TokenService.Tests.csproj
 # Publish a self-contained single-file build
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ```
+
+---
+
+## Architecture (v2.0)
+
+OpenClaw Manager v2.0 uses a clean MVVM + DI architecture:
+
+- **Dependency Injection** via Microsoft.Extensions.Hosting
+- **MVVM** for all windows (MainWindow, TokenManager, GatewayLog, LiveLog, Settings, Cleaning)
+- **Async UI** with status polling, WMI checks, and log reads kept off the UI thread
+- **ITokenService** interface coverage for Token Manager workflows while preserving the audited DPAPI/AES-GCM implementation
 
 ---
 

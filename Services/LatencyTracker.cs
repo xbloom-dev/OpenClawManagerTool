@@ -1,12 +1,7 @@
 namespace OpenClawManager.Services;
 
 /// <summary>
-/// Sleduje latence z Gateway logu — udržuje klouzavý průměr posledních 10 requestů.
-///
-/// Volá se z MainWindow.UpdateStatus() každé 2 sekundy.
-/// Čte pouze nové řádky logu od posledního čtení (fileOffset tracking).
-///
-/// Reset() se volá při restartu Gateway (logPath se změní, offset = 0).
+/// Tracks Gateway latency and keeps a moving average of the last requests.
 /// </summary>
 public static class LatencyTracker
 {
@@ -20,12 +15,10 @@ public static class LatencyTracker
     private static string? _currentLogPath = null;
 
     /// <summary>
-    /// Načte nové záznamy z logu a aktualizuje statistiky.
-    /// Volej periodicky (každé 2s) z UI timeru.
+    /// Loads new log entries and updates latency stats.
     /// </summary>
     public static void Poll(string logPath)
     {
-        // Pokud se změnil log soubor (po restartu Gateway), resetovat offset
         if (_currentLogPath != logPath)
         {
             _fileOffset = 0;
@@ -34,22 +27,25 @@ public static class LatencyTracker
 
         var entries = LogMonitor.ParseNewLatencyEntries(logPath, ref _fileOffset);
 
-        foreach (var (_, ms) in entries)
+        AddEntries(entries);
+    }
+
+    public static async Task PollAsync(string logPath)
+    {
+        if (_currentLogPath != logPath)
         {
-            _lastMs = ms;
-            _window.Enqueue(ms);
-            if (_window.Count > WindowSize)
-                _window.Dequeue();
-
-            if (!_maxMs.HasValue || ms > _maxMs)
-                _maxMs = ms;
-
-            _totalCount++;
+            _fileOffset = 0;
+            _currentLogPath = logPath;
         }
+
+        var (entries, newOffset) = await LogMonitor.ParseNewLatencyEntriesAsync(logPath, _fileOffset);
+        _fileOffset = newOffset;
+
+        AddEntries(entries);
     }
 
     /// <summary>
-    /// Resetuje statistiky (volat při restartu Gateway).
+    /// Resets stats after Gateway restart or log rotation.
     /// </summary>
     public static void Reset()
     {
@@ -62,7 +58,7 @@ public static class LatencyTracker
     }
 
     /// <summary>
-    /// Vrátí aktuální statistiky.
+    /// Returns the current latency stats.
     /// </summary>
     public static LatencyStats GetStats()
     {
@@ -74,6 +70,22 @@ public static class LatencyTracker
             : null;
 
         return new LatencyStats(_lastMs, avg, _maxMs, _totalCount);
+    }
+
+    private static void AddEntries(List<(string Method, int Ms)> entries)
+    {
+        foreach (var (_, ms) in entries)
+        {
+            _lastMs = ms;
+            _window.Enqueue(ms);
+            if (_window.Count > WindowSize)
+                _window.Dequeue();
+
+            if (!_maxMs.HasValue || ms > _maxMs)
+                _maxMs = ms;
+
+            _totalCount++;
+        }
     }
 }
 

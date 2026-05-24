@@ -4,37 +4,28 @@ using System.Windows;
 using System.Windows.Media;
 using Microsoft.Web.WebView2.Core;
 using OpenClawManager.Services;
+using OpenClawManager.ViewModels;
 
 namespace OpenClawManager.Views;
 
 public partial class AboutWindow : Window
 {
     private const string CommandPrefix = "command:";
+    private readonly IAppEnvironment _env;
 
     public AboutWindow()
+        : this(new AboutViewModel(), new AppEnvironment())
     {
-        InitializeComponent();
-        ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
-        BtnClose.Click += (_, _) => Close();
-        ApplyLocalization();
-        _ = InitWebViewAsync();
     }
 
-    private void ApplyLocalization()
+    public AboutWindow(AboutViewModel viewModel, IAppEnvironment env)
     {
-        bool cs = L10n.Current == L10n.Language.CS;
-
-        TxtShortcut_T.Text        = "Start/Stop OpenClaw TUI";
-        TxtShortcut_G.Text        = cs ? "Start/Stop Gateway" : "Start/Stop Gateway";
-        TxtShortcut_R.Text        = "Restart Gateway";
-        TxtShortcut_C.Text        = cs ? "Vyčistit soubory" : "Cleaning Tool";
-        TxtShortcut_Settings.Text = cs ? "Nastavení" : "Settings";
-        TxtShortcut_L.Text        = cs ? "Živá data Gateway logu" : "Gateway live log";
-        TxtShortcut_F1.Text       = cs ? "O aplikaci" : "About";
-        TxtShortcut_AltF4.Text    = cs ? "Zavřít aplikaci" : "Close application";
-        BtnClose.Content          = cs ? "Zavřít" : "Close";
-        BtnClose.ToolTip          = L10n.Get("Str_Tip_AboutClose");
-        Title = cs ? "O aplikaci" : "About";
+        _env = env;
+        InitializeComponent();
+        DataContext = viewModel;
+        ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
+        BtnClose.Click += (_, _) => Close();
+        _ = InitWebViewAsync();
     }
 
     // ── WebView2 logo ─────────────────────────────────────────────────────────
@@ -64,14 +55,13 @@ public partial class AboutWindow : Window
             mainWindow.ExecuteAboutCommand(command);
     }
 
-    private static string? FindSvgPath()
+    private string? FindSvgPath()
     {
-        var exeDir = AppContext.BaseDirectory;
+        var exeDir = _env.AppBaseDirectory;
         var candidates = new[]
         {
             Path.Combine(exeDir, "Resources", "app-logo.svg"),
-            Path.Combine(exeDir, "app-logo.svg"),
-            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "app-logo.svg"),
+            Path.Combine(exeDir, "app-logo.svg")
         };
         return candidates.FirstOrDefault(File.Exists);
     }

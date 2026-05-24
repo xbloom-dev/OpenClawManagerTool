@@ -1,4 +1,4 @@
-# OpenClaw Manager Tool by Bloom v1.1
+# OpenClaw Manager Tool by Bloom v2.0
 
 Windows WPF utility for managing an OpenClaw environment: Gateway/TUI control, embedded terminal, logs, cleanup, settings, themes, and Token Manager.
 
@@ -25,7 +25,7 @@ The embedded terminal uses local xterm.js files included under `Resources/Termin
 
 ## Smoke Test
 
-- Start the app and confirm the status bar shows `v1.1`.
+- Start the app and confirm the status bar shows `v2.0`.
 - Start Gateway.
 - Open OpenClaw TUI.
 - Open Gateway Log and Live Log.
@@ -43,4 +43,4 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 
 ## Release Notes
 
-See `Docs/RELEASE_NOTES_v1.1.md` and `Docs/CHANGELOG.md` for the v1.1 release summary.
+See `Docs/CHANGELOG.md` for the current release summary.

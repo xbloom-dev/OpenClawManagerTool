@@ -1,7 +1,7 @@
 <Window x:Class="OpenClawManager.Views.GatewayLogWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Gateway Log"
+        Title="{Binding WindowTitle}"
         Height="600" Width="1000"
         MinHeight="300" MinWidth="600"
         WindowStartupLocation="CenterOwner"
@@ -27,6 +27,7 @@
                        x:Name="TxtLogPath"
                        FontFamily="Consolas" FontSize="11"
                        Foreground="Gray"
+                       Text="{Binding LogPathInfo}"
                        TextWrapping="Wrap"
                        Margin="0,0,0,4" />
 
@@ -50,23 +51,23 @@
 
             <Button Grid.Row="1" Grid.Column="2"
                     x:Name="BtnRefresh"
-                    Content="Aktualizovat"
+                    Content="{Binding RefreshText}"
                     Width="100" Height="24"
                     Margin="4,0"
-                    ToolTip="Znovu načte obsah logu ze souboru." />
+                    ToolTip="{Binding RefreshToolTip}" />
 
             <Button Grid.Row="1" Grid.Column="3"
                     x:Name="BtnCopy"
-                    Content="Kopírovat"
+                    Content="{Binding CopyText}"
                     Width="100" Height="24"
                     Margin="4,0"
                     Background="{DynamicResource Brush.ActionUtility}"
-                    ToolTip="Zkopíruje celý zobrazený log do schránky." />
+                    ToolTip="{Binding CopyToolTip}" />
 
             <!-- Feedback text "Zkopírováno" — zobrazí se vedle Kopírovat na 2s -->
             <TextBlock Grid.Row="1" Grid.Column="4"
                        x:Name="TxtCopiedFeedback"
-                       Text="✓ Zkopírováno"
+                       Text="{Binding CopiedFeedbackText}"
                        FontWeight="Bold" Foreground="Green"
                        VerticalAlignment="Center"
                        Margin="6,0,0,0"
@@ -83,29 +84,31 @@
 
             <StatusBar Grid.Column="0" Height="22" Background="Transparent">
                 <StatusBarItem>
-                    <TextBlock x:Name="TxtStatus" Text="Připraveno." />
+                    <TextBlock x:Name="TxtStatus" Text="{Binding StatusText}" />
                 </StatusBarItem>
             </StatusBar>
 
             <Button Grid.Column="1"
                     x:Name="BtnLiveLog"
-                    Content="Živá data"
+                    Content="{Binding LiveLogText}"
                     Width="100" Height="24"
                     Margin="4,2"
                     Background="{DynamicResource Brush.ActionPositive}"
-                    ToolTip="Otevře okno pro živé sledování logu. Toto okno se zavře." />
+                    ToolTip="{Binding LiveLogToolTip}" />
 
             <Button Grid.Column="2"
                     x:Name="BtnClose"
-                    Content="Zavřít"
+                    Content="{Binding CloseText}"
                     Width="80" Height="24"
                     Margin="4,2"
                     Background="{DynamicResource Brush.ActionDanger}"
+                    ToolTip="{Binding CloseToolTip}"
                     IsCancel="True" />
         </Grid>
 
         <Border BorderBrush="Gray" BorderThickness="1">
             <TextBox x:Name="TxtLogContent"
+                     Text="{Binding LogContent, Mode=OneWay}"
                      IsReadOnly="True"
                      FontFamily="Consolas"
                      FontSize="11"

@@ -1,58 +1,54 @@
-using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using OpenClawManager.Services;
+using OpenClawManager.ViewModels;
 
 namespace OpenClawManager.Views;
 
-/// <summary>
-/// Okno pro zobrazení Gateway log souboru.
-/// Zachovává původní funkcionalitu (dropdown, Aktualizovat, StatusBar).
-/// Nově: Kopírovat (s 2s fade feedback) + Živá data (otevře LiveLogWindow, toto zavře).
-/// </summary>
 public partial class GatewayLogWindow : Window
 {
-    private readonly string _logPath;
+    private readonly GatewayLogViewModel _vm;
     private DispatcherTimer? _feedbackTimer;
 
+    public GatewayLogWindow()
+        : this(new GatewayLogViewModel("", 20))
+    {
+    }
+
     public GatewayLogWindow(string logPath, int defaultLines = 20)
+        : this(new GatewayLogViewModel(logPath, defaultLines))
+    {
+    }
+
+    public GatewayLogWindow(GatewayLogViewModel viewModel)
     {
         InitializeComponent();
         ModernPaletteRuntimeStyles.ApplyIfModernPalette(this);
-        _logPath = logPath;
 
-        SelectLineCount(defaultLines);
+        _vm = viewModel;
+        DataContext = _vm;
 
-        BtnRefresh.Click += (_, _) => LoadLog();
+        SelectLineCount(_vm.DefaultLines);
+
+        BtnRefresh.Click += (_, _) => RefreshLog();
         BtnClose.Click += (_, _) => Close();
         BtnCopy.Click += BtnCopy_Click;
         BtnLiveLog.Click += BtnLiveLog_Click;
-        CmbLineCount.SelectionChanged += (_, _) => LoadLog();
+        CmbLineCount.SelectionChanged += (_, _) => RefreshLog();
 
-        ApplyLocalization();
-        LoadLog();
+        RefreshLog();
     }
 
-    private void ApplyLocalization()
+    private void RefreshLog()
     {
-        bool cs = L10n.Current == L10n.Language.CS;
-        BtnRefresh.Content  = cs ? "Aktualizovat" : "Refresh";
-        BtnCopy.Content     = cs ? "Kopírovat" : "Copy";
-        BtnClose.Content    = cs ? "Zavřít" : "Close";
-        BtnLiveLog.Content  = cs ? "Živá data" : "Live log";
-        BtnRefresh.ToolTip  = cs ? "Znovu načte obsah logu ze souboru." : "Reloads log content from file.";
-        BtnCopy.ToolTip     = cs ? "Zkopíruje celý zobrazený log do schránky." : "Copies displayed log to clipboard.";
-        BtnLiveLog.ToolTip  = cs
-            ? "Otevře okno pro živé sledování logu. Toto okno se zavře."
-            : "Opens live log monitoring window. This window will close.";
-        BtnClose.ToolTip    = cs ? "Zavře okno s logem." : "Closes the log window.";
-        TxtCopiedFeedback.Text = "✓ " + (cs ? "Zkopírováno" : "Copied");
+        _vm.LoadLog(GetSelectedLineCount());
+        Dispatcher.BeginInvoke(() => TxtLogContent.ScrollToEnd(), DispatcherPriority.Background);
     }
 
     private void SelectLineCount(int lines)
     {
-        foreach (System.Windows.Controls.ComboBoxItem item in CmbLineCount.Items)
+        foreach (ComboBoxItem item in CmbLineCount.Items)
         {
             if (item.Tag is string tag && tag == lines.ToString())
             {
@@ -60,81 +56,37 @@ public partial class GatewayLogWindow : Window
                 return;
             }
         }
+
         if (CmbLineCount.Items.Count > 1)
-            CmbLineCount.SelectedIndex = 1; // výchozí: 20 řádků
+            CmbLineCount.SelectedIndex = 1;
     }
 
     private int GetSelectedLineCount()
     {
-        if (CmbLineCount.SelectedItem is System.Windows.Controls.ComboBoxItem item &&
-            item.Tag is string tag && int.TryParse(tag, out var n))
+        if (CmbLineCount.SelectedItem is ComboBoxItem item &&
+            item.Tag is string tag &&
+            int.TryParse(tag, out var n))
+        {
             return n;
+        }
+
         return 20;
-    }
-
-    private void LoadLog()
-    {
-        var lines = GetSelectedLineCount();
-
-        if (!File.Exists(_logPath))
-        {
-            bool cs2 = L10n.Current == L10n.Language.CS;
-            TxtLogPath.Text   = $"{(cs2 ? "Soubor" : "File")}: {_logPath}";
-            TxtLogContent.Text = cs2 ? "(soubor neexistuje)" : "(file not found)";
-            TxtStatus.Text    = cs2 ? "Soubor nenalezen." : "File not found.";
-            return;
-        }
-
-        try
-        {
-            string content;
-            using (var fs = new FileStream(_logPath, FileMode.Open,
-                FileAccess.Read, FileShare.ReadWrite))
-            using (var reader = new StreamReader(fs))
-                content = reader.ReadToEnd();
-
-            var allLines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
-            var display  = lines > 0 && allLines.Length > lines
-                ? allLines.Skip(allLines.Length - lines).ToArray()
-                : allLines;
-
-            TxtLogContent.Text = string.Join("\n", display);
-            TxtLogContent.ScrollToEnd();
-
-            var fi    = new FileInfo(_logPath);
-            var sizeKb = Math.Round(fi.Length / 1024.0, 1);
-            bool cs   = L10n.Current == L10n.Language.CS;
-
-            TxtLogPath.Text = cs
-                ? $"Soubor: {_logPath}   |   Velikost: {sizeKb} KB   |   Zobrazeno řádků: {display.Length}"
-                : $"File: {_logPath}   |   Size: {sizeKb} KB   |   Lines shown: {display.Length}";
-
-            TxtStatus.Text = cs
-                ? (lines == 0 ? $"Zobrazen celý log ({display.Length} řádků)."
-                              : $"Zobrazeno posledních {display.Length} řádků.")
-                : (lines == 0 ? $"Showing entire log ({display.Length} lines)."
-                              : $"Showing last {display.Length} lines.");
-        }
-        catch (Exception ex)
-        {
-            TxtStatus.Text = $"Chyba: {ex.Message}";
-        }
     }
 
     private void BtnCopy_Click(object? sender, RoutedEventArgs e)
     {
         try
         {
-            Clipboard.SetText(TxtLogContent.Text);
+            Clipboard.SetText(_vm.LogContent);
             ShowCopiedFeedback();
         }
         catch (Exception ex)
         {
-            bool cs = L10n.Current == L10n.Language.CS;
             MessageBox.Show(
-                cs ? $"Kopírování selhalo:\n{ex.Message}" : $"Copy failed:\n{ex.Message}",
-                cs ? "Chyba" : "Error",
-                MessageBoxButton.OK, MessageBoxImage.Error);
+                $"{_vm.CopyFailedMessagePrefix}\n{ex.Message}",
+                _vm.CopyFailedTitle,
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
         }
     }
 
@@ -155,8 +107,7 @@ public partial class GatewayLogWindow : Window
 
     private void BtnLiveLog_Click(object? sender, RoutedEventArgs e)
     {
-        var lines = GetSelectedLineCount();
-        var live = new LiveLogWindow(_logPath, lines);
+        var live = new LiveLogWindow(_vm.LogPath, GetSelectedLineCount());
         live.Show();
         Close();
     }

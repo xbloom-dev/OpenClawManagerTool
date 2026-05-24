@@ -1,4 +1,4 @@
-// Services/ThemeService.cs
+﻿// Services/ThemeService.cs
 // Centrální správa vizuálních témat (v0.5+)
 // ═══════════════════════════════════════════════════════════════════════════
 // Architektura pro N témat:
@@ -134,7 +134,7 @@ public static class ThemeService
     /// </summary>
     public static string GetIconFolder(AppTheme theme)
     {
-        if (theme == SettingsService.Current.Theme)
+        if (theme == OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)
         {
             var iconSet = GetString("Theme.Meta.IconSet", "");
             if (!string.IsNullOrWhiteSpace(iconSet)) return iconSet;
@@ -153,7 +153,7 @@ public static class ThemeService
         return new ThemeMetadata(
             GetString("Theme.Meta.Name", ""),
             GetString("Theme.Meta.Variant", ""),
-            GetString("Theme.Meta.IconSet", GetIconFolder(SettingsService.Current.Theme)),
+            GetString("Theme.Meta.IconSet", GetIconFolder(OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)),
             GetString("Theme.Meta.PaletteFamily", ""),
             GetString("Theme.Meta.ButtonInteraction", "HoverScanline"));
     }

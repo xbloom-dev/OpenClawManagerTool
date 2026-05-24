@@ -5,34 +5,38 @@ using OpenClawManager.Models;
 namespace OpenClawManager.Services;
 
 /// <summary>
-/// Singleton služba pro načítání a ukládání AppSettings.
-///
-/// Architektura: SettingsService.Current vrací aktuální AppSettings instanci pro
-/// celou aplikaci. Všechny services i Views si berou nastavení odsud (žádné
-/// předávání přes parametry).
+/// Loads and saves application settings for the current application lifetime.
 /// </summary>
-public static class SettingsService
+public sealed class SettingsService : ISettingsService
 {
-    public static string SettingsFilePath { get; } = Path.Combine(
+    public string SettingsFilePath { get; }
+
+    public AppSettings Settings { get; private set; }
+
+    public event EventHandler? SettingsChanged;
+
+    public SettingsService()
+        : this(new AppEnvironment())
+    {
+    }
+
+    public SettingsService(IAppEnvironment env)
+        : this(env.SettingsFilePath)
+    {
+    }
+
+    internal SettingsService(string settingsFilePath)
+    {
+        SettingsFilePath = settingsFilePath;
+        Settings = LoadFromDisk();
+    }
+
+    public static string GetDefaultSettingsFilePath() => Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
         "OpenClawManager",
         "settings.json");
 
-    public static AppSettings Current
-    {
-        get
-        {
-            if (_current == null)
-                _current = LoadFromDisk();
-            return _current;
-        }
-        private set => _current = value;
-    }
-    private static AppSettings? _current;
-
-    public static event EventHandler? SettingsChanged;
-
-    private static AppSettings LoadFromDisk()
+    private AppSettings LoadFromDisk()
     {
         try
         {
@@ -53,7 +57,7 @@ public static class SettingsService
         }
     }
 
-    public static AppSettings MigrateSettings(AppSettings settings, out bool changed)
+    public AppSettings MigrateSettings(AppSettings settings, out bool changed)
     {
         changed = false;
         var defaults = new AppSettings();
@@ -128,14 +132,14 @@ public static class SettingsService
         return settings;
     }
 
-    public static bool Save(AppSettings settings)
+    public bool Save(AppSettings settings)
     {
         try
         {
             settings = MigrateSettings(settings, out _);
             SaveToDisk(settings);
 
-            Current = settings;
+            Settings = settings;
             SettingsChanged?.Invoke(null, EventArgs.Empty);
 
             return true;
@@ -146,7 +150,7 @@ public static class SettingsService
         }
     }
 
-    private static void SaveToDisk(AppSettings settings)
+    private void SaveToDisk(AppSettings settings)
     {
         var dir = Path.GetDirectoryName(SettingsFilePath);
         if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))

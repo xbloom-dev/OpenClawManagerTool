@@ -4,20 +4,20 @@ using OpenClawManager.Services;
 namespace OpenClawManager.Views;
 
 /// <summary>
-/// Dialog pro potvrzení Stop Gateway s volitelným zavřením TUI oken.
+/// Dialog for confirming Stop Gateway with optional TUI window cleanup.
 ///
-/// Použití:
+/// Usage:
 ///   var dlg = new StopGatewayDialog { Owner = this };
 ///   if (dlg.ShowDialog() == true) {
-///       if (dlg.CloseTui) GatewayService.StopAndCloseTui();
-///       else GatewayService.Stop();
+///       if (dlg.CloseTui) App.GetService&lt;IGatewayService&gt;().StopAndCloseTui();
+///       else App.GetService&lt;IGatewayService&gt;().Stop();
 ///   }
 /// </summary>
 public partial class StopGatewayDialog : Window
 {
     /// <summary>
-    /// True pokud uživatel zaškrtl "Zavřít také TUI okna".
-    /// Čte se po ShowDialog() == true.
+    /// True when the user chose to close TUI windows too.
+    /// Read after ShowDialog() == true.
     /// </summary>
     public bool CloseTui => ChkCloseTui.IsChecked == true;
 
