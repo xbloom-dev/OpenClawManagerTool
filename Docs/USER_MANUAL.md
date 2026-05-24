@@ -2,8 +2,8 @@
 
 *English · [Czech version](USER_MANUAL.cs.md)*
 
-**App version:** v1.1
-**Date:** 23 May 2026
+**App version:** v2.0
+**Date:** 25 May 2026
 
 ---
 
@@ -72,7 +72,7 @@ If you do not run OpenClaw via `openclaw` on the PATH, set the "openclaw command
 
 ## 3. Themes and splash screen
 
-Change the theme in **Settings**. OpenClaw Manager v1.1 offers **seven themes**:
+Change the theme in **Settings**. OpenClaw Manager v2.0 offers **seven themes**:
 
 | Theme | Description |
 |---|---|
@@ -147,7 +147,7 @@ The app's main button. It has **3 modes** depending on the current state:
 
 ### Status bar (bottom)
 
-`Gateway: ● state | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v1.1`
+`Gateway: ● state | PID: X | uptime: H:MM:SS | RAM: X/Y GB | VRAM: X/Y GB | CPU: X% | v2.0`
 
 | Dot color | State |
 |---|---|
@@ -464,4 +464,4 @@ Open via the **Help → About…** menu or F1. Shows the logo, version, technica
 
 ---
 
-**End of document — app version v1.1**
+**End of document — app version v2.0**

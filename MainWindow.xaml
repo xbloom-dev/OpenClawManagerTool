@@ -99,7 +99,7 @@
                 <TextBlock x:Name="StatusCpu" Text="{Binding CpuText}" />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="v1.1" Foreground="Gray" />
+                <TextBlock Text="v2.0" Foreground="Gray" />
             </StatusBarItem>
         </StatusBar>
 

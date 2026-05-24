@@ -2,6 +2,34 @@
 
 ---
 
+## v2.0.0 — 25 May 2026
+
+### Architecture
+- Introduced Dependency Injection via `Microsoft.Extensions.Hosting` for application services and windows.
+- Migrated the main UI flows toward MVVM: About, Settings, Cleaning, Gateway Log, Live Log, Token Manager, and MainWindow status logic now use ViewModels.
+- Added `MainViewModel` for Gateway start/stop/restart state, status polling, AppLog, latency display, and localized left-panel state.
+- Added `IAppEnvironment` to encapsulate application paths and make filesystem-dependent code easier to test.
+- Reduced theme runtime code by moving selected shared WPF styles into `Resources/Themes/CoreStyles.xaml`.
+
+### User-visible improvements
+- Smoother UI status updates by moving WMI Gateway checks and latency log reads away from the UI thread.
+- More stable secondary windows through DI-managed dependencies instead of ad-hoc service construction.
+- Cleaner theme behavior for shared GroupBox, Button, and MenuItem styling.
+
+### Security and tests
+- Preserved the existing DPAPI vault, `.ocvault`, PBKDF2-SHA256, and AES-256-GCM implementation without vault format changes.
+- Expanded TokenService test coverage for token updates, rotation, removal, redaction overwrite protection, and GitIgnore idempotence.
+- Maintained Gitleaks verification as part of the release checklist.
+
+### Completed from the v1.x backlog
+- UI thread blocking audit
+- App path/environment encapsulation
+- Dependency Injection foundation
+- MVVM migration for all major windows
+- Theme system cleanup pilot
+
+---
+
 ## v1.1 — 23. května 2026
 
 ### Bezpečnost

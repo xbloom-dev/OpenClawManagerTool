@@ -13,7 +13,7 @@ public sealed partial class AboutViewModel : ObservableObject
             ?.InformationalVersion;
 
         AppVersion = string.IsNullOrWhiteSpace(version)
-            ? "v1.1"
+            ? "v2.0"
             : $"v{version.Split('+')[0]}";
 
         RefreshLocalization();
