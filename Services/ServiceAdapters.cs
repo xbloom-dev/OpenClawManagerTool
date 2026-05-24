@@ -1,29 +1,6 @@
-using System.Diagnostics;
 using OpenClawManager.Models;
 
 namespace OpenClawManager.Services;
-
-internal sealed class CleanupServiceAdapter : ICleanupService
-{
-    private readonly CleanupService _inner;
-
-    public CleanupServiceAdapter()
-    {
-        _inner = new CleanupService(new SettingsService());
-    }
-
-    public IReadOnlyList<CleanupStep> AllSteps => CleanupService.AllSteps;
-    public IReadOnlyList<string> DefaultAgents => CleanupService.DefaultAgents;
-
-    public CleanupStepResult RunStep(
-        int stepNum,
-        bool dryRun,
-        Action<string> log,
-        int keepSessions = 10) =>
-        _inner.RunStep(stepNum, dryRun, log, keepSessions);
-
-    public string FormatBytes(long bytes) => _inner.FormatBytes(bytes);
-}
 
 internal sealed class TokenServiceAdapter : ITokenService
 {
