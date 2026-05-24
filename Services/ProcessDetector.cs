@@ -7,13 +7,13 @@ namespace OpenClawManager.Services;
 /// Detekce běžících OpenClaw procesů přes WMI/CIM.
 /// Používá Win32_Process dotazy stejně jako cleanup.ps1.
 /// </summary>
-public static class ProcessDetector
+public sealed class ProcessDetector : IProcessDetector
 {
     /// <summary>
     /// Najde běžící openclaw gateway proces.
     /// </summary>
     /// <returns>Process objekt pokud Gateway běží, jinak null.</returns>
-    public static Process? FindGatewayProcess()
+    public Process? FindGatewayProcess()
     {
         try
         {
@@ -54,5 +54,5 @@ public static class ProcessDetector
     /// <summary>
     /// Rychlá kontrola zda Gateway běží.
     /// </summary>
-    public static bool IsGatewayRunning() => FindGatewayProcess() != null;
+    public bool IsGatewayRunning() => FindGatewayProcess() != null;
 }

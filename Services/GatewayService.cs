@@ -13,10 +13,12 @@ namespace OpenClawManager.Services;
 public sealed class GatewayService : IGatewayService
 {
     private readonly ISettingsService _settingsService;
+    private readonly IProcessDetector _processDetector;
 
-    public GatewayService(ISettingsService settingsService)
+    public GatewayService(ISettingsService settingsService, IProcessDetector processDetector)
     {
         _settingsService = settingsService;
+        _processDetector = processDetector;
     }
 
     public Process? Start()
@@ -65,7 +67,7 @@ public sealed class GatewayService : IGatewayService
 
         try
         {
-            var gateway = ProcessDetector.FindGatewayProcess();
+            var gateway = _processDetector.FindGatewayProcess();
             if (gateway != null)
             {
                 gateway.Kill(entireProcessTree: true);

@@ -12,12 +12,6 @@ internal sealed class ResourceMonitorAdapter : IResourceMonitor
     public ResourceSnapshot Measure() => ResourceMonitor.Measure();
 }
 
-internal sealed class ProcessDetectorAdapter : IProcessDetector
-{
-    public Process? FindGatewayProcess() => ProcessDetector.FindGatewayProcess();
-    public bool IsGatewayRunning() => ProcessDetector.IsGatewayRunning();
-}
-
 internal sealed class CleanupServiceAdapter : ICleanupService
 {
     private readonly CleanupService _inner;

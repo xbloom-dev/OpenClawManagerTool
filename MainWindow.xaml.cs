@@ -41,9 +41,9 @@ public partial class MainWindow : Window
     private MainWindow(ISettingsService settingsService)
         : this(
             settingsService,
-            new GatewayService(settingsService),
+            new GatewayService(settingsService, new ProcessDetector()),
             new ResourceMonitorAdapter(),
-            new ProcessDetectorAdapter())
+            new ProcessDetector())
     {
     }
 

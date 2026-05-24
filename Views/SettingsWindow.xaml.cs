@@ -33,6 +33,6 @@ public partial class SettingsWindow : Window
     private static SettingsViewModel CreateFallbackViewModel()
     {
         var settingsService = new SettingsService();
-        return new SettingsViewModel(settingsService, new GatewayService(settingsService));
+        return new SettingsViewModel(settingsService, new GatewayService(settingsService, new ProcessDetector()));
     }
 }
