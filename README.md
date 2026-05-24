@@ -36,7 +36,7 @@ A Windows desktop app for managing a local [OpenClaw](https://github.com/opencla
 ### Option 1 — Download a release (recommended)
 
 1. Go to the [Releases](../../releases) page.
-2. Download `OpenClawManagerTool-v2.0-win-x64.zip`.
+2. Download `OpenClawManagerTool-v2.0.0-win-x64.zip`.
 3. (Optional) Verify the download against the published `.sha256` file.
 4. Extract anywhere and run `OpenClawManager.exe`.
 
