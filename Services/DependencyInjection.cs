@@ -12,7 +12,7 @@ public static class DependencyInjection
         services.AddSingleton<IGatewayService, GatewayService>();
         services.AddSingleton<IResourceMonitor, ResourceMonitorAdapter>();
         services.AddSingleton<IProcessDetector, ProcessDetectorAdapter>();
-        services.AddSingleton<ICleanupService, CleanupServiceAdapter>();
+        services.AddSingleton<ICleanupService, CleanupService>();
         services.AddSingleton<ITokenService, TokenServiceAdapter>();
 
         services.AddTransient<AboutViewModel>();

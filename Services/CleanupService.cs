@@ -21,8 +21,15 @@ public record CleanupStepResult(
 /// - Selhání jednoho souboru neshodí celý krok
 /// - Krok 6 vždy vytvoří .bak před zápisem, rollback při chybě
 /// </summary>
-public static class CleanupService
+public sealed class CleanupService : ICleanupService
 {
+    private readonly ISettingsService _settingsService;
+
+    public CleanupService(ISettingsService settingsService)
+    {
+        _settingsService = settingsService;
+    }
+
     public static readonly CleanupStep[] AllSteps =
     {
         new(1, "Staré logy",           "Gateway log soubory starší než dnešek"),
@@ -47,25 +54,26 @@ public static class CleanupService
         "createdAt", "timestamp", "updatedAt", "lastModified", "mtime", "created_at"
     };
 
-    public static CleanupStepResult RunStep(
+    IReadOnlyList<CleanupStep> ICleanupService.AllSteps => AllSteps;
+    IReadOnlyList<string> ICleanupService.DefaultAgents => DefaultAgents;
+
+    public CleanupStepResult RunStep(
         int stepNumber,
         bool dryRun,
         Action<string> logCallback,
         int keepSessions = 10)
     {
-        var settings = OpenClawManager.App.GetService<ISettingsService>().Settings;
-
         try
         {
             return stepNumber switch
             {
-                1 => CleanLogs(settings, dryRun, logCallback),
-                2 => CleanBackups(settings, dryRun, logCallback),
-                3 => CleanStabilityReports(settings, dryRun, logCallback),
-                4 => CleanBrowserCache(settings, dryRun, logCallback),
-                5 => CleanSessionLocks(settings, dryRun, logCallback),
-                6 => CleanSessionsJson(settings, dryRun, logCallback, keepSessions),
-                7 => CleanTokenManagerBackups(settings, dryRun, logCallback),
+                1 => CleanLogs(dryRun, logCallback),
+                2 => CleanBackups(dryRun, logCallback),
+                3 => CleanStabilityReports(dryRun, logCallback),
+                4 => CleanBrowserCache(dryRun, logCallback),
+                5 => CleanSessionLocks(dryRun, logCallback),
+                6 => CleanSessionsJson(dryRun, logCallback, keepSessions),
+                7 => CleanTokenManagerBackups(dryRun, logCallback),
                 _ => new CleanupStepResult(stepNumber, 0, 0, $"Neznámý krok: {stepNumber}", true)
             };
         }
@@ -77,9 +85,9 @@ public static class CleanupService
 
     // ==================== KROKY 1-5 ====================
 
-    private static CleanupStepResult CleanLogs(
-        Models.AppSettings settings, bool dryRun, Action<string> log)
+    private CleanupStepResult CleanLogs(bool dryRun, Action<string> log)
     {
+        var settings = _settingsService.Settings;
         log("[1/6] Staré logy...");
         if (!Directory.Exists(settings.TempPath))
         {
@@ -96,9 +104,9 @@ public static class CleanupService
         return DeleteFiles(1, files, dryRun, log);
     }
 
-    private static CleanupStepResult CleanBackups(
-        Models.AppSettings settings, bool dryRun, Action<string> log)
+    private CleanupStepResult CleanBackups(bool dryRun, Action<string> log)
     {
+        var settings = _settingsService.Settings;
         log("[2/6] Zálohy konfigurace (ponechat 2 nejnovější)...");
         if (!Directory.Exists(settings.OpenClawPath))
         {
@@ -115,9 +123,9 @@ public static class CleanupService
         return DeleteFiles(2, files, dryRun, log);
     }
 
-    private static CleanupStepResult CleanStabilityReports(
-        Models.AppSettings settings, bool dryRun, Action<string> log)
+    private CleanupStepResult CleanStabilityReports(bool dryRun, Action<string> log)
     {
+        var settings = _settingsService.Settings;
         log("[3/6] Stability reporty (> 3 dny)...");
         var stabPath = Path.Combine(settings.OpenClawPath, "logs", "stability");
         if (!Directory.Exists(stabPath))
@@ -135,9 +143,9 @@ public static class CleanupService
         return DeleteFiles(3, files, dryRun, log);
     }
 
-    private static CleanupStepResult CleanBrowserCache(
-        Models.AppSettings settings, bool dryRun, Action<string> log)
+    private CleanupStepResult CleanBrowserCache(bool dryRun, Action<string> log)
     {
+        var settings = _settingsService.Settings;
         log("[4/6] Browser cache (> 1 den)...");
         var cachePath = Path.Combine(settings.OpenClawPath, "browser-data");
         if (!Directory.Exists(cachePath))
@@ -155,9 +163,9 @@ public static class CleanupService
         return DeleteFiles(4, files, dryRun, log);
     }
 
-    private static CleanupStepResult CleanSessionLocks(
-        Models.AppSettings settings, bool dryRun, Action<string> log)
+    private CleanupStepResult CleanSessionLocks(bool dryRun, Action<string> log)
     {
+        var settings = _settingsService.Settings;
         log("[5/6] Session locky...");
         var agentsPath = Path.Combine(settings.OpenClawPath, "agents");
         if (!Directory.Exists(agentsPath))
@@ -192,9 +200,9 @@ public static class CleanupService
     /// - JSON struktura může být array nebo object — zvládneme oboje
     /// - Sessions bez detekovatelného timestamp se řadí jako nejstarší
     /// </summary>
-    private static CleanupStepResult CleanSessionsJson(
-        Models.AppSettings settings, bool dryRun, Action<string> log, int keepSessions)
+    private CleanupStepResult CleanSessionsJson(bool dryRun, Action<string> log, int keepSessions)
     {
+        var settings = _settingsService.Settings;
         log($"[6/6] sessions.json cleanup (zachovat {keepSessions} nejnovějších)...");
 
         var agentsPath = Path.Combine(settings.OpenClawPath, "agents");
@@ -238,7 +246,7 @@ public static class CleanupService
 
     private record SessionCleanupResult(int Removed, long BytesSaved, bool Error);
 
-    private static SessionCleanupResult CleanupSessionsForAgent(
+    private SessionCleanupResult CleanupSessionsForAgent(
         string agent, string sessionsPath, int keep, bool dryRun, Action<string> log)
     {
         long sizeBefore = new FileInfo(sessionsPath).Length;
@@ -359,7 +367,7 @@ public static class CleanupService
     /// <summary>
     /// Extrahuje seznam sessions z JSON root (zvládá array i object strukturu).
     /// </summary>
-    private static List<SessionEntry> ExtractEntries(JsonNode root)
+    private List<SessionEntry> ExtractEntries(JsonNode root)
     {
         var result = new List<SessionEntry>();
 
@@ -387,7 +395,7 @@ public static class CleanupService
     /// Zkusí najít timestamp v JSON objektu pomocí různých klíčů a formátů.
     /// Akceptuje: ISO 8601 string, Unix epoch (sec/ms jako int nebo string).
     /// </summary>
-    private static DateTime? ParseTimestamp(JsonNode? session)
+    private DateTime? ParseTimestamp(JsonNode? session)
     {
         if (session is not JsonObject obj) return null;
 
@@ -428,7 +436,7 @@ public static class CleanupService
     /// <summary>
     /// Konverze Unix epoch (sec nebo ms) na DateTime. Heuristika: > 10^10 = ms, jinak sec.
     /// </summary>
-    private static DateTime FromEpoch(long epoch)
+    private DateTime FromEpoch(long epoch)
     {
         if (epoch > 10_000_000_000L)
             return DateTimeOffset.FromUnixTimeMilliseconds(epoch).LocalDateTime;
@@ -438,7 +446,7 @@ public static class CleanupService
 
     // ==================== POMOCNÉ ====================
 
-    private static CleanupStepResult DeleteFiles(
+    private CleanupStepResult DeleteFiles(
         int stepNumber, List<FileInfo> files, bool dryRun, Action<string> log)
     {
         if (files.Count == 0)
@@ -478,7 +486,7 @@ public static class CleanupService
         return new CleanupStepResult(stepNumber, deleted, deletedBytes, null, false);
     }
 
-    public static string FormatBytes(long bytes)
+    public string FormatBytes(long bytes)
     {
         if (bytes < 1024) return $"{bytes} B";
         if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
@@ -495,9 +503,9 @@ public static class CleanupService
     /// Opt-in (výchozí vypnuto) — zálohy jsou poslední záchrana pro případ
     /// chyby při restore-inplace. Mazat vědomě.
     /// </summary>
-    private static CleanupStepResult CleanTokenManagerBackups(
-        Models.AppSettings settings, bool dryRun, Action<string> log)
+    private CleanupStepResult CleanTokenManagerBackups(bool dryRun, Action<string> log)
     {
+        var settings = _settingsService.Settings;
         const int stepNumber = 7;
         log("[7] Token Manager zálohy:");
 
