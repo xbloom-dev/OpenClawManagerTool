@@ -1,16 +1,7 @@
 using System.Diagnostics;
 using OpenClawManager.Models;
-using static OpenClawManager.Services.ResourceMonitor;
 
 namespace OpenClawManager.Services;
-
-internal sealed class ResourceMonitorAdapter : IResourceMonitor
-{
-    public Task<ResourceSnapshot> MeasureAsync(CancellationToken cancellationToken = default) =>
-        ResourceMonitor.MeasureAsync(cancellationToken);
-
-    public ResourceSnapshot Measure() => ResourceMonitor.Measure();
-}
 
 internal sealed class CleanupServiceAdapter : ICleanupService
 {

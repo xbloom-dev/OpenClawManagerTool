@@ -42,7 +42,7 @@ public partial class MainWindow : Window
         : this(
             settingsService,
             new GatewayService(settingsService, new ProcessDetector()),
-            new ResourceMonitorAdapter(),
+            new ResourceMonitor(),
             new ProcessDetector())
     {
     }
