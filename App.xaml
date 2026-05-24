@@ -4,6 +4,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Themes/CoreStyles.xaml" />
                 <!-- Výchozí jazyk — přepíše se L10n.Apply() v App.xaml.cs -->
                 <ResourceDictionary Source="Resources/Lang/Strings.cs.xaml" />
             </ResourceDictionary.MergedDictionaries>

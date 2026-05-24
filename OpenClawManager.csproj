@@ -31,6 +31,7 @@
     <Resource Include="Resources\Lang\Strings.cs.xaml" />
 
     <!-- v0.5: ResourceDictionary pro témata -->
+    <Resource Include="Resources\Themes\CoreStyles.xaml" />
     <Resource Include="Resources\Themes\Theme.Legacy.xaml" />
     <Resource Include="Resources\Themes\Theme.Modern.xaml" />
     <Resource Include="Resources\Themes\Theme.StandardDark.xaml" />

@@ -15,9 +15,16 @@ internal static class ModernPaletteRuntimeStyles
     private const int DwmwaBorderColor = 34;
     private const int DwmwaCaptionColor = 35;
     private const int DwmwaTextColor = 36;
-    private static readonly Dictionary<string, Style> StyleCache = new();
+    /// <summary>
+    /// Cached procedural scanline overlay kept in C# because it is a generated DrawingBrush,
+    /// not a simple theme token.
+    /// </summary>
     private static Brush? _pressedScanlineBrush;
 
+    private static Style FindThemeStyle(string key) =>
+        (Style)Application.Current.FindResource(key);
+
+    // DWM caption coloring is native Windows chrome work, so it intentionally remains in code.
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
 
@@ -31,7 +38,7 @@ internal static class ModernPaletteRuntimeStyles
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
         window.Background = ThemeService.GetBrush("Theme.Brush.WindowBackground", GetBrushColor(background, Color.FromRgb(0x19, 0x19, 0x19)));
         window.Foreground = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        window.Resources[typeof(Button)] = GetModernPaletteButtonStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect);
+        window.Resources[typeof(Button)] = FindThemeStyle("Style.Button.StandardFlat");
         ApplyCaption(window);
         window.Loaded += (_, _) => ApplyLoadedVisuals(window);
     }
@@ -58,7 +65,7 @@ internal static class ModernPaletteRuntimeStyles
                     groupBox.Background = surface;
                     groupBox.Foreground = primary;
                     groupBox.BorderBrush = border;
-                    groupBox.Style = GetModernPaletteGroupBoxStyle(primary, surface, border);
+                    groupBox.Style = FindThemeStyle("Style.GroupBox.ModernPalette");
                     break;
                 case CheckBox checkBox:
                     checkBox.Foreground = primary;
@@ -151,148 +158,6 @@ internal static class ModernPaletteRuntimeStyles
         }
     }
 
-    private static Style GetModernPaletteGroupBoxStyle(Brush textBrush, Brush backgroundBrush, Brush borderBrush)
-    {
-        var key = $"group|modern-palette|{BrushCacheKey(textBrush)}|{BrushCacheKey(backgroundBrush)}|{BrushCacheKey(borderBrush)}";
-        if (StyleCache.TryGetValue(key, out var cached))
-            return cached;
-
-        var root = new FrameworkElementFactory(typeof(Grid));
-        root.SetValue(UIElement.SnapsToDevicePixelsProperty, true);
-
-        var border = new FrameworkElementFactory(typeof(Border));
-        border.Name = "SectionBorder";
-        border.SetValue(Border.BackgroundProperty, backgroundBrush);
-        border.SetValue(Border.BorderBrushProperty, borderBrush);
-        border.SetValue(Border.BorderThicknessProperty, new Thickness(1));
-        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
-        border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
-        border.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 7, 0, 0));
-        root.AppendChild(border);
-
-        var content = new FrameworkElementFactory(typeof(ContentPresenter));
-        content.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(ContentControl.ContentProperty));
-        content.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
-        content.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Stretch);
-        border.AppendChild(content);
-
-        var headerShell = new FrameworkElementFactory(typeof(Border));
-        headerShell.SetValue(Border.BackgroundProperty, backgroundBrush);
-        headerShell.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
-        headerShell.SetValue(Border.PaddingProperty, new Thickness(4, 0, 4, 0));
-        headerShell.SetValue(FrameworkElement.MarginProperty, new Thickness(7, 0, 0, 0));
-        headerShell.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Left);
-        headerShell.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Top);
-        headerShell.SetValue(Panel.ZIndexProperty, 1);
-
-        var header = new FrameworkElementFactory(typeof(ContentPresenter));
-        header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
-        header.SetValue(TextElement.ForegroundProperty, textBrush);
-        header.SetValue(TextElement.FontWeightProperty, FontWeights.SemiBold);
-        header.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
-        headerShell.AppendChild(header);
-        root.AppendChild(headerShell);
-
-        var style = new Style(typeof(GroupBox));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, backgroundBrush));
-        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, borderBrush));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
-        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = root }));
-        StyleCache[key] = style;
-        return style;
-    }
-
-    private static Style CreateModernPaletteButtonStyle(bool useScanlineEffect)
-    {
-        var noShift = ThemeService.GetCurrentButtonInteraction()
-            .Equals("PressScanlineNoShift", StringComparison.OrdinalIgnoreCase);
-        var idleBrush = ThemeService.GetBrush("Theme.Brush.SecondaryButton", Color.FromRgb(0x2E, 0x2E, 0x2E));
-        var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x46, 0x46, 0x46));
-        var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x30, 0x30, 0x30));
-        var buttonTextBrush = ThemeService.GetBrush("Theme.Brush.ButtonText", Colors.White);
-        var pressedOverlayBrush = CreatePressedScanlineBrush();
-
-        var root = new FrameworkElementFactory(typeof(Border));
-        root.Name = "Root";
-        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Button.BackgroundProperty));
-        root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
-        root.SetValue(Border.BorderThicknessProperty, new Thickness(0));
-        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
-
-        var contentGrid = new FrameworkElementFactory(typeof(Grid));
-        contentGrid.Name = "ContentGrid";
-        contentGrid.SetValue(
-            FrameworkElement.HorizontalAlignmentProperty,
-            new TemplateBindingExtension(Control.HorizontalContentAlignmentProperty));
-        contentGrid.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Center);
-        contentGrid.SetValue(UIElement.RenderTransformProperty, new TranslateTransform(0, 0));
-
-        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
-        presenter.SetValue(
-            ContentPresenter.HorizontalAlignmentProperty,
-            new TemplateBindingExtension(Control.HorizontalContentAlignmentProperty));
-        presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
-        presenter.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
-        contentGrid.AppendChild(presenter);
-
-        var pressedOverlay = new FrameworkElementFactory(typeof(Border));
-        pressedOverlay.Name = "PressedOverlay";
-        pressedOverlay.SetValue(Border.BackgroundProperty, pressedOverlayBrush);
-        pressedOverlay.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
-        pressedOverlay.SetValue(UIElement.OpacityProperty, 0.0);
-        pressedOverlay.SetValue(UIElement.IsHitTestVisibleProperty, false);
-        contentGrid.AppendChild(pressedOverlay);
-
-        root.AppendChild(contentGrid);
-
-        var template = new ControlTemplate(typeof(Button)) { VisualTree = root };
-
-        var hover = new Trigger { Property = Button.IsMouseOverProperty, Value = true };
-        hover.Setters.Add(new Setter(Border.BackgroundProperty, hoverBrush, "Root"));
-        if (!noShift)
-            hover.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(2, 2), "ContentGrid"));
-
-        var pressed = new Trigger { Property = Button.IsPressedProperty, Value = true };
-        pressed.Setters.Add(new Setter(Border.BackgroundProperty, pressedBrush, "Root"));
-        if (!noShift)
-            pressed.Setters.Add(new Setter(UIElement.RenderTransformProperty, new TranslateTransform(3, 3), "ContentGrid"));
-        pressed.Setters.Add(new Setter(UIElement.OpacityProperty, useScanlineEffect ? 0.62 : 0.0, "PressedOverlay"));
-
-        template.Triggers.Add(hover);
-        template.Triggers.Add(pressed);
-
-        var style = new Style(typeof(Button));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, idleBrush));
-        style.Setters.Add(new Setter(Control.ForegroundProperty, buttonTextBrush));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.TemplateProperty, template));
-        style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
-        style.Triggers.Add(new Trigger
-        {
-            Property = UIElement.IsEnabledProperty,
-            Value = false,
-            Setters =
-            {
-                new Setter(Control.BackgroundProperty, idleBrush),
-                new Setter(UIElement.OpacityProperty, 0.55)
-            }
-        });
-        return style;
-    }
-
-    private static Style GetModernPaletteButtonStyle(bool useScanlineEffect)
-    {
-        var key = $"{OpenClawManager.App.GetService<ISettingsService>().Settings.Theme}|{ThemeService.GetCurrentButtonInteraction()}|{useScanlineEffect}";
-        if (StyleCache.TryGetValue(key, out var cached))
-            return cached;
-
-        var style = CreateModernPaletteButtonStyle(useScanlineEffect);
-        StyleCache[key] = style;
-        return style;
-    }
-
     private static Brush CreatePressedScanlineBrush()
     {
         if (_pressedScanlineBrush != null) return _pressedScanlineBrush;
@@ -357,10 +222,4 @@ internal static class ModernPaletteRuntimeStyles
         return brush is SolidColorBrush solid ? solid.Color : fallback;
     }
 
-    private static string BrushCacheKey(Brush brush)
-    {
-        return brush is SolidColorBrush solid
-            ? solid.Color.ToString()
-            : brush.GetHashCode().ToString(System.Globalization.CultureInfo.InvariantCulture);
-    }
 }
