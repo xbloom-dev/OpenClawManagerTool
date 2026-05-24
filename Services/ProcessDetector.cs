@@ -55,4 +55,10 @@ public sealed class ProcessDetector : IProcessDetector
     /// Rychlá kontrola zda Gateway běží.
     /// </summary>
     public bool IsGatewayRunning() => FindGatewayProcess() != null;
+
+    public Task<Process?> FindGatewayProcessAsync(CancellationToken ct = default) =>
+        Task.Run(FindGatewayProcess, ct);
+
+    public Task<bool> IsGatewayRunningAsync(CancellationToken ct = default) =>
+        Task.Run(IsGatewayRunning, ct);
 }
