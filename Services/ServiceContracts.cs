@@ -36,6 +36,8 @@ public interface IProcessDetector
 {
     Process? FindGatewayProcess();
     bool IsGatewayRunning();
+    Task<Process?> FindGatewayProcessAsync(CancellationToken ct = default);
+    Task<bool> IsGatewayRunningAsync(CancellationToken ct = default);
 }
 
 public interface ICleanupService

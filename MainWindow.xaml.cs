@@ -267,8 +267,9 @@ public partial class MainWindow : Window
                 StatusVram.Visibility = Visibility.Collapsed;
             }
 
-            UpdateGatewayStatus();
-            UpdateLatencyStats();
+            var gateway = await _processDetector.FindGatewayProcessAsync();
+            UpdateGatewayStatusWithResult(gateway);
+            await UpdateLatencyStatsAsync();
         }
         catch (Exception ex)
         {
@@ -280,10 +281,8 @@ public partial class MainWindow : Window
         }
     }
 
-    private void UpdateGatewayStatus()
+    private void UpdateGatewayStatusWithResult(Process? gateway)
     {
-        var gateway = _processDetector.FindGatewayProcess();
-
         if (gateway != null)
         {
             if (_lastKnownGatewayPid != gateway.Id)
@@ -308,10 +307,10 @@ public partial class MainWindow : Window
         }
     }
 
-    private void UpdateLatencyStats()
+    private async Task UpdateLatencyStatsAsync()
     {
         var logPath = _settingsService.Settings.GetTodayGatewayLogPath();
-        LatencyTracker.Poll(logPath);
+        await LatencyTracker.PollAsync(logPath);
 
         var stats = LatencyTracker.GetStats();
 

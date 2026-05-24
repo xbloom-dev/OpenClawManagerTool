@@ -124,6 +124,46 @@ public static class LogMonitor
         return results;
     }
 
+    public static async Task<(List<(string Method, int Ms)> Entries, long NewOffset)> ParseNewLatencyEntriesAsync(
+        string logPath, long fileOffset)
+    {
+        var results = new List<(string, int)>();
+
+        if (!File.Exists(logPath))
+            return (results, fileOffset);
+
+        try
+        {
+            await using var fs = new FileStream(
+                logPath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.ReadWrite,
+                bufferSize: 4096,
+                options: FileOptions.Asynchronous);
+
+            // Resume from the last parsed byte offset.
+            if (fileOffset > fs.Length)
+                fileOffset = 0; // The log was deleted or rotated.
+
+            fs.Seek(fileOffset, SeekOrigin.Begin);
+
+            using var reader = new StreamReader(fs);
+            string? line;
+            while ((line = await reader.ReadLineAsync()) != null)
+            {
+                var entry = TryParseLatencyLine(line);
+                if (entry.HasValue)
+                    results.Add(entry.Value);
+            }
+
+            fileOffset = fs.Position;
+        }
+        catch { }
+
+        return (results, fileOffset);
+    }
+
     private static (string Method, int Ms)? TryParseLatencyLine(string line)
     {
         if (string.IsNullOrWhiteSpace(line)) return null;
