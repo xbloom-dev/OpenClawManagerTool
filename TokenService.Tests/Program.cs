@@ -188,7 +188,7 @@ void VaultSafetyDetectsRiskyPaths()
 
 void OpenClawCommandValidationRejectsShellCharacters()
 {
-    var gatewayService = new GatewayService(new SettingsService());
+    var gatewayService = new GatewayService(new SettingsService(), new ProcessDetector());
 
     Assert(gatewayService.TryValidateOpenClawCommand("openclaw", out _), "Plain openclaw command should be valid.");
     Assert(!gatewayService.TryValidateOpenClawCommand("openclaw; calc", out _), "Semicolon should be rejected.");

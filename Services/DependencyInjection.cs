@@ -11,7 +11,7 @@ public static class DependencyInjection
         services.AddSingleton<ISettingsService, SettingsService>();
         services.AddSingleton<IGatewayService, GatewayService>();
         services.AddSingleton<IResourceMonitor, ResourceMonitorAdapter>();
-        services.AddSingleton<IProcessDetector, ProcessDetectorAdapter>();
+        services.AddSingleton<IProcessDetector, ProcessDetector>();
         services.AddSingleton<ICleanupService, CleanupService>();
         services.AddSingleton<ITokenService, TokenServiceAdapter>();
 

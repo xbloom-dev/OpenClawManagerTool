@@ -10,16 +10,19 @@ public sealed partial class CleaningViewModel : ObservableObject
     private readonly IGatewayService _gatewayService;
     private readonly ISettingsService _settingsService;
     private readonly ICleanupService _cleanupService;
+    private readonly IProcessDetector _processDetector;
     private bool _taskWasDisabled;
 
     public CleaningViewModel(
         IGatewayService gatewayService,
         ISettingsService settingsService,
-        ICleanupService cleanupService)
+        ICleanupService cleanupService,
+        IProcessDetector processDetector)
     {
         _gatewayService = gatewayService;
         _settingsService = settingsService;
         _cleanupService = cleanupService;
+        _processDetector = processDetector;
 
         RefreshLocalization();
         RefreshTaskStatus();
@@ -246,7 +249,7 @@ public sealed partial class CleaningViewModel : ObservableObject
 
     private async Task<bool> PrepareForDestructiveRunAsync()
     {
-        if (IsStopGatewaySelected && ProcessDetector.IsGatewayRunning())
+        if (IsStopGatewaySelected && _processDetector.IsGatewayRunning())
         {
             AppendLog(T("Zastavuji Gateway...", "Stopping Gateway..."));
 
@@ -264,7 +267,7 @@ public sealed partial class CleaningViewModel : ObservableObject
 
             await Task.Delay(1500);
         }
-        else if (!IsStopGatewaySelected && ProcessDetector.IsGatewayRunning())
+        else if (!IsStopGatewaySelected && _processDetector.IsGatewayRunning())
         {
             var warn = MessageBox.Show(
                 T(

@@ -63,9 +63,11 @@ public partial class CleaningWindow : Window
     private static CleaningViewModel CreateFallbackViewModel()
     {
         var settingsService = new SettingsService();
+        var processDetector = new ProcessDetector();
         return new CleaningViewModel(
-            new GatewayService(settingsService),
+            new GatewayService(settingsService, processDetector),
             settingsService,
-            new CleanupServiceAdapter());
+            new CleanupServiceAdapter(),
+            processDetector);
     }
 }
