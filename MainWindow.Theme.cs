@@ -50,9 +50,15 @@ public partial class MainWindow
     private readonly Dictionary<MenuItem, object?> _menuItemIcons = new();
     private static readonly Dictionary<string, Style> _themeStyleCache = new();
     private static readonly Dictionary<string, ImageSource> _themeIconSourceCache = new();
+    /// <summary>
+    /// Cached procedural scanline overlay used by the runtime-generated button feedback styles.
+    /// It stays in C# because WPF XAML dictionaries cannot express this DrawingBrush pattern clearly.
+    /// </summary>
     private static Brush? _pressedScanlineBrush;
     private AppTheme _activeTheme = AppTheme.Legacy;
 
+    // DWM caption coloring is intentionally kept in code: WPF ResourceDictionaries cannot
+    // set native Windows title-bar attributes for custom chrome windows.
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int size);
 
@@ -302,7 +308,7 @@ public partial class MainWindow
         GrpActions.Foreground = text;
         GrpActions.BorderBrush = Brushes.Transparent;
         GrpActions.BorderThickness = new Thickness(0);
-        GrpActions.Style = CreateModernHiddenGroupBoxStyle();
+        GrpActions.Style = FindThemeStyle("Style.GroupBox.Hidden");
 
         foreach (var group in new[] { GrpLatency, GrpAppLog })
         {
@@ -310,7 +316,7 @@ public partial class MainWindow
             group.Foreground = text;
             group.BorderBrush = Brushes.Transparent;
             group.BorderThickness = new Thickness(0);
-            group.Style = CreateModernPanelGroupBoxStyle(primaryText, surface);
+            group.Style = FindThemeStyle("Style.GroupBox.ModernPalette");
         }
 
         AppLog.Background = surface;
@@ -352,12 +358,12 @@ public partial class MainWindow
         MainMenu.Foreground = secondaryText;
         MainStatusBar.Background = chrome;
         MainStatusBar.Foreground = secondaryText;
-        MainStatusBar.Resources[typeof(Separator)] = CreateStandardSeparatorStyle(border);
+        MainStatusBar.Resources[typeof(Separator)] = BuildStandardSeparatorStyle(border);
         MainGridSplitter.Background = border;
 
         foreach (var group in new[] { GrpActions, GrpTools, GrpLatency, GrpAppLog })
         {
-            group.Style = CreateStandardSimpleGroupBoxStyle(primaryText, border, surface);
+            group.Style = FindThemeStyle("Style.GroupBox.Standard");
             group.Background = surface;
             group.Foreground = primaryText;
             group.BorderBrush = border;
@@ -415,13 +421,13 @@ public partial class MainWindow
         MainGridSplitter.Background = separator;
 
         // ── GrpActions — průhledný, bez headeru ──────────────────────────────
-        GrpActions.Style          = CreateStandardHiddenGroupBoxStyle();
+        GrpActions.Style          = FindThemeStyle("Style.GroupBox.Hidden");
         GrpActions.Background     = Brushes.Transparent;
         GrpActions.BorderBrush    = Brushes.Transparent;
         GrpActions.BorderThickness = new Thickness(0);
 
         // ── GrpTools — průhledný, bez headeru (Nástroje splývají s bg) ───────
-        GrpTools.Style          = CreateStandardHiddenGroupBoxStyle();
+        GrpTools.Style          = FindThemeStyle("Style.GroupBox.Hidden");
         GrpTools.Background     = Brushes.Transparent;
         GrpTools.BorderBrush    = Brushes.Transparent;
         GrpTools.BorderThickness = new Thickness(0);
@@ -429,7 +435,7 @@ public partial class MainWindow
         // ── GrpLatency + GrpAppLog — flat Active (#383838), bez headeru ──────
         foreach (var grp in new[] { GrpLatency, GrpAppLog })
         {
-            grp.Style          = CreateStandardFlatGroupBoxStyle(secondary, active);
+            grp.Style          = FindThemeStyle("Style.GroupBox.Hidden");
             grp.Background     = active;
             grp.Foreground     = secondary;
             grp.BorderBrush    = Brushes.Transparent;
@@ -476,12 +482,7 @@ public partial class MainWindow
         Brush popupBackground,
         Brush hoverBackground)
     {
-        MainMenu.Resources[typeof(MenuItem)] = CreateModernPaletteMenuItemStyle(
-            foreground,
-            topLevelForeground,
-            background,
-            popupBackground,
-            hoverBackground);
+        MainMenu.Resources[typeof(MenuItem)] = FindThemeStyle("Style.MenuItem.Dark");
         MainMenu.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
     }
 
@@ -581,7 +582,7 @@ public partial class MainWindow
         });
     }
 
-    private static Style CreateStandardSeparatorStyle(Brush brush)
+    private static Style BuildStandardSeparatorStyle(Brush brush)
     {
         var cacheKey = $"separator|standard|{BrushCacheKey(brush)}";
         return GetCachedStyle(cacheKey, () =>
@@ -592,213 +593,6 @@ public partial class MainWindow
         style.Setters.Add(new Setter(UIElement.OpacityProperty, 1.0));
         return style;
         });
-    }
-
-    private static Style CreateStandardSimpleGroupBoxStyle(Brush textBrush, Brush borderBrush, Brush backgroundBrush)
-    {
-        var cacheKey = $"group|standard-simple|{BrushCacheKey(textBrush)}|{BrushCacheKey(borderBrush)}|{BrushCacheKey(backgroundBrush)}";
-        return GetCachedStyle(cacheKey, () =>
-        {
-        var root = new FrameworkElementFactory(typeof(Grid));
-        root.SetValue(UIElement.SnapsToDevicePixelsProperty, true);
-
-        var border = new FrameworkElementFactory(typeof(Border));
-        border.Name = "SectionBorder";
-        border.SetValue(Border.BackgroundProperty, backgroundBrush);
-        border.SetValue(Border.BorderBrushProperty, borderBrush);
-        border.SetValue(Border.BorderThicknessProperty, new Thickness(1));
-        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
-        border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
-        border.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 7, 0, 0));
-        border.SetValue(UIElement.SnapsToDevicePixelsProperty, true);
-
-        var content = new FrameworkElementFactory(typeof(ContentPresenter));
-        content.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(ContentControl.ContentProperty));
-        content.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Stretch);
-        content.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Stretch);
-        border.AppendChild(content);
-        root.AppendChild(border);
-
-        var headerShell = new FrameworkElementFactory(typeof(Border));
-        headerShell.SetValue(Border.BackgroundProperty, backgroundBrush);
-        headerShell.SetValue(Border.PaddingProperty, new Thickness(4, 0, 4, 0));
-        headerShell.SetValue(FrameworkElement.MarginProperty, new Thickness(7, 0, 0, 0));
-        headerShell.SetValue(FrameworkElement.HorizontalAlignmentProperty, HorizontalAlignment.Left);
-        headerShell.SetValue(FrameworkElement.VerticalAlignmentProperty, VerticalAlignment.Top);
-        headerShell.SetValue(Panel.ZIndexProperty, 1);
-
-        var header = new FrameworkElementFactory(typeof(ContentPresenter));
-        header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
-        header.SetValue(TextElement.ForegroundProperty, textBrush);
-        header.SetValue(TextElement.FontWeightProperty, FontWeights.SemiBold);
-        header.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
-        headerShell.AppendChild(header);
-        root.AppendChild(headerShell);
-
-        var style = new Style(typeof(GroupBox));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, backgroundBrush));
-        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, borderBrush));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
-        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = root }));
-        return style;
-        });
-    }
-
-    private static Style CreateModernPaletteMenuItemStyle(
-        Brush foreground,
-        Brush topLevelForeground,
-        Brush background,
-        Brush popupBackground,
-        Brush hoverBackground)
-    {
-        var cacheKey = $"menu|modern-palette|{BrushCacheKey(foreground)}|{BrushCacheKey(topLevelForeground)}|{BrushCacheKey(background)}|{BrushCacheKey(popupBackground)}|{BrushCacheKey(hoverBackground)}";
-        return GetCachedStyle(cacheKey, () =>
-        {
-        var style = new Style(typeof(MenuItem));
-        style.Setters.Add(new Setter(Control.ForegroundProperty, foreground));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, background));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(8, 4, 8, 4)));
-        style.Setters.Add(new Setter(Control.TemplateProperty, CreateDarkMenuItemTemplate(topLevelForeground, popupBackground, hoverBackground)));
-        return style;
-        });
-    }
-
-    private static Style CreateDarkFramedGroupBoxStyle()
-    {
-        var textBrush = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x9E, 0x9E, 0x9E));
-        var borderBrush = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0x4E, 0x4E, 0x4E));
-        var backgroundBrush = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x19, 0x19, 0x19));
-        var cacheKey = $"group|dark-framed|{BrushCacheKey(textBrush)}|{BrushCacheKey(borderBrush)}|{BrushCacheKey(backgroundBrush)}";
-        return GetCachedStyle(cacheKey, () =>
-        {
-
-        var border = new FrameworkElementFactory(typeof(Border));
-        border.Name = "Border";
-        border.SetValue(Border.BackgroundProperty, backgroundBrush);
-        border.SetValue(Border.BorderBrushProperty, borderBrush);
-        border.SetValue(Border.BorderThicknessProperty, new Thickness(1));
-        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
-        border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
-
-        var dock = new FrameworkElementFactory(typeof(DockPanel));
-        dock.SetValue(DockPanel.LastChildFillProperty, true);
-
-        var header = new FrameworkElementFactory(typeof(ContentPresenter));
-        header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
-        header.SetValue(TextElement.ForegroundProperty, textBrush);
-        header.SetValue(TextElement.FontWeightProperty, FontWeights.SemiBold);
-        header.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 0, 0, 6));
-        header.SetValue(DockPanel.DockProperty, Dock.Top);
-        dock.AppendChild(header);
-
-        var content = new FrameworkElementFactory(typeof(ContentPresenter));
-        content.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(ContentControl.ContentProperty));
-        dock.AppendChild(content);
-
-        border.AppendChild(dock);
-
-        var style = new Style(typeof(GroupBox));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, backgroundBrush));
-        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, borderBrush));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
-        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
-        return style;
-        });
-    }
-
-    private static ControlTemplate CreateDarkMenuItemTemplate(Brush secondaryBrush, Brush popupBackground, Brush hoverBackground)
-    {
-        var root = new FrameworkElementFactory(typeof(Border));
-        root.Name = "Root";
-        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
-        root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
-        root.SetValue(Border.BorderThicknessProperty, new Thickness(0));
-        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
-        root.SetValue(Border.MarginProperty, new Thickness(2, 1, 2, 1));
-
-        var dock = new FrameworkElementFactory(typeof(DockPanel));
-        dock.Name = "Dock";
-        dock.SetValue(FrameworkElement.MinWidthProperty, 160.0);
-        dock.SetValue(FrameworkElement.MarginProperty, new Thickness(0));
-
-        var arrow = new FrameworkElementFactory(typeof(TextBlock));
-        arrow.Name = "Arrow";
-        arrow.SetValue(TextBlock.TextProperty, ">");
-        arrow.SetValue(TextBlock.ForegroundProperty, secondaryBrush);
-        arrow.SetValue(FrameworkElement.MarginProperty, new Thickness(16, 0, 0, 0));
-        arrow.SetValue(DockPanel.DockProperty, Dock.Right);
-        arrow.SetValue(UIElement.VisibilityProperty, Visibility.Collapsed);
-        dock.AppendChild(arrow);
-
-        var gesture = new FrameworkElementFactory(typeof(TextBlock));
-        gesture.Name = "Gesture";
-        gesture.SetValue(TextBlock.TextProperty, new TemplateBindingExtension(MenuItem.InputGestureTextProperty));
-        gesture.SetValue(TextBlock.ForegroundProperty, secondaryBrush);
-        gesture.SetValue(FrameworkElement.MarginProperty, new Thickness(24, 0, 0, 0));
-        gesture.SetValue(DockPanel.DockProperty, Dock.Right);
-        dock.AppendChild(gesture);
-
-        var header = new FrameworkElementFactory(typeof(ContentPresenter));
-        header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
-        header.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
-        header.SetValue(TextElement.ForegroundProperty, new TemplateBindingExtension(Control.ForegroundProperty));
-        header.SetValue(FrameworkElement.MarginProperty, new Thickness(8, 4, 8, 4));
-        dock.AppendChild(header);
-
-        root.AppendChild(dock);
-
-        var popup = new FrameworkElementFactory(typeof(Popup));
-        popup.Name = "PART_Popup";
-        popup.SetValue(Popup.AllowsTransparencyProperty, true);
-        popup.SetValue(Popup.FocusableProperty, false);
-        popup.SetValue(Popup.IsOpenProperty, new TemplateBindingExtension(MenuItem.IsSubmenuOpenProperty));
-        popup.SetValue(Popup.PlacementProperty, PlacementMode.Right);
-
-        var popupBorder = new FrameworkElementFactory(typeof(Border));
-        popupBorder.SetValue(Border.BackgroundProperty, popupBackground);
-        popupBorder.SetValue(Border.BorderThicknessProperty, new Thickness(0));
-
-        var items = new FrameworkElementFactory(typeof(ItemsPresenter));
-        popupBorder.AppendChild(items);
-        popup.AppendChild(popupBorder);
-
-        var panel = new FrameworkElementFactory(typeof(Grid));
-        panel.AppendChild(root);
-        panel.AppendChild(popup);
-
-        var template = new ControlTemplate(typeof(MenuItem)) { VisualTree = panel };
-
-        var hover = new Trigger { Property = MenuItem.IsHighlightedProperty, Value = true };
-        hover.Setters.Add(new Setter(Border.BackgroundProperty, hoverBackground, "Root"));
-        hover.Setters.Add(new Setter(Control.ForegroundProperty, Brushes.White));
-
-        var submenu = new Trigger { Property = MenuItem.RoleProperty, Value = MenuItemRole.SubmenuHeader };
-        submenu.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Visible, "Arrow"));
-        submenu.Setters.Add(new Setter(Border.BackgroundProperty, hoverBackground, "Root"));
-
-        var open = new Trigger { Property = MenuItem.IsSubmenuOpenProperty, Value = true };
-        open.Setters.Add(new Setter(Border.BackgroundProperty, hoverBackground, "Root"));
-
-        var topLevel = new Trigger { Property = MenuItem.RoleProperty, Value = MenuItemRole.TopLevelHeader };
-        topLevel.Setters.Add(new Setter(Control.ForegroundProperty, secondaryBrush));
-        topLevel.Setters.Add(new Setter(UIElement.VisibilityProperty, Visibility.Collapsed, "Arrow"));
-        topLevel.Setters.Add(new Setter(FrameworkElement.MinWidthProperty, 0.0, "Dock"));
-        topLevel.Setters.Add(new Setter(Popup.PlacementProperty, PlacementMode.Bottom, "PART_Popup"));
-
-        var openTopLevel = new MultiTrigger();
-        openTopLevel.Conditions.Add(new Condition(MenuItem.RoleProperty, MenuItemRole.TopLevelHeader));
-        openTopLevel.Conditions.Add(new Condition(MenuItem.IsSubmenuOpenProperty, true));
-        openTopLevel.Setters.Add(new Setter(Control.ForegroundProperty, Brushes.White));
-
-        template.Triggers.Add(hover);
-        template.Triggers.Add(submenu);
-        template.Triggers.Add(open);
-        template.Triggers.Add(topLevel);
-        template.Triggers.Add(openTopLevel);
-        return template;
     }
 
     private void ApplyModernPaletteButtonText()
@@ -982,7 +776,7 @@ public partial class MainWindow
         Brush idle, Brush hover, Brush pressed, Brush textBrush,
         params Button[] buttons)
     {
-        var style = CreateStandardFlatButtonStyle(idle, hover, pressed, textBrush);
+        var style = FindThemeStyle("Style.Button.StandardFlat");
         foreach (var btn in buttons)
         {
             btn.Style = style;
@@ -999,7 +793,7 @@ public partial class MainWindow
         Brush idle, Brush hoverColor, Brush textBrush,
         params Button[] buttons)
     {
-        var style = CreateStandardFlatButtonStyle(idle, hoverColor, hoverColor, textBrush);
+        var style = FindThemeStyle("Style.Button.StandardFlat");
         foreach (var btn in buttons)
         {
             btn.Style = style;
@@ -1011,117 +805,7 @@ public partial class MainWindow
         }
     }
 
-    // Flat button bez WPF Aero chrome
-    private static Style CreateStandardFlatButtonStyle(
-        Brush idle, Brush hover, Brush pressed, Brush textBrush)
-    {
-        var cacheKey = $"button|standard-flat|{BrushCacheKey(idle)}|{BrushCacheKey(hover)}|{BrushCacheKey(pressed)}|{BrushCacheKey(textBrush)}";
-        return GetCachedStyle(cacheKey, () =>
-        {
-        var root = new FrameworkElementFactory(typeof(Border));
-        root.Name = "Root";
-        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Button.BackgroundProperty));
-        root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
-        root.SetValue(Border.BorderThicknessProperty, new Thickness(0));
-        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
-
-        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
-        presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty,
-            new TemplateBindingExtension(Control.HorizontalContentAlignmentProperty));
-        presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
-        presenter.SetValue(ContentPresenter.MarginProperty,
-            new TemplateBindingExtension(Control.PaddingProperty));
-        presenter.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
-        root.AppendChild(presenter);
-
-        var template = new ControlTemplate(typeof(Button)) { VisualTree = root };
-
-        var hoverTrigger = new Trigger { Property = Button.IsMouseOverProperty, Value = true };
-        hoverTrigger.Setters.Add(new Setter(Border.BackgroundProperty, hover, "Root"));
-
-        var pressedTrigger = new Trigger { Property = Button.IsPressedProperty, Value = true };
-        pressedTrigger.Setters.Add(new Setter(Border.BackgroundProperty, pressed, "Root"));
-
-        template.Triggers.Add(hoverTrigger);
-        template.Triggers.Add(pressedTrigger);
-
-        var style = new Style(typeof(Button));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, idle));
-        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(10, 6, 10, 6)));
-        style.Setters.Add(new Setter(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Left));
-        style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
-        style.Setters.Add(new Setter(Control.TemplateProperty, template));
-        style.Triggers.Add(new Trigger
-        {
-            Property = UIElement.IsEnabledProperty,
-            Value    = false,
-            Setters  = { new Setter(UIElement.OpacityProperty, 0.4) }
-        });
-        return style;
-        });
-    }
-
-    // GroupBox bez headeru a border (GrpActions, GrpTools v StandardDark)
-    private static Style CreateStandardHiddenGroupBoxStyle()
-    {
-        return GetCachedStyle("group|standard-hidden", () =>
-        {
-        var border = new FrameworkElementFactory(typeof(Border));
-        border.SetValue(Border.BackgroundProperty, Brushes.Transparent);
-        border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
-        border.SetValue(Border.BorderThicknessProperty, new Thickness(0));
-        border.SetValue(Border.PaddingProperty, new Thickness(0));
-
-        var content = new FrameworkElementFactory(typeof(ContentPresenter));
-        content.SetValue(ContentPresenter.ContentProperty,
-            new TemplateBindingExtension(ContentControl.ContentProperty));
-        border.AppendChild(content);
-
-        var style = new Style(typeof(GroupBox));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.TemplateProperty,
-            new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
-        return style;
-        });
-    }
-
-    // GroupBox flat panel Active (#383838), bez headeru (GrpLatency, GrpAppLog)
-    private static Style CreateStandardFlatGroupBoxStyle(Brush textBrush, Brush backgroundBrush)
-    {
-        var cacheKey = $"group|standard-flat|{BrushCacheKey(textBrush)}|{BrushCacheKey(backgroundBrush)}";
-        return GetCachedStyle(cacheKey, () =>
-        {
-        var border = new FrameworkElementFactory(typeof(Border));
-        border.SetValue(Border.BackgroundProperty, backgroundBrush);
-        border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
-        border.SetValue(Border.BorderThicknessProperty, new Thickness(0));
-        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
-        border.SetValue(Border.PaddingProperty, new Thickness(8));
-
-        var content = new FrameworkElementFactory(typeof(ContentPresenter));
-        content.SetValue(ContentPresenter.ContentProperty,
-            new TemplateBindingExtension(ContentControl.ContentProperty));
-        border.AppendChild(content);
-
-        var style = new Style(typeof(GroupBox));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, backgroundBrush));
-        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.TemplateProperty,
-            new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
-        return style;
-        });
-    }
-
-        private void ApplyModernToolLayout()
+    private void ApplyModernToolLayout()
     {
         TxtGatewayLabel.Visibility = Visibility.Collapsed;
         TxtSectionOpen.Text = L10n.Get("Str_Section_Tools");
@@ -1266,6 +950,9 @@ public partial class MainWindow
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    private static Style FindThemeStyle(string key) =>
+        (Style)Application.Current.FindResource(key);
+
     private static Style GetCachedStyle(string key, Func<Style> factory)
     {
         if (_themeStyleCache.TryGetValue(key, out var cached))
@@ -1349,7 +1036,7 @@ public partial class MainWindow
         image.HorizontalAlignment = alignment;
 
         btn.Content = image;
-        btn.Style = CreateModernVariantImageButtonFeedbackStyle(
+        btn.Style = BuildModernVariantImageButtonFeedbackStyle(
             OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect,
             ThemeService.GetCurrentButtonInteraction().Equals("PressScanline", StringComparison.OrdinalIgnoreCase));
         btn.Height = height;
@@ -1365,14 +1052,14 @@ public partial class MainWindow
     {
         foreach (var button in buttons)
         {
-            button.Style = CreateModernButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect);
+            button.Style = BuildModernButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect);
             button.FocusVisualStyle = null;
         }
     }
 
     private static void ApplyStandardButtonFeedbackStyle(params Button[] buttons)
     {
-        var style = CreateStandardButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect);
+        var style = BuildStandardButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect);
         var idleBrush = ThemeService.GetBrush("Theme.Brush.Disabled", Color.FromRgb(0x28, 0x28, 0x28));
         var buttonTextBrush = ThemeService.GetBrush("Theme.Brush.ButtonText", Colors.White);
 
@@ -1387,7 +1074,7 @@ public partial class MainWindow
         }
     }
 
-    private static Style CreateStandardButtonFeedbackStyle(bool useScanlineEffect)
+    private static Style BuildStandardButtonFeedbackStyle(bool useScanlineEffect)
     {
         var idleBrush = ThemeService.GetBrush("Theme.Brush.Disabled", Color.FromRgb(0x28, 0x28, 0x28));
         var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x46, 0x46, 0x46));
@@ -1463,7 +1150,7 @@ public partial class MainWindow
         });
     }
 
-    private static Style CreateModernButtonFeedbackStyle(bool useScanlineEffect)
+    private static Style BuildModernButtonFeedbackStyle(bool useScanlineEffect)
     {
         var hoverBrush = new SolidColorBrush(Color.FromRgb(0xE2, 0xE7, 0xEE));
         var hoverBorderBrush = new SolidColorBrush(Color.FromRgb(0xB8, 0xC2, 0xCF));
@@ -1542,12 +1229,12 @@ public partial class MainWindow
     {
         foreach (var button in buttons)
         {
-            button.Style = CreateDarkButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect, idleBrush);
+            button.Style = BuildDarkButtonFeedbackStyle(OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect, idleBrush);
             button.FocusVisualStyle = null;
         }
     }
 
-    private static Style CreateDarkButtonFeedbackStyle(bool useScanlineEffect, Brush idleBrush)
+    private static Style BuildDarkButtonFeedbackStyle(bool useScanlineEffect, Brush idleBrush)
     {
         var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x38, 0x38, 0x38));
         var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x30, 0x30, 0x30));
@@ -1697,69 +1384,7 @@ public partial class MainWindow
         });
     }
 
-    private static Style CreateModernHiddenGroupBoxStyle()
-    {
-        return GetCachedStyle("group|modern-hidden", () =>
-        {
-        var border = new FrameworkElementFactory(typeof(Border));
-        border.SetValue(Border.BackgroundProperty, Brushes.Transparent);
-        border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
-        border.SetValue(Border.BorderThicknessProperty, new Thickness(0));
-        border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
-
-        var content = new FrameworkElementFactory(typeof(ContentPresenter));
-        content.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(ContentControl.ContentProperty));
-        border.AppendChild(content);
-
-        var style = new Style(typeof(GroupBox));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
-        return style;
-        });
-    }
-
-    private static Style CreateModernPanelGroupBoxStyle(Brush textBrush, Brush backgroundBrush)
-    {
-        var cacheKey = $"group|modern-panel|{BrushCacheKey(textBrush)}|{BrushCacheKey(backgroundBrush)}";
-        return GetCachedStyle(cacheKey, () =>
-        {
-        var border = new FrameworkElementFactory(typeof(Border));
-        border.SetValue(Border.BackgroundProperty, backgroundBrush);
-        border.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
-        border.SetValue(Border.BorderThicknessProperty, new Thickness(0));
-        border.SetValue(Border.CornerRadiusProperty, new CornerRadius(6));
-        border.SetValue(Border.PaddingProperty, new TemplateBindingExtension(Control.PaddingProperty));
-
-        var dock = new FrameworkElementFactory(typeof(DockPanel));
-        dock.SetValue(DockPanel.LastChildFillProperty, true);
-
-        var header = new FrameworkElementFactory(typeof(ContentPresenter));
-        header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
-        header.SetValue(TextElement.ForegroundProperty, textBrush);
-        header.SetValue(TextElement.FontWeightProperty, FontWeights.SemiBold);
-        header.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 0, 0, 6));
-        header.SetValue(DockPanel.DockProperty, Dock.Top);
-        dock.AppendChild(header);
-
-        var content = new FrameworkElementFactory(typeof(ContentPresenter));
-        content.SetValue(ContentPresenter.ContentProperty, new TemplateBindingExtension(ContentControl.ContentProperty));
-        dock.AppendChild(content);
-
-        border.AppendChild(dock);
-
-        var style = new Style(typeof(GroupBox));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, backgroundBrush));
-        style.Setters.Add(new Setter(Control.ForegroundProperty, textBrush));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = border }));
-        return style;
-        });
-    }
-
-    private static Style CreateModernVariantImageButtonFeedbackStyle(bool useScanlineEffect, bool lightInteraction)
+    private static Style BuildModernVariantImageButtonFeedbackStyle(bool useScanlineEffect, bool lightInteraction)
     {
         var cacheKey = $"button|modern-variant-image|{useScanlineEffect}|{lightInteraction}";
         return GetCachedStyle(cacheKey, () =>
@@ -1841,6 +1466,10 @@ public partial class MainWindow
         });
     }
 
+    /// <summary>
+    /// Builds the small pressed-state scanline overlay shared by procedural button templates.
+    /// This remains code-based because the generated brush is easier to audit here than as XAML geometry.
+    /// </summary>
     private static Brush CreatePressedScanlineBrush()
     {
         if (_pressedScanlineBrush != null) return _pressedScanlineBrush;
@@ -1932,6 +1561,10 @@ public partial class MainWindow
         SetCrabCuteButtonImage(BtnStartTui, tuiRunning ? "stop" : "tui", tuiRunning ? 44 : 88);
     }
 
+    /// <summary>
+    /// Captures the original XAML-defined visual state before any theme-specific code mutates controls.
+    /// RestoreThemeBaseline uses this snapshot so theme switching never compounds previous runtime edits.
+    /// </summary>
     private void CaptureThemeBaseline()
     {
         if (_buttonVisualStates.Count > 0) return;
@@ -2009,6 +1642,10 @@ public partial class MainWindow
         }
     }
 
+    /// <summary>
+    /// Restores controls to the captured baseline before applying the next theme layer.
+    /// This snapshot/restore pattern keeps legacy runtime theme code deterministic across repeated switches.
+    /// </summary>
     private void RestoreThemeBaseline()
     {
         RestoreToolControlsToActions();
@@ -2071,6 +1708,9 @@ public partial class MainWindow
         MainStatusBar.Resources.Remove(typeof(Separator));
     }
 
+    /// <summary>
+    /// Applies native DWM caption, border, and title text colors for themes that use custom window chrome.
+    /// </summary>
     private void ApplyWindowCaptionColor(Color? captionColor, Color? textColor)
     {
         void ApplyNow()
