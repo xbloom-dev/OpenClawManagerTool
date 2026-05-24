@@ -20,6 +20,13 @@ internal sealed class ProcessDetectorAdapter : IProcessDetector
 
 internal sealed class CleanupServiceAdapter : ICleanupService
 {
+    private readonly CleanupService _inner;
+
+    public CleanupServiceAdapter()
+    {
+        _inner = new CleanupService(new SettingsService());
+    }
+
     public IReadOnlyList<CleanupStep> AllSteps => CleanupService.AllSteps;
     public IReadOnlyList<string> DefaultAgents => CleanupService.DefaultAgents;
 
@@ -28,9 +35,9 @@ internal sealed class CleanupServiceAdapter : ICleanupService
         bool dryRun,
         Action<string> log,
         int keepSessions = 10) =>
-        CleanupService.RunStep(stepNum, dryRun, log, keepSessions);
+        _inner.RunStep(stepNum, dryRun, log, keepSessions);
 
-    public string FormatBytes(long bytes) => CleanupService.FormatBytes(bytes);
+    public string FormatBytes(long bytes) => _inner.FormatBytes(bytes);
 }
 
 internal sealed class TokenServiceAdapter : ITokenService
