@@ -1,5 +1,7 @@
 # OpenClaw Manager Tool
 
+[![CI](https://github.com/xbloom-dev/OpenClawManagerTool/actions/workflows/ci.yml/badge.svg)](https://github.com/xbloom-dev/OpenClawManagerTool/actions/workflows/ci.yml)
+
 A Windows desktop app for managing a local [OpenClaw](https://github.com/openclaw/openclaw) environment — start and stop the Gateway, open the TUI, watch logs, run cleanup, manage settings and themes, and store provider tokens in a DPAPI-protected vault. All from a single window, without memorizing CLI flags.
 
 > **What is OpenClaw?** OpenClaw is an open-source AI-agent framework. Its **Gateway** is a local daemon that connects your agents to AI providers (Anthropic, OpenAI, Ollama, …), and its **TUI** is a terminal dashboard for monitoring sessions, logs, and model usage. See the [OpenClaw project](https://github.com/openclaw/openclaw) and [docs.openclaw.ai](https://docs.openclaw.ai) to install and configure OpenClaw itself.
