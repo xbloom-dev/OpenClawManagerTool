@@ -70,7 +70,7 @@
     <!-- About -->
     <sys:String x:Key="Str_Tip_AboutClose">Closes dialog.</sys:String>
     <sys:String x:Key="Str_About_CommandHelpTitle">OpenClaw prompt commands</sys:String>
-    <sys:String x:Key="Str_About_CommandHelpText">replay - Replay splash when TUI is stopped&#x0a;legacy/dark/light/modern/crab - Switch theme&#x0a;logs - Open Gateway log&#x0a;tokens - Open token manager&#x0a;settings - Open settings&#x0a;exit - Close application</sys:String>
+    <sys:String x:Key="Str_About_CommandHelpText">replay - Replay splash when TUI is stopped&#x0a;legacy/dark/light/modern/crab - Switch theme&#x0a;logs - Open Gateway log&#x0a;tokens - Open token manager&#x0a;settings - Open settings&#x0a;easteregg/egg/about - Show this help&#x0a;exit - Close application</sys:String>
 
     <!-- Gateway log dialog -->
     <sys:String x:Key="Str_BtnCopy">Copy</sys:String>

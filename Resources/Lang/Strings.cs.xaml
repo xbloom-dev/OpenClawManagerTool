@@ -70,7 +70,7 @@
     <!-- About -->
     <sys:String x:Key="Str_Tip_AboutClose">Zavře dialog.</sys:String>
     <sys:String x:Key="Str_About_CommandHelpTitle">Příkazy OpenClaw promptu</sys:String>
-    <sys:String x:Key="Str_About_CommandHelpText">replay - Znovu přehrát splash, když TUI neběží&#x0a;legacy/dark/light/modern/crab - Přepnout téma&#x0a;logs - Otevřít Gateway log&#x0a;tokens - Otevřít správce tokenů&#x0a;settings - Otevřít nastavení&#x0a;exit - Zavřít aplikaci</sys:String>
+    <sys:String x:Key="Str_About_CommandHelpText">replay - Znovu přehrát splash, když TUI neběží&#x0a;legacy/dark/light/modern/crab - Přepnout téma&#x0a;logs - Otevřít Gateway log&#x0a;tokens - Otevřít správce tokenů&#x0a;settings - Otevřít nastavení&#x0a;easteregg/egg/about - Zobrazit tuto nápovědu&#x0a;exit - Zavřít aplikaci</sys:String>
 
     <!-- Gateway log dialog -->
     <sys:String x:Key="Str_BtnCopy">Kopírovat</sys:String>

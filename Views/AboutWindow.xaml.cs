@@ -34,6 +34,7 @@ public partial class AboutWindow : Window
         try
         {
             await SvgView.EnsureCoreWebView2Async();
+            SvgView.CoreWebView2.Settings.IsWebMessageEnabled = true;
             SvgView.CoreWebView2.WebMessageReceived += SvgView_WebMessageReceived;
             var svgPath = FindSvgPath();
             var svgContent = svgPath != null
@@ -47,12 +48,16 @@ public partial class AboutWindow : Window
     private void SvgView_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
         var message = e.TryGetWebMessageAsString();
-        if (!message.StartsWith(CommandPrefix, StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(message) ||
+            !message.StartsWith(CommandPrefix, StringComparison.Ordinal))
             return;
 
         var command = message[CommandPrefix.Length..].Trim().ToLowerInvariant();
-        if (Owner is MainWindow mainWindow)
-            mainWindow.ExecuteAboutCommand(command);
+        var mainWindow = Owner as MainWindow ?? Application.Current.MainWindow as MainWindow;
+        if (mainWindow == null)
+            return;
+
+        Dispatcher.BeginInvoke(new Action(() => mainWindow.ExecuteAboutCommand(command)));
     }
 
     private string? FindSvgPath()
@@ -121,7 +126,13 @@ public partial class AboutWindow : Window
     'replay', 'exit', 'legacy', 'dark', 'light', 'modern', 'crab', 'logs',
     'tokens', 'settings', 'help'
   ]);
-  const maxCommandLength = Math.max(...Array.from(commands).map(command => command.length));
+  const aliases = new Map([
+    ['easteregg', 'help'],
+    ['egg', 'help'],
+    ['about', 'help']
+  ]);
+  const acceptedInputs = new Set([...commands, ...aliases.keys()]);
+  const maxCommandLength = Math.max(...Array.from(acceptedInputs).map(command => command.length));
   let buffer = '';
   let resetTimer = null;
 
@@ -177,7 +188,14 @@ public partial class AboutWindow : Window
 
   function executeCommand(command) {{
     command = (command || '').trim().toLowerCase();
-    if (!commands.has(command)) return;
+    command = aliases.get(command) || command;
+    if (!commands.has(command)) {{
+      renderPrompt('unknown');
+      buffer = '';
+      resetPromptSoon(1200);
+      return;
+    }}
+
     renderPrompt(command);
     window.chrome.webview.postMessage('{CommandPrefix}' + command);
     buffer = '';
