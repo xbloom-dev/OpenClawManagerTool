@@ -69,6 +69,11 @@
     <None Include="Resources\splash.mp4">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+
+    <!-- About EasterEgg tools script - copied beside the app for prompt commands. -->
+    <None Include="Scripts\OpenClaw-Tools.ps1">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
