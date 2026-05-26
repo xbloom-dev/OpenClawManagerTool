@@ -70,6 +70,22 @@ function Invoke-InRepo {
     }
 }
 
+function Invoke-CompanionScript {
+    param(
+        [Parameter(Mandatory = $true)][string]$ScriptName
+    )
+
+    $scriptPath = Join-Path $PSScriptRoot $ScriptName
+    if (-not (Test-Path -LiteralPath $scriptPath)) {
+        throw "Required script was not found: $scriptPath"
+    }
+
+    & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $scriptPath
+    if ($LASTEXITCODE -ne 0) {
+        throw "$ScriptName failed with exit code $LASTEXITCODE"
+    }
+}
+
 function Show-WorkspaceStatus {
     Write-Title "OpenClaw workspace status"
     $workspaces = @(Get-Workspaces)
@@ -92,59 +108,11 @@ function Show-WorkspaceStatus {
 }
 
 function Sync-Workspaces {
-    Write-Title "Sync OpenClaw workspaces"
-    $workspaces = @(Get-Workspaces)
-    if ($workspaces.Count -eq 0) {
-        Write-Host "No OpenClaw workspaces were found." -ForegroundColor Yellow
-        return
-    }
-
-    foreach ($workspace in $workspaces) {
-        Write-Host ""
-        Write-Host "Syncing $($workspace.Name)..." -ForegroundColor White
-        Invoke-InRepo $workspace.Path {
-            $dirty = git status --porcelain
-            if ($dirty) {
-                Write-Host "Working tree has local changes; fetch only." -ForegroundColor Yellow
-                git fetch --prune
-                git status --short --branch
-                return
-            }
-
-            git fetch --prune
-            if ($LASTEXITCODE -ne 0) { throw "git fetch failed" }
-
-            $upstream = git rev-parse --abbrev-ref --symbolic-full-name "@{u}" 2>$null
-            if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($upstream)) {
-                git pull --ff-only
-                if ($LASTEXITCODE -ne 0) { throw "git pull --ff-only failed" }
-            } else {
-                Write-Host "No upstream configured; fetch completed." -ForegroundColor Yellow
-            }
-
-            git status --short --branch
-        }
-    }
+    Invoke-CompanionScript "Sync-Workspaces.ps1"
 }
 
 function Repair-GitAcl {
-    Write-Title "Repair Git ACL"
-    $workspaces = @(Get-Workspaces)
-    if ($workspaces.Count -eq 0) {
-        Write-Host "No OpenClaw workspaces were found." -ForegroundColor Yellow
-        return
-    }
-
-    foreach ($workspace in $workspaces) {
-        $gitDir = Join-Path $workspace.Path ".git"
-        Write-Host ""
-        Write-Host "Repairing $gitDir" -ForegroundColor White
-        takeown /F $gitDir /R /D Y | Out-Null
-        icacls $gitDir /inheritance:r /T /C /Q | Out-Null
-        icacls $gitDir /reset /T /C /Q | Out-Null
-        icacls $gitDir /grant:r "$env:USERNAME:(OI)(CI)F" "BUILTIN\Administrators:(OI)(CI)F" "NT AUTHORITY\SYSTEM:(OI)(CI)F" /T /C /Q | Out-Null
-        Write-Host "ACL repair attempted." -ForegroundColor Green
-    }
+    Invoke-CompanionScript "Fix-GitACL.ps1"
 }
 
 function Build-Project {
