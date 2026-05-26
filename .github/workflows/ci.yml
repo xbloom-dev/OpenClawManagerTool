@@ -14,6 +14,13 @@ on:
     branches:
       - master
       - develop
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: "Dry run (build artifacts only, no GitHub Release)"
+        required: true
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -45,7 +52,7 @@ jobs:
     name: Release installers
     runs-on: windows-2025
     needs: build-and-tests
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout
@@ -59,7 +66,13 @@ jobs:
       - name: Publish Full and Lite payloads
         shell: pwsh
         run: |
-          $version = "${{ github.ref_name }}".TrimStart("v")
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $version = "0.0.${{ github.run_number }}"
+          }
+          else {
+            $version = "${{ github.ref_name }}".TrimStart("v")
+          }
+
           $full = Join-Path $PWD "artifacts\publish-full"
           $lite = Join-Path $PWD "artifacts\publish-lite"
           Remove-Item -Path $full, $lite -Recurse -Force -ErrorAction SilentlyContinue
@@ -79,8 +92,15 @@ jobs:
       - name: Build installers and portable zip
         shell: pwsh
         run: |
-          $tag = "${{ github.ref_name }}"
-          $version = $tag.TrimStart("v")
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $tag = "dryrun-${{ github.run_number }}"
+            $version = "0.0.${{ github.run_number }}"
+          }
+          else {
+            $tag = "${{ github.ref_name }}"
+            $version = $tag.TrimStart("v")
+          }
+
           $full = Join-Path $PWD "artifacts\publish-full"
           $lite = Join-Path $PWD "artifacts\publish-lite"
           $out = Join-Path $PWD "artifacts\release-assets"
@@ -98,7 +118,16 @@ jobs:
             "$hash  $($_.Name)" | Set-Content -Path "$($_.FullName).sha256" -Encoding ASCII
           }
 
+      - name: Upload Output Artifacts (Dry Run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: OpenClawManager-Builds
+          path: artifacts/release-assets/*
+          retention-days: 3
+
       - name: Upload release assets
+        if: startsWith(github.ref, 'refs/tags/v')
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
