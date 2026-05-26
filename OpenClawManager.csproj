@@ -6,9 +6,9 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
-    <Version>2.0.0</Version>
+    <AssemblyVersion>2.0.2.0</AssemblyVersion>
+    <FileVersion>2.0.2.0</FileVersion>
+    <Version>2.0.2</Version>
     <ApplicationIcon>Resources\app-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -70,8 +70,8 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 
-    <!-- About EasterEgg tools script - copied beside the app for prompt commands. -->
-    <None Include="Scripts\OpenClaw-Tools.ps1">
+    <!-- About EasterEgg tools scripts - copied beside the app for prompt commands. -->
+    <None Include="Scripts\*.ps1">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
