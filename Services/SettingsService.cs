@@ -11,6 +11,12 @@ public sealed class SettingsService : ISettingsService
 {
     public string SettingsFilePath { get; }
 
+    public bool IsPortableMode { get; }
+
+    public bool IsNewSettingsFile { get; private set; }
+
+    public bool IsFirstRunCandidate => IsNewSettingsFile && Settings.Theme == AppTheme.Legacy;
+
     public AppSettings Settings { get; private set; }
 
     public event EventHandler? SettingsChanged;
@@ -21,13 +27,24 @@ public sealed class SettingsService : ISettingsService
     }
 
     public SettingsService(IAppEnvironment env)
-        : this(env.SettingsFilePath)
+        : this(ResolveSettingsPath(env))
     {
     }
 
     internal SettingsService(string settingsFilePath)
+        : this(settingsFilePath, isPortableMode: false)
+    {
+    }
+
+    private SettingsService(SettingsPathInfo settingsPath)
+        : this(settingsPath.Path, settingsPath.IsPortable)
+    {
+    }
+
+    private SettingsService(string settingsFilePath, bool isPortableMode)
     {
         SettingsFilePath = settingsFilePath;
+        IsPortableMode = isPortableMode;
         Settings = LoadFromDisk();
     }
 
@@ -36,14 +53,32 @@ public sealed class SettingsService : ISettingsService
         "OpenClawManager",
         "settings.json");
 
+    public static string GetPortableSettingsFilePath(string appBaseDirectory) =>
+        Path.Combine(appBaseDirectory, "settings.json");
+
+    private static SettingsPathInfo ResolveSettingsPath(IAppEnvironment env)
+    {
+        var portablePath = GetPortableSettingsFilePath(env.AppBaseDirectory);
+        return File.Exists(portablePath)
+            ? new SettingsPathInfo(portablePath, true)
+            : new SettingsPathInfo(env.SettingsFilePath, false);
+    }
+
     private AppSettings LoadFromDisk()
     {
         try
         {
             if (!File.Exists(SettingsFilePath))
+            {
+                IsNewSettingsFile = true;
                 return new AppSettings();
+            }
 
             var json = File.ReadAllText(SettingsFilePath);
+            IsNewSettingsFile = IsFirstRunJson(json);
+            if (string.IsNullOrWhiteSpace(json))
+                return new AppSettings();
+
             var settings = JsonSerializer.Deserialize<AppSettings>(json);
             settings = MigrateSettings(settings ?? new AppSettings(), out var changed);
             if (changed)
@@ -123,6 +158,14 @@ public sealed class SettingsService : ISettingsService
             changed = true;
         }
 
+#if LITE_BUILD
+        if (settings.Theme != AppTheme.Legacy)
+        {
+            settings.Theme = AppTheme.Legacy;
+            changed = true;
+        }
+#endif
+
         if (settings.SchemaVersion < AppSettings.CurrentSchemaVersion)
         {
             settings.SchemaVersion = AppSettings.CurrentSchemaVersion;
@@ -140,6 +183,7 @@ public sealed class SettingsService : ISettingsService
             SaveToDisk(settings);
 
             Settings = settings;
+            IsNewSettingsFile = false;
             SettingsChanged?.Invoke(null, EventArgs.Empty);
 
             return true;
@@ -195,4 +239,9 @@ public sealed class SettingsService : ISettingsService
 
         try { File.Delete(backupPath); } catch { /* best effort */ }
     }
+
+    private static bool IsFirstRunJson(string json) =>
+        string.IsNullOrWhiteSpace(json) || json.Trim() == "{}";
+
+    private readonly record struct SettingsPathInfo(string Path, bool IsPortable);
 }

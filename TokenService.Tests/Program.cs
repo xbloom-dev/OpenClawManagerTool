@@ -33,6 +33,10 @@ try
     IsVaultTrackedByGitDetectsRepo();
     OpenClawCommandValidationRejectsShellCharacters();
     AppSettingsMigrationFillsMissingValues();
+    PortableSettingsFileTakesPriority();
+    EmptyPortableSettingsIsFirstRunCandidate();
+    SavedLegacySettingsDoesNotRepeatWelcome();
+    MissingAppDataSettingsIsFirstRunCandidate();
 
     Console.WriteLine("TokenService tests OK.");
     return 0;
@@ -454,6 +458,75 @@ void AppSettingsMigrationFillsMissingValues()
     Assert(migrated.Language == "EN", "Migration should normalize language.");
 }
 
+void PortableSettingsFileTakesPriority()
+{
+    var caseDir = NewCase();
+    var appBase = Path.Combine(caseDir, "app");
+    var appData = Path.Combine(caseDir, "appdata", "settings.json");
+    Directory.CreateDirectory(appBase);
+    Directory.CreateDirectory(Path.GetDirectoryName(appData)!);
+
+    File.WriteAllText(Path.Combine(appBase, "settings.json"), "{}", Encoding.UTF8);
+    File.WriteAllText(appData, "{\"Theme\":\"Modern\"}", Encoding.UTF8);
+
+    var service = new SettingsService(new TestEnvironment(appBase, appData));
+
+    Assert(service.IsPortableMode, "SettingsService should prefer settings.json beside the executable.");
+    Assert(service.SettingsFilePath == Path.Combine(appBase, "settings.json"), "Portable settings path should be selected.");
+    Assert(service.IsNewSettingsFile, "Portable {} settings should be treated as new settings.");
+    Assert(service.IsFirstRunCandidate, "Portable {} settings should open WelcomeWindow.");
+}
+
+void EmptyPortableSettingsIsFirstRunCandidate()
+{
+    var caseDir = NewCase();
+    var appBase = Path.Combine(caseDir, "app");
+    var appData = Path.Combine(caseDir, "appdata", "settings.json");
+    Directory.CreateDirectory(appBase);
+    File.WriteAllText(Path.Combine(appBase, "settings.json"), "", Encoding.UTF8);
+
+    var service = new SettingsService(new TestEnvironment(appBase, appData));
+
+    Assert(service.IsPortableMode, "Empty portable settings should still enable portable mode.");
+    Assert(service.IsNewSettingsFile, "Empty portable settings should be treated as new settings.");
+    Assert(service.IsFirstRunCandidate, "Empty portable settings should open WelcomeWindow.");
+}
+
+void SavedLegacySettingsDoesNotRepeatWelcome()
+{
+    var caseDir = NewCase();
+    var appBase = Path.Combine(caseDir, "app");
+    var appData = Path.Combine(caseDir, "appdata", "settings.json");
+    Directory.CreateDirectory(appBase);
+    File.WriteAllText(Path.Combine(appBase, "settings.json"), "{}", Encoding.UTF8);
+
+    var service = new SettingsService(new TestEnvironment(appBase, appData));
+    var saved = service.Save(new AppSettings { Theme = AppTheme.Legacy });
+
+    Assert(saved, "Saving selected Legacy settings should succeed.");
+    Assert(!service.IsNewSettingsFile, "Saved settings should no longer be considered new.");
+    Assert(!service.IsFirstRunCandidate, "Saved Legacy settings should not open WelcomeWindow repeatedly.");
+
+    var restarted = new SettingsService(new TestEnvironment(appBase, appData));
+    Assert(!restarted.IsNewSettingsFile, "Persisted Legacy settings should not be considered new after restart.");
+    Assert(!restarted.IsFirstRunCandidate, "Persisted Legacy settings should not repeat WelcomeWindow after restart.");
+}
+
+void MissingAppDataSettingsIsFirstRunCandidate()
+{
+    var caseDir = NewCase();
+    var appBase = Path.Combine(caseDir, "app");
+    var appData = Path.Combine(caseDir, "appdata", "settings.json");
+    Directory.CreateDirectory(appBase);
+
+    var service = new SettingsService(new TestEnvironment(appBase, appData));
+
+    Assert(!service.IsPortableMode, "Missing portable settings should use AppData settings.");
+    Assert(service.SettingsFilePath == appData, "AppData settings path should be selected when portable file is absent.");
+    Assert(service.IsNewSettingsFile, "Missing AppData settings should be treated as first-run settings.");
+    Assert(service.IsFirstRunCandidate, "Missing AppData settings should open WelcomeWindow.");
+}
+
 string NewCase()
 {
     var path = Path.Combine(root, Guid.NewGuid().ToString("N"));
@@ -530,5 +603,12 @@ static void AssertThrows(Action action, string message)
     }
 
     throw new Exception(message);
+}
+
+sealed class TestEnvironment(string appBaseDirectory, string settingsFilePath) : IAppEnvironment
+{
+    public string SettingsFilePath { get; } = settingsFilePath;
+    public string WebView2DataRoot { get; } = Path.Combine(appBaseDirectory, "WebView2");
+    public string AppBaseDirectory { get; } = appBaseDirectory;
 }
 

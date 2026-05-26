@@ -188,6 +188,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     public bool AreModernThemeOptionsEnabled => Theme != AppTheme.Legacy;
+    public bool IsThemeLegacyAvailable => ThemeService.IsThemeAvailable(AppTheme.Legacy);
+    public bool IsThemeModernAvailable => ThemeService.IsThemeAvailable(AppTheme.Modern);
+    public bool IsThemeStandardDarkAvailable => ThemeService.IsThemeAvailable(AppTheme.StandardDark);
+    public bool IsThemeDarkAvailable => ThemeService.IsThemeAvailable(AppTheme.Dark);
+    public bool IsThemeModernLightAvailable => ThemeService.IsThemeAvailable(AppTheme.ModernLight);
+    public bool IsThemeHighContrastAvailable => ThemeService.IsThemeAvailable(AppTheme.HighContrast);
+    public bool IsThemeCrabCuteAvailable => ThemeService.IsThemeAvailable(AppTheme.CrabCute);
     public bool IsThemeLegacy { get => Theme == AppTheme.Legacy; set { if (value) Theme = AppTheme.Legacy; } }
     public bool IsThemeModern { get => Theme == AppTheme.Modern; set { if (value) Theme = AppTheme.Modern; } }
     public bool IsThemeStandardDark { get => Theme == AppTheme.StandardDark; set { if (value) Theme = AppTheme.StandardDark; } }
@@ -333,7 +340,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         PowerShellWorkingDir = settings.PowerShellWorkingDir;
         TokenManagerSecretsPath = settings.TokenManagerSecretsPath;
         Language = string.Equals(settings.Language, "EN", StringComparison.OrdinalIgnoreCase) ? "EN" : "CS";
-        Theme = settings.Theme;
+        Theme = NormalizeTheme(settings.Theme);
         UseSplashVideo = settings.UseSplashVideo;
         UseButtonScanlineEffect = settings.UseButtonScanlineEffect;
     }
@@ -352,11 +359,15 @@ public sealed partial class SettingsViewModel : ObservableObject
             TokenManagerSecretsPath = TokenManagerSecretsPath.Trim(),
             Language = IsLanguageEnglish ? "EN" : "CS",
             AutoScrollAppLog = current.AutoScrollAppLog,
-            Theme = Theme,
+            CheckUpdatesOnStartup = current.CheckUpdatesOnStartup,
+            Theme = NormalizeTheme(Theme),
             UseSplashVideo = UseSplashVideo,
             UseButtonScanlineEffect = UseButtonScanlineEffect
         };
     }
+
+    private static AppTheme NormalizeTheme(AppTheme theme) =>
+        ThemeService.IsThemeAvailable(theme) ? theme : AppTheme.Legacy;
 
     private void NotifyThemePropertiesChanged()
     {

@@ -5,6 +5,10 @@
         Height="700" Width="640"
         MinHeight="560" MinWidth="560"
         WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+    </Window.Resources>
+
     <DockPanel Margin="16">
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
             <Button Content="{Binding SaveText}"
@@ -38,13 +42,13 @@
                 <TextBlock Text="{Binding AppearanceTitle}" FontWeight="Bold" Margin="0,0,0,6" />
                 <TextBlock Text="{Binding ThemeLabel}" Margin="0,0,0,4" />
                 <WrapPanel Margin="0,0,0,6">
-                    <RadioButton Content="{Binding ThemeLegacyText}" IsChecked="{Binding IsThemeLegacy, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" />
-                    <RadioButton Content="{Binding ThemeModernText}" IsChecked="{Binding IsThemeModern, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" />
-                    <RadioButton Content="{Binding ThemeStandardDarkText}" IsChecked="{Binding IsThemeStandardDark, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" />
-                    <RadioButton Content="{Binding ThemeDarkText}" IsChecked="{Binding IsThemeDark, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" />
-                    <RadioButton Content="{Binding ThemeModernLightText}" IsChecked="{Binding IsThemeModernLight, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" />
-                    <RadioButton Content="{Binding ThemeHighContrastText}" IsChecked="{Binding IsThemeHighContrast, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" />
-                    <RadioButton Content="{Binding ThemeCrabCuteText}" IsChecked="{Binding IsThemeCrabCute, Mode=TwoWay}" GroupName="Theme" />
+                    <RadioButton Content="{Binding ThemeLegacyText}" IsChecked="{Binding IsThemeLegacy, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" Visibility="{Binding IsThemeLegacyAvailable, Converter={StaticResource BoolToVisibility}}" />
+                    <RadioButton Content="{Binding ThemeModernText}" IsChecked="{Binding IsThemeModern, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" Visibility="{Binding IsThemeModernAvailable, Converter={StaticResource BoolToVisibility}}" />
+                    <RadioButton Content="{Binding ThemeStandardDarkText}" IsChecked="{Binding IsThemeStandardDark, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" Visibility="{Binding IsThemeStandardDarkAvailable, Converter={StaticResource BoolToVisibility}}" />
+                    <RadioButton Content="{Binding ThemeDarkText}" IsChecked="{Binding IsThemeDark, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" Visibility="{Binding IsThemeDarkAvailable, Converter={StaticResource BoolToVisibility}}" />
+                    <RadioButton Content="{Binding ThemeModernLightText}" IsChecked="{Binding IsThemeModernLight, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" Visibility="{Binding IsThemeModernLightAvailable, Converter={StaticResource BoolToVisibility}}" />
+                    <RadioButton Content="{Binding ThemeHighContrastText}" IsChecked="{Binding IsThemeHighContrast, Mode=TwoWay}" GroupName="Theme" Margin="0,0,16,0" Visibility="{Binding IsThemeHighContrastAvailable, Converter={StaticResource BoolToVisibility}}" />
+                    <RadioButton Content="{Binding ThemeCrabCuteText}" IsChecked="{Binding IsThemeCrabCute, Mode=TwoWay}" GroupName="Theme" Visibility="{Binding IsThemeCrabCuteAvailable, Converter={StaticResource BoolToVisibility}}" />
                 </WrapPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                     <CheckBox Content="{Binding UseSplashVideoText}"

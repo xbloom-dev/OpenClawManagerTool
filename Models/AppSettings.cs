@@ -64,6 +64,9 @@ public class AppSettings
     /// <summary>Auto-scroll v Log aplikace</summary>
     public bool AutoScrollAppLog { get; set; } = true;
 
+    /// <summary>Opt-in kontrola aktualizaci pri startu aplikace.</summary>
+    public bool CheckUpdatesOnStartup { get; set; } = false;
+
     // ════════════════════════════════════════════════════════════════════════
     // v0.5 — Vzhled
     // ════════════════════════════════════════════════════════════════════════

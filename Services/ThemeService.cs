@@ -124,8 +124,20 @@ public static class ThemeService
     /// </summary>
     public static void Apply(AppTheme theme)
     {
+        if (!IsThemeAvailable(theme))
+            theme = AppTheme.Legacy;
+
         SwapResourceDictionary(theme);
         ThemeChanged?.Invoke(theme);
+    }
+
+    public static bool IsThemeAvailable(AppTheme theme)
+    {
+#if LITE_BUILD
+        return theme == AppTheme.Legacy;
+#else
+        return _themeResourcePaths.ContainsKey(theme);
+#endif
     }
 
     /// <summary>
@@ -134,6 +146,9 @@ public static class ThemeService
     /// </summary>
     public static string GetIconFolder(AppTheme theme)
     {
+        if (!IsThemeAvailable(theme))
+            theme = AppTheme.Legacy;
+
         if (theme == OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)
         {
             var iconSet = GetString("Theme.Meta.IconSet", "");
@@ -145,7 +160,8 @@ public static class ThemeService
 
     public static bool IsModernPaletteTheme(AppTheme theme)
     {
-        return theme is AppTheme.StandardDark or AppTheme.Dark or AppTheme.ModernLight;
+        return IsThemeAvailable(theme) &&
+               theme is AppTheme.StandardDark or AppTheme.Dark or AppTheme.ModernLight;
     }
 
     public static ThemeMetadata GetCurrentMetadata()
@@ -170,6 +186,9 @@ public static class ThemeService
     /// </summary>
     public static Uri? GetIconUri(AppTheme theme, string iconName)
     {
+        if (!IsThemeAvailable(theme))
+            return null;
+
         var folder = GetIconFolder(theme);
         if (string.IsNullOrEmpty(folder)) return null;
 
@@ -201,18 +220,26 @@ public static class ThemeService
         if (app == null) return;
 
         var merged = app.Resources.MergedDictionaries;
-
-        // Odebrat existující Theme.*.xaml dictionary
         var toRemove = merged
             .Where(d => d.Source?.OriginalString.Contains("/Resources/Themes/Theme.") == true)
             .ToList();
-        foreach (var d in toRemove) merged.Remove(d);
 
-        // Přidat nový
-        var newDict = new ResourceDictionary
+        try
         {
-            Source = new Uri(path, UriKind.Relative)
-        };
-        merged.Add(newDict);
+            var newDict = new ResourceDictionary
+            {
+                Source = new Uri(path, UriKind.Relative)
+            };
+
+            foreach (var d in toRemove) merged.Remove(d);
+            merged.Add(newDict);
+        }
+        catch
+        {
+            if (theme == AppTheme.Legacy)
+                return;
+
+            SwapResourceDictionary(AppTheme.Legacy);
+        }
     }
 }

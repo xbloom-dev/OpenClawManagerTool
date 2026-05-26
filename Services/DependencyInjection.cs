@@ -24,6 +24,7 @@ public static class DependencyInjection
         services.AddTransient<AboutWindow>();
         services.AddTransient<SettingsWindow>();
         services.AddTransient<CleaningWindow>();
+        services.AddTransient<WelcomeWindow>();
 
         return services;
     }

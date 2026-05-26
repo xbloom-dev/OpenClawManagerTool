@@ -14,6 +14,9 @@ public interface IAppEnvironment
 public interface ISettingsService
 {
     string SettingsFilePath { get; }
+    bool IsPortableMode { get; }
+    bool IsNewSettingsFile { get; }
+    bool IsFirstRunCandidate { get; }
     AppSettings Settings { get; }
     event EventHandler? SettingsChanged;
     bool Save(AppSettings settings);
