@@ -50,6 +50,7 @@ public partial class MainWindow
     private readonly Dictionary<MenuItem, object?> _menuItemIcons = new();
     private static readonly Dictionary<string, Style> _themeStyleCache = new();
     private static readonly Dictionary<string, ImageSource> _themeIconSourceCache = new();
+    private static readonly FontFamily LegacyIconFontFamily = new("Segoe UI Emoji");
     /// <summary>
     /// Cached procedural scanline overlay used by the runtime-generated button feedback styles.
     /// It stays in C# because WPF XAML dictionaries cannot express this DrawingBrush pattern clearly.
@@ -905,6 +906,11 @@ public partial class MainWindow
     // ── Legacy UI — obnovit emoji TextBlock ───────────────────────────────────
     private void ApplyLegacyUi()
     {
+        BtnStartTuiSymbol.FontFamily = LegacyIconFontFamily;
+        BtnStartTuiSymbol.FontSize = 16;
+        BtnStartTuiSymbol.FontWeight = FontWeights.Bold;
+        BtnStartTuiSymbol.Margin = new Thickness(0, 0, 8, 0);
+
         RestoreButtonLegacy(BtnGatewayStart,   "▶", "Green",  "Start");
         RestoreButtonLegacy(BtnGatewayStop,    "■", "Red",    "Stop");
         RestoreButtonLegacy(BtnGatewayRestart, "↻", "Orange", "Restart");
@@ -913,6 +919,8 @@ public partial class MainWindow
         RestoreButtonLegacy(BtnCleaningTool,   "🧹", null,   BtnCleaningToolLabel.Text);
         RestoreButtonLegacy(BtnTokenManager,   "🔑", null,   BtnTokenManagerLabel.Text);
         RestoreButtonLegacy(BtnDoctorFix,      "🩺", null,   BtnDoctorFixLabel.Text);
+
+        UpdateStartTuiButton(Terminal.IsTuiRunning);
     }
 
     private void RestoreToolControlsToActions()
@@ -1743,27 +1751,50 @@ public partial class MainWindow
     /// </summary>
     private static void RestoreButtonLegacy(Button btn, string emoji, string? color, string label)
     {
-        if (btn.Content is StackPanel sp && sp.Children.Count >= 1)
+        if (btn.Content is not StackPanel sp)
+            return;
+
+        TextBlock icon;
+        if (sp.Children.Count == 0)
         {
-            // Pokud je první child Image (z Modern), nahradit zpět TextBlock
-            if (sp.Children[0] is Image)
-            {
-                sp.Children.RemoveAt(0);
-                var tb = new TextBlock
-                {
-                    Text              = emoji,
-                    FontFamily        = new FontFamily("Segoe UI Emoji"),
-                    FontSize          = 14,
-                    Margin            = new Thickness(0, 0, 8, 0),
-                    VerticalAlignment = VerticalAlignment.Center
-                };
-                if (color != null)
-                {
-                    tb.Foreground = (Brush)new BrushConverter().ConvertFromString(color)!;
-                    tb.FontWeight = FontWeights.Bold;
-                }
-                sp.Children.Insert(0, tb);
-            }
+            icon = CreateLegacyIconTextBlock();
+            sp.Children.Add(icon);
         }
+        else if (sp.Children[0] is TextBlock existingIcon)
+        {
+            icon = existingIcon;
+        }
+        else
+        {
+            sp.Children.RemoveAt(0);
+            icon = CreateLegacyIconTextBlock();
+            sp.Children.Insert(0, icon);
+        }
+
+        icon.Text = emoji;
+        icon.FontFamily = LegacyIconFontFamily;
+        icon.FontSize = 14;
+        icon.Margin = new Thickness(0, 0, 8, 0);
+        icon.VerticalAlignment = VerticalAlignment.Center;
+        icon.FontWeight = color != null ? FontWeights.Bold : FontWeights.Normal;
+        if (color != null)
+            icon.Foreground = (Brush)new BrushConverter().ConvertFromString(color)!;
+        else
+            icon.ClearValue(TextBlock.ForegroundProperty);
+
+        var labelBlock = sp.Children.OfType<TextBlock>().FirstOrDefault(tb => !ReferenceEquals(tb, icon));
+        if (labelBlock != null && !string.IsNullOrWhiteSpace(label))
+            labelBlock.Text = label;
+    }
+
+    private static TextBlock CreateLegacyIconTextBlock()
+    {
+        return new TextBlock
+        {
+            FontFamily = LegacyIconFontFamily,
+            FontSize = 14,
+            Margin = new Thickness(0, 0, 8, 0),
+            VerticalAlignment = VerticalAlignment.Center
+        };
     }
 }
