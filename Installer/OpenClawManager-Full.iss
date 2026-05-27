@@ -33,18 +33,18 @@ Name: "compact"; Description: "Lite-style shortcuts only"
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "edition\full"; Description: "Full assets: themes, icons, splash video, and scripts"; Types: full custom; Flags: fixed
-Name: "shortcuts\startmenu"; Description: "Start menu shortcut"; Types: full compact custom; Flags: fixed
-Name: "shortcuts\desktop"; Description: "Desktop shortcut"; Types: full custom
-Name: "help\webview2"; Description: "Add WebView2 Runtime download shortcut"; Types: custom
+Name: "edition_full"; Description: "Full assets: themes, icons, splash video, and scripts"; Types: full custom; Flags: fixed
+Name: "shortcut_startmenu"; Description: "Start menu shortcut"; Types: full compact custom; Flags: fixed
+Name: "shortcut_desktop"; Description: "Desktop shortcut"; Types: full custom
+Name: "help_webview2"; Description: "Add WebView2 Runtime download shortcut"; Types: custom
 
 [Files]
-Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "settings.json,*.pdb"; Components: edition\full
+Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "settings.json,*.pdb"; Components: edition_full
 
 [Icons]
-Name: "{group}\{#AppName}"; Filename: "{app}\{#ExeName}"; Components: shortcuts\startmenu
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#ExeName}"; Components: shortcuts\desktop
-Name: "{group}\Install Microsoft Edge WebView2 Runtime"; Filename: "{#WebView2Url}"; Components: help\webview2
+Name: "{group}\{#AppName}"; Filename: "{app}\{#ExeName}"; Components: shortcut_startmenu
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#ExeName}"; Components: shortcut_desktop
+Name: "{group}\Install Microsoft Edge WebView2 Runtime"; Filename: "{#WebView2Url}"; Components: help_webview2
 
 [Run]
 Filename: "{app}\{#ExeName}"; Description: "Launch {#AppName}"; Flags: nowait postinstall skipifsilent

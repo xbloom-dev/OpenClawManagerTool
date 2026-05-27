@@ -33,18 +33,18 @@ Name: "full"; Description: "Lite plus shortcuts"
 Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Components]
-Name: "edition\lite"; Description: "Lite assets: app runtime without splash video"; Types: compact full custom; Flags: fixed
-Name: "shortcuts\startmenu"; Description: "Start menu shortcut"; Types: compact full custom; Flags: fixed
-Name: "shortcuts\desktop"; Description: "Desktop shortcut"; Types: full custom
-Name: "help\webview2"; Description: "Add WebView2 Runtime download shortcut"; Types: custom
+Name: "edition_lite"; Description: "Lite assets: app runtime without splash video"; Types: compact full custom; Flags: fixed
+Name: "shortcut_startmenu"; Description: "Start menu shortcut"; Types: compact full custom; Flags: fixed
+Name: "shortcut_desktop"; Description: "Desktop shortcut"; Types: full custom
+Name: "help_webview2"; Description: "Add WebView2 Runtime download shortcut"; Types: custom
 
 [Files]
-Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "settings.json,*.pdb,Resources\splash.mp4"; Components: edition\lite
+Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "settings.json,*.pdb,Resources\splash.mp4"; Components: edition_lite
 
 [Icons]
-Name: "{group}\{#AppName} Lite"; Filename: "{app}\{#ExeName}"; Components: shortcuts\startmenu
-Name: "{autodesktop}\{#AppName} Lite"; Filename: "{app}\{#ExeName}"; Components: shortcuts\desktop
-Name: "{group}\Install Microsoft Edge WebView2 Runtime"; Filename: "{#WebView2Url}"; Components: help\webview2
+Name: "{group}\{#AppName} Lite"; Filename: "{app}\{#ExeName}"; Components: shortcut_startmenu
+Name: "{autodesktop}\{#AppName} Lite"; Filename: "{app}\{#ExeName}"; Components: shortcut_desktop
+Name: "{group}\Install Microsoft Edge WebView2 Runtime"; Filename: "{#WebView2Url}"; Components: help_webview2
 
 [Run]
 Filename: "{app}\{#ExeName}"; Description: "Launch {#AppName} Lite"; Flags: nowait postinstall skipifsilent
