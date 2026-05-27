@@ -80,7 +80,6 @@ jobs:
           dotnet publish .\OpenClawManager.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$version -o $full
           dotnet publish .\OpenClawManager.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$version -p:BuildProfile=Lite -o $lite
 
-          "{}" | Set-Content -Path (Join-Path $full "settings.json") -Encoding UTF8
           "{}" | Set-Content -Path (Join-Path $lite "settings.json") -Encoding UTF8
 
           Remove-Item -Path (Join-Path $lite "Resources\splash.mp4") -Force -ErrorAction SilentlyContinue
@@ -107,11 +106,9 @@ jobs:
           New-Item -ItemType Directory -Force -Path $out | Out-Null
 
           $iscc = Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6\ISCC.exe"
-          & $iscc .\Installer\OpenClawManager-Full.iss "/DAppVersion=$version" "/DSourceDir=$full" "/O$out"
-          & $iscc .\Installer\OpenClawManager-Lite.iss "/DAppVersion=$version" "/DSourceDir=$lite" "/O$out"
+          & $iscc .\Installer\OpenClawManager-Full.iss "/DAppVersion=$version" "/DFullSourceDir=$full" "/DLiteSourceDir=$lite" "/O$out"
 
-          Compress-Archive -Path (Join-Path $full "*") -DestinationPath (Join-Path $out "OpenClawManagerTool-$tag-win-x64.zip") -Force
-          Compress-Archive -Path (Join-Path $lite "*") -DestinationPath (Join-Path $out "OpenClawManagerTool-$tag-win-x64-lite-portable.zip") -Force
+          Compress-Archive -Path (Join-Path $lite "*") -DestinationPath (Join-Path $out "OpenClawManagerTool-$tag-win-x64-portable-lite.zip") -Force
 
           Get-ChildItem $out -File | Where-Object { $_.Extension -in ".exe", ".zip" } | ForEach-Object {
             $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
