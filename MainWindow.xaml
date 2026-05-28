@@ -199,7 +199,7 @@
                 <!-- Column 1: drag surface + brand text (brand visible only in ModernPalette mode) -->
                 <Grid Grid.Column="1">
                     <Border x:Name="TitleBarDragSurface" Background="Transparent" />
-                    <TextBlock x:Name="TitleBarBrandText"
+                    <TextBlock
                                Text="OpenClaw Manager Tool · by Bloom"
                                HorizontalAlignment="Center"
                                VerticalAlignment="Center"
