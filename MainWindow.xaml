@@ -6,161 +6,14 @@
         Icon="pack://application:,,,/Resources/app-favicon.ico"
         Height="720" Width="1400"
         MinHeight="500" MinWidth="900"
-        WindowStartupLocation="CenterScreen"
-        Background="{DynamicResource Theme.Brush.Background}">
+        WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
-
-        <!-- ── Modern Dark v2 — MainWindow local styles ──────────────────────────
-             Explicit Style= attribute on each element beats the runtime implicit
-             window.Resources[typeof(Button)] set by ModernPaletteRuntimeStyles.cs.
-             GroupBoxes: in Modern Dark, runtime overrides to GlassPanel (CornerRadius=18,
-             glass bg) which matches; Style.Grp.Panel applies for all other themes. -->
-
-        <!-- Standard action button: CornerRadius=10, hover/pressed, DynamicResource tokens -->
-        <Style x:Key="Style.Btn.Action" TargetType="Button">
-            <Setter Property="Background"                 Value="{DynamicResource Theme.Brush.SecondaryButton}" />
-            <Setter Property="Foreground"                 Value="{DynamicResource Theme.Brush.Text.Primary}" />
-            <Setter Property="BorderBrush"                Value="{DynamicResource Theme.Brush.Border}" />
-            <Setter Property="BorderThickness"            Value="1" />
-            <Setter Property="Padding"                    Value="10,0" />
-            <Setter Property="HorizontalContentAlignment" Value="Left" />
-            <Setter Property="FocusVisualStyle"           Value="{x:Null}" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border x:Name="Root"
-                                Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10"
-                                SnapsToDevicePixels="True">
-                            <ContentPresenter
-                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                VerticalAlignment="Center"
-                                Margin="{TemplateBinding Padding}"
-                                RecognizesAccessKey="True" />
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Background"
-                                        Value="{DynamicResource Theme.Brush.Hover}" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Root" Property="Background"
-                                        Value="{DynamicResource Theme.Brush.Pressed}" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Root" Property="Opacity" Value="0.40" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- CTA accent button (BtnStartTui): AccentTop→AccentBot gradient on top of
-             TemplateBinding Background (Brush.ActionPositive = green fallback in Legacy).
-             DynamicResource GradientStop colors — transparent when tokens absent (Legacy),
-             leaving the green fallback visible. -->
-        <Style x:Key="Style.Btn.CtaAccent" TargetType="Button">
-            <Setter Property="Foreground"                 Value="White" />
-            <Setter Property="BorderThickness"            Value="0" />
-            <Setter Property="Padding"                    Value="10,0" />
-            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-            <Setter Property="FocusVisualStyle"           Value="{x:Null}" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <!-- Outer border: TemplateBinding Background = Brush.ActionPositive fallback -->
-                        <Border x:Name="Root"
-                                Background="{TemplateBinding Background}"
-                                BorderThickness="0"
-                                CornerRadius="10"
-                                SnapsToDevicePixels="True">
-                            <Grid>
-                                <!-- Accent gradient overlay: visible when AccentTop/Bot tokens exist -->
-                                <Border x:Name="AccentLayer" CornerRadius="10">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="{DynamicResource Theme.Color.AccentTop}" Offset="0" />
-                                            <GradientStop Color="{DynamicResource Theme.Color.AccentBot}" Offset="1" />
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
-                                <!-- Gloss sheen (top-half highlight, 9 % opacity) -->
-                                <Border CornerRadius="10" Opacity="0.09">
-                                    <Border.Background>
-                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="White"       Offset="0" />
-                                            <GradientStop Color="Transparent" Offset="0.5" />
-                                        </LinearGradientBrush>
-                                    </Border.Background>
-                                </Border>
-                                <ContentPresenter
-                                    HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
-                                    VerticalAlignment="Center"
-                                    Margin="{TemplateBinding Padding}"
-                                    RecognizesAccessKey="True" />
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Root" Property="Opacity" Value="0.88" />
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter TargetName="Root" Property="Opacity" Value="0.75" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="Root" Property="Opacity" Value="0.40" />
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
-        <!-- Panel GroupBox: CornerRadius=18, Surface bg, themed border.
-             Runtime overrides this with Style.GroupBox.GlassPanel in Modern Dark mode —
-             end result is CornerRadius=18 in all cases. -->
-        <Style x:Key="Style.Grp.Panel" TargetType="GroupBox">
-            <Setter Property="Background"      Value="{DynamicResource Theme.Brush.Surface}" />
-            <Setter Property="Foreground"      Value="{DynamicResource Theme.Brush.Text.Secondary}" />
-            <Setter Property="BorderBrush"     Value="{DynamicResource Theme.Brush.Border}" />
-            <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="GroupBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="18"
-                                Padding="{TemplateBinding Padding}"
-                                SnapsToDevicePixels="True">
-                            <DockPanel LastChildFill="True">
-                                <ContentPresenter ContentSource="Header"
-                                                  DockPanel.Dock="Top"
-                                                  Margin="2,0,0,6"
-                                                  RecognizesAccessKey="True"
-                                                  TextElement.Foreground="{TemplateBinding Foreground}"
-                                                  TextElement.FontWeight="SemiBold"
-                                                  TextElement.FontSize="11" />
-                                <ContentPresenter Content="{TemplateBinding Content}" />
-                            </DockPanel>
-                        </Border>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
     </Window.Resources>
 
     <DockPanel>
-
-        <!-- ── TitleBar ────────────────────────────────────────────────────────── -->
-        <Border x:Name="TitleBarHost" DockPanel.Dock="Top"
-                Background="{DynamicResource Theme.Brush.TitleBar}">
+        <Border x:Name="TitleBarHost" DockPanel.Dock="Top">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -168,17 +21,15 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <Menu x:Name="MainMenu" Grid.Column="0"
-                      Background="Transparent"
-                      BorderThickness="0">
+                <Menu x:Name="MainMenu" Grid.Column="0">
                     <MenuItem x:Name="MnuMenuOpen" Header="_Otevřít">
                         <MenuItem x:Name="MnuOpenOpenClawFolder" Header="_OpenClaw složku" />
                         <MenuItem x:Name="MnuOpenTempFolder" Header="_Temp složku (Gateway logy)" />
                         <MenuItem x:Name="MnuOpenGatewayLog" Header="_Gateway log">
-                            <MenuItem x:Name="MnuOpenLog10"  Header="Posledních 10 řádků"  Tag="10" />
-                            <MenuItem x:Name="MnuOpenLog20"  Header="Posledních 20 řádků"  Tag="20" />
-                            <MenuItem x:Name="MnuOpenLog30"  Header="Posledních 30 řádků"  Tag="30" />
-                            <MenuItem x:Name="MnuOpenLog50"  Header="Posledních 50 řádků"  Tag="50" />
+                            <MenuItem x:Name="MnuOpenLog10" Header="Posledních 10 řádků" Tag="10" />
+                            <MenuItem x:Name="MnuOpenLog20" Header="Posledních 20 řádků" Tag="20" />
+                            <MenuItem x:Name="MnuOpenLog30" Header="Posledních 30 řádků" Tag="30" />
+                            <MenuItem x:Name="MnuOpenLog50" Header="Posledních 50 řádků" Tag="50" />
                             <MenuItem x:Name="MnuOpenLog100" Header="Posledních 100 řádků" Tag="100" />
                             <Separator />
                             <MenuItem x:Name="MnuOpenLogAll" Header="Celý log" Tag="0" />
@@ -191,24 +42,14 @@
                         <MenuItem x:Name="MnuSettings" Header="Otevřít _Nastavení..." InputGestureText="Ctrl+," />
                     </MenuItem>
                     <MenuItem x:Name="MnuMenuHelp" Header="_Nápověda">
-                        <MenuItem x:Name="MnuAbout"       Header="_O aplikaci..."        InputGestureText="F1" />
+                        <MenuItem x:Name="MnuAbout" Header="_O aplikaci..." InputGestureText="F1" />
                         <MenuItem x:Name="MnuOpenClawWeb" Header="Otevřít web OpenClaw" />
                     </MenuItem>
                 </Menu>
 
-                <!-- Column 1: drag surface + brand text (brand visible only in ModernPalette mode) -->
-                <Grid Grid.Column="1">
-                    <Border x:Name="TitleBarDragSurface" Background="Transparent" />
-                    <TextBlock x:Name="TitleBarBrandText"
-                               Text="OpenClaw Manager Tool · by Bloom"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               FontSize="13"
-                               FontWeight="SemiBold"
-                               Foreground="#A6FFFFFF"
-                               Visibility="Collapsed"
-                               IsHitTestVisible="False" />
-                </Grid>
+                <Border x:Name="TitleBarDragSurface"
+                        Grid.Column="1"
+                        Background="Transparent" />
 
                 <StackPanel x:Name="CaptionButtons"
                             Grid.Column="2"
@@ -218,16 +59,13 @@
                             Padding="0" FocusVisualStyle="{x:Null}" />
                     <Button x:Name="BtnWindowMaximize" Width="46" Height="32" Content="□"
                             Padding="0" FocusVisualStyle="{x:Null}" />
-                    <Button x:Name="BtnWindowClose"    Width="46" Height="32" Content="X"
+                    <Button x:Name="BtnWindowClose" Width="46" Height="32" Content="X"
                             Padding="0" FocusVisualStyle="{x:Null}" />
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ── StatusBar ───────────────────────────────────────────────────────── -->
-        <StatusBar x:Name="MainStatusBar" DockPanel.Dock="Bottom" Height="28"
-                   Background="{DynamicResource Theme.Brush.Surface}"
-                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}">
+        <StatusBar x:Name="MainStatusBar" DockPanel.Dock="Bottom" Height="24">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Gateway: " />
@@ -236,16 +74,12 @@
                     <TextBlock x:Name="StatusGatewayText" Text="{Binding GatewayStatusText}" />
                 </StackPanel>
             </StatusBarItem>
-            <Separator x:Name="StatusGatewayDetailsSep"
-                       Visibility="{Binding IsPidVisible, Converter={StaticResource BoolToVisibility}}" />
-            <StatusBarItem x:Name="StatusGatewayPidItem"
-                           Visibility="{Binding IsPidVisible, Converter={StaticResource BoolToVisibility}}">
+            <Separator x:Name="StatusGatewayDetailsSep" Visibility="{Binding IsPidVisible, Converter={StaticResource BoolToVisibility}}" />
+            <StatusBarItem x:Name="StatusGatewayPidItem" Visibility="{Binding IsPidVisible, Converter={StaticResource BoolToVisibility}}">
                 <TextBlock x:Name="StatusGatewayPid" Text="{Binding GatewayPidText}" />
             </StatusBarItem>
-            <Separator x:Name="StatusGatewayUptimeSep"
-                       Visibility="{Binding IsUptimeVisible, Converter={StaticResource BoolToVisibility}}" />
-            <StatusBarItem x:Name="StatusGatewayUptimeItem"
-                           Visibility="{Binding IsUptimeVisible, Converter={StaticResource BoolToVisibility}}">
+            <Separator x:Name="StatusGatewayUptimeSep" Visibility="{Binding IsUptimeVisible, Converter={StaticResource BoolToVisibility}}" />
+            <StatusBarItem x:Name="StatusGatewayUptimeItem" Visibility="{Binding IsUptimeVisible, Converter={StaticResource BoolToVisibility}}">
                 <TextBlock x:Name="StatusGatewayUptime" Text="{Binding GatewayUptimeText}" />
             </StatusBarItem>
             <StatusBarItem>
@@ -265,11 +99,10 @@
                 <TextBlock x:Name="StatusCpu" Text="{Binding CpuText}" />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="v2.0" Foreground="{DynamicResource Theme.Brush.Text.Secondary}" />
+                <TextBlock Text="v2.0" Foreground="Gray" />
             </StatusBarItem>
         </StatusBar>
 
-        <!-- ── Main content grid ───────────────────────────────────────────────── -->
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="330" />
@@ -277,7 +110,6 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- ── Left panel ──────────────────────────────────────────────────── -->
             <Grid Grid.Column="0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -287,181 +119,113 @@
                 </Grid.RowDefinitions>
 
                 <!-- Sekce Akce -->
-                <GroupBox x:Name="GrpActions" Grid.Row="0"
-                          Header="{Binding GrpActionsHeader}"
-                          Margin="8,8,8,4" Padding="8"
-                          Style="{StaticResource Style.Grp.Panel}">
+                <GroupBox x:Name="GrpActions" Grid.Row="0" Header="{Binding GrpActionsHeader}" Margin="8,8,8,4" Padding="8">
                     <StackPanel x:Name="ActionsStack">
 
-                        <!-- Dynamické TUI tlačítko — CTA gradient accent -->
-                        <Button x:Name="BtnStartTui"
-                                Style="{StaticResource Style.Btn.CtaAccent}"
-                                Background="{DynamicResource Brush.ActionPositive}"
-                                Height="48" FontWeight="Bold" FontSize="13"
-                                Margin="0,0,0,8">
+                        <!-- Dynamické TUI tlačítko -->
+                        <Button x:Name="BtnStartTui" Height="48" FontWeight="Bold" FontSize="13"
+                                Margin="0,0,0,8" Background="{DynamicResource Brush.ActionPositive}">
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                    <TextBlock x:Name="BtnStartTuiSymbol"
-                                               Text="▶" Foreground="Green"
-                                               FontWeight="Bold" FontSize="16"
-                                               VerticalAlignment="Center" Margin="0,0,8,0" />
-                                    <TextBlock x:Name="BtnStartTuiLabel"
-                                               Text="OpenClaw TUI" VerticalAlignment="Center" />
+                                    <TextBlock x:Name="BtnStartTuiSymbol" Text="▶" Foreground="Green"
+                                               FontWeight="Bold" FontSize="16" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <TextBlock x:Name="BtnStartTuiLabel" Text="OpenClaw TUI" VerticalAlignment="Center" />
                                 </StackPanel>
-                                <TextBlock x:Name="BtnStartTuiSubLabel"
-                                           Text="(restart Gateway)"
-                                           HorizontalAlignment="Center"
-                                           FontSize="10" FontWeight="Normal"
-                                           Foreground="{DynamicResource Theme.Brush.Text.Secondary}" />
+                                <TextBlock x:Name="BtnStartTuiSubLabel" Text="(restart Gateway)"
+                                           HorizontalAlignment="Center" FontSize="10" FontWeight="Normal" Foreground="Gray" />
                             </StackPanel>
                         </Button>
 
                         <!-- Gateway tlačítka -->
-                        <TextBlock x:Name="TxtGatewayLabel"
-                                   Text="{Binding GatewayLabel}"
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}"
-                                   Margin="0,4,0,4" />
+                        <TextBlock x:Name="TxtGatewayLabel" Text="{Binding GatewayLabel}" FontWeight="Bold" Margin="0,4,0,4" />
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="4" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Button x:Name="BtnGatewayStart"
-                                    Style="{StaticResource Style.Btn.Action}"
-                                    Grid.Column="0" Height="28"
+                            <Button x:Name="BtnGatewayStart" Grid.Column="0" Height="28"
                                     IsEnabled="{Binding BtnGatewayStartEnabled}"
                                     ToolTip="{Binding BtnGatewayStartToolTip}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="▶" Foreground="Green" FontWeight="Bold" Margin="0,0,6,0" />
-                                    <TextBlock x:Name="BtnGatewayStartLabel"
-                                               Text="{Binding BtnGatewayStartLabel}"
-                                               VerticalAlignment="Center" />
+                                    <TextBlock x:Name="BtnGatewayStartLabel" Text="{Binding BtnGatewayStartLabel}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
-                            <Button x:Name="BtnGatewayStop"
-                                    Style="{StaticResource Style.Btn.Action}"
-                                    Grid.Column="2" Height="28"
+                            <Button x:Name="BtnGatewayStop" Grid.Column="2" Height="28"
                                     IsEnabled="{Binding BtnGatewayStopEnabled}"
                                     ToolTip="{Binding BtnGatewayStopToolTip}">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="■" Foreground="Red" FontWeight="Bold" Margin="0,0,6,0" />
-                                    <TextBlock x:Name="BtnGatewayStopLabel"
-                                               Text="{Binding BtnGatewayStopLabel}"
-                                               VerticalAlignment="Center" />
+                                    <TextBlock x:Name="BtnGatewayStopLabel" Text="{Binding BtnGatewayStopLabel}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                         </Grid>
-                        <Button x:Name="BtnGatewayRestart"
-                                Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,8"
+                        <Button x:Name="BtnGatewayRestart" Height="28" Margin="0,0,0,8"
                                 IsEnabled="{Binding BtnGatewayRestartEnabled}"
                                 ToolTip="{Binding BtnGatewayRestartToolTip}">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="↻" Foreground="Orange"
-                                           FontWeight="Bold" FontSize="14" Margin="0,0,6,0" />
-                                <TextBlock x:Name="BtnGatewayRestartLabel"
-                                           Text="{Binding BtnGatewayRestartLabel}"
-                                           VerticalAlignment="Center" />
+                                <TextBlock Text="↻" Foreground="Orange" FontWeight="Bold" FontSize="14" Margin="0,0,6,0" />
+                                <TextBlock x:Name="BtnGatewayRestartLabel" Text="{Binding BtnGatewayRestartLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
                         <!-- Otevřít -->
-                        <TextBlock x:Name="TxtSectionOpen"
-                                   Text="{Binding SectionOpenLabel}"
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}"
-                                   Margin="0,4,0,4" />
-                        <Button x:Name="BtnOpenPowerShell"
-                                Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,4"
+                        <TextBlock x:Name="TxtSectionOpen" Text="{Binding SectionOpenLabel}" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Button x:Name="BtnOpenPowerShell" Height="28" Margin="0,0,0,4"
                                 ToolTip="{Binding BtnPowerShellToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="⚡" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnPowerShellLabel"
-                                           Text="{Binding BtnPowerShellLabel}"
-                                           VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnPowerShellLabel" Text="{Binding BtnPowerShellLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="BtnOpenGatewayLog"
-                                Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,8"
+                        <Button x:Name="BtnOpenGatewayLog" Height="28" Margin="0,0,0,8"
                                 ToolTip="{Binding BtnGatewayLogToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="📄" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnGatewayLogLabel"
-                                           Text="{Binding BtnGatewayLogLabel}"
-                                           VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnGatewayLogLabel" Text="{Binding BtnGatewayLogLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
                         <!-- Nástroje -->
-                        <TextBlock x:Name="TxtSectionTools"
-                                   Text="{Binding SectionToolsLabel}"
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}"
-                                   Margin="0,4,0,4" />
-                        <Button x:Name="BtnCleaningTool"
-                                Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,4"
+                        <TextBlock x:Name="TxtSectionTools" Text="{Binding SectionToolsLabel}" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Button x:Name="BtnCleaningTool" Height="28" Margin="0,0,0,4"
                                 ToolTip="{Binding BtnCleaningToolToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🧹" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnCleaningToolLabel"
-                                           Text="{Binding BtnCleaningToolLabel}"
-                                           VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnCleaningToolLabel" Text="{Binding BtnCleaningToolLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
-                        <Button x:Name="BtnTokenManager"
-                                Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,8"
+                        <Button x:Name="BtnTokenManager" Height="28" Margin="0,0,0,8"
                                 ToolTip="{Binding BtnTokenManagerToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🔑" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnTokenManagerLabel"
-                                           Text="{Binding BtnTokenManagerLabel}"
-                                           VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnTokenManagerLabel" Text="{Binding BtnTokenManagerLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
                         <!-- Údržba -->
-                        <TextBlock x:Name="TxtSectionMaintenance"
-                                   Text="{Binding SectionMaintenanceLabel}"
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}"
-                                   Margin="0,4,0,4" />
-                        <Button x:Name="BtnDoctorFix"
-                                Style="{StaticResource Style.Btn.Action}"
-                                Height="28"
-                                Background="{DynamicResource Brush.ActionDanger}"
+                        <TextBlock x:Name="TxtSectionMaintenance" Text="{Binding SectionMaintenanceLabel}" FontWeight="Bold" Margin="0,4,0,4" />
+                        <Button x:Name="BtnDoctorFix" Height="28" Background="{DynamicResource Brush.ActionDanger}"
                                 ToolTip="{Binding BtnDoctorFixToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🩺" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
-                                <TextBlock x:Name="BtnDoctorFixLabel"
-                                           Text="{Binding BtnDoctorFixLabel}"
-                                           VerticalAlignment="Center" />
+                                <TextBlock x:Name="BtnDoctorFixLabel" Text="{Binding BtnDoctorFixLabel}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
                     </StackPanel>
                 </GroupBox>
 
-                <!-- Sekce Nástroje — používá se pro StandardDark layout -->
-                <GroupBox x:Name="GrpTools" Grid.Row="1"
-                          Header="{Binding GrpToolsHeader}"
-                          Margin="8,4,8,4" Padding="8"
-                          Visibility="Collapsed"
-                          Style="{StaticResource Style.Grp.Panel}">
+                <!-- Sekce Nástroje — používá se pro StandardDark layout. -->
+                <GroupBox x:Name="GrpTools" Grid.Row="1" Header="{Binding GrpToolsHeader}" Margin="8,4,8,4" Padding="8"
+                          Visibility="Collapsed">
                     <StackPanel x:Name="ToolsStack" />
                 </GroupBox>
 
                 <!-- Sekce Měření latence -->
-                <GroupBox x:Name="GrpLatency" Grid.Row="2"
-                          Header="{Binding GrpLatencyHeader}"
-                          Margin="8,4,8,4" Padding="8"
-                          ToolTip="{Binding GrpLatencyToolTip}"
-                          Style="{StaticResource Style.Grp.Panel}">
+                <GroupBox x:Name="GrpLatency" Grid.Row="2" Header="{Binding GrpLatencyHeader}" Margin="8,4,8,4" Padding="8"
+                          ToolTip="{Binding GrpLatencyToolTip}">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
@@ -473,47 +237,37 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <TextBlock x:Name="TxtLatencyLast"  Grid.Row="0" Grid.Column="0" Text="{Binding LatencyLastLabel}" />
-                        <TextBlock                           Grid.Row="0" Grid.Column="1"
-                                   x:Name="LatencyLast"  Text="{Binding LatencyLastText}"
+                        <TextBlock x:Name="TxtLatencyLast" Grid.Row="0" Grid.Column="0" Text="{Binding LatencyLastLabel}" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" x:Name="LatencyLast" Text="{Binding LatencyLastText}"
                                    Foreground="{Binding LatencyLastColor}" />
-                        <TextBlock x:Name="TxtLatencyAvg"   Grid.Row="1" Grid.Column="0" Text="{Binding LatencyAvgLabel}" />
-                        <TextBlock                           Grid.Row="1" Grid.Column="1"
-                                   x:Name="LatencyAvg"   Text="{Binding LatencyAvgText}" />
-                        <TextBlock x:Name="TxtLatencyMax"   Grid.Row="2" Grid.Column="0" Text="{Binding LatencyMaxLabel}" />
-                        <TextBlock                           Grid.Row="2" Grid.Column="1"
-                                   x:Name="LatencyMax"   Text="{Binding LatencyMaxText}" />
+                        <TextBlock x:Name="TxtLatencyAvg" Grid.Row="1" Grid.Column="0" Text="{Binding LatencyAvgLabel}" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" x:Name="LatencyAvg" Text="{Binding LatencyAvgText}" />
+                        <TextBlock x:Name="TxtLatencyMax" Grid.Row="2" Grid.Column="0" Text="{Binding LatencyMaxLabel}" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" x:Name="LatencyMax" Text="{Binding LatencyMaxText}" />
                         <TextBlock x:Name="TxtLatencyCount" Grid.Row="3" Grid.Column="0" Text="{Binding LatencyCountLabel}" />
-                        <TextBlock                           Grid.Row="3" Grid.Column="1"
-                                   x:Name="LatencyCount" Text="{Binding LatencyCountText}" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" x:Name="LatencyCount" Text="{Binding LatencyCountText}" />
                     </Grid>
                 </GroupBox>
 
                 <!-- Sekce Log aplikace -->
-                <GroupBox x:Name="GrpAppLog" Grid.Row="3"
-                          Header="{Binding GrpAppLogHeader}"
-                          Margin="8,4,8,8" Padding="8"
-                          Style="{StaticResource Style.Grp.Panel}">
+                <GroupBox x:Name="GrpAppLog" Grid.Row="3" Header="{Binding GrpAppLogHeader}" Margin="8,4,8,8" Padding="8">
                     <ListBox x:Name="AppLog"
                              FontFamily="Consolas" FontSize="11"
                              BorderThickness="0"
-                             Background="Transparent"
-                             Foreground="{DynamicResource Theme.Brush.Text.Primary}"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </GroupBox>
             </Grid>
 
-            <!-- ── GridSplitter ─────────────────────────────────────────────────── -->
             <GridSplitter x:Name="MainGridSplitter" Grid.Column="1" Width="5"
                           HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                          Background="{DynamicResource Theme.Brush.Border}" />
+                          Background="LightGray" />
 
-            <!-- ════════════════════════════════════════════════════════════════════ -->
-            <!-- v0.5: Pravý panel — Grid se dvěma vrstvami                          -->
-            <!-- Vrstva 0: TerminalControl (TUI)                                     -->
-            <!-- Vrstva 1: SplashOverlay (video/PNG nad TUI, moderní pozadí)        -->
-            <!-- ════════════════════════════════════════════════════════════════════ -->
+            <!-- ════════════════════════════════════════════════════════════ -->
+            <!-- v0.5: Pravý panel — Grid se dvěma vrstvami                    -->
+            <!-- Vrstva 0: TerminalControl (TUI)                               -->
+            <!-- Vrstva 1: SplashOverlay (video/PNG nad TUI, moderní pozadí)  -->
+            <!-- ════════════════════════════════════════════════════════════ -->
             <Grid x:Name="RightPanel" Grid.Column="2">
 
                 <!-- Vrstva 0: Embedded TUI terminál (vždy přítomný) -->
