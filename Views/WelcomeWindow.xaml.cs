@@ -36,6 +36,11 @@ public partial class WelcomeWindow : Window
         ThemeCombo.ItemsSource = _themes;
         ThemeCombo.SelectedItem = _themes.FirstOrDefault(t => t.Theme == settingsService.Settings.Theme) ?? _themes[0];
         AutoUpdateCheckBox.IsChecked = settingsService.Settings.CheckUpdatesOnStartup;
+        if (ThemeCombo.SelectedItem is ThemeChoice selectedTheme)
+        {
+            UpdateThemePreview(selectedTheme);
+            UpdateCtaGradient(selectedTheme.Theme);
+        }
 
         SettingsModeText.Text = settingsService.IsPortableMode ? "PORTABLE" : "APPDATA";
         DpapiWarningText.Text = L10n.IsCzech
@@ -52,6 +57,7 @@ public partial class WelcomeWindow : Window
 
         ThemeService.Apply(choice.Theme);
         UpdateThemePreview(choice);
+        UpdateCtaGradient(choice.Theme);
     }
 
     private async void Continue_Click(object sender, RoutedEventArgs e)
@@ -161,6 +167,41 @@ public partial class WelcomeWindow : Window
         ThemePreviewImage.Visibility = Visibility.Visible;
         ThemePreviewPlaceholder.Visibility = Visibility.Collapsed;
     }
+
+    private void UpdateCtaGradient(AppTheme theme)
+    {
+        var topColor = Application.Current.TryFindResource("Theme.Color.AccentTop") is Color top
+            ? top
+            : FallbackAccentTop(theme);
+        var bottomColor = Application.Current.TryFindResource("Theme.Color.AccentBot") is Color bottom
+            ? bottom
+            : FallbackAccentBot(theme);
+
+        var gradient = new LinearGradientBrush
+        {
+            StartPoint = new Point(0, 0),
+            EndPoint = new Point(0, 1)
+        };
+        gradient.GradientStops.Add(new GradientStop(topColor, 0));
+        gradient.GradientStops.Add(new GradientStop(bottomColor, 1));
+        ContinueButton.Background = gradient;
+    }
+
+    private static Color FallbackAccentTop(AppTheme theme) => theme switch
+    {
+        AppTheme.CrabCute => Color.FromRgb(0xFB, 0x71, 0x85),
+        AppTheme.HighContrast => Color.FromRgb(0xFE, 0xF0, 0x8A),
+        AppTheme.Legacy => Color.FromRgb(0xFB, 0xBF, 0x24),
+        _ => Color.FromRgb(0x5A, 0xA1, 0xFF)
+    };
+
+    private static Color FallbackAccentBot(AppTheme theme) => theme switch
+    {
+        AppTheme.CrabCute => Color.FromRgb(0xBE, 0x12, 0x3C),
+        AppTheme.HighContrast => Color.FromRgb(0xCA, 0x8A, 0x04),
+        AppTheme.Legacy => Color.FromRgb(0x92, 0x40, 0x0E),
+        _ => Color.FromRgb(0x1D, 0x4E, 0xD8)
+    };
 
     private void StopSplashVideo()
     {

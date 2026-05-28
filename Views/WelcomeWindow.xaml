@@ -20,12 +20,109 @@
             <Setter Property="Margin" Value="4,0,0,0" />
             <Setter Property="Padding" Value="0" />
             <Setter Property="Foreground" Value="#E7E9EE" />
-            <Setter Property="Background" Value="#22FFFFFF" />
+            <Setter Property="Background" Value="#0FFFFFFF" />
             <Setter Property="BorderBrush" Value="#33FFFFFF" />
             <Setter Property="BorderThickness" Value="1" />
             <Setter Property="FontSize" Value="14" />
             <Setter Property="FontWeight" Value="SemiBold" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#1FFFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#0AFFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="WelcomeCloseCaptionButton"
+               TargetType="{x:Type Button}"
+               BasedOn="{StaticResource WelcomeCaptionButton}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#D9EF4444" />
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#D9EF4444" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#AAEF4444" />
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#AAEF4444" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="WelcomeLaunchButtonStyle" TargetType="{x:Type Button}">
+            <Setter Property="Foreground" Value="#F3F4F6" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="18"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                <Border x:Name="Gloss"
+                                        Height="28"
+                                        VerticalAlignment="Top"
+                                        CornerRadius="18,18,0,0"
+                                        IsHitTestVisible="False">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#0DFFFFFF" Offset="0" />
+                                            <GradientStop Color="#00FFFFFF" Offset="1" />
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.92" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.84" />
+                                <Setter TargetName="Root" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform Y="1" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
@@ -90,7 +187,7 @@
                                 Style="{StaticResource WelcomeCaptionButton}"
                                 Click="Minimize_Click" />
                         <Button Content="X"
-                                Style="{StaticResource WelcomeCaptionButton}"
+                                Style="{StaticResource WelcomeCloseCaptionButton}"
                                 Click="Close_Click" />
                     </StackPanel>
                 </DockPanel>
@@ -264,13 +361,9 @@
                                 x:Name="ContinueButton"
                                 Height="62"
                                 Content="Spustit aplikaci"
+                                Style="{StaticResource WelcomeLaunchButtonStyle}"
                                 Click="Continue_Click"
-                                Foreground="#F3F4F6"
-                                Background="{DynamicResource Theme.Brush.Accent}"
-                                FontSize="18"
-                                FontWeight="Bold"
-                                BorderBrush="#66FFFFFF"
-                                BorderThickness="1" />
+                                Background="{DynamicResource Theme.Brush.Accent}" />
                     </Grid>
                 </Border>
             </Grid>
