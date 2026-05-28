@@ -4,22 +4,28 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--
-        Theme: Dark (Modern Dark - palette B)
-        Background:       #191919    main window surface
-        Surface:          #272727    panels and GroupBox surfaces
-        Chrome:           #121212    TUI shell background
-        TitleBar:         #202020    top and bottom bars
-        MenuBackground:   #181818    menu and splash background
-        MenuHover:        #363635    menu item highlight
-        SecondaryButton:  #2E2E2E    secondary window button idle state
-        Hover:            #464646    hover state
-        Pressed:          #535353    pressed state
-        Disabled:         #282828    tool button idle state
-        Text Primary:     #FFFFFF    primary text
-        Text Secondary:   #787878    secondary text
-        ButtonText:       #FFFFFF    button captions
-        Border:           #3A3A3A    borders
-        Corner radius:    6px        named styles for secondary windows
+        Theme: Dark (Modern Dark — Design Language v2)
+        Philosophy: "Dark glass over live splash" — §15 MainWindow has NO glassmorphism.
+        Background:            #0F1115    main window surface          (DL §15)
+        Surface:               #14171C    sidebar / panels             (DL §15)
+        Chrome:                #0B0C10    TUI shell background
+        TitleBar:              #14171C    top and bottom bars          (DL §15)
+        MenuBackground:        #0F1115    menu and splash background
+        MenuHover:             #222831    menu item highlight
+        SecondaryButton:       #1C2026    secondary window button idle (DL §7.5)
+        SecondaryButtonBorder: #2B3038    secondary button border      (DL §7.5)
+        Disabled:              #1C2026    tool button idle state
+        Hover:                 #222831    hover state
+        Pressed:               #181C22    pressed state
+        Separator:             #23272F    main grid separator          (DL §15)
+        Text Primary:          #F3F4F6    primary text (ink)           (DL §5.1)
+        Text Secondary:        #9AA1AC    secondary text (label)       (DL §5.1)
+        ButtonText:            #F3F4F6    button captions
+        Border:                #23272F    borders / separators         (DL §5.1 line-soft)
+        AccentTop:             #5AA1FF    gradient accent start        (DL §5.2)
+        AccentBot:             #1D4ED8    gradient accent end          (DL §5.2)
+        AccentGlow:            #991D4ED8  accent glow (60 % opacity)   (DL §5.2)
+        Corner radius:         button 8px, card 18px                  (DL §9)
     -->
 
     <!-- Metadata -->
@@ -29,62 +35,117 @@
     <sys:String x:Key="Theme.Meta.PaletteFamily">ModernPalette</sys:String>
     <sys:String x:Key="Theme.Meta.ButtonInteraction">HoverScanline</sys:String>
 
-    <!-- Colors -->
-    <Color x:Key="Theme.Color.Background">#191919</Color>
-    <Color x:Key="Theme.Color.Surface">#272727</Color>
-    <Color x:Key="Theme.Color.Chrome">#121212</Color>
-    <Color x:Key="Theme.Color.TitleBar">#202020</Color>
-    <Color x:Key="Theme.Color.MenuBackground">#181818</Color>
-    <Color x:Key="Theme.Color.MenuHover">#363635</Color>
-    <Color x:Key="Theme.Color.SecondaryButton">#2E2E2E</Color>
-    <Color x:Key="Theme.Color.Disabled">#282828</Color>
-    <Color x:Key="Theme.Color.Hover">#464646</Color>
-    <Color x:Key="Theme.Color.Pressed">#535353</Color>
-    <Color x:Key="Theme.Color.Menu.Hover">#363635</Color>
-    <Color x:Key="Theme.Color.Text.Primary">#FFFFFF</Color>
-    <Color x:Key="Theme.Color.Text.Secondary">#787878</Color>
-    <Color x:Key="Theme.Color.ButtonText">#FFFFFF</Color>
-    <Color x:Key="Theme.Color.Border">#3A3A3A</Color>
-    <Color x:Key="Theme.Color.WindowBackground">#272727</Color>
-    <Color x:Key="Theme.Color.Success">#38C172</Color>
-    <Color x:Key="Theme.Color.Danger">#FF6B7A</Color>
-    <Color x:Key="Theme.Color.Warning">#F6C177</Color>
-    <Color x:Key="Theme.Color.ActionPositive">#1C3527</Color>
-    <Color x:Key="Theme.Color.ActionDanger">#3D1515</Color>
-    <Color x:Key="Theme.Color.ActionUtility">#152535</Color>
-    <Color x:Key="Theme.Color.SplashModernBackground">#181818</Color>
+    <!-- ═══════════════════════════════════════════════════════ Colors -->
 
-    <!-- Brushes -->
-    <SolidColorBrush x:Key="Theme.Brush.Background"       Color="{StaticResource Theme.Color.Background}" />
-    <SolidColorBrush x:Key="Theme.Brush.Surface"          Color="{StaticResource Theme.Color.Surface}" />
-    <SolidColorBrush x:Key="Theme.Brush.Chrome"           Color="{StaticResource Theme.Color.Chrome}" />
-    <SolidColorBrush x:Key="Theme.Brush.TitleBar"         Color="{StaticResource Theme.Color.TitleBar}" />
-    <SolidColorBrush x:Key="Theme.Brush.MenuBackground"   Color="{StaticResource Theme.Color.MenuBackground}" />
-    <SolidColorBrush x:Key="Theme.Brush.MenuHover"        Color="{StaticResource Theme.Color.MenuHover}" />
-    <SolidColorBrush x:Key="Theme.Brush.SecondaryButton"  Color="{StaticResource Theme.Color.SecondaryButton}" />
-    <SolidColorBrush x:Key="Theme.Brush.Disabled"         Color="{StaticResource Theme.Color.Disabled}" />
-    <SolidColorBrush x:Key="Theme.Brush.Hover"            Color="{StaticResource Theme.Color.Hover}" />
-    <SolidColorBrush x:Key="Theme.Brush.Pressed"          Color="{StaticResource Theme.Color.Pressed}" />
-    <SolidColorBrush x:Key="Theme.Brush.Menu.Hover"       Color="{StaticResource Theme.Color.Menu.Hover}" />
-    <SolidColorBrush x:Key="Theme.Brush.Text.Primary"     Color="{StaticResource Theme.Color.Text.Primary}" />
-    <SolidColorBrush x:Key="Theme.Brush.Text.Secondary"   Color="{StaticResource Theme.Color.Text.Secondary}" />
-    <SolidColorBrush x:Key="Theme.Brush.ButtonText"       Color="{StaticResource Theme.Color.ButtonText}" />
-    <SolidColorBrush x:Key="Theme.Brush.Border"           Color="{StaticResource Theme.Color.Border}" />
-    <SolidColorBrush x:Key="Theme.Brush.WindowBackground" Color="{StaticResource Theme.Color.WindowBackground}" />
-    <SolidColorBrush x:Key="Brush.ActionPositive"         Color="{StaticResource Theme.Color.ActionPositive}" />
-    <SolidColorBrush x:Key="Brush.ActionDanger"           Color="{StaticResource Theme.Color.ActionDanger}" />
-    <SolidColorBrush x:Key="Brush.ActionUtility"          Color="{StaticResource Theme.Color.ActionUtility}" />
-    <SolidColorBrush x:Key="Brush.SplashModernBackground" Color="{StaticResource Theme.Color.SplashModernBackground}" />
+    <!-- Surfaces -->
+    <Color x:Key="Theme.Color.Background">#0F1115</Color>
+    <Color x:Key="Theme.Color.Surface">#14171C</Color>
+    <Color x:Key="Theme.Color.Chrome">#0B0C10</Color>
+    <Color x:Key="Theme.Color.TitleBar">#14171C</Color>
+    <Color x:Key="Theme.Color.MenuBackground">#0F1115</Color>
+    <Color x:Key="Theme.Color.MenuHover">#222831</Color>
+    <Color x:Key="Theme.Color.SecondaryButton">#1C2026</Color>
+    <Color x:Key="Theme.Color.SecondaryButtonBorder">#2B3038</Color>
+    <Color x:Key="Theme.Color.Disabled">#1C2026</Color>
+    <Color x:Key="Theme.Color.Hover">#222831</Color>
+    <Color x:Key="Theme.Color.Pressed">#181C22</Color>
+    <Color x:Key="Theme.Color.Menu.Hover">#222831</Color>
 
-    <!-- Named styles for secondary windows. Runtime wiring is handled by
-         ModernPaletteRuntimeStyles.cs through window.Resources entries. -->
+    <!-- Typography -->
+    <Color x:Key="Theme.Color.Text.Primary">#F3F4F6</Color>
+    <Color x:Key="Theme.Color.Text.Secondary">#9AA1AC</Color>
+    <Color x:Key="Theme.Color.ButtonText">#F3F4F6</Color>
+
+    <!-- Structure -->
+    <Color x:Key="Theme.Color.Border">#23272F</Color>
+    <Color x:Key="Theme.Color.WindowBackground">#14171C</Color>
+
+    <!-- Semantic -->
+    <Color x:Key="Theme.Color.Success">#34D399</Color>
+    <Color x:Key="Theme.Color.Danger">#EF4444</Color>
+    <Color x:Key="Theme.Color.Warning">#FBBF24</Color>
+
+    <!-- Action tint backgrounds -->
+    <Color x:Key="Theme.Color.ActionPositive">#102A1E</Color>
+    <Color x:Key="Theme.Color.ActionDanger">#2A1010</Color>
+    <Color x:Key="Theme.Color.ActionUtility">#0F1A30</Color>
+
+    <!-- Splash -->
+    <Color x:Key="Theme.Color.SplashModernBackground">#0B0C10</Color>
+
+    <!-- Accent (DL §5.2) -->
+    <Color x:Key="Theme.Color.AccentTop">#5AA1FF</Color>
+    <Color x:Key="Theme.Color.AccentBot">#1D4ED8</Color>
+    <Color x:Key="Theme.Color.AccentGlow">#991D4ED8</Color>
+
+    <!-- ═══════════════════════════════════════════════════════ Brushes -->
+
+    <!-- Surfaces -->
+    <SolidColorBrush x:Key="Theme.Brush.Background"            Color="{StaticResource Theme.Color.Background}" />
+    <SolidColorBrush x:Key="Theme.Brush.Surface"               Color="{StaticResource Theme.Color.Surface}" />
+    <SolidColorBrush x:Key="Theme.Brush.Chrome"                Color="{StaticResource Theme.Color.Chrome}" />
+    <SolidColorBrush x:Key="Theme.Brush.TitleBar"              Color="{StaticResource Theme.Color.TitleBar}" />
+    <SolidColorBrush x:Key="Theme.Brush.MenuBackground"        Color="{StaticResource Theme.Color.MenuBackground}" />
+    <SolidColorBrush x:Key="Theme.Brush.MenuHover"             Color="{StaticResource Theme.Color.MenuHover}" />
+    <SolidColorBrush x:Key="Theme.Brush.SecondaryButton"       Color="{StaticResource Theme.Color.SecondaryButton}" />
+    <SolidColorBrush x:Key="Theme.Brush.SecondaryButtonBorder" Color="{StaticResource Theme.Color.SecondaryButtonBorder}" />
+    <SolidColorBrush x:Key="Theme.Brush.Disabled"              Color="{StaticResource Theme.Color.Disabled}" />
+    <SolidColorBrush x:Key="Theme.Brush.Hover"                 Color="{StaticResource Theme.Color.Hover}" />
+    <SolidColorBrush x:Key="Theme.Brush.Pressed"               Color="{StaticResource Theme.Color.Pressed}" />
+    <SolidColorBrush x:Key="Theme.Brush.Menu.Hover"            Color="{StaticResource Theme.Color.Menu.Hover}" />
+
+    <!-- Typography -->
+    <SolidColorBrush x:Key="Theme.Brush.Text.Primary"          Color="{StaticResource Theme.Color.Text.Primary}" />
+    <SolidColorBrush x:Key="Theme.Brush.Text.Secondary"        Color="{StaticResource Theme.Color.Text.Secondary}" />
+    <SolidColorBrush x:Key="Theme.Brush.ButtonText"            Color="{StaticResource Theme.Color.ButtonText}" />
+
+    <!-- Structure -->
+    <SolidColorBrush x:Key="Theme.Brush.Border"                Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.WindowBackground"      Color="{StaticResource Theme.Color.WindowBackground}" />
+
+    <!-- Action tints -->
+    <SolidColorBrush x:Key="Brush.ActionPositive"              Color="{StaticResource Theme.Color.ActionPositive}" />
+    <SolidColorBrush x:Key="Brush.ActionDanger"                Color="{StaticResource Theme.Color.ActionDanger}" />
+    <SolidColorBrush x:Key="Brush.ActionUtility"               Color="{StaticResource Theme.Color.ActionUtility}" />
+
+    <!-- Splash -->
+    <SolidColorBrush x:Key="Brush.SplashModernBackground"      Color="{StaticResource Theme.Color.SplashModernBackground}" />
+
+    <!-- Accent (DL §5.2) — consumed as DynamicResource by buttons and highlights -->
+    <SolidColorBrush x:Key="Theme.Brush.AccentTop"             Color="{StaticResource Theme.Color.AccentTop}" />
+    <SolidColorBrush x:Key="Theme.Brush.AccentBot"             Color="{StaticResource Theme.Color.AccentBot}" />
+    <SolidColorBrush x:Key="Theme.Brush.AccentGlow"            Color="{StaticResource Theme.Color.AccentGlow}" />
+
+    <!-- ═══════════════════════════════════════════════════════ Glass tokens -->
+    <!-- Panel: rgba(8,10,14,0.72) · Border: rgba(255,255,255,0.16) -->
+    <!-- Highlight (top line): rgba(255,255,255,0.14)                -->
+    <Color x:Key="Theme.Color.GlassPanel.Background">#B8080A0E</Color>
+    <Color x:Key="Theme.Color.GlassBorder">#29FFFFFF</Color>
+    <Color x:Key="Theme.Color.GlassHighlight">#24FFFFFF</Color>
+
+    <!-- Window controls: idle rgba(255,255,255,0.08) / hover 0.14 / close red 0.85 -->
+    <Color x:Key="Theme.Color.WinCtrl.Idle">#14FFFFFF</Color>
+    <Color x:Key="Theme.Color.WinCtrl.Hover">#24FFFFFF</Color>
+    <Color x:Key="Theme.Color.WinCtrl.Border">#29FFFFFF</Color>
+    <Color x:Key="Theme.Color.WinCtrl.Close">#D9EF4444</Color>
+
+    <SolidColorBrush x:Key="Theme.Brush.GlassPanel.Background" Color="{StaticResource Theme.Color.GlassPanel.Background}" />
+    <SolidColorBrush x:Key="Theme.Brush.GlassBorder"           Color="{StaticResource Theme.Color.GlassBorder}" />
+    <SolidColorBrush x:Key="Theme.Brush.GlassHighlight"        Color="{StaticResource Theme.Color.GlassHighlight}" />
+    <SolidColorBrush x:Key="Theme.Brush.WinCtrl.Idle"          Color="{StaticResource Theme.Color.WinCtrl.Idle}" />
+    <SolidColorBrush x:Key="Theme.Brush.WinCtrl.Hover"         Color="{StaticResource Theme.Color.WinCtrl.Hover}" />
+    <SolidColorBrush x:Key="Theme.Brush.WinCtrl.Border"        Color="{StaticResource Theme.Color.WinCtrl.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.WinCtrl.Close"         Color="{StaticResource Theme.Color.WinCtrl.Close}" />
+
+    <!-- ═══════════════════════════════════════════════════════ Named styles (secondary windows) -->
+    <!-- Runtime wiring via ModernPaletteRuntimeStyles.cs through window.Resources entries. -->
 
     <Style x:Key="Theme.Style.Window" TargetType="Window">
         <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
         <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
     </Style>
 
-    <!-- Rounded GroupBox style for secondary windows. -->
+    <!-- Card-radius GroupBox for secondary windows (DL §9 card = 18 px). -->
     <Style x:Key="Theme.Style.GroupBox" TargetType="GroupBox">
         <Setter Property="Background"      Value="{StaticResource Theme.Brush.Surface}" />
         <Setter Property="BorderBrush"     Value="{StaticResource Theme.Brush.Border}" />
@@ -102,7 +163,7 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6" />
+                                CornerRadius="18" />
                         <Border Grid.Row="0" Padding="10,6,10,0">
                             <ContentPresenter ContentSource="Header"
                                               RecognizesAccessKey="True"
@@ -115,13 +176,13 @@
         </Setter>
     </Style>
 
-    <!-- Rounded button style for secondary windows. -->
+    <!-- DL §7.5 secondary button: bg #1C2026, border #2B3038, radius 8 px. -->
     <Style x:Key="Theme.Style.Button" TargetType="Button">
-        <Setter Property="Background"               Value="{StaticResource Theme.Brush.SecondaryButton}" />
-        <Setter Property="Foreground"               Value="{StaticResource Theme.Brush.Text.Primary}" />
-        <Setter Property="BorderBrush"              Value="Transparent" />
-        <Setter Property="BorderThickness"          Value="0" />
-        <Setter Property="Padding"                  Value="12,6" />
+        <Setter Property="Background"                 Value="{StaticResource Theme.Brush.SecondaryButton}" />
+        <Setter Property="Foreground"                 Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="BorderBrush"                Value="{StaticResource Theme.Brush.SecondaryButtonBorder}" />
+        <Setter Property="BorderThickness"            Value="1" />
+        <Setter Property="Padding"                    Value="12,6" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment"   Value="Center" />
         <Setter Property="Template">
@@ -131,7 +192,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="6"
+                            CornerRadius="8"
                             SnapsToDevicePixels="True">
                         <ContentPresenter
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -155,6 +216,49 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <!-- Glass window control — Tag carries the hover brush so WinCtrl.Close can override it. -->
+    <Style x:Key="Theme.Style.WinCtrl" TargetType="Button">
+        <Setter Property="Background"       Value="{StaticResource Theme.Brush.WinCtrl.Idle}" />
+        <Setter Property="BorderBrush"      Value="{StaticResource Theme.Brush.WinCtrl.Border}" />
+        <Setter Property="BorderThickness"  Value="1" />
+        <Setter Property="Foreground"       Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="Width"            Value="44" />
+        <Setter Property="Height"           Value="34" />
+        <Setter Property="Padding"          Value="0" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <!-- Tag = hover brush; WinCtrl.Close overrides this to red -->
+        <Setter Property="Tag"              Value="{StaticResource Theme.Brush.WinCtrl.Hover}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="10"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background"
+                                    Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background"
+                                    Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Close button: same template, red hover via Tag override. -->
+    <Style x:Key="Theme.Style.WinCtrl.Close" BasedOn="{StaticResource Theme.Style.WinCtrl}" TargetType="Button">
+        <Setter Property="Tag" Value="{StaticResource Theme.Brush.WinCtrl.Close}" />
     </Style>
 
     <Style x:Key="Theme.Style.TextBlock" TargetType="TextBlock">

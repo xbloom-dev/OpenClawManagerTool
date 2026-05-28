@@ -86,6 +86,42 @@
         </Setter>
     </Style>
 
+    <!-- Glass GroupBox — semi-transparent panel for ModernPalette secondary windows.
+         Background/border reads from DynamicResource so it adapts to Dark vs Light glass tokens. -->
+    <Style x:Key="Style.GroupBox.GlassPanel" TargetType="{x:Type GroupBox}">
+        <Setter Property="Background"      Value="{DynamicResource Theme.Brush.GlassPanel.Background}" />
+        <Setter Property="Foreground"      Value="{DynamicResource Theme.Brush.Text.Primary}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource Theme.Brush.GlassBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type GroupBox}">
+                    <Border x:Name="GlassRoot"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="18"
+                            Padding="{TemplateBinding Padding}"
+                            SnapsToDevicePixels="True">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="40" ShadowDepth="10"
+                                              Direction="270" Opacity="0.45"
+                                              Color="Black" />
+                        </Border.Effect>
+                        <DockPanel LastChildFill="True">
+                            <ContentPresenter ContentSource="Header"
+                                              DockPanel.Dock="Top"
+                                              Margin="0,0,0,8"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"
+                                              TextElement.FontWeight="SemiBold" />
+                            <ContentPresenter Content="{TemplateBinding Content}" />
+                        </DockPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="Style.Button.StandardFlat" TargetType="{x:Type Button}">
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.Disabled}" />
         <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.ButtonText}" />

@@ -47,9 +47,19 @@
                     </MenuItem>
                 </Menu>
 
-                <Border x:Name="TitleBarDragSurface"
-                        Grid.Column="1"
-                        Background="Transparent" />
+                <!-- Column 1: drag surface + brand text (brand visible only in ModernPalette mode) -->
+                <Grid Grid.Column="1">
+                    <Border x:Name="TitleBarDragSurface" Background="Transparent" />
+                    <TextBlock x:Name="TitleBarBrandText"
+                               Text="OpenClaw Manager Tool · by Bloom"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               FontSize="13"
+                               FontWeight="SemiBold"
+                               Foreground="#A6FFFFFF"
+                               Visibility="Collapsed"
+                               IsHitTestVisible="False" />
+                </Grid>
 
                 <StackPanel x:Name="CaptionButtons"
                             Grid.Column="2"
@@ -65,7 +75,7 @@
             </Grid>
         </Border>
 
-        <StatusBar x:Name="MainStatusBar" DockPanel.Dock="Bottom" Height="24">
+        <StatusBar x:Name="MainStatusBar" DockPanel.Dock="Bottom" Height="28">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Gateway: " />

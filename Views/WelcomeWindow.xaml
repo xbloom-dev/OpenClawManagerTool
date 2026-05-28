@@ -1,0 +1,406 @@
+<Window x:Class="OpenClawManager.Views.WelcomeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="OpenClaw Manager Tool — Vítejte"
+        Width="860" Height="720"
+        MinWidth="660" MinHeight="520"
+        WindowStyle="None"
+        AllowsTransparency="False"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanMinimize"
+        Background="#FF0B0C10"
+        Icon="{x:Null}"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType">
+
+    <Window.Resources>
+
+        <!-- ── Caption button (—) ─────────────────────────────────────────── -->
+        <Style x:Key="WelcomeCapBtnStyle" TargetType="Button">
+            <Setter Property="Width"          Value="44"/>
+            <Setter Property="Height"         Value="34"/>
+            <Setter Property="FontSize"       Value="13"/>
+            <Setter Property="Foreground"     Value="#B8BDC7"/>
+            <Setter Property="Background"     Value="#0FFFFFFF"/>
+            <Setter Property="BorderBrush"    Value="#29FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor"         Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#1FFFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background" Value="#0AFFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── Caption button close (✕) — červený hover ──────────────────── -->
+        <Style x:Key="WelcomeCloseBtnStyle" TargetType="Button">
+            <Setter Property="Width"          Value="44"/>
+            <Setter Property="Height"         Value="34"/>
+            <Setter Property="FontSize"       Value="11"/>
+            <Setter Property="Foreground"     Value="#B8BDC7"/>
+            <Setter Property="Background"     Value="#0FFFFFFF"/>
+            <Setter Property="BorderBrush"    Value="#29FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Cursor"         Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Background"  Value="#D9EF4444"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#D9EF4444"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Background"  Value="#AAEF4444"/>
+                                <Setter TargetName="Root" Property="BorderBrush" Value="#AAEF4444"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- ── CTA "Spustit aplikaci" button ────────────────────────────── -->
+        <Style x:Key="WelcomeLaunchBtnStyle" TargetType="Button">
+            <Setter Property="Foreground"       Value="White"/>
+            <Setter Property="FontSize"         Value="15"/>
+            <Setter Property="FontWeight"       Value="ExtraBold"/>
+            <Setter Property="BorderThickness"  Value="0"/>
+            <Setter Property="Cursor"           Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="18"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                <!-- Top gloss highlight (22 % white → transparent) -->
+                                <Border x:Name="Gloss"
+                                        CornerRadius="18,18,0,0"
+                                        Height="28" VerticalAlignment="Top"
+                                        IsHitTestVisible="False">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                            <GradientStop Color="#33FFFFFF" Offset="0"/>
+                                            <GradientStop Color="Transparent"  Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.90"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Root" Property="Opacity" Value="0.82"/>
+                                <Setter TargetName="Root" Property="RenderTransform">
+                                    <Setter.Value><TranslateTransform Y="1"/></Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!--  ROOT GRID — 4 vrstvy: pozadí / tint / titlebar / glass panel        -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <Grid>
+
+        <!-- ═══ VRSTVA 1: Splash pozadí (PNG + volitelné video) ═══ -->
+        <Image x:Name="SplashImage"
+               Source="pack://application:,,,/Resources/splash.png"
+               Stretch="UniformToFill"
+               RenderOptions.BitmapScalingMode="HighQuality"
+               ImageFailed="SplashImage_ImageFailed" />
+
+        <!-- Video se zobrazí po úspěšném MediaOpened; PNG fallback zůstane pod ním -->
+        <MediaElement x:Name="SplashVideo"
+                      LoadedBehavior="Manual"
+                      UnloadedBehavior="Stop"
+                      IsMuted="True"
+                      Stretch="UniformToFill"
+                      Visibility="Collapsed"
+                      MediaOpened="SplashVideo_MediaOpened"
+                      MediaFailed="SplashVideo_MediaFailed"
+                      MediaEnded="SplashVideo_MediaEnded" />
+
+        <!-- ═══ VRSTVA 2: Tint overlay — sjednocuje kontrast splashe ═══ -->
+        <!-- Uniformní tmavnutí pro čitelnost panelu -->
+        <Border Background="#59000000" IsHitTestVisible="False"/>
+        <!-- Spodní gradient — přidává hloubku pod panelem -->
+        <Border IsHitTestVisible="False">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                    <GradientStop Color="#00000000" Offset="0.40"/>
+                    <GradientStop Color="#8C000000" Offset="1.0"/>
+                </LinearGradientBrush>
+            </Border.Background>
+        </Border>
+
+        <!-- ═══ VRSTVA 3: Custom title bar (56 px) ═══ -->
+        <Border Height="56" VerticalAlignment="Top"
+                Background="Transparent"
+                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Grid Margin="20,0,8,0">
+                <!-- Jemný název aplikace vlevo -->
+                <TextBlock Text="OpenClaw Manager Tool"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center"
+                           FontSize="13" FontWeight="SemiBold"
+                           Foreground="#80FFFFFF"/>
+                <!-- Caption tlačítka vpravo (—  ✕) -->
+                <StackPanel Orientation="Horizontal"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center">
+                    <Button Click="BtnMinimize_Click"
+                            Style="{StaticResource WelcomeCapBtnStyle}"
+                            Margin="0,0,6,0">
+                        <TextBlock Text="—" FontSize="14" VerticalAlignment="Center"/>
+                    </Button>
+                    <Button Click="BtnClose_Click"
+                            Style="{StaticResource WelcomeCloseBtnStyle}">
+                        <TextBlock Text="✕" FontSize="11" VerticalAlignment="Center"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ═══ VRSTVA 4: Skleněný panel (ScrollViewer jako safety net) ═══ -->
+        <ScrollViewer Margin="0,56,0,0"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled"
+                      PanningMode="VerticalOnly">
+            <Border x:Name="GlassPanel"
+                    Width="580"
+                    HorizontalAlignment="Center"
+                    Margin="0,28,0,32"
+                    CornerRadius="28"
+                    Background="#6B0A0C12"
+                    BorderBrush="#2DFFFFFF"
+                    BorderThickness="1"
+                    SnapsToDevicePixels="True">
+                <Border.Effect>
+                    <!-- e6 shadow ze spec: 0 50px 100px -28px rgba(0,0,0,.7) -->
+                    <DropShadowEffect BlurRadius="80" ShadowDepth="0"
+                                      Opacity="0.65" Color="Black"/>
+                </Border.Effect>
+
+                <Grid>
+                    <!-- Světelný proužek nahoře — "ostří" skla -->
+                    <Rectangle Height="1" VerticalAlignment="Top"
+                               Margin="44,0,44,0" Opacity="0.55"
+                               IsHitTestVisible="False">
+                        <Rectangle.Fill>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                <GradientStop Color="Transparent"  Offset="0"/>
+                                <GradientStop Color="#FFFFFFFF"    Offset="0.5"/>
+                                <GradientStop Color="Transparent"  Offset="1"/>
+                            </LinearGradientBrush>
+                        </Rectangle.Fill>
+                    </Rectangle>
+
+                    <!-- ── Obsah panelu ── -->
+                    <StackPanel Margin="48,40,48,36">
+
+                        <!-- ── HLAVIČKA: brand mark + název aplikace ── -->
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,24">
+                            <!-- Brand mark 56×56 — crab-red gradient, favicon uvnitř -->
+                            <!-- Placeholder: v produkci nahradit SVG OpenClaw ikonou (v4 icon set) -->
+                            <Border Width="56" Height="56" CornerRadius="14"
+                                    VerticalAlignment="Top" Margin="0,0,18,0">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0.2,0" EndPoint="0.8,1">
+                                        <GradientStop Color="#EF4444" Offset="0"/>
+                                        <GradientStop Color="#7C2D12" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="20" ShadowDepth="6"
+                                                      Direction="270" Opacity="0.50"
+                                                      Color="#EF4444"/>
+                                </Border.Effect>
+                                <Image Source="pack://application:,,,/Resources/app-favicon.ico"
+                                       Width="34" Height="34" Stretch="Uniform"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                                       RenderOptions.BitmapScalingMode="HighQuality"/>
+                            </Border>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="OpenClaw Manager Tool"
+                                           FontSize="18" FontWeight="ExtraBold"
+                                           Foreground="#F3F4F6"/>
+                                <TextBlock Text="Správce Claude AI Gateway"
+                                           FontSize="13" FontWeight="Medium"
+                                           Foreground="#9AA1AC"
+                                           Margin="0,3,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- ── SEKCE: výběr tématu ── -->
+                        <TextBlock Text="VYBERTE TÉMA"
+                                   FontSize="12" FontWeight="Bold"
+                                   Foreground="#9AA1AC"
+                                   Margin="0,0,0,10"/>
+
+                        <!-- ComboBox — základní styling; custom template v budoucí verzi -->
+                        <ComboBox x:Name="CmbTheme"
+                                  Height="44"
+                                  Background="#0AFFFFFF"
+                                  Foreground="#F3F4F6"
+                                  BorderBrush="#1AFFFFFF"
+                                  BorderThickness="1"
+                                  FontSize="14" FontWeight="SemiBold"
+                                  Padding="14,0"
+                                  Margin="0,0,0,10"
+                                  SelectionChanged="CmbTheme_SelectionChanged"
+                                  IsEditable="False"/>
+
+                        <!-- Náhledová karta tématu (placeholder — screenshoty v příštím vydání) -->
+                        <Border x:Name="ThemePreviewCard"
+                                Height="108"
+                                CornerRadius="18"
+                                Background="#0A0C12"
+                                BorderBrush="#1FFFFFFF"
+                                BorderThickness="1"
+                                Margin="0,0,0,22"
+                                ClipToBounds="True"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <!-- Placeholder indikátor -->
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"
+                                            Opacity="0.45">
+                                    <TextBlock Text="▣" FontSize="20" Foreground="#2D3748"
+                                               HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Náhled tématu"
+                                               FontSize="12" Foreground="#4A505A"
+                                               HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                    <TextBlock Text="Screenshoty připraveny v příštím vydání"
+                                               FontSize="11" Foreground="#353A44"
+                                               HorizontalAlignment="Center" Margin="0,3,0,0"/>
+                                </StackPanel>
+                                <!-- Spodní caption strip -->
+                                <Border VerticalAlignment="Bottom" Height="26"
+                                        CornerRadius="0,0,18,18">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                            <GradientStop Color="Transparent"  Offset="0"/>
+                                            <GradientStop Color="#C0000000"    Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                    <TextBlock x:Name="TxtPreviewCaption"
+                                               FontSize="11" FontWeight="SemiBold"
+                                               FontFamily="Consolas"
+                                               Foreground="#6B7280"
+                                               VerticalAlignment="Center"
+                                               Margin="14,0,0,0"/>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- ── SEKCE: nastavení ── -->
+                        <TextBlock Text="NASTAVENÍ"
+                                   FontSize="12" FontWeight="Bold"
+                                   Foreground="#9AA1AC"
+                                   Margin="0,0,0,10"/>
+
+                        <!-- Auto-update checkbox — binding připravený na PR27 logiku -->
+                        <CheckBox x:Name="ChkAutoUpdate"
+                                  Content="Automatické aktualizace"
+                                  FontSize="14" FontWeight="Medium"
+                                  Foreground="#F3F4F6"
+                                  IsChecked="True"
+                                  Margin="0,0,0,14"
+                                  VerticalContentAlignment="Center"/>
+
+                        <!-- DPAPI info box — jasný text, bez strašení -->
+                        <Border CornerRadius="12"
+                                Background="#14FFFFFF"
+                                BorderBrush="#1AFFFFFF"
+                                BorderThickness="1"
+                                Padding="16,12"
+                                Margin="0,0,0,22">
+                            <StackPanel>
+                                <!-- Placeholder emoji ikona — v produkci nahradit SVG lock ikonou -->
+                                <TextBlock FontSize="13" FontWeight="SemiBold"
+                                           Foreground="#B8BDC7" Margin="0,0,0,6">
+                                    <Run FontFamily="Segoe UI Emoji">🔒</Run>
+                                    <Run>  Zabezpečení vaultu tokenů</Run>
+                                </TextBlock>
+                                <TextBlock Text="Tokeny API jsou šifrovány pomocí Windows DPAPI — ochrana je svázána s vaším uživatelským účtem. Vault nelze přenést na jiný počítač bez re-exportu tokenů."
+                                           FontSize="12" FontWeight="Normal"
+                                           Foreground="#6B7280"
+                                           TextWrapping="Wrap"
+                                           LineHeight="19"/>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- ── CTA: Spustit aplikaci ── -->
+                        <Button x:Name="BtnLaunch"
+                                Height="60"
+                                Style="{StaticResource WelcomeLaunchBtnStyle}"
+                                Click="BtnLaunch_Click">
+                            <!-- Gradient se nastavuje z code-behind dle aktivního tématu -->
+                            <Button.Background>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                    <GradientStop Color="#5AA1FF" Offset="0"/>
+                                    <GradientStop Color="#1D4ED8" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                            <Button.Effect>
+                                <DropShadowEffect BlurRadius="36" ShadowDepth="10"
+                                                  Direction="270" Opacity="0.50"
+                                                  Color="Black"/>
+                            </Button.Effect>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="▶" FontSize="12" VerticalAlignment="Center"
+                                           Foreground="White" Margin="0,1,10,0"/>
+                                <TextBlock Text="Spustit aplikaci"
+                                           FontSize="15" FontWeight="ExtraBold"
+                                           VerticalAlignment="Center" Foreground="White"/>
+                            </StackPanel>
+                        </Button>
+
+                    </StackPanel>
+                    <!-- /obsah panelu -->
+                </Grid>
+            </Border>
+        </ScrollViewer>
+
+    </Grid>
+</Window>

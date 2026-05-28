@@ -284,18 +284,18 @@ public partial class MainWindow
 
     private void ApplyModernPaletteShell()
     {
-        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
+        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x0F, 0x11, 0x15));
         var surface = ThemeService.GetBrush("Theme.Brush.Surface", Colors.White);
-        var chrome = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12));
-        var text = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x9E, 0x9E, 0x9E));
+        var chrome = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x0B, 0x0C, 0x10));
+        var text = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x9A, 0xA1, 0xAC));
         var primaryText = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
         var secondary = text;
 
         Background = chrome;
         Foreground = text;
 
-        var titleBar = ThemeService.GetBrush("Theme.Brush.TitleBar",       Color.FromRgb(0x20, 0x20, 0x20));
-        var menuBg   = ThemeService.GetBrush("Theme.Brush.MenuBackground", Color.FromRgb(0x18, 0x18, 0x18));
+        var titleBar = ThemeService.GetBrush("Theme.Brush.TitleBar",       Color.FromRgb(0x14, 0x17, 0x1C));
+        var menuBg   = ThemeService.GetBrush("Theme.Brush.MenuBackground", Color.FromRgb(0x0F, 0x11, 0x15));
 
         MainMenu.Background      = menuBg;
         MainMenu.Foreground      = text;
@@ -303,7 +303,7 @@ public partial class MainWindow
         MainStatusBar.Background = titleBar;
         MainStatusBar.Foreground = secondary;
         MainStatusBar.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
-        MainGridSplitter.Background = new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x20));
+        MainGridSplitter.Background = new SolidColorBrush(Color.FromRgb(0x23, 0x27, 0x2F));
 
         GrpActions.Background = Brushes.Transparent;
         GrpActions.Foreground = text;
@@ -328,14 +328,19 @@ public partial class MainWindow
         SplashOverlay.Background = menuBg;
         Terminal.SetShellBackground(chrome);
 
-        var hoverBackground = ThemeService.GetBrush("Theme.Brush.Menu.Hover", Color.FromRgb(0x27, 0x27, 0x27));
+        // Glass title bar — 56px (HTML spec), brand text visible
+        TitleBarHost.Height = 56;
+        TitleBarBrandText.Visibility = Visibility.Visible;
+        TitleBarBrandText.Foreground = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
+
+        var hoverBackground = ThemeService.GetBrush("Theme.Brush.Menu.Hover", Color.FromRgb(0x22, 0x28, 0x31));
         ApplyModernPaletteMenuVisuals(text, text, chrome, background, hoverBackground);
-        ApplyCaptionButtonVisuals(text, hoverBackground, ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x30, 0x30, 0x30)));
+        ApplyGlassCaptionButtonVisuals();
         ApplyModernPaletteButtonText();
         ApplyModernPaletteMainWindowText(primaryText, secondary);
 
         var captionText = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        ApplyWindowCaptionColor(GetBrushColor(titleBar, Color.FromRgb(0x20, 0x20, 0x20)), GetBrushColor(captionText, Colors.White));
+        ApplyWindowCaptionColor(GetBrushColor(titleBar, Color.FromRgb(0x14, 0x17, 0x1C)), GetBrushColor(captionText, Colors.White));
     }
 
     private void ApplyStandardShell()
@@ -534,6 +539,68 @@ public partial class MainWindow
             button.BorderBrush = Brushes.Transparent;
             button.BorderThickness = new Thickness(0);
         }
+    }
+
+    /// <summary>
+    /// Applies glass-style window controls for ModernPalette themes.
+    /// Reads tokens from the active theme (WinCtrl.Idle / Hover / Border / Close).
+    /// </summary>
+    private void ApplyGlassCaptionButtonVisuals()
+    {
+        var idle    = ThemeService.GetBrush("Theme.Brush.WinCtrl.Idle",   Color.FromArgb(0x14, 0xFF, 0xFF, 0xFF));
+        var hover   = ThemeService.GetBrush("Theme.Brush.WinCtrl.Hover",  Color.FromArgb(0x24, 0xFF, 0xFF, 0xFF));
+        var border  = ThemeService.GetBrush("Theme.Brush.WinCtrl.Border", Color.FromArgb(0x29, 0xFF, 0xFF, 0xFF));
+        var close   = ThemeService.GetBrush("Theme.Brush.WinCtrl.Close",  Color.FromArgb(0xD9, 0xEF, 0x44, 0x44));
+        var fg      = ThemeService.GetBrush("Theme.Brush.Text.Primary",   Colors.White);
+
+        var normalStyle = CreateGlassCaptionButtonStyle(idle, hover, border);
+        var closeStyle  = CreateGlassCaptionButtonStyle(idle, close, border);
+
+        foreach (var btn in new[] { BtnWindowMinimize, BtnWindowMaximize })
+        {
+            btn.Style      = normalStyle;
+            btn.Foreground = fg;
+        }
+
+        BtnWindowClose.Style      = closeStyle;
+        BtnWindowClose.Foreground = fg;
+    }
+
+    private static Style CreateGlassCaptionButtonStyle(Brush idleBrush, Brush hoverBrush, Brush borderBrush)
+    {
+        var cacheKey = $"caption-glass|{BrushCacheKey(idleBrush)}|{BrushCacheKey(hoverBrush)}|{BrushCacheKey(borderBrush)}";
+        return GetCachedStyle(cacheKey, () =>
+        {
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.Name = "Root";
+        root.SetValue(Border.BackgroundProperty, idleBrush);
+        root.SetValue(Border.BorderBrushProperty, borderBrush);
+        root.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(10));
+
+        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+        presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+        presenter.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
+        root.AppendChild(presenter);
+
+        var template = new ControlTemplate(typeof(Button)) { VisualTree = root };
+
+        var hoverTrigger = new Trigger { Property = Button.IsMouseOverProperty, Value = true };
+        hoverTrigger.Setters.Add(new Setter(Border.BackgroundProperty, hoverBrush, "Root"));
+
+        var pressedTrigger = new Trigger { Property = Button.IsPressedProperty, Value = true };
+        pressedTrigger.Setters.Add(new Setter(Border.BackgroundProperty, hoverBrush, "Root"));
+
+        template.Triggers.Add(hoverTrigger);
+        template.Triggers.Add(pressedTrigger);
+
+        var style = new Style(typeof(Button));
+        style.Setters.Add(new Setter(Control.TemplateProperty, template));
+        style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
+        style.Seal();
+        return style;
+        });
     }
 
     private static Style CreateCaptionButtonStyle(Brush hoverBackground, Brush pressedBackground)
@@ -1244,8 +1311,8 @@ public partial class MainWindow
 
     private static Style BuildDarkButtonFeedbackStyle(bool useScanlineEffect, Brush idleBrush)
     {
-        var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x38, 0x38, 0x38));
-        var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x30, 0x30, 0x30));
+        var hoverBrush = ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x22, 0x28, 0x31));
+        var pressedBrush = ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x18, 0x1C, 0x22));
         var buttonTextBrush = ThemeService.GetBrush("Theme.Brush.ButtonText", Colors.White);
         var cacheKey = $"button|dark-feedback|{useScanlineEffect}|{BrushCacheKey(idleBrush)}|{BrushCacheKey(hoverBrush)}|{BrushCacheKey(pressedBrush)}|{BrushCacheKey(buttonTextBrush)}";
         return GetCachedStyle(cacheKey, () =>
@@ -1662,6 +1729,8 @@ public partial class MainWindow
         Background = SystemColors.WindowBrush;
         Foreground = SystemColors.ControlTextBrush;
         MainGridSplitter.Background = Brushes.LightGray;
+        MainGridSplitter.Width = 5;
+        TitleBarBrandText.Visibility = Visibility.Collapsed;
         RightPanel.Background = Brushes.Transparent;
         SplashOverlay.SetResourceReference(Border.BackgroundProperty, "Brush.SplashModernBackground");
         SplashProgress.ClearValue(Control.ForegroundProperty);

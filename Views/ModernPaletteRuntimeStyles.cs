@@ -15,6 +15,9 @@ internal static class ModernPaletteRuntimeStyles
     private const int DwmwaBorderColor = 34;
     private const int DwmwaCaptionColor = 35;
     private const int DwmwaTextColor = 36;
+    // Windows 11 22H2+ system backdrop (38 = DWMWA_SYSTEMBACKDROP_TYPE)
+    private const int DwmwaSystemBackdropType = 38;
+    private const int DwmsbtTransientWindow = 3; // Acrylic
     /// <summary>
     /// Cached procedural scanline overlay kept in C# because it is a generated DrawingBrush,
     /// not a simple theme token.
@@ -35,21 +38,71 @@ internal static class ModernPaletteRuntimeStyles
         if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme != AppTheme.Modern &&
             !ThemeService.IsModernPaletteTheme(OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)) return;
 
-        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
-        window.Background = ThemeService.GetBrush("Theme.Brush.WindowBackground", GetBrushColor(background, Color.FromRgb(0x19, 0x19, 0x19)));
+        // True glass themes (Dark / ModernLight) have GlassPanel tokens; Standard (Modern) does not.
+        bool isGlass = Application.Current.TryFindResource("Theme.Brush.GlassPanel.Background") is Brush;
+
+        if (isGlass)
+        {
+            // Near-transparent background lets DWM Acrylic backdrop show through WPF rendering.
+            window.Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
+            EnableModernBackdrop(window);
+        }
+        else
+        {
+            var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x0F, 0x11, 0x15));
+            window.Background = ThemeService.GetBrush("Theme.Brush.WindowBackground",
+                GetBrushColor(background, Color.FromRgb(0x0F, 0x11, 0x15)));
+        }
+
         window.Foreground = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
         window.Resources[typeof(Button)] = FindThemeStyle("Style.Button.StandardFlat");
         ApplyCaption(window);
-        window.Loaded += (_, _) => ApplyLoadedVisuals(window);
+        window.Loaded += (_, _) => ApplyLoadedVisuals(window, isGlass);
     }
 
-    private static void ApplyLoadedVisuals(Window window)
+    /// <summary>
+    /// Requests Windows 11 Acrylic system backdrop for a secondary window.
+    /// Silently no-ops on Windows 10 and older (DWM attribute not supported).
+    /// </summary>
+    private static void EnableModernBackdrop(Window window)
     {
-        var primary = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x78, 0x78, 0x78));
-        var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
-        var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x27, 0x27, 0x27));
-        var border = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0x4E, 0x4E, 0x4E));
+        void Apply()
+        {
+            var hwnd = new WindowInteropHelper(window).Handle;
+            if (hwnd == IntPtr.Zero) return;
+            try
+            {
+                int acrylic = DwmsbtTransientWindow;
+                DwmSetWindowAttribute(hwnd, DwmwaSystemBackdropType, ref acrylic, sizeof(int));
+            }
+            catch
+            {
+                // Windows 10 / pre-22H2: attribute not supported — fall back gracefully
+                // The near-transparent background still gives a subtle glass feel over whatever is behind.
+            }
+        }
+
+        if (new WindowInteropHelper(window).Handle == IntPtr.Zero)
+            window.SourceInitialized += (_, _) => Apply();
+        else
+            Apply();
+    }
+
+    private static void ApplyLoadedVisuals(Window window, bool isGlass = false)
+    {
+        var primary    = ThemeService.GetBrush("Theme.Brush.Text.Primary",    Colors.White);
+        var secondary  = ThemeService.GetBrush("Theme.Brush.Text.Secondary",  Color.FromRgb(0x9A, 0xA1, 0xAC));
+        var background = ThemeService.GetBrush("Theme.Brush.Background",      Color.FromRgb(0x0F, 0x11, 0x15));
+        var surface    = ThemeService.GetBrush("Theme.Brush.Surface",         Color.FromRgb(0x14, 0x17, 0x1C));
+        var border     = ThemeService.GetBrush("Theme.Brush.Border",          Color.FromRgb(0x23, 0x27, 0x2F));
+
+        // Glass themes use semi-transparent glass panel tokens for GroupBoxes.
+        var glassPanelBg  = isGlass ? ThemeService.GetBrush("Theme.Brush.GlassPanel.Background",
+                                          Color.FromArgb(0xB8, 0x08, 0x0A, 0x0E)) : surface;
+        var glassBorder   = isGlass ? ThemeService.GetBrush("Theme.Brush.GlassBorder",
+                                          Color.FromArgb(0x29, 0xFF, 0xFF, 0xFF)) : border;
+        var groupBoxStyle = isGlass ? FindThemeStyle("Style.GroupBox.GlassPanel")
+                                    : FindThemeStyle("Style.GroupBox.ModernPalette");
 
         foreach (var element in EnumerateVisualChildren(window))
         {
@@ -62,10 +115,10 @@ internal static class ModernPaletteRuntimeStyles
                     label.Foreground = primary;
                     break;
                 case GroupBox groupBox:
-                    groupBox.Background = surface;
-                    groupBox.Foreground = primary;
-                    groupBox.BorderBrush = border;
-                    groupBox.Style = FindThemeStyle("Style.GroupBox.ModernPalette");
+                    groupBox.Background  = glassPanelBg;
+                    groupBox.Foreground  = primary;
+                    groupBox.BorderBrush = glassBorder;
+                    groupBox.Style       = groupBoxStyle;
                     break;
                 case CheckBox checkBox:
                     checkBox.Foreground = primary;
@@ -107,7 +160,7 @@ internal static class ModernPaletteRuntimeStyles
                         borderElement.CornerRadius = new CornerRadius(6);
                     break;
                 case StatusBar statusBar:
-                    statusBar.Background = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12));
+                    statusBar.Background = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x0B, 0x0C, 0x10));
                     statusBar.Foreground = secondary;
                     break;
             }
@@ -194,8 +247,8 @@ internal static class ModernPaletteRuntimeStyles
             if (hwnd == IntPtr.Zero) return;
 
             var caption = ToColorRef(GetBrushColor(
-                ThemeService.GetBrush("Theme.Brush.TitleBar", Color.FromRgb(0x20, 0x20, 0x20)),
-                Color.FromRgb(0x20, 0x20, 0x20)));
+                ThemeService.GetBrush("Theme.Brush.TitleBar", Color.FromRgb(0x14, 0x17, 0x1C)),
+                Color.FromRgb(0x14, 0x17, 0x1C)));
             var border = caption;
             var text = ToColorRef(GetBrushColor(
                 ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White),
