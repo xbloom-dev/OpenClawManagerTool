@@ -67,7 +67,11 @@ jobs:
         shell: pwsh
         run: |
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-            $version = "0.0.${{ github.run_number }}"
+            [xml]$proj = Get-Content .\OpenClawManager.csproj
+            $version = ($proj.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1 -ExpandProperty Version)
+            if ([string]::IsNullOrWhiteSpace($version)) {
+              $version = "2.0.2"
+            }
           }
           else {
             $version = "${{ github.ref_name }}".TrimStart("v")
@@ -93,7 +97,11 @@ jobs:
         run: |
           if ("${{ github.event_name }}" -eq "workflow_dispatch") {
             $tag = "dryrun-${{ github.run_number }}"
-            $version = "0.0.${{ github.run_number }}"
+            [xml]$proj = Get-Content .\OpenClawManager.csproj
+            $version = ($proj.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1 -ExpandProperty Version)
+            if ([string]::IsNullOrWhiteSpace($version)) {
+              $version = "2.0.2"
+            }
           }
           else {
             $tag = "${{ github.ref_name }}"
