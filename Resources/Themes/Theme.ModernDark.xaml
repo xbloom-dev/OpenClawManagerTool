@@ -54,6 +54,26 @@
     <Color x:Key="Theme.Color.ActionUtility">#152535</Color>
     <Color x:Key="Theme.Color.SplashModernBackground">#181818</Color>
 
+    <!-- Glass / Performance Glass tokeny (Fáze 4) -->
+    <!-- Hodnoty z md-kit.jsx objekt G — přesné rgba hodnoty z design handoff -->
+    <Color x:Key="Theme.Color.Glass.SectionBg">#0BFFFFFF</Color>      <!-- rgba(255,255,255,.045) -->
+    <Color x:Key="Theme.Color.Glass.SectionBorder">#1FFFFFFF</Color>  <!-- rgba(255,255,255,.12) -->
+    <Color x:Key="Theme.Color.Glass.BtnBg">#14FFFFFF</Color>          <!-- rgba(255,255,255,.08) -->
+    <Color x:Key="Theme.Color.Glass.BtnBorder">#33FFFFFF</Color>      <!-- rgba(255,255,255,.20) -->
+    <Color x:Key="Theme.Color.Glass.BarBg">#570A0812</Color>          <!-- rgba(10,8,18,.34) -->
+    <Color x:Key="Theme.Color.Glass.SidebarBg">#3308080E</Color>      <!-- rgba(8,8,14,.20) -->
+    <Color x:Key="Theme.Color.Glass.Divider">#1FFFFFFF</Color>        <!-- rgba(255,255,255,.12) -->
+    <Color x:Key="Theme.Color.Glass.GlassBorder">#38FFFFFF</Color>    <!-- rgba(255,255,255,.22) -->
+
+    <SolidColorBrush x:Key="Theme.Brush.Glass.SectionBg"     Color="{StaticResource Theme.Color.Glass.SectionBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.SectionBorder" Color="{StaticResource Theme.Color.Glass.SectionBorder}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.BtnBg"         Color="{StaticResource Theme.Color.Glass.BtnBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.BtnBorder"     Color="{StaticResource Theme.Color.Glass.BtnBorder}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.BarBg"         Color="{StaticResource Theme.Color.Glass.BarBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.SidebarBg"     Color="{StaticResource Theme.Color.Glass.SidebarBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.Divider"       Color="{StaticResource Theme.Color.Glass.Divider}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.GlassBorder"   Color="{StaticResource Theme.Color.Glass.GlassBorder}" />
+
     <!-- Brushes -->
     <SolidColorBrush x:Key="Theme.Brush.Background"       Color="{StaticResource Theme.Color.Background}" />
     <SolidColorBrush x:Key="Theme.Brush.Surface"          Color="{StaticResource Theme.Color.Surface}" />

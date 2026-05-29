@@ -122,6 +122,11 @@ public partial class MainWindow
         RestoreThemeBaseline();
         ApplyThemeTitleBarMode(theme != AppTheme.Legacy && theme != AppTheme.StandardDark);
 
+        // Fáze 3: Vrstvené pozadí — viditelné jen v ModernDark/ModernLight
+        var showGlass = theme is AppTheme.ModernDark or AppTheme.ModernLight;
+        BgWallpaper.Visibility = showGlass ? Visibility.Visible : Visibility.Collapsed;
+        BgGlow.Visibility      = showGlass ? Visibility.Visible : Visibility.Collapsed;
+
         switch (theme)
         {
             case AppTheme.StandardLight:
@@ -140,6 +145,12 @@ public partial class MainWindow
                 ApplyModernPaletteShell();
                 break;
             case AppTheme.ModernDark:
+                ApplyModernVariantUi();
+                ApplyModernToolLayout();
+                ApplyModernVariantToolLayout();
+                ApplyModernPaletteShell();
+                ApplyModernDarkGlassShell();
+                break;
             case AppTheme.ModernLight:
                 ApplyModernVariantUi();
                 ApplyModernToolLayout();
@@ -1815,5 +1826,37 @@ public partial class MainWindow
             Margin = new Thickness(0, 0, 8, 0),
             VerticalAlignment = VerticalAlignment.Center
         };
+    }
+
+    // Fáze 4 — ModernDark glass override: aplikuje průhledné glass brushe nad
+    // ApplyModernPaletteShell tak, aby panely "pluly" nad BgWallpaper.
+    private void ApplyModernDarkGlassShell()
+    {
+        var sidebarBg  = ThemeService.GetBrush("Theme.Brush.Glass.SidebarBg",  Color.FromArgb(0x33, 0x08, 0x08, 0x0E));
+        var sectionBg  = ThemeService.GetBrush("Theme.Brush.Glass.SectionBg",  Color.FromArgb(0x0B, 0xFF, 0xFF, 0xFF));
+        var barBg      = ThemeService.GetBrush("Theme.Brush.Glass.BarBg",       Color.FromArgb(0x57, 0x0A, 0x08, 0x12));
+        var glassBorder = ThemeService.GetBrush("Theme.Brush.Glass.GlassBorder", Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF));
+
+        // Sidebar (Column 0) průhledné pozadí — "float" over BgWallpaper
+        // Levý Grid sdílí background Window; nastavit přímo Background na Window nestačí,
+        // ale GrpActions a status bar jsou hlavní plochy.
+        GrpActions.Background = sidebarBg;
+        GrpLatency.Background = sectionBg;
+        GrpAppLog.Background  = sectionBg;
+        AppLog.Background     = Brushes.Transparent;
+
+        // Title bar + status bar — tmavý glass pruh
+        TitleBarHost.Background  = barBg;
+        MainStatusBar.Background = barBg;
+        MainMenu.Background      = Brushes.Transparent;
+
+        // Jemný glassborder pro GroupBoxy
+        GrpLatency.BorderBrush    = glassBorder;
+        GrpLatency.BorderThickness = new Thickness(1);
+        GrpAppLog.BorderBrush     = glassBorder;
+        GrpAppLog.BorderThickness  = new Thickness(1);
+
+        // Okno samotné — průhledné, aby BgWallpaper prosvítal
+        Background = Brushes.Transparent;
     }
 }
