@@ -1,6 +1,7 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--
         Theme: Modern (Light Modern — paleta C)
@@ -21,6 +22,7 @@
     -->
 
     <!-- ── Barvy ── -->
+    <sys:String x:Key="Theme.Meta.Name">Theme.HighContrast</sys:String>
     <Color x:Key="Theme.Color.Background">#000000</Color>
     <Color x:Key="Theme.Color.Surface">#000000</Color>
     <Color x:Key="Theme.Color.Accent">#FFFF00</Color>

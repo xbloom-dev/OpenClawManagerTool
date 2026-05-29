@@ -1,6 +1,7 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--
         Theme: Legacy
@@ -8,6 +9,8 @@
         Žádné přepsání barev ani stylů — aplikace vypadá jako v0.4.
         Ikony: emoji TextBlock (zabudováno přímo v XAML tlačítek).
     -->
+
+    <sys:String x:Key="Theme.Meta.Name">Theme.Legacy</sys:String>
 
     <Color x:Key="Theme.Color.ActionPositive">#D0FFD0</Color>
     <Color x:Key="Theme.Color.ActionDanger">#FFD0D0</Color>

@@ -22,7 +22,7 @@
     -->
 
     <!-- ── Metadata ── -->
-    <sys:String x:Key="Theme.Meta.Name">Standard</sys:String>
+    <sys:String x:Key="Theme.Meta.Name">Theme.StandardLight</sys:String>
     <sys:String x:Key="Theme.Meta.Variant">Light</sys:String>
     <sys:String x:Key="Theme.Meta.IconSet">Modern</sys:String>
     <sys:String x:Key="Theme.Meta.PaletteFamily">Standard</sys:String>

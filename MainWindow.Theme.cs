@@ -51,6 +51,7 @@ public partial class MainWindow
     private static readonly Dictionary<string, Style> _themeStyleCache = new();
     private static readonly Dictionary<string, ImageSource> _themeIconSourceCache = new();
     private static readonly FontFamily LegacyIconFontFamily = new("Segoe UI Emoji");
+    private static readonly FontFamily LegacyPlayIconFontFamily = new("Segoe UI");
     /// <summary>
     /// Cached procedural scanline overlay used by the runtime-generated button feedback styles.
     /// It stays in C# because WPF XAML dictionaries cannot express this DrawingBrush pattern clearly.
@@ -123,7 +124,7 @@ public partial class MainWindow
 
         switch (theme)
         {
-            case AppTheme.Modern:
+            case AppTheme.StandardLight:
                 ApplyStandardUi();
                 ApplyStandardToolLayout();
                 ApplyStandardShell();
@@ -138,7 +139,7 @@ public partial class MainWindow
                 ApplyModernToolLayout();
                 ApplyModernPaletteShell();
                 break;
-            case AppTheme.Dark:
+            case AppTheme.ModernDark:
             case AppTheme.ModernLight:
                 ApplyModernVariantUi();
                 ApplyModernToolLayout();
@@ -893,7 +894,7 @@ public partial class MainWindow
 
     private void ReapplyCurrentThemeLayoutAfterLocalization()
     {
-        if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme == AppTheme.Modern)
+        if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme == AppTheme.StandardLight)
             ApplyStandardToolLayout();
         else if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme == AppTheme.StandardDark)
             ApplyStandardDarkToolLayout();
@@ -906,12 +907,19 @@ public partial class MainWindow
     // ── Legacy UI — obnovit emoji TextBlock ───────────────────────────────────
     private void ApplyLegacyUi()
     {
-        BtnStartTuiSymbol.FontFamily = LegacyIconFontFamily;
+        TitleBarHost.Background = SystemColors.WindowBrush;
+        MainMenu.Background = SystemColors.WindowBrush;
+        MainMenu.Foreground = SystemColors.ControlTextBrush;
+        MainStatusBar.Background = SystemColors.WindowBrush;
+        MainStatusBar.Foreground = SystemColors.ControlTextBrush;
+
+        BtnStartTuiSymbol.FontFamily = LegacyPlayIconFontFamily;
         BtnStartTuiSymbol.FontSize = 16;
         BtnStartTuiSymbol.FontWeight = FontWeights.Bold;
         BtnStartTuiSymbol.Margin = new Thickness(0, 0, 8, 0);
+        BtnStartTuiSymbol.RenderTransformOrigin = new Point(0.5, 0.5);
 
-        RestoreButtonLegacy(BtnGatewayStart,   "▶", "Green",  "Start");
+        RestoreButtonLegacy(BtnGatewayStart,   "▲", "Green",  "Start");
         RestoreButtonLegacy(BtnGatewayStop,    "■", "Red",    "Stop");
         RestoreButtonLegacy(BtnGatewayRestart, "↻", "Orange", "Restart");
         RestoreButtonLegacy(BtnOpenPowerShell, "⚡", null,    BtnPowerShellLabel.Text);
@@ -919,6 +927,17 @@ public partial class MainWindow
         RestoreButtonLegacy(BtnCleaningTool,   "🧹", null,   BtnCleaningToolLabel.Text);
         RestoreButtonLegacy(BtnTokenManager,   "🔑", null,   BtnTokenManagerLabel.Text);
         RestoreButtonLegacy(BtnDoctorFix,      "🩺", null,   BtnDoctorFixLabel.Text);
+        BtnDoctorFix.Background = ActionDangerBrush;
+
+        // Start glyphy mají být klasický trojúhelník, ne emoji play ikona.
+        if (BtnGatewayStart.Content is StackPanel startStack
+            && startStack.Children.Count > 0
+            && startStack.Children[0] is TextBlock startIcon)
+        {
+            startIcon.FontFamily = LegacyPlayIconFontFamily;
+            startIcon.RenderTransformOrigin = new Point(0.5, 0.5);
+            startIcon.RenderTransform = new RotateTransform(90);
+        }
 
         UpdateStartTuiButton(Terminal.IsTuiRunning);
     }
@@ -1558,7 +1577,7 @@ public partial class MainWindow
 
     private void ApplyThemeSpecificTuiVisual(bool tuiRunning)
     {
-        if (_activeTheme is AppTheme.Dark or AppTheme.ModernLight)
+        if (_activeTheme is AppTheme.ModernDark or AppTheme.ModernLight)
         {
             SetModernVariantButtonImage(BtnStartTui, tuiRunning ? "stop" : "tui", tuiRunning ? 44 : 88, HorizontalAlignment.Center);
             return;

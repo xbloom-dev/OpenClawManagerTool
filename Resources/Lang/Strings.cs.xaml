@@ -59,13 +59,13 @@
     <sys:String x:Key="Str_Tip_Reset">Obnoví všechny hodnoty na výchozí.</sys:String>
     <sys:String x:Key="Str_Tip_Cancel">Zavře bez uložení.</sys:String>
     <sys:String x:Key="Str_Tip_Browse">Vybere složku ze systému.</sys:String>
-    <sys:String x:Key="Str_Theme_Legacy">Legacy</sys:String>
+    <sys:String x:Key="Str_Theme_Legacy">Legacy (výchozí)</sys:String>
     <sys:String x:Key="Str_Theme_Standard">Standardní</sys:String>
-    <sys:String x:Key="Str_Theme_StandardDark">StandardDark</sys:String>
+    <sys:String x:Key="Str_Theme_StandardDark">Standardní tmavé</sys:String>
     <sys:String x:Key="Str_Theme_ModernDark">Moderní tmavé</sys:String>
-    <sys:String x:Key="Str_Theme_ModernLight">Moderní světlé</sys:String>
+    <sys:String x:Key="Str_Theme_ModernLight">Moderní</sys:String>
     <sys:String x:Key="Str_Theme_HighContrast">Vysoký kontrast</sys:String>
-    <sys:String x:Key="Str_Theme_CrabCute">CrabCute</sys:String>
+    <sys:String x:Key="Str_Theme_CrabCute">Crab Cute</sys:String>
 
     <!-- About -->
     <sys:String x:Key="Str_Tip_AboutClose">Zavře dialog.</sys:String>
@@ -96,7 +96,8 @@
     <sys:String x:Key="Str_Menu_Help">_Nápověda</sys:String>
     <sys:String x:Key="Str_Menu_About">_O aplikaci...</sys:String>
     <sys:String x:Key="Str_Menu_OpenSettings">Otevřít _Nastavení...</sys:String>
-    <sys:String x:Key="Str_Menu_OpenClawWeb">Otevřít web OpenClaw</sys:String>
+    <sys:String x:Key="Str_Menu_OpenClawWeb">Uživatelský manuál</sys:String>
+    <sys:String x:Key="Str_Menu_OpenGitHubRepo">GitHub projektu</sys:String>
     <sys:String x:Key="Str_Menu_Exit">_Konec</sys:String>
 
     <!-- Status bar -->
@@ -106,7 +107,14 @@
     <sys:String x:Key="Str_Status_Stopped">neběží</sys:String>
 
     <!-- Log zprávy -->
-    <sys:String x:Key="Str_Log_AppStarted">Aplikace spuštěna (v1.1).</sys:String>
+    <sys:String x:Key="Str_Log_AppStarted">Aplikace spuštěna ({0}).</sys:String>
+    <sys:String x:Key="Str_Log_UpdateCheckEnabled">Kontrola aktualizací při startu: zapnuto.</sys:String>
+    <sys:String x:Key="Str_Log_UpdateCheckDisabled">Kontrola aktualizací při startu: vypnuto.</sys:String>
+    <sys:String x:Key="Str_Log_UpdateCheckRunning">Kontroluji nové vydání…</sys:String>
+    <sys:String x:Key="Str_Log_UpdateCheckFailed">Kontrola aktualizací selhala: {0}</sys:String>
+    <sys:String x:Key="Str_Log_UpdateAvailable">Je dostupná nová verze: {0} (aktuální: {1}).</sys:String>
+    <sys:String x:Key="Str_Log_UpdateReleaseUrl">Release: {0}</sys:String>
+    <sys:String x:Key="Str_Log_UpdateUpToDate">Aplikace je aktuální ({0}).</sys:String>
     <sys:String x:Key="Str_Log_GatewayStarting">Spouštím Gateway...</sys:String>
     <sys:String x:Key="Str_Log_GatewayReady">Gateway ready.</sys:String>
     <sys:String x:Key="Str_Log_GatewayStopping">Zastavuji Gateway...</sys:String>

@@ -1,34 +1,52 @@
-# TODO — OpenClaw Manager Tool
+﻿# TODO - OpenClaw Manager Tool
 
-Plánované úkoly a technický dluh mimo aktivní vývoj.
+Aktualni stav po instalator + welcome integraci (29 May 2026).
 
----
+## Priorities
 
-## Priority
-
-- **P0** — řešit před releasem; bezpečnost nebo stabilita
-- **P1** — řešit v nejbližší minor verzi; významně zlepší údržbu nebo spolehlivost
-- **P2** — plánovaný refactor; dělat postupně bez velkého přepisu najednou
+- P0 = pred RC/Release, stabilita nebo user-facing bug
+- P1 = dalsi minor verze
+- P2 = dlouhodoby refactor
 
 ---
 
-## P1 — data, výkon a testovatelnost
+## P0 (open)
 
-- **Audit UI thread blockingu** — projít Gateway/TUI/logy/resource monitor a ověřit, že IO a delší operace neběží na UI vlákně; blokující místa převést na `async/await` nebo bezpečně přesunout mimo UI vlákno.
-- **Zapouzdření cest a souborového IO** — zavést malé rozhraní pro aplikační prostředí/cesty (např. `IAppEnvironment`) a postupně přes něj vést `%APPDATA%`, temp složky a testovací cesty.
+- [ ] Welcome UX redesign (soucasna verze je funkcni, ale vizualne nevyhovuje).
+- [ ] Potvrdit final vzhled Legacy theme proti puvodni baseline (vsechny ovladaci prvky a spacing).
 
-## P2 — dlouhodobá údržba WPF vrstvy
+## P1 (open)
 
-- **Postupný přechod k MVVM** — nezačínat velkým přepisem hlavního okna; nejdřív menší okna a izolované funkce, teprve později hlavní okno, splash a TUI.
-- **Zavedení dependency injection** — po oddělení služeb a prostředí přidat DI kontejner pro služby, viewmodely a testy.
-- **Zmenšení `MainWindow.*.cs` code-behind** — postupně přesouvat aplikační logiku z partial tříd do služeb/viewmodelů; citlivé části splash/WebView2/TUI měnit jen samostatně a s ručním testem.
-- **Dotažení theme systému** — odstraňovat zbytky hardcoded barev a duplicitních runtime stylů; témata mají číst hodnoty z ResourceDictionary/metadat a nemají si navzájem přepisovat vzhled.
+- [ ] Sekundarni okna vizualne sjednotit se zbytkem app (Settings, About, Cleaning, Token dialogs).
+- [ ] Audit hardcoded barev a textu v XAML (omezit runtime prepisy, vic DynamicResource).
+- [ ] Prevest User Manual z Markdown do lokalnich HTML souboru (CS/EN) pro prijemnejsi zobrazeni.
+
+## P2 (open)
+
+- [ ] Postupny rozpad `MainWindow.*.cs` (mensi code-behind, vice ViewModel/service vrstvy).
+- [ ] Pokracovat v MVVM migraci po feature blocich, ne big-bang prepisem.
+- [ ] Uklid theme runtime stylu (minimum vedlejsich efektu mezi themes).
 
 ---
 
-## Hotovo v v1.1
+## Done
 
-- **Export/import vaultu chráněný heslem** — přenosný `.ocvault`, PBKDF2-SHA256 + AES-256-GCM, obnova zpět do lokálního DPAPI vaultu.
-- **Rozšířená validace OpenClaw příkazu** — odmítá shell znaky `<`, `>`, `%`, `^`, `&`, `|`.
-- **Security scan Git historie** — Gitleaks bez nálezů.
-- **CI na Node 24 kompatibilní akce** — `actions/checkout@v6`, `actions/setup-dotnet@v5`, runner `windows-2025`.
+- [x] Portable detection v `SettingsService` (`settings.json` vedle exe ma prednost pred AppData).
+- [x] Lite profile (`LITE_BUILD`) - pouze Legacy theme + bez `splash.mp4`.
+- [x] Welcome startup flow (first-run routing + save + fade transition).
+- [x] Unified installer Full/Lite + Portable Lite artifact.
+- [x] WebView2 runtime detekce v installeru.
+- [x] CI dry-run artifacts + SHA256 files.
+- [x] Welcome edge case: zavreni Welcome bez dokonceni ukonci app proces.
+- [x] Installer excludes `settings.json` (instalovana app nespousti portable mode omylem).
+- [x] Legacy start icon hotfix: zeleny trojuhelnik misto stylizovane play ikony.
+- [x] CI dry-run version hotfix: installer app version bere verzi z `.csproj` (ne `0.0.<run>`).
+- [x] README support note: jak znovu vyvolat Welcome screen na installed/portable buildu.
+- [x] Sjednocené názvy témat: interní `AppTheme.*`, JSON hodnoty bez prefixu, GUI CZ/EN labely sjednocené.
+- [x] Help menu: pridany odkaz na verejny GitHub repozitar projektu.
+- [x] Dynamic verze v UI: status bar pouziva runtime verzi z assembly metadata (bez hardcode).
+- [x] Startup log pouziva runtime verzi (bez staleho `v1.1` textu).
+- [x] Startup log zobrazi stav `CheckUpdatesOnStartup` a realny vysledek kontroly pres GitHub Releases API.
+- [x] Help menu: polozka `Uzivatelsky manual` odkazuje na dokumentaci projektu.
+- [x] Help menu: `Uzivatelsky manual` preferuje lokalni soubor (Docs) a az pak fallback na web.
+

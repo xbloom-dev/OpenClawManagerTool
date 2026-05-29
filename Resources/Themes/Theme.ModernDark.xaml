@@ -23,7 +23,7 @@
     -->
 
     <!-- Metadata -->
-    <sys:String x:Key="Theme.Meta.Name">Modern Dark</sys:String>
+    <sys:String x:Key="Theme.Meta.Name">Theme.ModernDark</sys:String>
     <sys:String x:Key="Theme.Meta.Variant">Dark</sys:String>
     <sys:String x:Key="Theme.Meta.IconSet">ModernDark</sys:String>
     <sys:String x:Key="Theme.Meta.PaletteFamily">ModernPalette</sys:String>

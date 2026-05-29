@@ -21,7 +21,7 @@
     -->
 
     <!-- ── Metadata ── -->
-    <sys:String x:Key="Theme.Meta.Name">Modern Light</sys:String>
+    <sys:String x:Key="Theme.Meta.Name">Theme.ModernLight</sys:String>
     <sys:String x:Key="Theme.Meta.Variant">Light</sys:String>
     <sys:String x:Key="Theme.Meta.IconSet">ModernLight</sys:String>
     <sys:String x:Key="Theme.Meta.PaletteFamily">Modern</sys:String>

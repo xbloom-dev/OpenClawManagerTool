@@ -1,10 +1,10 @@
-# OpenClaw Manager Tool
+﻿# OpenClaw Manager Tool
 
 [![CI](https://github.com/xbloom-dev/OpenClawManagerTool/actions/workflows/ci.yml/badge.svg)](https://github.com/xbloom-dev/OpenClawManagerTool/actions/workflows/ci.yml)
 
-A Windows desktop app for managing a local [OpenClaw](https://github.com/openclaw/openclaw) environment — start and stop the Gateway, open the TUI, watch logs, run cleanup, manage settings and themes, and store provider tokens in a DPAPI-protected vault. All from a single window, without memorizing CLI flags.
+A Windows desktop app for managing a local [OpenClaw](https://github.com/openclaw/openclaw) environment â€” start and stop the Gateway, open the TUI, watch logs, run cleanup, manage settings and themes, and store provider tokens in a DPAPI-protected vault. All from a single window, without memorizing CLI flags.
 
-> **What is OpenClaw?** OpenClaw is an open-source AI-agent framework. Its **Gateway** is a local daemon that connects your agents to AI providers (Anthropic, OpenAI, Ollama, …), and its **TUI** is a terminal dashboard for monitoring sessions, logs, and model usage. See the [OpenClaw project](https://github.com/openclaw/openclaw) and [docs.openclaw.ai](https://docs.openclaw.ai) to install and configure OpenClaw itself.
+> **What is OpenClaw?** OpenClaw is an open-source AI-agent framework. Its **Gateway** is a local daemon that connects your agents to AI providers (Anthropic, OpenAI, Ollama, â€¦), and its **TUI** is a terminal dashboard for monitoring sessions, logs, and model usage. See the [OpenClaw project](https://github.com/openclaw/openclaw) and [docs.openclaw.ai](https://docs.openclaw.ai) to install and configure OpenClaw itself.
 >
 > **This is an independent, community-built tool.** It is not affiliated with or endorsed by the OpenClaw project. It simply wraps an existing OpenClaw installation in a Windows GUI.
 
@@ -12,15 +12,15 @@ A Windows desktop app for managing a local [OpenClaw](https://github.com/opencla
 
 ## Features
 
-- **Gateway control** — start, stop, and restart the OpenClaw Gateway from buttons instead of the command line.
-- **Embedded TUI** — open the OpenClaw terminal interface in an in-app terminal (xterm.js + ConPTY + WebView2).
-- **Live logs** — Gateway log viewer with copy and live-tail (`Ctrl+L`).
-- **Cleaning tool** — preview and remove stale files with a dry-run mode.
-- **Token Manager** — store API keys and tokens encrypted with Windows DPAPI, with masked previews and file redaction.
-- **Portable vault backup** — export/import the vault as a password-protected `.ocvault` file (PBKDF2-SHA256 + AES-256-GCM).
-- **Themes** — Legacy, Modern, Standard Dark, Modern Dark, Modern Light, High Contrast, and Crab Cute.
-- **Offline by default** — the embedded terminal ships local xterm.js assets, so it needs no CDN or internet at runtime.
-- **Bilingual UI** — English and Czech.
+- **Gateway control** â€” start, stop, and restart the OpenClaw Gateway from buttons instead of the command line.
+- **Embedded TUI** â€” open the OpenClaw terminal interface in an in-app terminal (xterm.js + ConPTY + WebView2).
+- **Live logs** â€” Gateway log viewer with copy and live-tail (`Ctrl+L`).
+- **Cleaning tool** â€” preview and remove stale files with a dry-run mode.
+- **Token Manager** â€” store API keys and tokens encrypted with Windows DPAPI, with masked previews and file redaction.
+- **Portable vault backup** â€” export/import the vault as a password-protected `.ocvault` file (PBKDF2-SHA256 + AES-256-GCM).
+- **Themes** â€” Theme.Legacy, Theme.StandardLight, Theme.StandardDark, Theme.ModernDark, Theme.ModernLight, Theme.HighContrast, and Theme.CrabCute.
+- **Offline by default** â€” the embedded terminal ships local xterm.js assets, so it needs no CDN or internet at runtime.
+- **Bilingual UI** â€” English and Czech.
 
 ---
 
@@ -35,18 +35,18 @@ A Windows desktop app for managing a local [OpenClaw](https://github.com/opencla
 
 ## Installation
 
-### Option 1 — Download a release (recommended)
+### Option 1 â€” Download a release (recommended)
 
 1. Go to the [Releases](../../releases) page.
 2. Choose the package that matches how you want to run the app:
-   - `OpenClawManagerTool-vX.Y.Z-win-x64-full-setup.exe` — installer with all themes and splash video.
-   - `OpenClawManagerTool-vX.Y.Z-win-x64-lite-setup.exe` — installer without the splash video, Legacy-only UI.
-   - `OpenClawManagerTool-vX.Y.Z-win-x64.zip` — portable Full package, no installer.
-   - `OpenClawManagerTool-vX.Y.Z-win-x64-lite-portable.zip` — portable Lite package, no installer.
+   - `OpenClawManagerTool-vX.Y.Z-win-x64-full-setup.exe` â€” installer with all themes and splash video.
+   - `OpenClawManagerTool-vX.Y.Z-win-x64-lite-setup.exe` â€” installer without the splash video, Legacy-only UI.
+   - `OpenClawManagerTool-vX.Y.Z-win-x64.zip` â€” portable Full package, no installer.
+   - `OpenClawManagerTool-vX.Y.Z-win-x64-lite-portable.zip` â€” portable Lite package, no installer.
 3. (Optional) Verify the download against the published `.sha256` file.
 4. For portable packages, extract anywhere and run `OpenClawManager.exe`.
 
-### Option 2 — Build from source
+### Option 2 â€” Build from source
 
 See [Building from source](#building-from-source) below.
 
@@ -58,6 +58,16 @@ See [Building from source](#building-from-source) below.
 2. Open **Settings** and confirm your OpenClaw folders and command path.
 3. Open **Token Manager** and initialize the vault.
 4. Keep the vault **outside** project folders, `.openclaw`, Git repositories, and cloud-synced folders.
+
+### Re-run Welcome screen (support/testing)
+
+If you need to force the first-run Welcome flow again on an installed build:
+
+1. Close OpenClaw Manager.
+2. Rename or delete `%APPDATA%\OpenClawManager\settings.json` (and optional `.bak`).
+3. Start the app again.
+
+For portable builds, do the same with `settings.json` next to `OpenClawManager.exe`.
 
 ---
 
@@ -79,7 +89,7 @@ Avoid project folders, `.openclaw`, Git repositories, cloud-sync folders, and sh
 
 ## Themes
 
-Switch themes in **Settings**: Legacy, Modern, Standard Dark, Modern Dark, Modern Light, High Contrast, and Crab Cute. Modern themes use bitmap icons and themed secondary windows; Legacy keeps the simpler classic layout.
+Switch themes in **Settings**: Theme.Legacy, Theme.StandardLight, Theme.StandardDark, Theme.ModernDark, Theme.ModernLight, Theme.HighContrast, and Theme.CrabCute. Modern themes use bitmap icons and themed secondary windows; Legacy keeps the simpler classic layout.
 
 Language, theme, paths, and the Token Manager vault path are saved in:
 
@@ -131,7 +141,7 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before
 
 ## Security
 
-This app handles API tokens and secrets. If you discover a vulnerability, **do not** open a public issue — follow the disclosure process in [SECURITY.md](SECURITY.md).
+This app handles API tokens and secrets. If you discover a vulnerability, **do not** open a public issue â€” follow the disclosure process in [SECURITY.md](SECURITY.md).
 
 ---
 
@@ -144,3 +154,5 @@ This project is built by Bloom with assistance from AI coding agents. Code, test
 ## License
 
 This project is released under the terms of the [MIT License](LICENSE).
+
+

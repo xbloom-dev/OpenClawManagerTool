@@ -467,7 +467,7 @@ void PortableSettingsFileTakesPriority()
     Directory.CreateDirectory(Path.GetDirectoryName(appData)!);
 
     File.WriteAllText(Path.Combine(appBase, "settings.json"), "{}", Encoding.UTF8);
-    File.WriteAllText(appData, "{\"Theme\":\"Modern\"}", Encoding.UTF8);
+    File.WriteAllText(appData, "{\"Theme\":\"StandardLight\"}", Encoding.UTF8);
 
     var service = new SettingsService(new TestEnvironment(appBase, appData));
 

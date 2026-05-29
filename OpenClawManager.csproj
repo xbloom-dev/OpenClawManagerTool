@@ -37,9 +37,9 @@
     <!-- v0.5: ResourceDictionary pro témata -->
     <Resource Include="Resources\Themes\CoreStyles.xaml" />
     <Resource Include="Resources\Themes\Theme.Legacy.xaml" />
-    <Resource Include="Resources\Themes\Theme.Modern.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Themes\Theme.StandardLight.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
     <Resource Include="Resources\Themes\Theme.StandardDark.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
-    <Resource Include="Resources\Themes\Theme.Dark.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Themes\Theme.ModernDark.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
     <Resource Include="Resources\Themes\Theme.ModernLight.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
     <Resource Include="Resources\Themes\Theme.HighContrast.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
     <Resource Include="Resources\Themes\Theme.CrabCute.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
@@ -64,6 +64,16 @@
     <!-- SVG logo pro dialog O aplikaci — zkopírovat vedle EXE při buildu -->
     <None Include="Resources\app-logo.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
+    <!-- Lokalni uzivatelske manualy pro menu Napoveda (preferujeme lokalni otevreni). -->
+    <None Include="Docs\USER_MANUAL*.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Docs\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="Docs\USER_MANUAL*.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Docs\%(Filename)%(Extension)</Link>
     </None>
 
     <!-- v0.5: Splash PNG fallback — embedded resource (graceful degradation když chybí .mp4) -->

@@ -5,7 +5,7 @@
 //
 //   AppTheme enum       → identifikátor tématu (AppSettings.Theme)
 //   ThemeService        → Apply(), ThemeChanged event, ResourceDictionary swap
-//   Resources/Themes/   → Theme.Legacy.xaml, Theme.Modern.xaml, ...
+//   Resources/Themes/   → Theme.Legacy.xaml, Theme.StandardLight.xaml, ...
 //   Resources/Icons/    → Legacy/ (prázdno), Modern/*.png, ...
 //
 // Přidání nového tématu:
@@ -42,9 +42,9 @@ public static class ThemeService
     private static readonly Dictionary<AppTheme, string> _themeResourcePaths = new()
     {
         { AppTheme.Legacy, "/Resources/Themes/Theme.Legacy.xaml" },
-        { AppTheme.Modern, "/Resources/Themes/Theme.Modern.xaml" },
+        { AppTheme.StandardLight, "/Resources/Themes/Theme.StandardLight.xaml" },
         { AppTheme.StandardDark, "/Resources/Themes/Theme.StandardDark.xaml" },
-        { AppTheme.Dark, "/Resources/Themes/Theme.Dark.xaml" },
+        { AppTheme.ModernDark, "/Resources/Themes/Theme.ModernDark.xaml" },
         { AppTheme.ModernLight, "/Resources/Themes/Theme.ModernLight.xaml" },
         { AppTheme.HighContrast, "/Resources/Themes/Theme.HighContrast.xaml" },
         { AppTheme.CrabCute, "/Resources/Themes/Theme.CrabCute.xaml" },
@@ -55,9 +55,9 @@ public static class ThemeService
     private static readonly Dictionary<AppTheme, string> _iconFolderNames = new()
     {
         { AppTheme.Legacy, "" },         // Legacy nemá PNG ikony (používá emoji)
-        { AppTheme.Modern, "Modern" },
+        { AppTheme.StandardLight, "Modern" },
         { AppTheme.StandardDark, "Modern" },
-        { AppTheme.Dark, "ModernDark" },
+        { AppTheme.ModernDark, "ModernDark" },
         { AppTheme.ModernLight, "ModernLight" },
         { AppTheme.HighContrast, "Modern" },
         { AppTheme.CrabCute, "CrabCute" },
@@ -66,7 +66,7 @@ public static class ThemeService
     private static readonly Dictionary<AppTheme, Dictionary<string, string>> _iconFileNames = new()
     {
         {
-            AppTheme.Dark,
+            AppTheme.ModernDark,
             new Dictionary<string, string>
             {
                 { "start", "Start.png" },
@@ -142,7 +142,7 @@ public static class ThemeService
 
     /// <summary>
     /// Vrátí název složky ikon pro dané téma (prázdný string = žádné ikony).
-    /// Příklad: GetIconFolder(AppTheme.Modern) → "Modern"
+    /// Příklad: GetIconFolder(AppTheme.StandardLight) → "Modern"
     /// </summary>
     public static string GetIconFolder(AppTheme theme)
     {
@@ -161,7 +161,7 @@ public static class ThemeService
     public static bool IsModernPaletteTheme(AppTheme theme)
     {
         return IsThemeAvailable(theme) &&
-               theme is AppTheme.StandardDark or AppTheme.Dark or AppTheme.ModernLight;
+               theme is AppTheme.StandardDark or AppTheme.ModernDark or AppTheme.ModernLight;
     }
 
     public static ThemeMetadata GetCurrentMetadata()
@@ -180,7 +180,7 @@ public static class ThemeService
 
     /// <summary>
     /// Vrátí pack:// URI pro ikonu daného tématu a jména.
-    /// Příklad: GetIconUri(AppTheme.Modern, "start") →
+    /// Příklad: GetIconUri(AppTheme.StandardLight, "start") →
     ///          "pack://application:,,,/Resources/Icons/Modern/start.png"
     /// Vrátí null pokud téma nemá složku ikon.
     /// </summary>

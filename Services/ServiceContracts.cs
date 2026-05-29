@@ -94,3 +94,16 @@ public interface ITokenService
     GitIgnoreResult AddVaultToGitIgnore(string vaultPath);
     string BuildDefaultOutputPath(string inputPath, string marker);
 }
+
+public interface IUpdateCheckService
+{
+    Task<UpdateCheckResult> CheckAsync(CancellationToken cancellationToken = default);
+}
+
+public sealed record UpdateCheckResult(
+    bool Success,
+    bool UpdateAvailable,
+    string CurrentVersion,
+    string? LatestVersion,
+    string? ReleaseUrl,
+    string? ErrorMessage);

@@ -1,124 +1,126 @@
-# OpenClaw Manager — Barevný styl v1.1
+﻿# OpenClaw Manager â€” BarevnĂ˝ styl v1.1
 
-## Účel
+## ĂšÄŤel
 
-Barvy tlačítek nejsou dekorace — používají se jako rychlá vizuální orientace:
+Barvy tlaÄŤĂ­tek nejsou dekorace â€” pouĹľĂ­vajĂ­ se jako rychlĂˇ vizuĂˇlnĂ­ orientace:
 
-- **zelená** = hlavní pozitivní akce
-- **červená** = zavřít, zrušit, obnovit nebo rizikovější akce
-- **modrá** = pomocné technické akce, náhled, kopírování, ověření, procházení
+- **zelenĂˇ** = hlavnĂ­ pozitivnĂ­ akce
+- **ÄŤervenĂˇ** = zavĹ™Ă­t, zruĹˇit, obnovit nebo rizikovÄ›jĹˇĂ­ akce
+- **modrĂˇ** = pomocnĂ© technickĂ© akce, nĂˇhled, kopĂ­rovĂˇnĂ­, ovÄ›Ĺ™enĂ­, prochĂˇzenĂ­
 
-Od v1.1 jsou barvy definovány jako **theme resource tokeny** v `Resources/Themes/Theme.*.xaml`.
-Code-behind přistupuje přes `ThemeService.GetBrush("Brush.ActionPositive", fallback)`.
+Od v1.1 jsou barvy definovĂˇny jako **theme resource tokeny** v `Resources/Themes/Theme.*.xaml`.
+Code-behind pĹ™istupuje pĹ™es `ThemeService.GetBrush("Brush.ActionPositive", fallback)`.
 
 ---
 
-## Sémantické tokeny (sdílené napříč tématy)
+## SĂ©mantickĂ© tokeny (sdĂ­lenĂ© napĹ™Ă­ÄŤ tĂ©maty)
 
-| Token | Modern (světlé) | Modern Dark | Popis |
+| Token | Theme.StandardLight | Theme.ModernDark | Popis |
 |---|---|---|---|
-| `Brush.ActionPositive` | `#D0FFD0` | `#1C3527` | pozitivní/spouštěcí akce |
-| `Brush.ActionDanger` | `#FFD0D0` | `#3D1515` | zavřít, zrušit, obnovit, opravit |
-| `Brush.ActionUtility` | `#D0E8FF` | `#152535` | kopírovat, náhled, reset, procházet |
-| `Brush.SplashModernBackground` | `#4C247E` | `#181818` | pozadí splash obrazovky |
+| `Brush.ActionPositive` | `#D0FFD0` | `#1C3527` | pozitivnĂ­/spouĹˇtÄ›cĂ­ akce |
+| `Brush.ActionDanger` | `#FFD0D0` | `#3D1515` | zavĹ™Ă­t, zruĹˇit, obnovit, opravit |
+| `Brush.ActionUtility` | `#D0E8FF` | `#152535` | kopĂ­rovat, nĂˇhled, reset, prochĂˇzet |
+| `Brush.SplashModernBackground` | `#4C247E` | `#181818` | pozadĂ­ splash obrazovky |
 
 ---
 
-## Paleta Modern (Standard Light)
+## Paleta Theme.StandardLight
 
 | Token | HEX | Popis |
 |---|---|---|
-| `Theme.Brush.Background` | `#F4F6FA` | pozadí okna |
+| `Theme.Brush.Background` | `#F4F6FA` | pozadĂ­ okna |
 | `Theme.Brush.Surface` | `#FFFFFF` | panely, GroupBox |
-| `Theme.Brush.Chrome` | `#F4F6FA` | TUI pozadí |
-| `Theme.Brush.TitleBar` | `#F4F6FA` | horní a spodní lišta |
-| `Theme.Brush.MenuBackground` | `#F4F6FA` | menu pozadí |
-| `Theme.Brush.Menu.Hover` | `#E5E7EB` | hover položky menu |
-| `Theme.Brush.Text.Primary` | `#1A1A2E` | primární text |
-| `Theme.Brush.Text.Secondary` | `#6B7280` | sekundární text |
-| `Theme.Brush.ButtonText` | `#1A1A2E` | popisky tlačítek |
-| `Theme.Brush.Border` | `#E5E7EB` | ohraničení |
+| `Theme.Brush.Chrome` | `#F4F6FA` | TUI pozadĂ­ |
+| `Theme.Brush.TitleBar` | `#F4F6FA` | hornĂ­ a spodnĂ­ liĹˇta |
+| `Theme.Brush.MenuBackground` | `#F4F6FA` | menu pozadĂ­ |
+| `Theme.Brush.Menu.Hover` | `#E5E7EB` | hover poloĹľky menu |
+| `Theme.Brush.Text.Primary` | `#1A1A2E` | primĂˇrnĂ­ text |
+| `Theme.Brush.Text.Secondary` | `#6B7280` | sekundĂˇrnĂ­ text |
+| `Theme.Brush.ButtonText` | `#1A1A2E` | popisky tlaÄŤĂ­tek |
+| `Theme.Brush.Border` | `#E5E7EB` | ohraniÄŤenĂ­ |
 
 ---
 
-## Paleta Modern Dark
+## Paleta Theme.ModernDark
 
 | Token | HEX | Popis |
 |---|---|---|
-| `Theme.Brush.Background` | `#191919` | pozadí okna |
+| `Theme.Brush.Background` | `#191919` | pozadĂ­ okna |
 | `Theme.Brush.Surface` | `#272727` | panely, GroupBox |
-| `Theme.Brush.Chrome` | `#121212` | TUI okno pozadí |
-| `Theme.Brush.TitleBar` | `#202020` | horní + spodní lišta *(nový v1.1)* |
-| `Theme.Brush.MenuBackground` | `#181818` | menu + Splash pozadí *(nový v1.1)* |
-| `Theme.Brush.Menu.Hover` | `#363635` | zvýraznění menu *(nový v1.1)* |
-| `Theme.Brush.SecondaryButton` | `#2E2E2E` | tlačítka v sek. oknech idle *(nový v1.1)* |
-| `Theme.Brush.Disabled` | `#282828` | idle nástrojů tlačítka |
-| `Theme.Brush.Hover` | `#464646` | hover tlačítek |
-| `Theme.Brush.Pressed` | `#535353` | stisknutý stav |
-| `Theme.Brush.Text.Primary` | `#FFFFFF` | primární text |
-| `Theme.Brush.Text.Secondary` | `#787878` | sekundární text |
-| `Theme.Brush.ButtonText` | `#FFFFFF` | popisky tlačítek |
-| `Theme.Brush.Border` | `#3A3A3A` | ohraničení |
+| `Theme.Brush.Chrome` | `#121212` | TUI okno pozadĂ­ |
+| `Theme.Brush.TitleBar` | `#202020` | hornĂ­ + spodnĂ­ liĹˇta *(novĂ˝ v1.1)* |
+| `Theme.Brush.MenuBackground` | `#181818` | menu + Splash pozadĂ­ *(novĂ˝ v1.1)* |
+| `Theme.Brush.Menu.Hover` | `#363635` | zvĂ˝raznÄ›nĂ­ menu *(novĂ˝ v1.1)* |
+| `Theme.Brush.SecondaryButton` | `#2E2E2E` | tlaÄŤĂ­tka v sek. oknech idle *(novĂ˝ v1.1)* |
+| `Theme.Brush.Disabled` | `#282828` | idle nĂˇstrojĹŻ tlaÄŤĂ­tka |
+| `Theme.Brush.Hover` | `#464646` | hover tlaÄŤĂ­tek |
+| `Theme.Brush.Pressed` | `#535353` | stisknutĂ˝ stav |
+| `Theme.Brush.Text.Primary` | `#FFFFFF` | primĂˇrnĂ­ text |
+| `Theme.Brush.Text.Secondary` | `#787878` | sekundĂˇrnĂ­ text |
+| `Theme.Brush.ButtonText` | `#FFFFFF` | popisky tlaÄŤĂ­tek |
+| `Theme.Brush.Border` | `#3A3A3A` | ohraniÄŤenĂ­ |
 
 ---
 
-## Paleta Standard Dark
+## Paleta Theme.StandardDark
 
 | Token | HEX | Popis |
 |---|---|---|
-| `Theme.Brush.Chrome` | `#121212` | TUI pozadí |
-| `Theme.Brush.Background` | `#282828` | pozadí okna, Nástroje idle |
-| `Theme.Brush.Active` | `#383838` | Akce tlačítka idle, Latence, Log |
+| `Theme.Brush.Chrome` | `#121212` | TUI pozadĂ­ |
+| `Theme.Brush.Background` | `#282828` | pozadĂ­ okna, NĂˇstroje idle |
+| `Theme.Brush.Active` | `#383838` | Akce tlaÄŤĂ­tka idle, Latence, Log |
 | `Theme.Brush.Hover` | `#464646` | hover |
 | `Theme.Brush.Pressed` | `#535353` | pressed |
-| `Theme.Brush.Separator` | `#1E1E1E` | GridSplitter, oddělovače |
-| `Theme.Brush.Text.Primary` | `#FFFFFF` | primární text |
-| `Theme.Brush.Text.Secondary` | `#787878` | sekundární text |
+| `Theme.Brush.Separator` | `#1E1E1E` | GridSplitter, oddÄ›lovaÄŤe |
+| `Theme.Brush.Text.Primary` | `#FFFFFF` | primĂˇrnĂ­ text |
+| `Theme.Brush.Text.Secondary` | `#787878` | sekundĂˇrnĂ­ text |
 
 ---
 
-## Mapování tlačítek (Legacy + Modern Light)
+## MapovĂˇnĂ­ tlaÄŤĂ­tek (Theme.Legacy + Theme.ModernLight)
 
-### Zelená `#D0FFD0` / Dark `#1C3527`
+### ZelenĂˇ `#D0FFD0` / Dark `#1C3527`
 
 - `OpenClaw TUI`
-- `Živá data`
-- `Uložit` v Nastavení
+- `Ĺ˝ivĂˇ data`
+- `UloĹľit` v NastavenĂ­
 - `Spustit` v Cleaning Tool
-- `[REDACT]` v Token Manageru *(tučné)*
+- `[REDACT]` v Token Manageru *(tuÄŤnĂ©)*
 
-### Červená `#FFD0D0` / Dark `#3D1515`
+### ÄŚervenĂˇ `#FFD0D0` / Dark `#3D1515`
 
 - `Opravit konfiguraci`
-- `Zavřít` v Gateway logu, Živých datech, Cleaning Tool, Token Manageru
-- `Zrušit` v Nastavení
+- `ZavĹ™Ă­t` v Gateway logu, Ĺ˝ivĂ˝ch datech, Cleaning Tool, Token Manageru
+- `ZruĹˇit` v NastavenĂ­
 - `Obnovit` v Token Manageru
 
-### Modrá `#D0E8FF` / Dark `#152535`
+### ModrĂˇ `#D0E8FF` / Dark `#152535`
 
-- `Reset na výchozí` v Nastavení
-- `Kopírovat` v Gateway logu a Živých datech
-- `Náhled` v Cleaning Tool
-- `Procházet` v Token Manageru *(modrá)*
-- `Ověřit` v Token Manageru *(tučná modrá)*
-
----
-
-## Zaoblené rohy (v1.1)
-
-Všechna témata **Modern family** (Dark, ModernLight, StandardDark) používají `CornerRadius="6"` pro:
-- Tlačítka v sekundárních oknech (`Theme.Style.Button`)
-- GroupBox v sekundárních oknech (`Theme.Style.GroupBox`)
-- Hover zvýraznění menu položek (`CornerRadius="4"`)
-
-Legacy téma: žádné zaoblení (systémové WPF).
+- `Reset na vĂ˝chozĂ­` v NastavenĂ­
+- `KopĂ­rovat` v Gateway logu a Ĺ˝ivĂ˝ch datech
+- `NĂˇhled` v Cleaning Tool
+- `ProchĂˇzet` v Token Manageru *(modrĂˇ)*
+- `OvÄ›Ĺ™it` v Token Manageru *(tuÄŤnĂˇ modrĂˇ)*
 
 ---
 
-## Pravidla pro přidání nového tématu
+## ZaoblenĂ© rohy (v1.1)
 
-1. Vytvořit `Resources/Themes/Theme.{Název}.xaml`
-2. Definovat **všechny** tokeny z tabulky výše (paleta podle Variant: Dark/Light)
-3. Přidat sémantické tokeny (`Brush.ActionPositive` atd.) s hodnotami odpovídajícími tmavé/světlé variantě
+VĹˇechna tĂ©mata **Theme family** (Theme.ModernDark, Theme.ModernLight, Theme.StandardDark) pouĹľĂ­vajĂ­ `CornerRadius="6"` pro:
+- TlaÄŤĂ­tka v sekundĂˇrnĂ­ch oknech (`Theme.Style.Button`)
+- GroupBox v sekundĂˇrnĂ­ch oknech (`Theme.Style.GroupBox`)
+- Hover zvĂ˝raznÄ›nĂ­ menu poloĹľek (`CornerRadius="4"`)
+
+Legacy tĂ©ma: ĹľĂˇdnĂ© zaoblenĂ­ (systĂ©movĂ© WPF).
+
+---
+
+## Pravidla pro pĹ™idĂˇnĂ­ novĂ©ho tĂ©matu
+
+1. VytvoĹ™it `Resources/Themes/Theme.{NĂˇzev}.xaml`
+2. Definovat **vĹˇechny** tokeny z tabulky vĂ˝Ĺˇe (paleta podle Variant: Dark/Light)
+3. PĹ™idat sĂ©mantickĂ© tokeny (`Brush.ActionPositive` atd.) s hodnotami odpovĂ­dajĂ­cĂ­mi tmavĂ©/svÄ›tlĂ© variantÄ›
 4. Registrovat v `ThemeService._themeResourcePaths`
-5. **Nikdy** nevkládat HEX hodnoty přímo do code-behind — vždy přes `ThemeService.GetBrush()`
+5. **Nikdy** nevklĂˇdat HEX hodnoty pĹ™Ă­mo do code-behind â€” vĹľdy pĹ™es `ThemeService.GetBrush()`
+
+

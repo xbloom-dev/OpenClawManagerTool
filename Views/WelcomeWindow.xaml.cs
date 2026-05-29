@@ -22,13 +22,13 @@ public partial class WelcomeWindow : Window
         _environment = environment;
         _themes = new ThemeChoice[]
         {
-            new(AppTheme.Legacy, "Legacy", "classic"),
-            new(AppTheme.Modern, "Modern", "standard"),
-            new(AppTheme.StandardDark, "Standard Dark", "dark"),
-            new(AppTheme.Dark, "Modern Dark", "dark"),
-            new(AppTheme.ModernLight, "Modern Light", "light"),
-            new(AppTheme.HighContrast, "High Contrast", "contrast"),
-            new(AppTheme.CrabCute, "Crab Cute", "color"),
+            new(AppTheme.Legacy, L10n.Get("Str_Theme_Legacy"), "classic"),
+            new(AppTheme.StandardLight, L10n.Get("Str_Theme_Standard"), "standard"),
+            new(AppTheme.StandardDark, L10n.Get("Str_Theme_StandardDark"), "dark"),
+            new(AppTheme.ModernDark, L10n.Get("Str_Theme_ModernDark"), "dark"),
+            new(AppTheme.ModernLight, L10n.Get("Str_Theme_ModernLight"), "light"),
+            new(AppTheme.HighContrast, L10n.Get("Str_Theme_HighContrast"), "contrast"),
+            new(AppTheme.CrabCute, L10n.Get("Str_Theme_CrabCute"), "color"),
         }.Where(t => ThemeService.IsThemeAvailable(t.Theme)).ToList();
 
         InitializeComponent();

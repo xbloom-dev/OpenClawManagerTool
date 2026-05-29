@@ -92,13 +92,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     private string _themeLegacyText = "";
 
     [ObservableProperty]
-    private string _themeModernText = "";
+    private string _themeStandardLightText = "";
 
     [ObservableProperty]
     private string _themeStandardDarkText = "";
 
     [ObservableProperty]
-    private string _themeDarkText = "";
+    private string _themeModernDarkText = "";
 
     [ObservableProperty]
     private string _themeModernLightText = "";
@@ -189,16 +189,16 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public bool AreModernThemeOptionsEnabled => Theme != AppTheme.Legacy;
     public bool IsThemeLegacyAvailable => ThemeService.IsThemeAvailable(AppTheme.Legacy);
-    public bool IsThemeModernAvailable => ThemeService.IsThemeAvailable(AppTheme.Modern);
+    public bool IsThemeStandardLightAvailable => ThemeService.IsThemeAvailable(AppTheme.StandardLight);
     public bool IsThemeStandardDarkAvailable => ThemeService.IsThemeAvailable(AppTheme.StandardDark);
-    public bool IsThemeDarkAvailable => ThemeService.IsThemeAvailable(AppTheme.Dark);
+    public bool IsThemeModernDarkAvailable => ThemeService.IsThemeAvailable(AppTheme.ModernDark);
     public bool IsThemeModernLightAvailable => ThemeService.IsThemeAvailable(AppTheme.ModernLight);
     public bool IsThemeHighContrastAvailable => ThemeService.IsThemeAvailable(AppTheme.HighContrast);
     public bool IsThemeCrabCuteAvailable => ThemeService.IsThemeAvailable(AppTheme.CrabCute);
     public bool IsThemeLegacy { get => Theme == AppTheme.Legacy; set { if (value) Theme = AppTheme.Legacy; } }
-    public bool IsThemeModern { get => Theme == AppTheme.Modern; set { if (value) Theme = AppTheme.Modern; } }
+    public bool IsThemeStandardLight { get => Theme == AppTheme.StandardLight; set { if (value) Theme = AppTheme.StandardLight; } }
     public bool IsThemeStandardDark { get => Theme == AppTheme.StandardDark; set { if (value) Theme = AppTheme.StandardDark; } }
-    public bool IsThemeDark { get => Theme == AppTheme.Dark; set { if (value) Theme = AppTheme.Dark; } }
+    public bool IsThemeModernDark { get => Theme == AppTheme.ModernDark; set { if (value) Theme = AppTheme.ModernDark; } }
     public bool IsThemeModernLight { get => Theme == AppTheme.ModernLight; set { if (value) Theme = AppTheme.ModernLight; } }
     public bool IsThemeHighContrast { get => Theme == AppTheme.HighContrast; set { if (value) Theme = AppTheme.HighContrast; } }
     public bool IsThemeCrabCute { get => Theme == AppTheme.CrabCute; set { if (value) Theme = AppTheme.CrabCute; } }
@@ -226,9 +226,9 @@ public sealed partial class SettingsViewModel : ObservableObject
         AppearanceTitle = T("Vzhled", "Appearance");
         ThemeLabel = T("Téma aplikace:", "Application theme:");
         ThemeLegacyText = L10n.Get("Str_Theme_Legacy");
-        ThemeModernText = L10n.Get("Str_Theme_Standard");
+        ThemeStandardLightText = L10n.Get("Str_Theme_Standard");
         ThemeStandardDarkText = L10n.Get("Str_Theme_StandardDark");
-        ThemeDarkText = L10n.Get("Str_Theme_ModernDark");
+        ThemeModernDarkText = L10n.Get("Str_Theme_ModernDark");
         ThemeModernLightText = L10n.Get("Str_Theme_ModernLight");
         ThemeHighContrastText = L10n.Get("Str_Theme_HighContrast");
         ThemeCrabCuteText = L10n.Get("Str_Theme_CrabCute");
@@ -373,9 +373,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     {
         OnPropertyChanged(nameof(AreModernThemeOptionsEnabled));
         OnPropertyChanged(nameof(IsThemeLegacy));
-        OnPropertyChanged(nameof(IsThemeModern));
+        OnPropertyChanged(nameof(IsThemeStandardLight));
         OnPropertyChanged(nameof(IsThemeStandardDark));
-        OnPropertyChanged(nameof(IsThemeDark));
+        OnPropertyChanged(nameof(IsThemeModernDark));
         OnPropertyChanged(nameof(IsThemeModernLight));
         OnPropertyChanged(nameof(IsThemeHighContrast));
         OnPropertyChanged(nameof(IsThemeCrabCute));

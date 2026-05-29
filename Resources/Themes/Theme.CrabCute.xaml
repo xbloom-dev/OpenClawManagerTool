@@ -1,6 +1,7 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--
         Theme: CrabCute (soft coral + sea palette)
@@ -21,6 +22,7 @@
     -->
 
     <!-- ── Barvy ── -->
+    <sys:String x:Key="Theme.Meta.Name">Theme.CrabCute</sys:String>
     <Color x:Key="Theme.Color.Background">#EEF1F5</Color>
     <Color x:Key="Theme.Color.Surface">#EEF1F5</Color>
     <Color x:Key="Theme.Color.Accent">#F97316</Color>

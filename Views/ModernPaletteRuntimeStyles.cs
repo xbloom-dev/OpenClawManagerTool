@@ -32,7 +32,7 @@ internal static class ModernPaletteRuntimeStyles
     {
         window.Icon = null;
 
-        if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme != AppTheme.Modern &&
+        if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme != AppTheme.StandardLight &&
             !ThemeService.IsModernPaletteTheme(OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)) return;
 
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));

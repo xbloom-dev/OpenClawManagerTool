@@ -15,6 +15,7 @@ public static class DependencyInjection
         services.AddSingleton<IProcessDetector, ProcessDetector>();
         services.AddSingleton<ICleanupService, CleanupService>();
         services.AddSingleton<ITokenService, TokenServiceAdapter>();
+        services.AddSingleton<IUpdateCheckService, GitHubReleaseUpdateService>();
 
         services.AddTransient<AboutViewModel>();
         services.AddTransient<SettingsViewModel>();
