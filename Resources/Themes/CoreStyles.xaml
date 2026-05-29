@@ -60,63 +60,85 @@
     </Style>
 
     <Style x:Key="Style.GroupBox.ModernPalette" TargetType="{x:Type GroupBox}">
-        <Setter Property="Background" Value="{DynamicResource Theme.Brush.Surface}" />
-        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Text.Primary}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Border}" />
-        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.SectionBg}" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Label}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.SectionBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="16" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GroupBox}">
-                    <Border Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="6"
-                            Padding="{TemplateBinding Padding}">
-                        <DockPanel LastChildFill="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Padding="4,0,4,6">
                             <ContentPresenter ContentSource="Header"
-                                              DockPanel.Dock="Top"
-                                              Margin="0,0,0,6"
                                               TextElement.Foreground="{TemplateBinding Foreground}"
-                                              TextElement.FontWeight="SemiBold" />
+                                              TextElement.FontWeight="Bold"
+                                              TextElement.FontSize="11" />
+                        </Border>
+                        <Border Grid.Row="1"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14"
+                                Padding="{TemplateBinding Padding}">
                             <ContentPresenter Content="{TemplateBinding Content}" />
-                        </DockPanel>
-                    </Border>
+                        </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- Glass GroupBox — semi-transparent panel for ModernPalette secondary windows.
-         Background/border reads from DynamicResource so it adapts to Dark vs Light glass tokens. -->
+    <!-- Glass GroupBox (DL v2) — floating label + bordered card, radius 14.
+         Background/border reads DynamicResource — adapts to Dark vs Light glass tokens. -->
     <Style x:Key="Style.GroupBox.GlassPanel" TargetType="{x:Type GroupBox}">
-        <Setter Property="Background"      Value="{DynamicResource Theme.Brush.GlassPanel.Background}" />
-        <Setter Property="Foreground"      Value="{DynamicResource Theme.Brush.Text.Primary}" />
-        <Setter Property="BorderBrush"     Value="{DynamicResource Theme.Brush.GlassBorder}" />
+        <Setter Property="Background"      Value="{DynamicResource Theme.Brush.SectionBg}" />
+        <Setter Property="Foreground"      Value="{DynamicResource Theme.Brush.Label}" />
+        <Setter Property="BorderBrush"     Value="{DynamicResource Theme.Brush.SectionBorder}" />
         <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding"         Value="16" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type GroupBox}">
-                    <Border x:Name="GlassRoot"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="18"
-                            Padding="{TemplateBinding Padding}"
-                            SnapsToDevicePixels="True">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="40" ShadowDepth="10"
-                                              Direction="270" Opacity="0.45"
-                                              Color="Black" />
-                        </Border.Effect>
-                        <DockPanel LastChildFill="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <!-- Floating section label -->
+                        <Border Grid.Row="0" Padding="4,0,4,6">
                             <ContentPresenter ContentSource="Header"
-                                              DockPanel.Dock="Top"
-                                              Margin="0,0,0,8"
                                               TextElement.Foreground="{TemplateBinding Foreground}"
-                                              TextElement.FontWeight="SemiBold" />
-                            <ContentPresenter Content="{TemplateBinding Content}" />
-                        </DockPanel>
-                    </Border>
+                                              TextElement.FontSize="11"
+                                              TextElement.FontWeight="Bold" />
+                        </Border>
+                        <!-- Bordered card with inset top highlight -->
+                        <Border x:Name="GlassRoot"
+                                Grid.Row="1"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="14"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <!-- Inset top highlight rgba(255,255,255,.09) -->
+                                <Border CornerRadius="14" IsHitTestVisible="False">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,0.12">
+                                            <GradientStop Color="#17FFFFFF" Offset="0"/>
+                                            <GradientStop Color="Transparent" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <ContentPresenter Content="{TemplateBinding Content}" />
+                            </Grid>
+                        </Border>
+                    </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

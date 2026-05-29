@@ -4,7 +4,7 @@
         xmlns:views="clr-namespace:OpenClawManager.Views"
         Title="OpenClaw Manager Tool by Bloom"
         Icon="pack://application:,,,/Resources/app-favicon.ico"
-        Height="720" Width="1400"
+        Height="860" Width="1400"
         MinHeight="500" MinWidth="900"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource Theme.Brush.Background}">
@@ -13,18 +13,20 @@
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
         <!-- ── Modern Dark v2 — MainWindow local styles ──────────────────────────
-             Explicit Style= attribute on each element beats the runtime implicit
-             window.Resources[typeof(Button)] set by ModernPaletteRuntimeStyles.cs.
-             GroupBoxes: in Modern Dark, runtime overrides to GlassPanel (CornerRadius=18,
-             glass bg) which matches; Style.Grp.Panel applies for all other themes. -->
+             Design Language: md-kit.jsx G tokens, md-windows.jsx layout.
+             Explicit Style= attribute beats the runtime implicit window.Resources[typeof(Button)].
+             GroupBoxes: in Modern Dark, runtime overrides to GlassPanel (CornerRadius=14,
+             SectionBg/SectionBorder floating label) — end result identical to Style.Grp.Panel. -->
 
-        <!-- Standard action button: CornerRadius=10, hover/pressed, DynamicResource tokens -->
+        <!-- Standard action button: CornerRadius=9, BtnBg/BtnBorder, 13px/SemiBold, InkSoft -->
         <Style x:Key="Style.Btn.Action" TargetType="Button">
-            <Setter Property="Background"                 Value="{DynamicResource Theme.Brush.SecondaryButton}" />
-            <Setter Property="Foreground"                 Value="{DynamicResource Theme.Brush.Text.Primary}" />
-            <Setter Property="BorderBrush"                Value="{DynamicResource Theme.Brush.Border}" />
+            <Setter Property="Background"                 Value="{DynamicResource Theme.Brush.BtnBg}" />
+            <Setter Property="Foreground"                 Value="{DynamicResource Theme.Brush.InkSoft}" />
+            <Setter Property="BorderBrush"                Value="{DynamicResource Theme.Brush.BtnBorder}" />
             <Setter Property="BorderThickness"            Value="1" />
             <Setter Property="Padding"                    Value="10,0" />
+            <Setter Property="FontSize"                   Value="13" />
+            <Setter Property="FontWeight"                 Value="SemiBold" />
             <Setter Property="HorizontalContentAlignment" Value="Left" />
             <Setter Property="FocusVisualStyle"           Value="{x:Null}" />
             <Setter Property="Template">
@@ -34,7 +36,7 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="10"
+                                CornerRadius="9"
                                 SnapsToDevicePixels="True">
                             <ContentPresenter
                                 HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -60,10 +62,8 @@
             </Setter>
         </Style>
 
-        <!-- CTA accent button (BtnStartTui): AccentTop→AccentBot gradient on top of
-             TemplateBinding Background (Brush.ActionPositive = green fallback in Legacy).
-             DynamicResource GradientStop colors — transparent when tokens absent (Legacy),
-             leaving the green fallback visible. -->
+        <!-- CTA accent button (BtnStartTui): AccentTop→AccentBot gradient + gloss, radius 11.
+             TemplateBinding Background = Brush.ActionPositive fallback when tokens absent. -->
         <Style x:Key="Style.Btn.CtaAccent" TargetType="Button">
             <Setter Property="Foreground"                 Value="White" />
             <Setter Property="BorderThickness"            Value="0" />
@@ -73,15 +73,14 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <!-- Outer border: TemplateBinding Background = Brush.ActionPositive fallback -->
                         <Border x:Name="Root"
                                 Background="{TemplateBinding Background}"
                                 BorderThickness="0"
-                                CornerRadius="10"
+                                CornerRadius="11"
                                 SnapsToDevicePixels="True">
                             <Grid>
-                                <!-- Accent gradient overlay: visible when AccentTop/Bot tokens exist -->
-                                <Border x:Name="AccentLayer" CornerRadius="10">
+                                <!-- Accent gradient overlay (transparent when tokens absent) -->
+                                <Border x:Name="AccentLayer" CornerRadius="11">
                                     <Border.Background>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                             <GradientStop Color="{DynamicResource Theme.Color.AccentTop}" Offset="0" />
@@ -89,8 +88,8 @@
                                         </LinearGradientBrush>
                                     </Border.Background>
                                 </Border>
-                                <!-- Gloss sheen (top-half highlight, 9 % opacity) -->
-                                <Border CornerRadius="10" Opacity="0.09">
+                                <!-- Top gloss sheen (9% opacity) -->
+                                <Border CornerRadius="11" Opacity="0.09">
                                     <Border.Background>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
                                             <GradientStop Color="White"       Offset="0" />
@@ -121,34 +120,52 @@
             </Setter>
         </Style>
 
-        <!-- Panel GroupBox: CornerRadius=18, Surface bg, themed border.
-             Runtime overrides this with Style.GroupBox.GlassPanel in Modern Dark mode —
-             end result is CornerRadius=18 in all cases. -->
+        <!-- Section GroupBox (DL v2): floating label above bordered card, radius 14.
+             Runtime overrides to Style.GroupBox.GlassPanel in Modern Dark — same result. -->
         <Style x:Key="Style.Grp.Panel" TargetType="GroupBox">
-            <Setter Property="Background"      Value="{DynamicResource Theme.Brush.Surface}" />
-            <Setter Property="Foreground"      Value="{DynamicResource Theme.Brush.Text.Secondary}" />
-            <Setter Property="BorderBrush"     Value="{DynamicResource Theme.Brush.Border}" />
+            <Setter Property="Background"      Value="{DynamicResource Theme.Brush.SectionBg}" />
+            <Setter Property="Foreground"      Value="{DynamicResource Theme.Brush.Label}" />
+            <Setter Property="BorderBrush"     Value="{DynamicResource Theme.Brush.SectionBorder}" />
             <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding"         Value="16" />
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="GroupBox">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="18"
-                                Padding="{TemplateBinding Padding}"
-                                SnapsToDevicePixels="True">
-                            <DockPanel LastChildFill="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <!-- Floating section label -->
+                            <Border Grid.Row="0" Padding="4,0,4,6">
                                 <ContentPresenter ContentSource="Header"
-                                                  DockPanel.Dock="Top"
-                                                  Margin="2,0,0,6"
                                                   RecognizesAccessKey="True"
                                                   TextElement.Foreground="{TemplateBinding Foreground}"
-                                                  TextElement.FontWeight="SemiBold"
+                                                  TextElement.FontWeight="Bold"
                                                   TextElement.FontSize="11" />
-                                <ContentPresenter Content="{TemplateBinding Content}" />
-                            </DockPanel>
-                        </Border>
+                            </Border>
+                            <!-- Bordered card with inset top highlight -->
+                            <Border Grid.Row="1"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="14"
+                                    Padding="{TemplateBinding Padding}"
+                                    SnapsToDevicePixels="True">
+                                <Grid>
+                                    <!-- Inset top highlight rgba(255,255,255,.09) -->
+                                    <Border CornerRadius="14" IsHitTestVisible="False">
+                                        <Border.Background>
+                                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,0.12">
+                                                <GradientStop Color="#17FFFFFF" Offset="0"/>
+                                                <GradientStop Color="Transparent" Offset="1"/>
+                                            </LinearGradientBrush>
+                                        </Border.Background>
+                                    </Border>
+                                    <ContentPresenter Content="{TemplateBinding Content}" />
+                                </Grid>
+                            </Border>
+                        </Grid>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -158,9 +175,12 @@
 
     <DockPanel>
 
-        <!-- ── TitleBar ────────────────────────────────────────────────────────── -->
+        <!-- ── TitleBar (DL v2: 46 px, BarBg, bottom divider) ─────────────────── -->
         <Border x:Name="TitleBarHost" DockPanel.Dock="Top"
-                Background="{DynamicResource Theme.Brush.TitleBar}">
+                MinHeight="46"
+                Background="{DynamicResource Theme.Brush.BarBg}"
+                BorderBrush="{DynamicResource Theme.Brush.Divider}"
+                BorderThickness="0,0,0,1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -168,9 +188,12 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
+                <!-- DL v2: menu items 13.5px/500, InkSoft, radius 8, 0 13px padding -->
                 <Menu x:Name="MainMenu" Grid.Column="0"
                       Background="Transparent"
-                      BorderThickness="0">
+                      BorderThickness="0"
+                      Foreground="{DynamicResource Theme.Brush.InkSoft}"
+                      FontSize="13.5" FontWeight="Medium">
                     <MenuItem x:Name="MnuMenuOpen" Header="_Otevřít">
                         <MenuItem x:Name="MnuOpenOpenClawFolder" Header="_OpenClaw složku" />
                         <MenuItem x:Name="MnuOpenTempFolder" Header="_Temp složku (Gateway logy)" />
@@ -196,7 +219,7 @@
                     </MenuItem>
                 </Menu>
 
-                <!-- Column 1: drag surface + brand text (brand visible only in ModernPalette mode) -->
+                <!-- Drag surface + brand text (brand visible in ModernPalette mode) -->
                 <Grid Grid.Column="1">
                     <Border x:Name="TitleBarDragSurface" Background="Transparent" />
                     <TextBlock x:Name="TitleBarBrandText"
@@ -210,29 +233,59 @@
                                IsHitTestVisible="False" />
                 </Grid>
 
+                <!-- DL v2 window controls: 44×30 px, SVG path glyphs, InkMute → white on hover -->
                 <StackPanel x:Name="CaptionButtons"
                             Grid.Column="2"
                             Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,4,0"
                             Visibility="Collapsed">
-                    <Button x:Name="BtnWindowMinimize" Width="46" Height="32" Content="_"
-                            Padding="0" FocusVisualStyle="{x:Null}" />
-                    <Button x:Name="BtnWindowMaximize" Width="46" Height="32" Content="□"
-                            Padding="0" FocusVisualStyle="{x:Null}" />
-                    <Button x:Name="BtnWindowClose"    Width="46" Height="32" Content="X"
-                            Padding="0" FocusVisualStyle="{x:Null}" />
+                    <!-- Minimize: M3 6.5 H10, stroke 1.5, round caps -->
+                    <Button x:Name="BtnWindowMinimize" Width="44" Height="30"
+                            Padding="0" FocusVisualStyle="{x:Null}">
+                        <Path Data="M3,6.5 H10"
+                              Stroke="{DynamicResource Theme.Brush.InkMute}"
+                              StrokeThickness="1.5"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              Width="13" Height="13" Stretch="None"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
+                    <!-- Maximize: rect 3,3 7×7 rx1.4, stroke 1.4 -->
+                    <Button x:Name="BtnWindowMaximize" Width="44" Height="30"
+                            Padding="0" FocusVisualStyle="{x:Null}">
+                        <Path Data="M4.4,3 H8.6 C9.4,3 10,3.6 10,4.4 V8.6 C10,9.4 9.4,10 8.6,10 H4.4 C3.6,10 3,9.4 3,8.6 V4.4 C3,3.6 3.6,3 4.4,3 Z"
+                              Fill="Transparent"
+                              Stroke="{DynamicResource Theme.Brush.InkMute}"
+                              StrokeThickness="1.4"
+                              Width="13" Height="13" Stretch="None"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
+                    <!-- Close: M3.5 3.5 L9.5 9.5 / M9.5 3.5 L3.5 9.5, stroke 1.5, round caps -->
+                    <Button x:Name="BtnWindowClose" Width="44" Height="30"
+                            Padding="0" FocusVisualStyle="{x:Null}">
+                        <Path Data="M3.5,3.5 L9.5,9.5 M9.5,3.5 L3.5,9.5"
+                              Stroke="{DynamicResource Theme.Brush.InkMute}"
+                              StrokeThickness="1.5"
+                              StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                              Width="13" Height="13" Stretch="None"
+                              HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
-        <!-- ── StatusBar ───────────────────────────────────────────────────────── -->
-        <StatusBar x:Name="MainStatusBar" DockPanel.Dock="Bottom" Height="28"
-                   Background="{DynamicResource Theme.Brush.Surface}"
-                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}">
+        <!-- ── StatusBar (DL v2: 30 px, BarBg, mono 12px, Label color) ────────── -->
+        <StatusBar x:Name="MainStatusBar" DockPanel.Dock="Bottom" Height="30"
+                   Background="{DynamicResource Theme.Brush.BarBg}"
+                   Foreground="{DynamicResource Theme.Brush.Label}"
+                   FontFamily="Consolas" FontSize="12"
+                   BorderBrush="{DynamicResource Theme.Brush.Divider}"
+                   BorderThickness="0,1,0,0">
             <StatusBarItem>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Gateway: " />
-                    <Ellipse x:Name="StatusGatewayDot" Width="10" Height="10"
-                             Fill="{Binding GatewayStatusColor}" Margin="2,0,4,0" VerticalAlignment="Center" />
+                    <Ellipse x:Name="StatusGatewayDot" Width="8" Height="8"
+                             Fill="{Binding GatewayStatusColor}" Margin="2,0,5,0" VerticalAlignment="Center" />
                     <TextBlock x:Name="StatusGatewayText" Text="{Binding GatewayStatusText}" />
                 </StackPanel>
             </StatusBarItem>
@@ -249,7 +302,7 @@
                 <TextBlock x:Name="StatusGatewayUptime" Text="{Binding GatewayUptimeText}" />
             </StatusBarItem>
             <StatusBarItem>
-                <TextBlock Text=" " Width="20" />
+                <TextBlock Text=" " Width="16" />
             </StatusBarItem>
             <Separator />
             <StatusBarItem>
@@ -265,20 +318,23 @@
                 <TextBlock x:Name="StatusCpu" Text="{Binding CpuText}" />
             </StatusBarItem>
             <StatusBarItem HorizontalAlignment="Right">
-                <TextBlock Text="v2.0" Foreground="{DynamicResource Theme.Brush.Text.Secondary}" />
+                <TextBlock Text="v2.0" />
             </StatusBarItem>
         </StatusBar>
 
         <!-- ── Main content grid ───────────────────────────────────────────────── -->
+        <!-- DL v2 columns: sidebar 286 | 1px divider | 5px splitter | content * -->
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="330" />
-                <ColumnDefinition Width="5" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="286" />   <!-- sidebar (DL v2: 286px) -->
+                <ColumnDefinition Width="1" />     <!-- sidebar right border -->
+                <ColumnDefinition Width="5" />     <!-- GridSplitter -->
+                <ColumnDefinition Width="*" />     <!-- right content -->
             </Grid.ColumnDefinitions>
 
-            <!-- ── Left panel ──────────────────────────────────────────────────── -->
-            <Grid Grid.Column="0">
+            <!-- ── Sidebar (DL v2: SidebarBg rgba(8,8,14,.20), right border Divider) ── -->
+            <Grid Grid.Column="0"
+                  Background="{DynamicResource Theme.Brush.SidebarBg}">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
@@ -289,11 +345,11 @@
                 <!-- Sekce Akce -->
                 <GroupBox x:Name="GrpActions" Grid.Row="0"
                           Header="{Binding GrpActionsHeader}"
-                          Margin="8,8,8,4" Padding="8"
+                          Margin="8,8,8,4" Padding="12"
                           Style="{StaticResource Style.Grp.Panel}">
                     <StackPanel x:Name="ActionsStack">
 
-                        <!-- Dynamické TUI tlačítko — CTA gradient accent -->
+                        <!-- BtnStartTui — CTA accent, gradient AccentTop→AccentBot -->
                         <Button x:Name="BtnStartTui"
                                 Style="{StaticResource Style.Btn.CtaAccent}"
                                 Background="{DynamicResource Brush.ActionPositive}"
@@ -312,15 +368,15 @@
                                            Text="(restart Gateway)"
                                            HorizontalAlignment="Center"
                                            FontSize="10" FontWeight="Normal"
-                                           Foreground="{DynamicResource Theme.Brush.Text.Secondary}" />
+                                           Foreground="{DynamicResource Theme.Brush.Label}" />
                             </StackPanel>
                         </Button>
 
                         <!-- Gateway tlačítka -->
                         <TextBlock x:Name="TxtGatewayLabel"
                                    Text="{Binding GatewayLabel}"
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}"
+                                   FontWeight="Bold" FontSize="11"
+                                   Foreground="{DynamicResource Theme.Brush.Label}"
                                    Margin="0,4,0,4" />
                         <Grid Margin="0,0,0,4">
                             <Grid.ColumnDefinitions>
@@ -330,11 +386,11 @@
                             </Grid.ColumnDefinitions>
                             <Button x:Name="BtnGatewayStart"
                                     Style="{StaticResource Style.Btn.Action}"
-                                    Grid.Column="0" Height="28"
+                                    Grid.Column="0" Height="30"
                                     IsEnabled="{Binding BtnGatewayStartEnabled}"
                                     ToolTip="{Binding BtnGatewayStartToolTip}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="▶" Foreground="Green" FontWeight="Bold" Margin="0,0,6,0" />
+                                    <TextBlock Text="▶" Foreground="#5be07e" FontWeight="Bold" Margin="0,0,6,0" />
                                     <TextBlock x:Name="BtnGatewayStartLabel"
                                                Text="{Binding BtnGatewayStartLabel}"
                                                VerticalAlignment="Center" />
@@ -342,11 +398,11 @@
                             </Button>
                             <Button x:Name="BtnGatewayStop"
                                     Style="{StaticResource Style.Btn.Action}"
-                                    Grid.Column="2" Height="28"
+                                    Grid.Column="2" Height="30"
                                     IsEnabled="{Binding BtnGatewayStopEnabled}"
                                     ToolTip="{Binding BtnGatewayStopToolTip}">
                                 <StackPanel Orientation="Horizontal">
-                                    <TextBlock Text="■" Foreground="Red" FontWeight="Bold" Margin="0,0,6,0" />
+                                    <TextBlock Text="■" Foreground="#ff7b6f" FontWeight="Bold" Margin="0,0,6,0" />
                                     <TextBlock x:Name="BtnGatewayStopLabel"
                                                Text="{Binding BtnGatewayStopLabel}"
                                                VerticalAlignment="Center" />
@@ -355,11 +411,11 @@
                         </Grid>
                         <Button x:Name="BtnGatewayRestart"
                                 Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,8"
+                                Height="30" Margin="0,0,0,8"
                                 IsEnabled="{Binding BtnGatewayRestartEnabled}"
                                 ToolTip="{Binding BtnGatewayRestartToolTip}">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="↻" Foreground="Orange"
+                                <TextBlock Text="↻" Foreground="#ffc56b"
                                            FontWeight="Bold" FontSize="14" Margin="0,0,6,0" />
                                 <TextBlock x:Name="BtnGatewayRestartLabel"
                                            Text="{Binding BtnGatewayRestartLabel}"
@@ -370,12 +426,12 @@
                         <!-- Otevřít -->
                         <TextBlock x:Name="TxtSectionOpen"
                                    Text="{Binding SectionOpenLabel}"
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}"
+                                   FontWeight="Bold" FontSize="11"
+                                   Foreground="{DynamicResource Theme.Brush.Label}"
                                    Margin="0,4,0,4" />
                         <Button x:Name="BtnOpenPowerShell"
                                 Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,4"
+                                Height="30" Margin="0,0,0,4"
                                 ToolTip="{Binding BtnPowerShellToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="⚡" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
@@ -386,7 +442,7 @@
                         </Button>
                         <Button x:Name="BtnOpenGatewayLog"
                                 Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,8"
+                                Height="30" Margin="0,0,0,8"
                                 ToolTip="{Binding BtnGatewayLogToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="📄" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
@@ -399,12 +455,12 @@
                         <!-- Nástroje -->
                         <TextBlock x:Name="TxtSectionTools"
                                    Text="{Binding SectionToolsLabel}"
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}"
+                                   FontWeight="Bold" FontSize="11"
+                                   Foreground="{DynamicResource Theme.Brush.Label}"
                                    Margin="0,4,0,4" />
                         <Button x:Name="BtnCleaningTool"
                                 Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,4"
+                                Height="30" Margin="0,0,0,4"
                                 ToolTip="{Binding BtnCleaningToolToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🧹" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
@@ -415,7 +471,7 @@
                         </Button>
                         <Button x:Name="BtnTokenManager"
                                 Style="{StaticResource Style.Btn.Action}"
-                                Height="28" Margin="0,0,0,8"
+                                Height="30" Margin="0,0,0,8"
                                 ToolTip="{Binding BtnTokenManagerToolTip}">
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="🔑" FontFamily="Segoe UI Emoji" FontSize="14" Margin="0,0,8,0" />
@@ -428,12 +484,12 @@
                         <!-- Údržba -->
                         <TextBlock x:Name="TxtSectionMaintenance"
                                    Text="{Binding SectionMaintenanceLabel}"
-                                   FontWeight="SemiBold" FontSize="11"
-                                   Foreground="{DynamicResource Theme.Brush.Text.Secondary}"
+                                   FontWeight="Bold" FontSize="11"
+                                   Foreground="{DynamicResource Theme.Brush.Label}"
                                    Margin="0,4,0,4" />
                         <Button x:Name="BtnDoctorFix"
                                 Style="{StaticResource Style.Btn.Action}"
-                                Height="28"
+                                Height="30"
                                 Background="{DynamicResource Brush.ActionDanger}"
                                 ToolTip="{Binding BtnDoctorFixToolTip}">
                             <StackPanel Orientation="Horizontal">
@@ -450,7 +506,7 @@
                 <!-- Sekce Nástroje — používá se pro StandardDark layout -->
                 <GroupBox x:Name="GrpTools" Grid.Row="1"
                           Header="{Binding GrpToolsHeader}"
-                          Margin="8,4,8,4" Padding="8"
+                          Margin="8,4,8,4" Padding="12"
                           Visibility="Collapsed"
                           Style="{StaticResource Style.Grp.Panel}">
                     <StackPanel x:Name="ToolsStack" />
@@ -459,7 +515,7 @@
                 <!-- Sekce Měření latence -->
                 <GroupBox x:Name="GrpLatency" Grid.Row="2"
                           Header="{Binding GrpLatencyHeader}"
-                          Margin="8,4,8,4" Padding="8"
+                          Margin="8,4,8,4" Padding="12"
                           ToolTip="{Binding GrpLatencyToolTip}"
                           Style="{StaticResource Style.Grp.Panel}">
                     <Grid>
@@ -473,19 +529,31 @@
                             <RowDefinition />
                             <RowDefinition />
                         </Grid.RowDefinitions>
-                        <TextBlock x:Name="TxtLatencyLast"  Grid.Row="0" Grid.Column="0" Text="{Binding LatencyLastLabel}" />
+                        <TextBlock x:Name="TxtLatencyLast"  Grid.Row="0" Grid.Column="0"
+                                   Text="{Binding LatencyLastLabel}"
+                                   Foreground="{DynamicResource Theme.Brush.InkMute}" />
                         <TextBlock                           Grid.Row="0" Grid.Column="1"
-                                   x:Name="LatencyLast"  Text="{Binding LatencyLastText}"
-                                   Foreground="{Binding LatencyLastColor}" />
-                        <TextBlock x:Name="TxtLatencyAvg"   Grid.Row="1" Grid.Column="0" Text="{Binding LatencyAvgLabel}" />
+                                   x:Name="LatencyLast" Text="{Binding LatencyLastText}"
+                                   Foreground="{Binding LatencyLastColor}"
+                                   FontFamily="Consolas" FontWeight="SemiBold" />
+                        <TextBlock x:Name="TxtLatencyAvg"   Grid.Row="1" Grid.Column="0"
+                                   Text="{Binding LatencyAvgLabel}"
+                                   Foreground="{DynamicResource Theme.Brush.InkMute}" />
                         <TextBlock                           Grid.Row="1" Grid.Column="1"
-                                   x:Name="LatencyAvg"   Text="{Binding LatencyAvgText}" />
-                        <TextBlock x:Name="TxtLatencyMax"   Grid.Row="2" Grid.Column="0" Text="{Binding LatencyMaxLabel}" />
+                                   x:Name="LatencyAvg" Text="{Binding LatencyAvgText}"
+                                   FontFamily="Consolas" FontWeight="SemiBold" />
+                        <TextBlock x:Name="TxtLatencyMax"   Grid.Row="2" Grid.Column="0"
+                                   Text="{Binding LatencyMaxLabel}"
+                                   Foreground="{DynamicResource Theme.Brush.InkMute}" />
                         <TextBlock                           Grid.Row="2" Grid.Column="1"
-                                   x:Name="LatencyMax"   Text="{Binding LatencyMaxText}" />
-                        <TextBlock x:Name="TxtLatencyCount" Grid.Row="3" Grid.Column="0" Text="{Binding LatencyCountLabel}" />
+                                   x:Name="LatencyMax" Text="{Binding LatencyMaxText}"
+                                   FontFamily="Consolas" FontWeight="SemiBold" />
+                        <TextBlock x:Name="TxtLatencyCount" Grid.Row="3" Grid.Column="0"
+                                   Text="{Binding LatencyCountLabel}"
+                                   Foreground="{DynamicResource Theme.Brush.InkMute}" />
                         <TextBlock                           Grid.Row="3" Grid.Column="1"
-                                   x:Name="LatencyCount" Text="{Binding LatencyCountText}" />
+                                   x:Name="LatencyCount" Text="{Binding LatencyCountText}"
+                                   FontFamily="Consolas" FontWeight="SemiBold" />
                     </Grid>
                 </GroupBox>
 
@@ -498,14 +566,18 @@
                              FontFamily="Consolas" FontSize="11"
                              BorderThickness="0"
                              Background="Transparent"
-                             Foreground="{DynamicResource Theme.Brush.Text.Primary}"
+                             Foreground="{DynamicResource Theme.Brush.InkSoft}"
                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                              ScrollViewer.VerticalScrollBarVisibility="Auto" />
                 </GroupBox>
             </Grid>
 
+            <!-- Sidebar right border: DL v2 divider rgba(255,255,255,.12) -->
+            <Border Grid.Column="1"
+                    Background="{DynamicResource Theme.Brush.Divider}" />
+
             <!-- ── GridSplitter ─────────────────────────────────────────────────── -->
-            <GridSplitter x:Name="MainGridSplitter" Grid.Column="1" Width="5"
+            <GridSplitter x:Name="MainGridSplitter" Grid.Column="2" Width="5"
                           HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                           Background="{DynamicResource Theme.Brush.Border}" />
 
@@ -514,7 +586,7 @@
             <!-- Vrstva 0: TerminalControl (TUI)                                     -->
             <!-- Vrstva 1: SplashOverlay (video/PNG nad TUI, moderní pozadí)        -->
             <!-- ════════════════════════════════════════════════════════════════════ -->
-            <Grid x:Name="RightPanel" Grid.Column="2">
+            <Grid x:Name="RightPanel" Grid.Column="3">
 
                 <!-- Vrstva 0: Embedded TUI terminál (vždy přítomný) -->
                 <views:TerminalControl x:Name="Terminal" />
@@ -555,7 +627,7 @@
                                      Visibility="Collapsed"
                                      BorderThickness="0"
                                      Background="Transparent"
-                                     Foreground="#2563EB" />
+                                     Foreground="{DynamicResource Theme.Brush.AccentBot}" />
 
                     </Grid>
                 </Border>

@@ -78,6 +78,23 @@
     <Color x:Key="Theme.Color.AccentBot">#1D4ED8</Color>
     <Color x:Key="Theme.Color.AccentGlow">#991D4ED8</Color>
 
+    <!-- Design Language v2 — liquid-glass tokens (md-kit.jsx G object)
+         SectionBg  = rgba(255,255,255,.045)   BtnBg     = rgba(255,255,255,.08)
+         BtnBorder  = rgba(255,255,255,.20)    BarBg     = rgba(10,8,18,.34)
+         SidebarBg  = rgba(8,8,14,.20)         Divider   = rgba(255,255,255,.12)
+         Label = #9ea4b6  Ink = #f6f7fb  InkSoft = #e6e8f0  InkMute = #c2c6d4   -->
+    <Color x:Key="Theme.Color.SectionBg">#0BFFFFFF</Color>
+    <Color x:Key="Theme.Color.SectionBorder">#1FFFFFFF</Color>
+    <Color x:Key="Theme.Color.BtnBg">#14FFFFFF</Color>
+    <Color x:Key="Theme.Color.BtnBorder">#33FFFFFF</Color>
+    <Color x:Key="Theme.Color.BarBg">#570A0812</Color>
+    <Color x:Key="Theme.Color.SidebarBg">#3308080E</Color>
+    <Color x:Key="Theme.Color.Divider">#1FFFFFFF</Color>
+    <Color x:Key="Theme.Color.Label">#9EA4B6</Color>
+    <Color x:Key="Theme.Color.Ink">#F6F7FB</Color>
+    <Color x:Key="Theme.Color.InkSoft">#E6E8F0</Color>
+    <Color x:Key="Theme.Color.InkMute">#C2C6D4</Color>
+
     <!-- ═══════════════════════════════════════════════════════ Brushes -->
 
     <!-- Surfaces -->
@@ -116,11 +133,24 @@
     <SolidColorBrush x:Key="Theme.Brush.AccentBot"             Color="{StaticResource Theme.Color.AccentBot}" />
     <SolidColorBrush x:Key="Theme.Brush.AccentGlow"            Color="{StaticResource Theme.Color.AccentGlow}" />
 
+    <!-- DL v2 liquid-glass component brushes -->
+    <SolidColorBrush x:Key="Theme.Brush.SectionBg"             Color="{StaticResource Theme.Color.SectionBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.SectionBorder"         Color="{StaticResource Theme.Color.SectionBorder}" />
+    <SolidColorBrush x:Key="Theme.Brush.BtnBg"                 Color="{StaticResource Theme.Color.BtnBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.BtnBorder"             Color="{StaticResource Theme.Color.BtnBorder}" />
+    <SolidColorBrush x:Key="Theme.Brush.BarBg"                 Color="{StaticResource Theme.Color.BarBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.SidebarBg"             Color="{StaticResource Theme.Color.SidebarBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.Divider"               Color="{StaticResource Theme.Color.Divider}" />
+    <SolidColorBrush x:Key="Theme.Brush.Label"                 Color="{StaticResource Theme.Color.Label}" />
+    <SolidColorBrush x:Key="Theme.Brush.Ink"                   Color="{StaticResource Theme.Color.Ink}" />
+    <SolidColorBrush x:Key="Theme.Brush.InkSoft"               Color="{StaticResource Theme.Color.InkSoft}" />
+    <SolidColorBrush x:Key="Theme.Brush.InkMute"               Color="{StaticResource Theme.Color.InkMute}" />
+
     <!-- ═══════════════════════════════════════════════════════ Glass tokens -->
-    <!-- Panel: rgba(8,10,14,0.72) · Border: rgba(255,255,255,0.16) -->
+    <!-- Panel: rgba(8,10,14,0.72) · Border: rgba(255,255,255,0.22)  (DL v2: glassBorder) -->
     <!-- Highlight (top line): rgba(255,255,255,0.14)                -->
     <Color x:Key="Theme.Color.GlassPanel.Background">#B8080A0E</Color>
-    <Color x:Key="Theme.Color.GlassBorder">#29FFFFFF</Color>
+    <Color x:Key="Theme.Color.GlassBorder">#38FFFFFF</Color>
     <Color x:Key="Theme.Color.GlassHighlight">#24FFFFFF</Color>
 
     <!-- Window controls: idle rgba(255,255,255,0.08) / hover 0.14 / close red 0.85 -->
@@ -145,12 +175,14 @@
         <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
     </Style>
 
-    <!-- Card-radius GroupBox for secondary windows (DL §9 card = 18 px). -->
+    <!-- DL v2 Section/GroupBox: floating label above bordered card (radius 14, SectionBg).
+         Label: 11px/700, Label color. Card: SectionBg + SectionBorder + inset top highlight. -->
     <Style x:Key="Theme.Style.GroupBox" TargetType="GroupBox">
-        <Setter Property="Background"      Value="{StaticResource Theme.Brush.Surface}" />
-        <Setter Property="BorderBrush"     Value="{StaticResource Theme.Brush.Border}" />
-        <Setter Property="Foreground"      Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="Background"      Value="{StaticResource Theme.Brush.SectionBg}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource Theme.Brush.SectionBorder}" />
+        <Setter Property="Foreground"      Value="{StaticResource Theme.Brush.Label}" />
         <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding"         Value="16" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="GroupBox">
@@ -159,30 +191,52 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
-                        <Border Grid.Row="0" Grid.RowSpan="2"
+                        <!-- Floating section label row -->
+                        <Border Grid.Row="0" Padding="4,0,4,6">
+                            <ContentPresenter ContentSource="Header"
+                                              RecognizesAccessKey="True"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"
+                                              TextElement.FontSize="11"
+                                              TextElement.FontWeight="Bold" />
+                        </Border>
+                        <!-- Bordered card -->
+                        <Border Grid.Row="1"
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="18" />
-                        <Border Grid.Row="0" Padding="10,6,10,0">
-                            <ContentPresenter ContentSource="Header"
-                                              RecognizesAccessKey="True"
-                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                                CornerRadius="14"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <Grid>
+                                <!-- Inset top highlight: rgba(255,255,255,.09) -->
+                                <Border CornerRadius="14" IsHitTestVisible="False">
+                                    <Border.Background>
+                                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,0.12">
+                                            <GradientStop Color="#17FFFFFF" Offset="0"/>
+                                            <GradientStop Color="Transparent" Offset="1"/>
+                                        </LinearGradientBrush>
+                                    </Border.Background>
+                                </Border>
+                                <ContentPresenter Content="{TemplateBinding Content}" />
+                            </Grid>
                         </Border>
-                        <ContentPresenter Grid.Row="1" Margin="6,4,6,6" />
                     </Grid>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
-    <!-- DL §7.5 secondary button: bg #1C2026, border #2B3038, radius 8 px. -->
+    <!-- DL v2 secondary button: BtnBg rgba(255,255,255,.08), BtnBorder rgba(255,255,255,.20),
+         radius 9, 13px/SemiBold InkSoft text. Used by secondary windows via Theme.Style.Button. -->
     <Style x:Key="Theme.Style.Button" TargetType="Button">
-        <Setter Property="Background"                 Value="{StaticResource Theme.Brush.SecondaryButton}" />
-        <Setter Property="Foreground"                 Value="{StaticResource Theme.Brush.Text.Primary}" />
-        <Setter Property="BorderBrush"                Value="{StaticResource Theme.Brush.SecondaryButtonBorder}" />
+        <Setter Property="Background"                 Value="{StaticResource Theme.Brush.BtnBg}" />
+        <Setter Property="Foreground"                 Value="{StaticResource Theme.Brush.InkSoft}" />
+        <Setter Property="BorderBrush"                Value="{StaticResource Theme.Brush.BtnBorder}" />
         <Setter Property="BorderThickness"            Value="1" />
-        <Setter Property="Padding"                    Value="12,6" />
+        <Setter Property="Padding"                    Value="14,0" />
+        <Setter Property="Height"                     Value="34" />
+        <Setter Property="FontSize"                   Value="13" />
+        <Setter Property="FontWeight"                 Value="SemiBold" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment"   Value="Center" />
         <Setter Property="Template">
@@ -192,7 +246,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="8"
+                            CornerRadius="9"
                             SnapsToDevicePixels="True">
                         <ContentPresenter
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -218,17 +272,18 @@
         </Setter>
     </Style>
 
-    <!-- Glass window control — Tag carries the hover brush so WinCtrl.Close can override it. -->
+    <!-- Glass window control (DL v2: 44×30, radius 9, InkMute glyph → white on hover) -->
+    <!-- Tag carries the hover bg brush so WinCtrl.Close can override to red.            -->
     <Style x:Key="Theme.Style.WinCtrl" TargetType="Button">
         <Setter Property="Background"       Value="{StaticResource Theme.Brush.WinCtrl.Idle}" />
         <Setter Property="BorderBrush"      Value="{StaticResource Theme.Brush.WinCtrl.Border}" />
         <Setter Property="BorderThickness"  Value="1" />
-        <Setter Property="Foreground"       Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="Foreground"       Value="{StaticResource Theme.Brush.InkMute}" />
         <Setter Property="Width"            Value="44" />
-        <Setter Property="Height"           Value="34" />
+        <Setter Property="Height"           Value="30" />
         <Setter Property="Padding"          Value="0" />
         <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        <!-- Tag = hover brush; WinCtrl.Close overrides this to red -->
+        <!-- Tag = hover bg brush; WinCtrl.Close overrides this to red -->
         <Setter Property="Tag"              Value="{StaticResource Theme.Brush.WinCtrl.Hover}" />
         <Setter Property="Template">
             <Setter.Value>
@@ -237,7 +292,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="10"
+                            CornerRadius="9"
                             SnapsToDevicePixels="True">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
@@ -245,10 +300,12 @@
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Root" Property="Background"
                                     Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" />
+                            <Setter Property="Foreground" Value="White" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter TargetName="Root" Property="Background"
                                     Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" />
+                            <Setter Property="Foreground" Value="White" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -256,7 +313,7 @@
         </Setter>
     </Style>
 
-    <!-- Close button: same template, red hover via Tag override. -->
+    <!-- Close button: same template, red hover bg via Tag override. -->
     <Style x:Key="Theme.Style.WinCtrl.Close" BasedOn="{StaticResource Theme.Style.WinCtrl}" TargetType="Button">
         <Setter Property="Tag" Value="{StaticResource Theme.Brush.WinCtrl.Close}" />
     </Style>
