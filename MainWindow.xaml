@@ -4,7 +4,7 @@
         xmlns:views="clr-namespace:OpenClawManager.Views"
         Title="OpenClaw Manager Tool by Bloom"
         Icon="pack://application:,,,/Resources/app-favicon.ico"
-        Height="860" Width="1400"
+        Height="720" Width="1400"
         MinHeight="500" MinWidth="900"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource Theme.Brush.Background}">
@@ -323,13 +323,11 @@
         </StatusBar>
 
         <!-- ── Main content grid ───────────────────────────────────────────────── -->
-        <!-- DL v2 columns: sidebar 286 | 1px divider | 5px splitter | content * -->
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="286" />   <!-- sidebar (DL v2: 286px) -->
-                <ColumnDefinition Width="1" />     <!-- sidebar right border -->
-                <ColumnDefinition Width="5" />     <!-- GridSplitter -->
-                <ColumnDefinition Width="*" />     <!-- right content -->
+                <ColumnDefinition Width="330" />
+                <ColumnDefinition Width="5" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
             <!-- ── Sidebar (DL v2: SidebarBg rgba(8,8,14,.20), right border Divider) ── -->
@@ -572,12 +570,8 @@
                 </GroupBox>
             </Grid>
 
-            <!-- Sidebar right border: DL v2 divider rgba(255,255,255,.12) -->
-            <Border Grid.Column="1"
-                    Background="{DynamicResource Theme.Brush.Divider}" />
-
             <!-- ── GridSplitter ─────────────────────────────────────────────────── -->
-            <GridSplitter x:Name="MainGridSplitter" Grid.Column="2" Width="5"
+            <GridSplitter x:Name="MainGridSplitter" Grid.Column="1" Width="5"
                           HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                           Background="{DynamicResource Theme.Brush.Border}" />
 
@@ -586,7 +580,7 @@
             <!-- Vrstva 0: TerminalControl (TUI)                                     -->
             <!-- Vrstva 1: SplashOverlay (video/PNG nad TUI, moderní pozadí)        -->
             <!-- ════════════════════════════════════════════════════════════════════ -->
-            <Grid x:Name="RightPanel" Grid.Column="3">
+            <Grid x:Name="RightPanel" Grid.Column="2">
 
                 <!-- Vrstva 0: Embedded TUI terminál (vždy přítomný) -->
                 <views:TerminalControl x:Name="Terminal" />
