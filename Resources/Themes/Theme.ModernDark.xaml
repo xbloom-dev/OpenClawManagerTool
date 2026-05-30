@@ -95,6 +95,8 @@
     <SolidColorBrush x:Key="Brush.ActionDanger"           Color="{StaticResource Theme.Color.ActionDanger}" />
     <SolidColorBrush x:Key="Brush.ActionUtility"          Color="{StaticResource Theme.Color.ActionUtility}" />
     <SolidColorBrush x:Key="Brush.SplashModernBackground" Color="{StaticResource Theme.Color.SplashModernBackground}" />
+    <!-- Accent — AccentTop z md-kit.jsx design spec (#5AA1FF) -->
+    <SolidColorBrush x:Key="Theme.Brush.Accent"           Color="#5AA1FF" />
 
     <!-- Named styles for secondary windows. Runtime wiring is handled by
          ModernPaletteRuntimeStyles.cs through window.Resources entries. -->

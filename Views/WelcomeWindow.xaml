@@ -14,6 +14,11 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
+        <!-- Fallback pro Theme.Brush.Accent: použito pokud aktivní téma klíč nedefinuje.
+             WelcomeWindow se zobrazuje při prvním spuštění (Legacy téma), kdy žádná
+             téma-specific hodnota ještě neexistuje. -->
+        <SolidColorBrush x:Key="Theme.Brush.Accent" Color="#E11D48" />
+
         <Style x:Key="WelcomeCaptionButton" TargetType="{x:Type Button}">
             <Setter Property="Width" Value="44" />
             <Setter Property="Height" Value="34" />

@@ -2,6 +2,10 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- Globální fallback pro Accent — přepisuje se individuálními theme slovníky.
+         Hodnota je použita kdekoliv mimo WelcomeWindow (tam vyhraje Window.Resources). -->
+    <SolidColorBrush x:Key="Theme.Brush.Accent" Color="#E11D48" />
+
     <Style x:Key="Style.GroupBox.Standard" TargetType="{x:Type GroupBox}">
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.Surface}" />
         <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Text.Secondary}" />

@@ -81,11 +81,17 @@ jobs:
           $lite = Join-Path $PWD "artifacts\publish-lite"
           Remove-Item -Path $full, $lite -Recurse -Force -ErrorAction SilentlyContinue
 
+          # Self-contained single-file publish — Full edition (všechny assety)
           dotnet publish .\OpenClawManager.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$version -o $full
+
+          # Self-contained single-file publish — Lite edition (Legacy theme only)
           dotnet publish .\OpenClawManager.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:Version=$version -p:BuildProfile=Lite -o $lite
 
+          # settings.json = {} spustí Portable detekci v SettingsService pro oba portable buildy
+          "{}" | Set-Content -Path (Join-Path $full "settings.json") -Encoding UTF8
           "{}" | Set-Content -Path (Join-Path $lite "settings.json") -Encoding UTF8
 
+          # Lite edition nemá splash video
           Remove-Item -Path (Join-Path $lite "Resources\splash.mp4") -Force -ErrorAction SilentlyContinue
 
       - name: Install Inno Setup
@@ -114,8 +120,11 @@ jobs:
           New-Item -ItemType Directory -Force -Path $out | Out-Null
 
           $iscc = Join-Path ${env:ProgramFiles(x86)} "Inno Setup 6\ISCC.exe"
-          & $iscc .\Installer\OpenClawManager-Full.iss "/DAppVersion=$version" "/DFullSourceDir=$full" "/DLiteSourceDir=$lite" "/O$out"
+          # OpenClawManager.iss — instalace do Program Files, Full + Lite komponenty, WebView2 check
+          & $iscc .\Installer\OpenClawManager.iss "/DAppVersion=$version" "/DFullSourceDir=$full" "/DLiteSourceDir=$lite" "/O$out"
 
+          # Portable archivy — settings.json je již přítomen z publish kroku (spouští Portable detekci)
+          Compress-Archive -Path (Join-Path $full "*") -DestinationPath (Join-Path $out "OpenClawManagerTool-$tag-win-x64-portable-full.zip") -Force
           Compress-Archive -Path (Join-Path $lite "*") -DestinationPath (Join-Path $out "OpenClawManagerTool-$tag-win-x64-portable-lite.zip") -Force
 
           Get-ChildItem $out -File | Where-Object { $_.Extension -in ".exe", ".zip" } | ForEach-Object {
