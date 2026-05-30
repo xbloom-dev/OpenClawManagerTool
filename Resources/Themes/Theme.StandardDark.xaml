@@ -8,17 +8,13 @@
         ═══════════════════════════════════════════════════════════════════
         #121212   Chrome     — title bar, menu, status bar
         #1E1E1E   Separator  — decentní GridSplitter
+        #191919   TuiBg      — TUI okno ("světle černé", mezivrstva)
         #282828   Background — pozadí okna, idle Nástroje (ghost)
-        #383838   Active     — idle Akce tlačítka (výrazná)
-        #464646   Hover      — hover všech tlačítek
-        #535353   Pressed    — pressed stav
+        #4A4A4A   Active     — idle Akce tlačítka (světlejší než dříve)
+        #5C5C5C   Hover      — hover všech tlačítek
+        #6E6E6E   Pressed    — pressed stav
         #FFFFFF   Text.Primary  — text tlačítek
-        #787878   Text.Secondary — všechny ostatní texty, log, popisky
-        ═══════════════════════════════════════════════════════════════════
-        XAML klíče načítané z MainWindow.Theme.cs přes FindThemeStyle():
-          Style.Button.StandardFlat
-          Style.GroupBox.Hidden
-          Style.MenuItem.Dark
+        #787878   Text.Secondary — ostatní texty, log, popisky
         ═══════════════════════════════════════════════════════════════════
     -->
 
@@ -34,27 +30,29 @@
     ═══════════════════════════════════════════════════════════════════ -->
     <Color x:Key="Theme.Color.Chrome">#121212</Color>
     <Color x:Key="Theme.Color.Separator">#1E1E1E</Color>
+    <Color x:Key="Theme.Color.TuiBackground">#191919</Color>
     <Color x:Key="Theme.Color.Background">#282828</Color>
-    <Color x:Key="Theme.Color.Active">#383838</Color>
-    <Color x:Key="Theme.Color.Hover">#464646</Color>
-    <Color x:Key="Theme.Color.Pressed">#535353</Color>
-    <Color x:Key="Theme.Color.Menu.Hover">#383838</Color>
+    <Color x:Key="Theme.Color.Active">#4A4A4A</Color>
+    <Color x:Key="Theme.Color.Hover">#5C5C5C</Color>
+    <Color x:Key="Theme.Color.Pressed">#6E6E6E</Color>
+    <Color x:Key="Theme.Color.Menu.Hover">#4A4A4A</Color>
     <Color x:Key="Theme.Color.Text.Primary">#FFFFFF</Color>
     <Color x:Key="Theme.Color.Text.Secondary">#787878</Color>
-    <!-- Aliasy pro kompatibilitu s ostatními tématy -->
-    <Color x:Key="Theme.Color.Surface">#383838</Color>
-    <Color x:Key="Theme.Color.Border">#464646</Color>
+    <!-- Aliasy -->
+    <Color x:Key="Theme.Color.Surface">#4A4A4A</Color>
+    <Color x:Key="Theme.Color.Border">#5C5C5C</Color>
     <Color x:Key="Theme.Color.ButtonText">#FFFFFF</Color>
-    <Color x:Key="Theme.Color.ActionPositive">#383838</Color>
-    <Color x:Key="Theme.Color.ActionDanger">#383838</Color>
-    <Color x:Key="Theme.Color.ActionUtility">#383838</Color>
-    <Color x:Key="Theme.Color.SplashModernBackground">#121212</Color>
+    <Color x:Key="Theme.Color.ActionPositive">#4A4A4A</Color>
+    <Color x:Key="Theme.Color.ActionDanger">#4A4A4A</Color>
+    <Color x:Key="Theme.Color.ActionUtility">#4A4A4A</Color>
+    <Color x:Key="Theme.Color.SplashModernBackground">#191919</Color>
 
     <!-- ═══════════════════════════════════════════════════════════════════
-         BRUSHE — přesné klíče načítané z ApplyStandardDarkShell()
+         BRUSHE
     ═══════════════════════════════════════════════════════════════════ -->
     <SolidColorBrush x:Key="Theme.Brush.Chrome"          Color="{StaticResource Theme.Color.Chrome}" />
     <SolidColorBrush x:Key="Theme.Brush.Separator"       Color="{StaticResource Theme.Color.Separator}" />
+    <SolidColorBrush x:Key="Theme.Brush.TuiBackground"   Color="{StaticResource Theme.Color.TuiBackground}" />
     <SolidColorBrush x:Key="Theme.Brush.Background"      Color="{StaticResource Theme.Color.Background}" />
     <SolidColorBrush x:Key="Theme.Brush.Active"          Color="{StaticResource Theme.Color.Active}" />
     <SolidColorBrush x:Key="Theme.Brush.Hover"           Color="{StaticResource Theme.Color.Hover}" />
@@ -62,7 +60,6 @@
     <SolidColorBrush x:Key="Theme.Brush.Menu.Hover"      Color="{StaticResource Theme.Color.Menu.Hover}" />
     <SolidColorBrush x:Key="Theme.Brush.Text.Primary"    Color="{StaticResource Theme.Color.Text.Primary}" />
     <SolidColorBrush x:Key="Theme.Brush.Text.Secondary"  Color="{StaticResource Theme.Color.Text.Secondary}" />
-    <!-- Aliasy -->
     <SolidColorBrush x:Key="Theme.Brush.Surface"         Color="{StaticResource Theme.Color.Surface}" />
     <SolidColorBrush x:Key="Theme.Brush.Border"          Color="{StaticResource Theme.Color.Border}" />
     <SolidColorBrush x:Key="Theme.Brush.ButtonText"      Color="{StaticResource Theme.Color.ButtonText}" />
@@ -73,15 +70,34 @@
     <SolidColorBrush x:Key="Brush.SplashModernBackground" Color="{StaticResource Theme.Color.SplashModernBackground}" />
 
     <!-- ═══════════════════════════════════════════════════════════════════
+         SYSTÉMOVÉ PŘEPSÁNÍ — menu popup pozadí a rámeček
+         Platí jen při aktivním StandardDark (ResourceDictionary je swapnutý).
+    ═══════════════════════════════════════════════════════════════════ -->
+    <SolidColorBrush x:Key="{x:Static SystemColors.MenuBrushKey}"
+                     Color="{StaticResource Theme.Color.Chrome}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.MenuBarBrushKey}"
+                     Color="{StaticResource Theme.Color.Chrome}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.MenuHighlightBrushKey}"
+                     Color="{StaticResource Theme.Color.Active}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.MenuTextBrushKey}"
+                     Color="{StaticResource Theme.Color.Text.Secondary}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.ControlBrushKey}"
+                     Color="{StaticResource Theme.Color.Background}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.ControlDarkBrushKey}"
+                     Color="{StaticResource Theme.Color.Chrome}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.WindowBrushKey}"
+                     Color="{StaticResource Theme.Color.Background}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.WindowFrameBrushKey}"
+                     Color="{StaticResource Theme.Color.Chrome}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}"
+                     Color="{StaticResource Theme.Color.Active}" />
+    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}"
+                     Color="{StaticResource Theme.Color.Text.Primary}" />
+
+    <!-- ═══════════════════════════════════════════════════════════════════
          POJMENOVANÉ STYLY — načítané z MainWindow.Theme.cs přes FindThemeStyle()
     ═══════════════════════════════════════════════════════════════════ -->
 
-    <!--
-        Style.Button.StandardFlat
-        Flat tlačítko bez WPF chrome. Idle barva přichází z btn.Background
-        nastaveného externě v ApplyStandardActiveButtonStyle / ApplyStandardToolButtonStyle.
-        Hover a Pressed jsou fixní ze standardní palety.
-    -->
     <Style x:Key="Style.Button.StandardFlat" TargetType="Button">
         <Setter Property="BorderBrush"      Value="Transparent" />
         <Setter Property="BorderThickness"  Value="0" />
@@ -121,12 +137,6 @@
         </Setter>
     </Style>
 
-    <!--
-        Style.GroupBox.Hidden
-        Průhledný GroupBox bez headeru — používá se pro GrpActions, GrpTools,
-        GrpLatency a GrpAppLog v StandardDark layoutu.
-        Background a Foreground jsou nastavovány externě v ApplyStandardDarkShell().
-    -->
     <Style x:Key="Style.GroupBox.Hidden" TargetType="GroupBox">
         <Setter Property="Background"      Value="Transparent" />
         <Setter Property="BorderBrush"     Value="Transparent" />
@@ -143,11 +153,6 @@
         </Setter>
     </Style>
 
-    <!--
-        Style.MenuItem.Dark
-        Tmavý MenuItem styl pro MainMenu.
-        Aplikován přes MainMenu.Resources[typeof(MenuItem)] = FindThemeStyle(...).
-    -->
     <Style x:Key="Style.MenuItem.Dark" TargetType="MenuItem">
         <Setter Property="Background"      Value="{DynamicResource Theme.Brush.Chrome}" />
         <Setter Property="Foreground"      Value="{DynamicResource Theme.Brush.Text.Secondary}" />
@@ -165,7 +170,9 @@
         </Style.Triggers>
     </Style>
 
-    <!-- ── Ostatní pojmenované styly (pro přechodné použití v jiných místech kódu) ── -->
+    <!-- ═══════════════════════════════════════════════════════════════════
+         POJMENOVANÉ STYLY pro ostatní místa v kódu
+    ═══════════════════════════════════════════════════════════════════ -->
     <Style x:Key="Theme.Style.Window" TargetType="Window">
         <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
         <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Secondary}" />
@@ -192,11 +199,8 @@
     </Style>
 
     <!-- ═══════════════════════════════════════════════════════════════════
-         IMPLICITNÍ STYLY — automaticky aplikovány na sekundární okna
-         (Settings, About, CleaningTool, TokenManager, GatewayLog...)
-         Platí pro všechna okna aplikace při aktivním StandardDark tématu.
+         IMPLICITNÍ STYLY — sekundární okna (Settings, TokenManager, GatewayLog...)
     ═══════════════════════════════════════════════════════════════════ -->
-
     <Style TargetType="Window"    BasedOn="{StaticResource Theme.Style.Window}" />
     <Style TargetType="TextBlock" BasedOn="{StaticResource Theme.Style.TextBlock}" />
     <Style TargetType="ListBox"   BasedOn="{StaticResource Theme.Style.ListBox}" />
@@ -284,7 +288,6 @@
     <!-- ═══════════════════════════════════════════════════════════════════
          MODERNÍ SCROLLBAR — tenký 8px, bez šipek, zakulacený thumb
     ═══════════════════════════════════════════════════════════════════ -->
-
     <Style x:Key="StandardDark.ScrollBar.RepeatButton" TargetType="RepeatButton">
         <Setter Property="Focusable"  Value="False" />
         <Setter Property="IsTabStop"  Value="False" />
