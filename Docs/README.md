@@ -1,11 +1,11 @@
-﻿# OpenClaw Manager Tool by Bloom v2.0
+# OpenClaw Manager Tool by Bloom v2.0
 
 Windows WPF utility for managing an OpenClaw environment: Gateway/TUI control, embedded terminal, logs, cleanup, settings, themes, and Token Manager.
 
-## Shared Encoding Rule (Agents)
+## Encoding Rule
 
-All shared Markdown documentation must be saved as **UTF-8** and keep valid Czech diacritics.
-Do not commit broken encoding artifacts (for example: `Ä›`, `Ăˇ`, `Å™`).
+Documentation must be saved as **UTF-8 without BOM** with LF line endings.
+Keep Czech text with valid diacritics and do not commit mojibake.
 
 ## First Run
 
@@ -50,5 +50,4 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ## Release Notes
 
 See `Docs/CHANGELOG.md` for the current release summary.
-
 

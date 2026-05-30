@@ -1,4 +1,4 @@
-﻿# OpenClaw Manager Tool
+# OpenClaw Manager Tool
 
 [![CI](https://github.com/xbloom-dev/OpenClawManagerTool/actions/workflows/ci.yml/badge.svg)](https://github.com/xbloom-dev/OpenClawManagerTool/actions/workflows/ci.yml)
 
@@ -21,18 +21,6 @@ A Windows desktop app for managing a local [OpenClaw](https://github.com/opencla
 - **Themes** â€” Theme.Legacy, Theme.StandardLight, Theme.StandardDark, Theme.ModernDark, Theme.ModernLight, Theme.HighContrast, and Theme.CrabCute.
 - **Offline by default** â€” the embedded terminal ships local xterm.js assets, so it needs no CDN or internet at runtime.
 - **Bilingual UI** â€” English and Czech.
-
----
-
-## Shared Docs Encoding Rule (Agents)
-
-For all shared Markdown files used across agents (`*.md` in repository root and `Docs/`):
-
-- Use **UTF-8** encoding.
-- Keep Czech text in **valid diacritics** (e.g., `ěščřžýáíéůúďťň`), never mojibake (`Ä›`, `Ăˇ`, `Å™`, ...).
-- If encoding is broken after edits, fix the file before commit.
-
----
 
 ## Requirements
 
@@ -153,16 +141,7 @@ Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before
 
 This app handles API tokens and secrets. If you discover a vulnerability, **do not** open a public issue â€” follow the disclosure process in [SECURITY.md](SECURITY.md).
 
----
-
-## Development notes
-
-This project is built by Bloom with assistance from AI coding agents. Code, tests, and documentation are reviewed before merging.
-
----
-
 ## License
 
 This project is released under the terms of the [MIT License](LICENSE).
-
 

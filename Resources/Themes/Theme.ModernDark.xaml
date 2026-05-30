@@ -55,7 +55,7 @@
     <Color x:Key="Theme.Color.SplashModernBackground">#181818</Color>
 
     <!-- Glass / Performance Glass tokeny (Fáze 4) -->
-    <!-- Hodnoty z md-kit.jsx objekt G — přesné rgba hodnoty z design handoff -->
+    <!-- Modern Dark glass surface tokens. -->
     <Color x:Key="Theme.Color.Glass.SectionBg">#0BFFFFFF</Color>      <!-- rgba(255,255,255,.045) -->
     <Color x:Key="Theme.Color.Glass.SectionBorder">#1FFFFFFF</Color>  <!-- rgba(255,255,255,.12) -->
     <Color x:Key="Theme.Color.Glass.BtnBg">#14FFFFFF</Color>          <!-- rgba(255,255,255,.08) -->
