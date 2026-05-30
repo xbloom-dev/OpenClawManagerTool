@@ -8,6 +8,11 @@ Aktualni stav po instalator + welcome integraci (29 May 2026).
 - P1 = dalsi minor verze
 - P2 = dlouhodoby refactor
 
+## Agent Guardrails
+
+- Vsechny sdilene Markdown soubory (`*.md` v rootu a `Docs/`) musi byt ulozene jako UTF-8.
+- Cesky text musi zustat se spravnou diakritikou; necommitovat mojibake jako `Ä›`, `Ăˇ`, `Å™`.
+
 ---
 
 ## P0 (open)

@@ -2,6 +2,11 @@
 
 Windows WPF utility for managing an OpenClaw environment: Gateway/TUI control, embedded terminal, logs, cleanup, settings, themes, and Token Manager.
 
+## Shared Encoding Rule (Agents)
+
+All shared Markdown documentation must be saved as **UTF-8** and keep valid Czech diacritics.
+Do not commit broken encoding artifacts (for example: `Ä›`, `Ăˇ`, `Å™`).
+
 ## First Run
 
 1. Start `OpenClawManager.exe`.

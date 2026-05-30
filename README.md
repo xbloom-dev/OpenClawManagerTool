@@ -24,6 +24,16 @@ A Windows desktop app for managing a local [OpenClaw](https://github.com/opencla
 
 ---
 
+## Shared Docs Encoding Rule (Agents)
+
+For all shared Markdown files used across agents (`*.md` in repository root and `Docs/`):
+
+- Use **UTF-8** encoding.
+- Keep Czech text in **valid diacritics** (e.g., `ěščřžýáíéůúďťň`), never mojibake (`Ä›`, `Ăˇ`, `Å™`, ...).
+- If encoding is broken after edits, fix the file before commit.
+
+---
+
 ## Requirements
 
 - Windows 10 or 11 (x64)

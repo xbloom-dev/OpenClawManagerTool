@@ -79,6 +79,14 @@
     <!-- v0.5: Splash PNG fallback — embedded resource (graceful degradation když chybí .mp4) -->
     <Resource Include="Resources\splash.png" />
 
+    <!-- Welcome screen UI assets. -->
+    <Resource Include="Resources\Welcome\*.png" />
+
+    <!-- Welcome screen theme thumbnails copied beside the EXE for live preview. -->
+    <None Include="Resources\ThemePreviews\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
     <!-- v0.5: Splash video — vedle EXE (WMF/MediaElement potřebuje file path) -->
     <None Include="Resources\splash.mp4" Condition="'$(BuildProfile)' != 'Lite'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

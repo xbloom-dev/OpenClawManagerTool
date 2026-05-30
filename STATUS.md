@@ -3,9 +3,21 @@
 ## Current State
 
 - **Version:** v2.0.0-RC1
-- **Updated:** 2026-05-25
+- **Updated:** 2026-05-29
 - **Base branch:** develop
 - **Status:** Release Candidate preparation
+
+## Latest Update (2026-05-29)
+
+- Theme naming was unified across code, settings JSON, and shared docs:
+  - Internal enum/API uses: `Legacy`, `StandardLight`, `StandardDark`, `ModernDark`, `ModernLight`, `HighContrast`, `CrabCute`.
+  - Theme resource files use: `Theme.Legacy.xaml`, `Theme.StandardLight.xaml`, `Theme.StandardDark.xaml`, `Theme.ModernDark.xaml`, `Theme.ModernLight.xaml`, `Theme.HighContrast.xaml`, `Theme.CrabCute.xaml`.
+  - GUI labels were aligned for CZ/EN localization.
+- A **Welcome Screen baseline backup** was created before further UI experiments:
+  - Branch: `codex/baseline-welcome-2026-05-29`
+  - Tag: `welcome-baseline-2026-05-29`
+  - Snapshot commit: `ad22fdd`
+- Shared docs guardrail was added: all agent-shared Markdown files must use UTF-8 and correct Czech diacritics (no mojibake).
 
 ## V2.0 Roadmap
 
