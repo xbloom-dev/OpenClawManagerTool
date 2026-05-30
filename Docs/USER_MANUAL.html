@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Manual - OpenClaw Manager Tool by Bloom</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101116;
+      --surface: #181a22;
+      --surface-2: #20232d;
+      --border: #343846;
+      --text: #f4f6fb;
+      --muted: #b8bdca;
+      --accent: #19b7aa;
+      --accent-2: #7d65d6;
+      --warn: #ffcf70;
+      --code: #0c0d12;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, rgba(125, 101, 214, 0.2), transparent 34rem), var(--bg);
+      color: var(--text);
+      font: 16px/1.6 "Segoe UI", Arial, sans-serif;
+    }
+    main {
+      width: min(1040px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 56px;
+    }
+    header, section {
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      margin: 0 0 18px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+    }
+    h1, h2, h3 { line-height: 1.2; margin: 0 0 14px; }
+    h1 { font-size: 34px; }
+    h2 { font-size: 24px; padding-top: 4px; }
+    h3 { font-size: 18px; color: var(--text); }
+    p { margin: 0 0 14px; }
+    a { color: #8be9df; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .meta, .muted { color: var(--muted); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    nav {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px 18px;
+      margin-top: 18px;
+    }
+    nav a {
+      display: block;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      vertical-align: top;
+    }
+    th {
+      background: var(--surface-2);
+      text-align: left;
+    }
+    code, pre {
+      font-family: "Cascadia Mono", Consolas, monospace;
+      background: var(--code);
+      color: #e8ecf7;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    code { padding: 2px 5px; }
+    pre { padding: 14px; overflow: auto; }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: rgba(25, 183, 170, 0.1);
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin: 12px 0 18px;
+    }
+    .warn {
+      border-left-color: var(--warn);
+      background: rgba(255, 207, 112, 0.1);
+    }
+    ul { padding-left: 24px; }
+    li { margin: 4px 0; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="pill">Local help</span>
+    <h1>OpenClaw Manager Tool by Bloom</h1>
+    <p class="meta">User Manual for app version 2.0.2, updated 30 May 2026. <a href="USER_MANUAL.cs.html">Česká verze</a></p>
+    <nav aria-label="Contents">
+      <a href="#overview">1. Overview</a>
+      <a href="#install">2. Installation and startup</a>
+      <a href="#themes">3. Themes</a>
+      <a href="#main-window">4. Main window</a>
+      <a href="#gateway">5. Gateway control</a>
+      <a href="#tokens">6. Token Manager</a>
+      <a href="#cleaning">7. Cleaning Tool</a>
+      <a href="#settings">8. Settings</a>
+      <a href="#troubleshooting">9. Troubleshooting</a>
+    </nav>
+  </header>
+
+  <section id="overview">
+    <h2>1. Overview</h2>
+    <p>OpenClaw Manager is a Windows desktop helper for managing and diagnosing a local OpenClaw environment. It helps you start the TUI, control the Gateway, inspect logs, measure latency, clean temporary files, and manage local tokens.</p>
+    <p>The tool is designed for local maintenance. It does not replace OpenClaw itself and it does not require an online help page to open this manual.</p>
+  </section>
+
+  <section id="install">
+    <h2>2. Installation and startup</h2>
+    <h3>Installed build</h3>
+    <p>Use the installer and launch the app from the Start menu or desktop shortcut. Installed builds store settings in the standard Windows app data location.</p>
+    <h3>Portable build</h3>
+    <p>Extract the portable ZIP into a writable folder. A portable build uses the local <code>settings.json</code> placed next to the executable, so settings stay with the extracted folder.</p>
+    <h3>First run</h3>
+    <p>The Welcome screen lets you choose language, theme, and whether update checks should run at startup. Closing the Welcome screen before finishing closes the app.</p>
+  </section>
+
+  <section id="themes">
+    <h2>3. Themes</h2>
+    <p>The app uses seven internal theme identifiers. The user interface shows localized display names.</p>
+    <table>
+      <thead><tr><th>Internal ID</th><th>English name</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td><code>Legacy</code></td><td>Legacy</td><td>Classic default look. Do not change this theme unless explicitly approved.</td></tr>
+        <tr><td><code>StandardLight</code></td><td>Standard</td><td>Light standard interface.</td></tr>
+        <tr><td><code>StandardDark</code></td><td>Standard Dark</td><td>Dark standard interface.</td></tr>
+        <tr><td><code>ModernDark</code></td><td>Modern Dark</td><td>Modern glass-styled dark interface.</td></tr>
+        <tr><td><code>ModernLight</code></td><td>Modern</td><td>Modern light interface.</td></tr>
+        <tr><td><code>HighContrast</code></td><td>High Contrast</td><td>Higher contrast for readability.</td></tr>
+        <tr><td><code>CrabCute</code></td><td>Crab Cute</td><td>Playful visual variant.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Lite builds intentionally expose only the Legacy theme and omit the video splash file.</p>
+  </section>
+
+  <section id="main-window">
+    <h2>4. Main window</h2>
+    <p>The main window is split into actions, tools, latency information, app log, and terminal output.</p>
+    <table>
+      <thead><tr><th>Area</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>Actions</td><td>Start OpenClaw TUI and control the Gateway.</td></tr>
+        <tr><td>Tools</td><td>Open PowerShell, Gateway log, Cleaning Tool, Token Manager, and Doctor Fix.</td></tr>
+        <tr><td>Latency</td><td>Shows the last, average, maximum, and count values from Gateway checks.</td></tr>
+        <tr><td>App log</td><td>Shows local application events and diagnostic messages.</td></tr>
+        <tr><td>Terminal</td><td>Embedded terminal surface for OpenClaw output.</td></tr>
+      </tbody>
+    </table>
+    <h3>Keyboard shortcuts</h3>
+    <ul>
+      <li><code>Ctrl+,</code> opens Settings.</li>
+      <li><code>F1</code> opens this local manual.</li>
+      <li><code>Alt+F4</code> closes the active window.</li>
+    </ul>
+  </section>
+
+  <section id="gateway">
+    <h2>5. Gateway control</h2>
+    <p>The Gateway buttons can start, stop, or restart the local Gateway process. The status bar shows whether the Gateway appears to be running, including process ID and uptime when available.</p>
+    <p>If the Gateway does not start, open Settings and verify the OpenClaw command, working directory, and log folder paths.</p>
+  </section>
+
+  <section id="tokens">
+    <h2>6. Token Manager</h2>
+    <p>Token Manager stores and edits local provider tokens. Sensitive values are protected with Windows data protection where available. Portable mode may have different protection boundaries because the settings are stored next to the executable.</p>
+    <p class="warn note">Keep backups secure. Anyone with access to exported or copied token files may be able to use those credentials.</p>
+  </section>
+
+  <section id="cleaning">
+    <h2>7. Cleaning Tool</h2>
+    <p>Cleaning Tool removes selected temporary files, logs, and stale local data. Review selections before running cleanup, especially when working from a portable folder.</p>
+  </section>
+
+  <section id="settings">
+    <h2>8. Settings</h2>
+    <p>Settings controls paths, theme, language, startup behavior, and update-check preference. If the app behaves unexpectedly after a theme or path change, restart it once and verify the values again.</p>
+  </section>
+
+  <section id="troubleshooting">
+    <h2>9. Troubleshooting</h2>
+    <table>
+      <thead><tr><th>Problem</th><th>What to try</th></tr></thead>
+      <tbody>
+        <tr><td>Welcome screen does not show video</td><td>Lite builds omit the video by design. Full builds fall back to a static image if the video cannot be loaded.</td></tr>
+        <tr><td>Help does not open</td><td>Check that the <code>Docs</code> folder exists next to the executable and contains <code>USER_MANUAL.html</code>.</td></tr>
+        <tr><td>Gateway status stays offline</td><td>Verify the Gateway command and inspect the Gateway log from the Tools section.</td></tr>
+        <tr><td>Settings are not saved</td><td>Installed builds need write access to app data. Portable builds need write access to the extracted folder.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>
