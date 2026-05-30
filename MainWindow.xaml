@@ -105,6 +105,27 @@
         </StatusBar>
 
         <Grid>
+
+            <!-- Fáze 3: Vrstvené pozadí — viditelné pouze v ModernDark/ModernLight -->
+            <!-- Vrstva 0: Předrenderované rozmazané pozadí (Gaussian blur ~40px z splash.png) -->
+            <Image x:Name="BgWallpaper"
+                   Source="pack://application:,,,/Resources/splash-blurred.png"
+                   Stretch="UniformToFill"
+                   Visibility="Collapsed"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   Panel.ZIndex="0" />
+
+            <!-- Vrstva 1: Brand glow overlay (fialová→tmavá gradientní clona) -->
+            <Border x:Name="BgGlow" Visibility="Collapsed" Panel.ZIndex="1">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#00000000" Offset="0" />
+                        <GradientStop Color="#9E0A0A14" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <Grid Panel.ZIndex="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="330" />
                 <ColumnDefinition Width="5" />
@@ -341,6 +362,8 @@
                 </Border>
 
             </Grid>
+
+            </Grid><!-- /Panel.ZIndex=2 content grid -->
 
         </Grid>
     </DockPanel>
