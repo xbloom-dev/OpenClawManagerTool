@@ -107,7 +107,6 @@ public partial class MainWindow : Window, IMainWindowCallback
         MnuOpenClawWeb.Click += (_, _) => OpenUserManual();
         MnuOpenGitHubRepo.Click += (_, _) => OpenUrl("https://github.com/xbloom-dev/OpenClawManagerTool");
 
-        TitleBarDragSurface.MouseLeftButtonDown += TitleBarDragSurface_MouseLeftButtonDown;
         BtnWindowMinimize.Click += (_, _) => WindowState = WindowState.Minimized;
         BtnWindowMaximize.Click += (_, _) => ToggleWindowMaximized();
         BtnWindowClose.Click += (_, _) => Close();
@@ -127,6 +126,13 @@ public partial class MainWindow : Window, IMainWindowCallback
         // v0.5: tema + splash screen (pořadí důležité: theme před splash)
         InitTheme();
         InitSplash();
+    }
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+        Helpers.DwmHelper.ApplyWin11Styling(hwnd);
     }
 
     void IMainWindowCallback.StartTui() => Terminal.StartTui();
@@ -153,20 +159,6 @@ public partial class MainWindow : Window, IMainWindowCallback
     private void OnViewModelGatewayStateChanged(object? sender, EventArgs e)
     {
         UpdateStartTuiButton(Terminal.IsTuiRunning);
-    }
-
-    private void TitleBarDragSurface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (CaptionButtons.Visibility != Visibility.Visible) return;
-
-        if (e.ClickCount == 2)
-        {
-            ToggleWindowMaximized();
-            return;
-        }
-
-        if (e.ButtonState == MouseButtonState.Pressed)
-            DragMove();
     }
 
     private void ToggleWindowMaximized()

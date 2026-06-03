@@ -503,18 +503,7 @@ public partial class MainWindow
     {
         if (useCustomTitleBar)
         {
-            WindowStyle = WindowStyle.None;
-            ResizeMode = ResizeMode.CanResize;
-            WindowChrome.SetWindowChrome(this, new WindowChrome
-            {
-                CaptionHeight = 0,
-                CornerRadius = new CornerRadius(0),
-                GlassFrameThickness = new Thickness(0),
-                ResizeBorderThickness = new Thickness(6),
-                UseAeroCaptionButtons = false
-            });
-
-            TitleBarHost.Height = 32;
+            TitleBarHost.Height = 46;
             CaptionButtons.Visibility = Visibility.Visible;
             MainMenu.VerticalAlignment = VerticalAlignment.Stretch;
             MainMenu.Padding = new Thickness(0);
@@ -523,12 +512,10 @@ public partial class MainWindow
             return;
         }
 
-        WindowChrome.SetWindowChrome(this, null);
-        WindowStyle = WindowStyle.SingleBorderWindow;
-        ResizeMode = ResizeMode.CanResize;
-        TitleBarHost.Height = double.NaN;
+        TitleBarHost.Height = 46;
         TitleBarHost.ClearValue(Border.BackgroundProperty);
-        CaptionButtons.Visibility = Visibility.Collapsed;
+        CaptionButtons.Visibility = Visibility.Visible;
+        UpdateMaximizeGlyph();
         MainMenu.ClearValue(FrameworkElement.VerticalAlignmentProperty);
         MainMenu.ClearValue(Control.PaddingProperty);
         MainMenu.ClearValue(FrameworkElement.MarginProperty);
