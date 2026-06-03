@@ -2,6 +2,21 @@
 
 ---
 
+## v2.0.3 - 3 June 2026
+
+### Bug fixes
+- Fixed WelcomeWindow save-settings failure text to use localized strings with proper Czech diacritics.
+- Removed settings DI access from static theme helpers by tracking the currently applied theme in `ThemeService`.
+- Moved AboutWindow shortcut colors and secondary-window output/log colors to semantic theme resources.
+- Added missing Legacy fallback brushes used by `Style.Button.StandardFlat`.
+- Fixed the AboutWindow logo WebView background so the crab icon remains transparent in all themes.
+
+### Release
+- Kept risky Modern Dark runtime UI work out of this stabilization release.
+- Verified manual smoke test: Settings and tested secondary windows open/close without crashes, and the app exits without zombie processes.
+
+---
+
 ## v2.0.0 — 25 May 2026
 
 ### Architecture
