@@ -2,8 +2,8 @@
 
 Česky | [English version](USER_MANUAL.md) | [HTML verze](USER_MANUAL.cs.html)
 
-**Verze aplikace:** 2.0.2
-**Aktualizováno:** 30. května 2026
+**Verze aplikace:** 2.0.3
+**Aktualizováno:** 3. června 2026
 
 ## Obsah
 
