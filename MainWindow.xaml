@@ -7,23 +7,13 @@
         Icon="pack://application:,,,/Resources/app-favicon.ico"
         Height="720" Width="1400"
         MinHeight="600" MinWidth="900"
-        WindowStyle="None"
         AllowsTransparency="False"
         ResizeMode="CanResize"
-        Background="{DynamicResource Theme.Brush.WindowBg}"
         WindowStartupLocation="CenterScreen">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
     </Window.Resources>
-
-    <shell:WindowChrome.WindowChrome>
-        <shell:WindowChrome CaptionHeight="46"
-                            CornerRadius="0"
-                            GlassFrameThickness="0"
-                            ResizeBorderThickness="6"
-                            UseAeroCaptionButtons="False" />
-    </shell:WindowChrome.WindowChrome>
 
     <DockPanel>
         <Border x:Name="TitleBarHost" DockPanel.Dock="Top" Height="46">

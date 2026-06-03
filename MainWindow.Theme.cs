@@ -59,6 +59,9 @@ public partial class MainWindow
     private static Brush? _pressedScanlineBrush;
     private AppTheme _activeTheme = AppTheme.Legacy;
 
+    internal static bool IsFramelessTheme(AppTheme theme) =>
+        theme != AppTheme.Legacy && theme != AppTheme.StandardDark;
+
     // DWM caption coloring is intentionally kept in code: WPF ResourceDictionaries cannot
     // set native Windows title-bar attributes for custom chrome windows.
     [DllImport("dwmapi.dll")]
@@ -120,7 +123,7 @@ public partial class MainWindow
     {
         _activeTheme = theme;
         RestoreThemeBaseline();
-        ApplyThemeTitleBarMode(theme != AppTheme.Legacy && theme != AppTheme.StandardDark);
+        ApplyThemeTitleBarMode(IsFramelessTheme(theme));
 
         // Fáze 3: Vrstvené pozadí — viditelné jen v ModernDark/ModernLight
         var showGlass = theme is AppTheme.ModernDark or AppTheme.ModernLight;
@@ -415,7 +418,7 @@ public partial class MainWindow
         Background = bg;
         Foreground = secondary;
 
-        // ── Title bar (custom chrome aktivní přes ApplyThemeTitleBarMode) ───
+        // ── Title/menu bar visuals ───────────────────────────────────────────
         TitleBarHost.Background = chrome;
         ApplyCaptionButtonVisuals(primary, hover, pressed);
 
@@ -503,22 +506,44 @@ public partial class MainWindow
     {
         if (useCustomTitleBar)
         {
-            TitleBarHost.Height = 46;
-            CaptionButtons.Visibility = Visibility.Visible;
             MainMenu.VerticalAlignment = VerticalAlignment.Stretch;
             MainMenu.Padding = new Thickness(0);
             MainMenu.Margin = new Thickness(0);
+            return;
+        }
+
+        TitleBarHost.ClearValue(Border.BackgroundProperty);
+        MainMenu.ClearValue(FrameworkElement.VerticalAlignmentProperty);
+        MainMenu.ClearValue(Control.PaddingProperty);
+        MainMenu.ClearValue(FrameworkElement.MarginProperty);
+    }
+
+    private void ConfigureWindowChromeForStartup(AppTheme theme)
+    {
+        if (IsFramelessTheme(theme))
+        {
+            WindowStyle = WindowStyle.None;
+            ResizeMode = ResizeMode.CanResize;
+            WindowChrome.SetWindowChrome(this, new WindowChrome
+            {
+                CaptionHeight = 46,
+                CornerRadius = new CornerRadius(0),
+                GlassFrameThickness = new Thickness(0),
+                ResizeBorderThickness = new Thickness(6),
+                UseAeroCaptionButtons = false
+            });
+
+            TitleBarHost.Height = 46;
+            CaptionButtons.Visibility = Visibility.Visible;
             UpdateMaximizeGlyph();
             return;
         }
 
-        TitleBarHost.Height = 46;
-        TitleBarHost.ClearValue(Border.BackgroundProperty);
-        CaptionButtons.Visibility = Visibility.Visible;
-        UpdateMaximizeGlyph();
-        MainMenu.ClearValue(FrameworkElement.VerticalAlignmentProperty);
-        MainMenu.ClearValue(Control.PaddingProperty);
-        MainMenu.ClearValue(FrameworkElement.MarginProperty);
+        WindowStyle = WindowStyle.SingleBorderWindow;
+        ResizeMode = ResizeMode.CanResize;
+        WindowChrome.SetWindowChrome(this, null);
+        TitleBarHost.ClearValue(FrameworkElement.HeightProperty);
+        CaptionButtons.Visibility = Visibility.Collapsed;
     }
 
     private void ApplyCaptionButtonVisuals(Brush foreground, Brush hoverBackground, Brush pressedBackground)

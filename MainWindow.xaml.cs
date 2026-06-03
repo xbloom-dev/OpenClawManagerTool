@@ -73,6 +73,7 @@ public partial class MainWindow : Window, IMainWindowCallback
         _vm = viewModel;
 
         InitializeComponent();
+        ConfigureWindowChromeForStartup(ThemeService.CurrentTheme);
         DataContext = _vm;
 
         AppLog.ItemsSource = _vm.AppLogItems;
@@ -131,8 +132,11 @@ public partial class MainWindow : Window, IMainWindowCallback
     protected override void OnSourceInitialized(EventArgs e)
     {
         base.OnSourceInitialized(e);
-        IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
-        Helpers.DwmHelper.ApplyWin11Styling(hwnd);
+        if (IsFramelessTheme(ThemeService.CurrentTheme))
+        {
+            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            Helpers.DwmHelper.ApplyWin11Styling(hwnd);
+        }
     }
 
     void IMainWindowCallback.StartTui() => Terminal.StartTui();
