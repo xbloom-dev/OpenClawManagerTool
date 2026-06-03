@@ -1,4 +1,4 @@
-﻿using System.Runtime.InteropServices;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -32,8 +32,8 @@ internal static class ModernPaletteRuntimeStyles
     {
         window.Icon = null;
 
-        if (OpenClawManager.App.GetService<ISettingsService>().Settings.Theme != AppTheme.StandardLight &&
-            !ThemeService.IsModernPaletteTheme(OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)) return;
+        var theme = ThemeService.CurrentTheme;
+        if (theme != AppTheme.StandardLight && !ThemeService.IsModernPaletteTheme(theme)) return;
 
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
         window.Background = ThemeService.GetBrush("Theme.Brush.WindowBackground", GetBrushColor(background, Color.FromRgb(0x19, 0x19, 0x19)));

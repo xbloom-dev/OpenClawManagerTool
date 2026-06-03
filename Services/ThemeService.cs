@@ -1,4 +1,4 @@
-﻿// Services/ThemeService.cs
+// Services/ThemeService.cs
 // Centrální správa vizuálních témat (v0.5+)
 // ═══════════════════════════════════════════════════════════════════════════
 // Architektura pro N témat:
@@ -36,6 +36,8 @@ public static class ThemeService
     /// MainWindow se přihlašuje v konstruktoru: ThemeService.ThemeChanged += ApplyThemeToUi
     /// </summary>
     public static event Action<AppTheme>? ThemeChanged;
+    private static AppTheme _currentTheme = AppTheme.Legacy;
+    public static AppTheme CurrentTheme => _currentTheme;
 
     // ── Registr ResourceDictionary cest ──────────────────────────────────────
     // Přidat nové téma sem + vytvořit odpovídající .xaml soubor.
@@ -127,8 +129,8 @@ public static class ThemeService
         if (!IsThemeAvailable(theme))
             theme = AppTheme.Legacy;
 
-        SwapResourceDictionary(theme);
-        ThemeChanged?.Invoke(theme);
+        _currentTheme = SwapResourceDictionary(theme);
+        ThemeChanged?.Invoke(_currentTheme);
     }
 
     public static bool IsThemeAvailable(AppTheme theme)
@@ -149,7 +151,7 @@ public static class ThemeService
         if (!IsThemeAvailable(theme))
             theme = AppTheme.Legacy;
 
-        if (theme == OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)
+        if (theme == _currentTheme)
         {
             var iconSet = GetString("Theme.Meta.IconSet", "");
             if (!string.IsNullOrWhiteSpace(iconSet)) return iconSet;
@@ -169,7 +171,7 @@ public static class ThemeService
         return new ThemeMetadata(
             GetString("Theme.Meta.Name", ""),
             GetString("Theme.Meta.Variant", ""),
-            GetString("Theme.Meta.IconSet", GetIconFolder(OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)),
+            GetString("Theme.Meta.IconSet", GetIconFolder(_currentTheme)),
             GetString("Theme.Meta.PaletteFamily", ""),
             GetString("Theme.Meta.ButtonInteraction", "HoverScanline"));
     }
@@ -212,12 +214,12 @@ public static class ThemeService
     }
 
     // ── Interní: swap ResourceDictionary ─────────────────────────────────────
-    private static void SwapResourceDictionary(AppTheme theme)
+    private static AppTheme SwapResourceDictionary(AppTheme theme)
     {
-        if (!_themeResourcePaths.TryGetValue(theme, out var path)) return;
+        if (!_themeResourcePaths.TryGetValue(theme, out var path)) return AppTheme.Legacy;
 
         var app = Application.Current;
-        if (app == null) return;
+        if (app == null) return theme;
 
         var merged = app.Resources.MergedDictionaries;
         var toRemove = merged
@@ -233,13 +235,14 @@ public static class ThemeService
 
             foreach (var d in toRemove) merged.Remove(d);
             merged.Add(newDict);
+            return theme;
         }
         catch
         {
             if (theme == AppTheme.Legacy)
-                return;
+                return AppTheme.Legacy;
 
-            SwapResourceDictionary(AppTheme.Legacy);
+            return SwapResourceDictionary(AppTheme.Legacy);
         }
     }
 }

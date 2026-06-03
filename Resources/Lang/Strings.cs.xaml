@@ -56,6 +56,7 @@
     <sys:String x:Key="Str_BtnCancel">Zrušit</sys:String>
     <sys:String x:Key="Str_BtnBrowse">Procházet...</sys:String>
     <sys:String x:Key="Str_Tip_Save">Uloží nastavení a zavře dialog.</sys:String>
+    <sys:String x:Key="Str_Error_SaveSettings">Uložení nastavení selhalo. Zkontroluj oprávnění pro zápis do: {0}</sys:String>
     <sys:String x:Key="Str_Tip_Reset">Obnoví všechny hodnoty na výchozí.</sys:String>
     <sys:String x:Key="Str_Tip_Cancel">Zavře bez uložení.</sys:String>
     <sys:String x:Key="Str_Tip_Browse">Vybere složku ze systému.</sys:String>

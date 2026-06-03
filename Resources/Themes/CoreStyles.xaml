@@ -5,6 +5,12 @@
     <!-- Globální fallback pro Accent — přepisuje se individuálními theme slovníky.
          Hodnota je použita kdekoliv mimo WelcomeWindow (tam vyhraje Window.Resources). -->
     <SolidColorBrush x:Key="Theme.Brush.Accent" Color="#E11D48" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputBackground" Color="#1E1E1E" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputText" Color="#DCDCDC" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputBorder" Color="#808080" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutBackground" Color="#F5F5F5" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutBorder" Color="#E0E0E0" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutKeyText" Color="#0066CC" />
 
     <Style x:Key="Style.GroupBox.Standard" TargetType="{x:Type GroupBox}">
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.Surface}" />

@@ -56,6 +56,7 @@
     <sys:String x:Key="Str_BtnCancel">Cancel</sys:String>
     <sys:String x:Key="Str_BtnBrowse">Browse...</sys:String>
     <sys:String x:Key="Str_Tip_Save">Saves settings and closes dialog.</sys:String>
+    <sys:String x:Key="Str_Error_SaveSettings">Saving settings failed. Check write permissions for: {0}</sys:String>
     <sys:String x:Key="Str_Tip_Reset">Restores all values to defaults.</sys:String>
     <sys:String x:Key="Str_Tip_Cancel">Closes without saving.</sys:String>
     <sys:String x:Key="Str_Tip_Browse">Selects folder from filesystem.</sys:String>

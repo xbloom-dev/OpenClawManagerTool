@@ -71,6 +71,12 @@
     <SolidColorBrush x:Key="Brush.ActionDanger"          Color="{StaticResource Theme.Color.ActionDanger}" />
     <SolidColorBrush x:Key="Brush.ActionUtility"         Color="{StaticResource Theme.Color.ActionUtility}" />
     <SolidColorBrush x:Key="Brush.SplashModernBackground" Color="{StaticResource Theme.Color.SplashModernBackground}" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputBackground" Color="{StaticResource Theme.Color.Separator}" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputText" Color="#DCDCDC" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputBorder" Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutBackground" Color="{StaticResource Theme.Color.Background}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutBorder" Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutKeyText" Color="{StaticResource Theme.Color.Text.Primary}" />
 
     <!-- ═══════════════════════════════════════════════════════════════════
          POJMENOVANÉ STYLY — načítané z MainWindow.Theme.cs přes FindThemeStyle()

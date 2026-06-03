@@ -48,6 +48,12 @@
     <SolidColorBrush x:Key="Brush.ActionDanger" Color="{StaticResource Theme.Color.ActionDanger}" />
     <SolidColorBrush x:Key="Brush.ActionUtility" Color="{StaticResource Theme.Color.ActionUtility}" />
     <SolidColorBrush x:Key="Brush.SplashModernBackground" Color="{StaticResource Theme.Color.SplashModernBackground}" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputText" Color="{StaticResource Theme.Color.Text.Primary}" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputBorder" Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutBorder" Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutKeyText" Color="{StaticResource Theme.Color.Accent}" />
 
     <!-- ── Styly ── -->
 

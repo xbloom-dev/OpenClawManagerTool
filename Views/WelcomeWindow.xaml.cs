@@ -137,7 +137,7 @@ public partial class WelcomeWindow : Window
         {
             ContinueButton.IsEnabled = true;
             MessageBox.Show(
-                "Ulozeni nastaveni selhalo. Zkontroluj opravneni pro zapis do: " + _settingsService.SettingsFilePath,
+                L10n.Format("Str_Error_SaveSettings", _settingsService.SettingsFilePath),
                 "OpenClaw Manager Tool",
                 MessageBoxButton.OK,
                 MessageBoxImage.Warning);
