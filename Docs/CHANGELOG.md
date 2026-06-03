@@ -2,6 +2,20 @@
 
 ---
 
+## v2.0.4 - 3 June 2026
+
+### Stability
+- Added a startup-only main-window chrome selection so `Legacy` and `StandardDark` keep the native Windows frame while `StandardLight`, `ModernDark`, `ModernLight`, `HighContrast`, and `CrabCute` keep the frameless custom frame from the v2.0.3 baseline.
+- Moved Windows 11 DWM rounded-corner and immersive-dark setup into a narrow helper and apply it only for frameless startup themes.
+- Removed the old live `DragMove()` titlebar handler and stopped live theme switching from mutating `WindowStyle` / `WindowChrome`.
+- Kept `AllowsTransparency=False` so window shadows, resizing, and frame composition stay handled by Windows/DWM.
+
+### Release
+- This is a small stable checkpoint before the v2.0.5 Standard/Modern theme redesign work.
+- `Legacy`, `HighContrast`, and `CrabCute` theme dictionaries were intentionally left unchanged.
+
+---
+
 ## v2.0.3 - 3 June 2026
 
 ### Bug fixes
