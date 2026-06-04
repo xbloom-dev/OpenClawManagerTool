@@ -560,6 +560,25 @@ public partial class MainWindow
         }
     }
 
+    private void ApplyModernDarkCaptionButtonVisuals()
+    {
+        var foreground = new SolidColorBrush(Color.FromRgb(0xC2, 0xC6, 0xD4));
+
+        BtnWindowMinimize.Style = CreateModernDarkCaptionButtonStyle(isCloseButton: false);
+        BtnWindowMaximize.Style = CreateModernDarkCaptionButtonStyle(isCloseButton: false);
+        BtnWindowClose.Style = CreateModernDarkCaptionButtonStyle(isCloseButton: true);
+
+        foreach (var button in new[] { BtnWindowMinimize, BtnWindowMaximize, BtnWindowClose })
+        {
+            button.Background = Brushes.Transparent;
+            button.Foreground = foreground;
+            button.BorderBrush = Brushes.Transparent;
+            button.BorderThickness = new Thickness(0);
+            button.Padding = new Thickness(0);
+            button.FocusVisualStyle = null;
+        }
+    }
+
     private static Style CreateCaptionButtonStyle(Brush hoverBackground, Brush pressedBackground)
     {
         var cacheKey = $"caption|{BrushCacheKey(hoverBackground)}|{BrushCacheKey(pressedBackground)}";
@@ -593,6 +612,64 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
         style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
         style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
+        return style;
+        });
+    }
+
+    private static Style CreateModernDarkCaptionButtonStyle(bool isCloseButton)
+    {
+        var cacheKey = $"caption|modern-dark|{isCloseButton}";
+        return GetCachedStyle(cacheKey, () =>
+        {
+        var hoverBrush = isCloseButton
+            ? new SolidColorBrush(Color.FromArgb(0xE6, 0xEF, 0x44, 0x44))
+            : new SolidColorBrush(Color.FromArgb(0x24, 0xFF, 0xFF, 0xFF));
+        var pressedBrush = isCloseButton
+            ? new SolidColorBrush(Color.FromArgb(0xF0, 0xB9, 0x1C, 0x1C))
+            : new SolidColorBrush(Color.FromArgb(0x20, 0x5A, 0xA1, 0xFF));
+
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.Name = "Root";
+        root.SetValue(Border.BackgroundProperty, Brushes.Transparent);
+        root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
+        root.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(9));
+
+        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
+        presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
+        presenter.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
+        root.AppendChild(presenter);
+
+        var template = new ControlTemplate(typeof(Button)) { VisualTree = root };
+        template.Triggers.Add(new Trigger
+        {
+            Property = UIElement.IsMouseOverProperty,
+            Value = true,
+            Setters =
+            {
+                new Setter(Border.BackgroundProperty, hoverBrush, "Root"),
+                new Setter(Control.ForegroundProperty, Brushes.White)
+            }
+        });
+        template.Triggers.Add(new Trigger
+        {
+            Property = ButtonBase.IsPressedProperty,
+            Value = true,
+            Setters =
+            {
+                new Setter(Border.BackgroundProperty, pressedBrush, "Root"),
+                new Setter(Control.ForegroundProperty, Brushes.White)
+            }
+        });
+
+        var style = new Style(typeof(Button));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
+        style.Setters.Add(new Setter(Control.TemplateProperty, template));
+        style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
         return style;
         });
     }
@@ -1848,6 +1925,8 @@ public partial class MainWindow
         var sectionBg  = ThemeService.GetBrush("Theme.Brush.Glass.SectionBg",  Color.FromArgb(0x0B, 0xFF, 0xFF, 0xFF));
         var barBg      = ThemeService.GetBrush("Theme.Brush.Glass.BarBg",       Color.FromArgb(0x57, 0x0A, 0x08, 0x12));
         var glassBorder = ThemeService.GetBrush("Theme.Brush.Glass.GlassBorder", Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF));
+        var statusText = new SolidColorBrush(Color.FromRgb(0x55, 0x59, 0x58));
+        var logBackground = new SolidColorBrush(Color.FromRgb(0x14, 0x14, 0x14));
 
         // Sidebar (Column 0) průhledné pozadí — "float" over BgWallpaper
         // Levý Grid sdílí background Window; nastavit přímo Background na Window nestačí,
@@ -1855,12 +1934,16 @@ public partial class MainWindow
         GrpActions.Background = sidebarBg;
         GrpLatency.Background = sectionBg;
         GrpAppLog.Background  = sectionBg;
-        AppLog.Background     = Brushes.Transparent;
+        AppLog.Background     = logBackground;
+        AppLog.Foreground     = statusText;
 
         // Title bar + status bar — tmavý glass pruh
         TitleBarHost.Background  = barBg;
         MainStatusBar.Background = barBg;
+        MainStatusBar.Foreground = statusText;
         MainMenu.Background      = Brushes.Transparent;
+        MainMenu.Resources[typeof(MenuItem)] = FindThemeStyle("Theme.Style.MainMenuButton");
+        ApplyModernDarkCaptionButtonVisuals();
 
         // Jemný glassborder pro GroupBoxy
         GrpLatency.BorderBrush    = glassBorder;

@@ -4,22 +4,22 @@
     xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
     <!--
-        Theme: Dark (Modern Dark - palette B)
-        Background:       #191919    main window surface
-        Surface:          #272727    panels and GroupBox surfaces
-        Chrome:           #121212    TUI shell background
-        TitleBar:         #202020    top and bottom bars
-        MenuBackground:   #181818    menu and splash background
-        MenuHover:        #363635    menu item highlight
-        SecondaryButton:  #2E2E2E    secondary window button idle state
-        Hover:            #464646    hover state
-        Pressed:          #535353    pressed state
-        Disabled:         #282828    tool button idle state
-        Text Primary:     #FFFFFF    primary text
-        Text Secondary:   #787878    secondary text
-        ButtonText:       #FFFFFF    button captions
-        Border:           #3A3A3A    borders
-        Corner radius:    6px        named styles for secondary windows
+        Theme: Modern Dark - ClaudeDesign reference pass
+        Background:       #0F1115    main window surface
+        Surface:          #14171C    panels and GroupBox surfaces
+        Chrome:           #0B0C10    TUI shell background
+        TitleBar:         #12141A    top and bottom bars
+        MenuBackground:   #12141A    menu and splash background
+        MenuHover:        #222831    menu item highlight
+        SecondaryButton:  #1C2026    secondary window button idle state
+        Hover:            #222831    hover state
+        Pressed:          #181C22    pressed state
+        Disabled:         #16191E    disabled/tool button idle state
+        Text Primary:     #F4F4F5    primary text
+        Text Secondary:   #A1A1AA    secondary text
+        ButtonText:       #F4F4F5    button captions
+        Border:           #23272F    borders
+        Corner radius:    8px        named styles for secondary windows
     -->
 
     <!-- Metadata -->
@@ -30,37 +30,37 @@
     <sys:String x:Key="Theme.Meta.ButtonInteraction">HoverScanline</sys:String>
 
     <!-- Colors -->
-    <Color x:Key="Theme.Color.Background">#191919</Color>
-    <Color x:Key="Theme.Color.Surface">#272727</Color>
-    <Color x:Key="Theme.Color.Chrome">#121212</Color>
-    <Color x:Key="Theme.Color.TitleBar">#202020</Color>
-    <Color x:Key="Theme.Color.MenuBackground">#181818</Color>
-    <Color x:Key="Theme.Color.MenuHover">#363635</Color>
-    <Color x:Key="Theme.Color.SecondaryButton">#2E2E2E</Color>
-    <Color x:Key="Theme.Color.Disabled">#282828</Color>
-    <Color x:Key="Theme.Color.Hover">#464646</Color>
-    <Color x:Key="Theme.Color.Pressed">#535353</Color>
-    <Color x:Key="Theme.Color.Menu.Hover">#363635</Color>
-    <Color x:Key="Theme.Color.Text.Primary">#FFFFFF</Color>
-    <Color x:Key="Theme.Color.Text.Secondary">#787878</Color>
-    <Color x:Key="Theme.Color.ButtonText">#FFFFFF</Color>
-    <Color x:Key="Theme.Color.Border">#3A3A3A</Color>
-    <Color x:Key="Theme.Color.WindowBackground">#272727</Color>
-    <Color x:Key="Theme.Color.Success">#38C172</Color>
-    <Color x:Key="Theme.Color.Danger">#FF6B7A</Color>
-    <Color x:Key="Theme.Color.Warning">#F6C177</Color>
-    <Color x:Key="Theme.Color.ActionPositive">#1C3527</Color>
-    <Color x:Key="Theme.Color.ActionDanger">#3D1515</Color>
-    <Color x:Key="Theme.Color.ActionUtility">#152535</Color>
-    <Color x:Key="Theme.Color.SplashModernBackground">#181818</Color>
+    <Color x:Key="Theme.Color.Background">#0F1115</Color>
+    <Color x:Key="Theme.Color.Surface">#14171C</Color>
+    <Color x:Key="Theme.Color.Chrome">#0B0C10</Color>
+    <Color x:Key="Theme.Color.TitleBar">#12141A</Color>
+    <Color x:Key="Theme.Color.MenuBackground">#12141A</Color>
+    <Color x:Key="Theme.Color.MenuHover">#222831</Color>
+    <Color x:Key="Theme.Color.SecondaryButton">#1C2026</Color>
+    <Color x:Key="Theme.Color.Disabled">#16191E</Color>
+    <Color x:Key="Theme.Color.Hover">#222831</Color>
+    <Color x:Key="Theme.Color.Pressed">#181C22</Color>
+    <Color x:Key="Theme.Color.Menu.Hover">#222831</Color>
+    <Color x:Key="Theme.Color.Text.Primary">#F4F4F5</Color>
+    <Color x:Key="Theme.Color.Text.Secondary">#A1A1AA</Color>
+    <Color x:Key="Theme.Color.ButtonText">#F4F4F5</Color>
+    <Color x:Key="Theme.Color.Border">#23272F</Color>
+    <Color x:Key="Theme.Color.WindowBackground">#0F1115</Color>
+    <Color x:Key="Theme.Color.Success">#34D399</Color>
+    <Color x:Key="Theme.Color.Danger">#EF4444</Color>
+    <Color x:Key="Theme.Color.Warning">#FBBF24</Color>
+    <Color x:Key="Theme.Color.ActionPositive">#1D4ED8</Color>
+    <Color x:Key="Theme.Color.ActionDanger">#3A171B</Color>
+    <Color x:Key="Theme.Color.ActionUtility">#1C2026</Color>
+    <Color x:Key="Theme.Color.SplashModernBackground">#0B0C10</Color>
 
-    <!-- Glass / Performance Glass tokeny (Fáze 4) -->
+    <!-- Glass / Performance Glass tokens (Phase 4) -->
     <!-- Modern Dark glass surface tokens. -->
     <Color x:Key="Theme.Color.Glass.SectionBg">#0BFFFFFF</Color>      <!-- rgba(255,255,255,.045) -->
     <Color x:Key="Theme.Color.Glass.SectionBorder">#1FFFFFFF</Color>  <!-- rgba(255,255,255,.12) -->
     <Color x:Key="Theme.Color.Glass.BtnBg">#14FFFFFF</Color>          <!-- rgba(255,255,255,.08) -->
     <Color x:Key="Theme.Color.Glass.BtnBorder">#33FFFFFF</Color>      <!-- rgba(255,255,255,.20) -->
-    <Color x:Key="Theme.Color.Glass.BarBg">#570A0812</Color>          <!-- rgba(10,8,18,.34) -->
+    <Color x:Key="Theme.Color.Glass.BarBg">#FF141414</Color>          <!-- Top/status bar #141414 -->
     <Color x:Key="Theme.Color.Glass.SidebarBg">#3308080E</Color>      <!-- rgba(8,8,14,.20) -->
     <Color x:Key="Theme.Color.Glass.Divider">#1FFFFFFF</Color>        <!-- rgba(255,255,255,.12) -->
     <Color x:Key="Theme.Color.Glass.GlassBorder">#38FFFFFF</Color>    <!-- rgba(255,255,255,.22) -->
@@ -95,25 +95,27 @@
     <SolidColorBrush x:Key="Brush.ActionDanger"           Color="{StaticResource Theme.Color.ActionDanger}" />
     <SolidColorBrush x:Key="Brush.ActionUtility"          Color="{StaticResource Theme.Color.ActionUtility}" />
     <SolidColorBrush x:Key="Brush.SplashModernBackground" Color="{StaticResource Theme.Color.SplashModernBackground}" />
-    <!-- Accent — AccentTop z md-kit.jsx design spec (#5AA1FF) -->
+    <!-- AccentTop from the ClaudeDesign Modern Dark reference. -->
     <SolidColorBrush x:Key="Theme.Brush.Accent"           Color="#5AA1FF" />
     <SolidColorBrush x:Key="Theme.Brush.OutputBackground" Color="{StaticResource Theme.Color.Chrome}" />
-    <SolidColorBrush x:Key="Theme.Brush.OutputText" Color="{StaticResource Theme.Color.Text.Primary}" />
-    <SolidColorBrush x:Key="Theme.Brush.OutputBorder" Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputText"       Color="{StaticResource Theme.Color.Text.Primary}" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputBorder"     Color="{StaticResource Theme.Color.Border}" />
     <SolidColorBrush x:Key="Theme.Brush.ShortcutBackground" Color="{StaticResource Theme.Color.Surface}" />
-    <SolidColorBrush x:Key="Theme.Brush.ShortcutBorder" Color="{StaticResource Theme.Color.Border}" />
-    <SolidColorBrush x:Key="Theme.Brush.ShortcutKeyText" Color="{StaticResource Theme.Color.Text.Primary}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutBorder"     Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutKeyText"    Color="{StaticResource Theme.Color.Text.Primary}" />
 
     <!-- Named styles for secondary windows. Runtime wiring is handled by
          ModernPaletteRuntimeStyles.cs through window.Resources entries. -->
 
     <Style x:Key="Theme.Style.Window" TargetType="Window">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
         <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
         <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
     </Style>
 
     <!-- Rounded GroupBox style for secondary windows. -->
     <Style x:Key="Theme.Style.GroupBox" TargetType="GroupBox">
+        <Setter Property="FontFamily"      Value="Inter, Segoe UI" />
         <Setter Property="Background"      Value="{StaticResource Theme.Brush.Surface}" />
         <Setter Property="BorderBrush"     Value="{StaticResource Theme.Brush.Border}" />
         <Setter Property="Foreground"      Value="{StaticResource Theme.Brush.Text.Primary}" />
@@ -130,7 +132,7 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="6" />
+                                CornerRadius="14" />
                         <Border Grid.Row="0" Padding="10,6,10,0">
                             <ContentPresenter ContentSource="Header"
                                               RecognizesAccessKey="True"
@@ -145,10 +147,11 @@
 
     <!-- Rounded button style for secondary windows. -->
     <Style x:Key="Theme.Style.Button" TargetType="Button">
+        <Setter Property="FontFamily"               Value="Inter, Segoe UI" />
         <Setter Property="Background"               Value="{StaticResource Theme.Brush.SecondaryButton}" />
         <Setter Property="Foreground"               Value="{StaticResource Theme.Brush.Text.Primary}" />
-        <Setter Property="BorderBrush"              Value="Transparent" />
-        <Setter Property="BorderThickness"          Value="0" />
+        <Setter Property="BorderBrush"              Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="BorderThickness"          Value="1" />
         <Setter Property="Padding"                  Value="12,6" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment"   Value="Center" />
@@ -159,7 +162,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="6"
+                            CornerRadius="8"
                             SnapsToDevicePixels="True">
                         <ContentPresenter
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -186,13 +189,108 @@
     </Style>
 
     <Style x:Key="Theme.Style.TextBlock" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
         <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
     </Style>
 
     <Style x:Key="Theme.Style.ListBox" TargetType="ListBox">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
         <Setter Property="Background"  Value="{StaticResource Theme.Brush.Surface}" />
         <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Border}" />
         <Setter Property="Foreground"  Value="{StaticResource Theme.Brush.Text.Primary}" />
+    </Style>
+
+    <Style x:Key="Theme.Style.MainMenuButton" TargetType="{x:Type MenuItem}">
+        <Setter Property="Foreground" Value="#555958" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="13,0" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type MenuItem}">
+                    <Grid>
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Margin="2,0">
+                            <DockPanel x:Name="Dock" MinWidth="170">
+                                <TextBlock x:Name="Arrow"
+                                           Text=">"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           Margin="16,0,0,0"
+                                           DockPanel.Dock="Right"
+                                           Visibility="Collapsed" />
+                                <TextBlock x:Name="Gesture"
+                                           Text="{TemplateBinding InputGestureText}"
+                                           Foreground="#555958"
+                                           Margin="24,0,0,0"
+                                           DockPanel.Dock="Right" />
+                                <ContentPresenter x:Name="HeaderHost"
+                                                  ContentSource="Header"
+                                                  RecognizesAccessKey="True"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  VerticalAlignment="Center"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}" />
+                            </DockPanel>
+                        </Border>
+                        <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                               Placement="Bottom"
+                               PopupAnimation="Fade">
+                            <Border Background="#E80A0B10"
+                                    BorderBrush="{StaticResource Theme.Brush.Glass.GlassBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="4">
+                                <StackPanel IsItemsHost="True"
+                                            KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Role" Value="TopLevelHeader">
+                            <Setter TargetName="Dock" Property="MinWidth" Value="0" />
+                            <Setter TargetName="Gesture" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="Root" Property="Margin" Value="0" />
+                        </Trigger>
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="Arrow" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="PART_Popup" Property="Placement" Value="Right" />
+                            <Setter Property="FontSize" Value="12" />
+                            <Setter Property="FontWeight" Value="Normal" />
+                            <Setter Property="Foreground" Value="#FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="Role" Value="SubmenuItem">
+                            <Setter Property="FontSize" Value="12" />
+                            <Setter Property="FontWeight" Value="Normal" />
+                            <Setter Property="Padding" Value="12,7" />
+                            <Setter Property="Foreground" Value="#FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="IsSubmenuOpen" Value="True">
+                            <Setter Property="Foreground" Value="#FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="#1AFFFFFF" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Theme.Brush.Glass.BtnBorder}" />
+                            <Setter TargetName="Root" Property="BorderThickness" Value="1" />
+                            <Setter Property="Foreground" Value="#FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>
