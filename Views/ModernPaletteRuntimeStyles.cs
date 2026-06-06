@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Documents;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Interop;
 using OpenClawManager.Models;
@@ -15,6 +16,7 @@ internal static class ModernPaletteRuntimeStyles
     private const int DwmwaBorderColor = 34;
     private const int DwmwaCaptionColor = 35;
     private const int DwmwaTextColor = 36;
+    private const string ModernDarkSecondaryShellAppliedKey = "OpenClaw.ModernDark.SecondaryShellApplied";
     /// <summary>
     /// Cached procedural scanline overlay kept in C# because it is a generated DrawingBrush,
     /// not a simple theme token.
@@ -41,8 +43,55 @@ internal static class ModernPaletteRuntimeStyles
         window.Resources[typeof(Button)] = theme == AppTheme.ModernDark
             ? FindThemeStyle("Theme.Style.Button")
             : FindThemeStyle("Style.Button.StandardFlat");
-        ApplyCaption(window);
+        if (theme == AppTheme.ModernDark)
+            ApplyModernDarkSecondaryShell(window);
+        else
+            ApplyCaption(window);
         window.Loaded += (_, _) => ApplyLoadedVisuals(window, theme);
+    }
+
+    private static void ApplyModernDarkSecondaryShell(Window window)
+    {
+        if (window.Resources.Contains(ModernDarkSecondaryShellAppliedKey) || window.IsLoaded) return;
+        if (window.Content is not UIElement content) return;
+
+        window.Resources[ModernDarkSecondaryShellAppliedKey] = true;
+        window.WindowStyle = WindowStyle.None;
+        window.AllowsTransparency = true;
+        window.Background = Brushes.Transparent;
+        if (window.ResizeMode == ResizeMode.CanResize)
+            window.ResizeMode = ResizeMode.CanResizeWithGrip;
+
+        window.Content = null;
+        var shell = new Border
+        {
+            Background = GetResourceBrush("Theme.Brush.SecondaryWindowBg",
+                new SolidColorBrush(Color.FromRgb(0x05, 0x06, 0x0C))),
+            BorderBrush = GetResourceBrush("Theme.Brush.SecondaryWindowBorder",
+                new SolidColorBrush(Color.FromArgb(0x70, 0xFF, 0xFF, 0xFF))),
+            BorderThickness = new Thickness(1),
+            CornerRadius = new CornerRadius(24),
+            Child = content,
+            SnapsToDevicePixels = true,
+            ClipToBounds = true
+        };
+
+        shell.MouseLeftButtonDown += (_, e) =>
+        {
+            if (e.ButtonState != MouseButtonState.Pressed || IsInsideInteractiveElement(e.OriginalSource as DependencyObject))
+                return;
+
+            try
+            {
+                window.DragMove();
+            }
+            catch (InvalidOperationException)
+            {
+                // DragMove can throw if Windows has already ended the drag gesture.
+            }
+        };
+
+        window.Content = shell;
     }
 
     private static void ApplyLoadedVisuals(Window window, AppTheme theme)
@@ -268,6 +317,24 @@ internal static class ModernPaletteRuntimeStyles
         }
 
         return false;
+    }
+
+    private static bool IsInsideInteractiveElement(DependencyObject? element)
+    {
+        var current = element;
+        while (current != null)
+        {
+            if (current is ButtonBase or TextBoxBase or PasswordBox or ComboBox or ListBox or DataGrid or ScrollBar or RadioButton or CheckBox)
+                return true;
+            current = VisualTreeHelper.GetParent(current);
+        }
+
+        return false;
+    }
+
+    private static Brush GetResourceBrush(string key, Brush fallback)
+    {
+        return Application.Current.TryFindResource(key) as Brush ?? fallback;
     }
 
     private static IEnumerable<DependencyObject> EnumerateVisualChildren(DependencyObject root)
