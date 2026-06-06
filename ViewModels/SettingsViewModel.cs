@@ -50,6 +50,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     private bool _useButtonScanlineEffect;
 
     [ObservableProperty]
+    private bool _useFullSecondaryWindowTransparency;
+
+    [ObservableProperty]
     private string _settingsFilePath = "";
 
     [ObservableProperty]
@@ -114,6 +117,9 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private string _useButtonScanlineEffectText = "";
+
+    [ObservableProperty]
+    private string _useFullSecondaryWindowTransparencyText = "";
 
     [ObservableProperty]
     private string _themeHint = "";
@@ -188,6 +194,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     public bool AreModernThemeOptionsEnabled => Theme != AppTheme.Legacy;
+    public bool AreModernDarkOptionsEnabled => Theme == AppTheme.ModernDark;
     public bool IsThemeLegacyAvailable => ThemeService.IsThemeAvailable(AppTheme.Legacy);
     public bool IsThemeStandardLightAvailable => ThemeService.IsThemeAvailable(AppTheme.StandardLight);
     public bool IsThemeStandardDarkAvailable => ThemeService.IsThemeAvailable(AppTheme.StandardDark);
@@ -234,6 +241,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         ThemeCrabCuteText = L10n.Get("Str_Theme_CrabCute");
         UseSplashVideoText = T("SplashScreen animace při startu", "SplashScreen startup animation");
         UseButtonScanlineEffectText = T("Efekt řádkování tlačítek", "Button scanline effect");
+        UseFullSecondaryWindowTransparencyText = T("Úplná průhlednost oken", "Full window transparency");
         ThemeHint = T("Změna tématu se projeví po uložení. Video je aktivní ve všech moderních tématech.", "Theme changes after saving. Video is active in all modern-style themes.");
 
         PathsTitle = T("Cesty", "Paths");
@@ -343,6 +351,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         Theme = NormalizeTheme(settings.Theme);
         UseSplashVideo = settings.UseSplashVideo;
         UseButtonScanlineEffect = settings.UseButtonScanlineEffect;
+        UseFullSecondaryWindowTransparency = settings.UseFullSecondaryWindowTransparency;
     }
 
     private AppSettings BuildSettings()
@@ -362,7 +371,8 @@ public sealed partial class SettingsViewModel : ObservableObject
             CheckUpdatesOnStartup = current.CheckUpdatesOnStartup,
             Theme = NormalizeTheme(Theme),
             UseSplashVideo = UseSplashVideo,
-            UseButtonScanlineEffect = UseButtonScanlineEffect
+            UseButtonScanlineEffect = UseButtonScanlineEffect,
+            UseFullSecondaryWindowTransparency = UseFullSecondaryWindowTransparency
         };
     }
 
@@ -372,6 +382,7 @@ public sealed partial class SettingsViewModel : ObservableObject
     private void NotifyThemePropertiesChanged()
     {
         OnPropertyChanged(nameof(AreModernThemeOptionsEnabled));
+        OnPropertyChanged(nameof(AreModernDarkOptionsEnabled));
         OnPropertyChanged(nameof(IsThemeLegacy));
         OnPropertyChanged(nameof(IsThemeStandardLight));
         OnPropertyChanged(nameof(IsThemeStandardDark));

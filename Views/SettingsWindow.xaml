@@ -59,6 +59,10 @@
                               IsChecked="{Binding UseButtonScanlineEffect, Mode=TwoWay}"
                               IsEnabled="{Binding AreModernThemeOptionsEnabled}" />
                 </StackPanel>
+                <CheckBox Content="{Binding UseFullSecondaryWindowTransparencyText}"
+                          IsChecked="{Binding UseFullSecondaryWindowTransparency, Mode=TwoWay}"
+                          IsEnabled="{Binding AreModernDarkOptionsEnabled}"
+                          Margin="0,0,0,4" />
                 <TextBlock Text="{Binding ThemeHint}" Foreground="Gray" FontSize="11" TextWrapping="Wrap" Margin="0,0,0,14" />
 
                 <TextBlock Text="{Binding PathsTitle}" FontWeight="Bold" Margin="0,0,0,6" />

@@ -88,6 +88,12 @@ public class AppSettings
     /// </summary>
     public bool UseButtonScanlineEffect { get; set; } = false;
 
+    /// <summary>
+    /// Optional full transparent shell for Modern Dark secondary windows.
+    /// Disabled by default because the opaque shell is more stable and cheaper to render.
+    /// </summary>
+    public bool UseFullSecondaryWindowTransparency { get; set; } = false;
+
     // ════════════════════════════════════════════════════════════════════════
 
     /// <summary>

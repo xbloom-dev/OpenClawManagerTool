@@ -462,6 +462,7 @@ void AppSettingsMigrationFillsMissingValues()
     Assert(migrated.CleanupAgents.Count > 0, "Migration should fill cleanup agents.");
     Assert(!string.IsNullOrWhiteSpace(migrated.TokenManagerSecretsPath), "Migration should fill token vault path.");
     Assert(migrated.Language == "EN", "Migration should normalize language.");
+    Assert(!migrated.UseFullSecondaryWindowTransparency, "Full secondary-window transparency should default to off.");
 }
 
 void PortableSettingsFileTakesPriority()
@@ -584,10 +585,16 @@ void SettingsViewModelThemeFlagsStayConsistent()
     vm.IsThemeModernDark = true;
     Assert(vm.Theme == AppTheme.ModernDark, "SettingsViewModel should map ModernDark radio flag to AppTheme.ModernDark.");
     Assert(vm.AreModernThemeOptionsEnabled, "Modern theme options should be enabled outside Legacy.");
+    Assert(vm.AreModernDarkOptionsEnabled, "ModernDark-only options should be enabled for ModernDark.");
 
     vm.IsThemeLegacy = true;
     Assert(vm.Theme == AppTheme.Legacy, "SettingsViewModel should map Legacy radio flag to AppTheme.Legacy.");
     Assert(!vm.AreModernThemeOptionsEnabled, "Modern theme options should be disabled for Legacy.");
+    Assert(!vm.AreModernDarkOptionsEnabled, "ModernDark-only options should be disabled outside ModernDark.");
+
+    vm.UseFullSecondaryWindowTransparency = true;
+    vm.SaveCommand.Execute(null);
+    Assert(service.Settings.UseFullSecondaryWindowTransparency, "SettingsViewModel should persist the full transparency option.");
 }
 
 string NewCase()

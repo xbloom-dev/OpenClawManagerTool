@@ -55,10 +55,13 @@ internal static class ModernPaletteRuntimeStyles
         if (window.Resources.Contains(ModernDarkSecondaryShellAppliedKey) || window.IsLoaded) return;
         if (window.Content is not UIElement content) return;
 
+        var useFullTransparency = OpenClawManager.App.GetService<ISettingsService>().Settings.UseFullSecondaryWindowTransparency;
         window.Resources[ModernDarkSecondaryShellAppliedKey] = true;
         window.WindowStyle = WindowStyle.None;
-        window.AllowsTransparency = true;
-        window.Background = Brushes.Transparent;
+        window.AllowsTransparency = useFullTransparency;
+        window.Background = useFullTransparency
+            ? Brushes.Transparent
+            : GetResourceBrush("Theme.Brush.SecondaryWindowBg", new SolidColorBrush(Color.FromRgb(0x05, 0x06, 0x0C)));
         if (window.ResizeMode == ResizeMode.CanResize)
             window.ResizeMode = ResizeMode.CanResizeWithGrip;
 
