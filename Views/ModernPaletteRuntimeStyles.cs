@@ -38,28 +38,51 @@ internal static class ModernPaletteRuntimeStyles
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
         window.Background = ThemeService.GetBrush("Theme.Brush.WindowBackground", GetBrushColor(background, Color.FromRgb(0x19, 0x19, 0x19)));
         window.Foreground = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
-        window.Resources[typeof(Button)] = FindThemeStyle("Style.Button.StandardFlat");
+        window.Resources[typeof(Button)] = theme == AppTheme.ModernDark
+            ? CreateModernDarkButtonStyle()
+            : FindThemeStyle("Style.Button.StandardFlat");
         ApplyCaption(window);
-        window.Loaded += (_, _) => ApplyLoadedVisuals(window);
+        window.Loaded += (_, _) => ApplyLoadedVisuals(window, theme);
     }
 
-    private static void ApplyLoadedVisuals(Window window)
+    private static void ApplyLoadedVisuals(Window window, AppTheme theme)
     {
+        var isModernDark = theme == AppTheme.ModernDark;
         var primary = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
         var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x78, 0x78, 0x78));
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
         var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x27, 0x27, 0x27));
         var border = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0x4E, 0x4E, 0x4E));
+        var glassSection = isModernDark
+            ? new SolidColorBrush(Color.FromArgb(0x24, 0xFF, 0xFF, 0xFF))
+            : ThemeService.GetBrush("Theme.Brush.Glass.SectionBg", Color.FromArgb(0x0B, 0xFF, 0xFF, 0xFF));
+        var glassBorder = isModernDark
+            ? new SolidColorBrush(Color.FromArgb(0x4A, 0xFF, 0xFF, 0xFF))
+            : ThemeService.GetBrush("Theme.Brush.Glass.GlassBorder", Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF));
+        var inputBackground = new SolidColorBrush(Color.FromArgb(0xDA, 0x04, 0x04, 0x08));
+        var logBackground = new SolidColorBrush(Color.FromArgb(0xEA, 0x04, 0x04, 0x08));
 
         foreach (var element in EnumerateVisualChildren(window))
         {
             switch (element)
             {
+                case Button button when isModernDark:
+                    ApplyModernDarkButtonVisual(button);
+                    break;
+                case TextBlock textBlock when isModernDark && IsInside<Button>(textBlock):
+                    break;
                 case TextBlock textBlock:
                     textBlock.Foreground = IsSecondaryText(textBlock) ? secondary : primary;
                     break;
                 case Label label:
                     label.Foreground = primary;
+                    break;
+                case GroupBox groupBox when isModernDark:
+                    groupBox.Background = glassSection;
+                    groupBox.Foreground = primary;
+                    groupBox.BorderBrush = glassBorder;
+                    groupBox.BorderThickness = new Thickness(1);
+                    groupBox.Style = CreateModernDarkGroupBoxStyle();
                     break;
                 case GroupBox groupBox:
                     groupBox.Background = surface;
@@ -73,6 +96,12 @@ internal static class ModernPaletteRuntimeStyles
                 case RadioButton radioButton:
                     radioButton.Foreground = primary;
                     break;
+                case TextBox textBox when isModernDark:
+                    textBox.Background = IsLargeTextBox(textBox) ? logBackground : inputBackground;
+                    textBox.Foreground = primary;
+                    textBox.BorderBrush = glassBorder;
+                    textBox.CaretBrush = primary;
+                    break;
                 case TextBox textBox:
                     textBox.Background = surface;
                     textBox.Foreground = primary;
@@ -80,38 +109,223 @@ internal static class ModernPaletteRuntimeStyles
                     textBox.CaretBrush = primary;
                     break;
                 case PasswordBox passwordBox:
-                    passwordBox.Background = surface;
+                    passwordBox.Background = isModernDark ? inputBackground : surface;
                     passwordBox.Foreground = primary;
-                    passwordBox.BorderBrush = border;
+                    passwordBox.BorderBrush = isModernDark ? glassBorder : border;
                     passwordBox.CaretBrush = primary;
                     break;
                 case ComboBox comboBox:
-                    comboBox.Background = surface;
+                    comboBox.Background = isModernDark ? inputBackground : surface;
                     comboBox.Foreground = primary;
-                    comboBox.BorderBrush = border;
+                    comboBox.BorderBrush = isModernDark ? glassBorder : border;
                     break;
                 case DataGrid dataGrid:
-                    dataGrid.Background = surface;
+                    dataGrid.Background = isModernDark ? logBackground : surface;
                     dataGrid.Foreground = primary;
-                    dataGrid.BorderBrush = border;
-                    dataGrid.HorizontalGridLinesBrush = border;
-                    dataGrid.VerticalGridLinesBrush = border;
+                    dataGrid.BorderBrush = isModernDark ? glassBorder : border;
+                    dataGrid.HorizontalGridLinesBrush = isModernDark ? glassBorder : border;
+                    dataGrid.VerticalGridLinesBrush = isModernDark ? glassBorder : border;
                     break;
                 case Border { Name: "ShortcutFrame" } shortcutFrame:
-                    shortcutFrame.Background = surface;
-                    shortcutFrame.BorderBrush = border;
+                    shortcutFrame.Background = isModernDark ? glassSection : surface;
+                    shortcutFrame.BorderBrush = isModernDark ? glassBorder : border;
                     break;
                 case Border borderElement when borderElement.BorderThickness != new Thickness(0):
-                    borderElement.BorderBrush = border;
+                    borderElement.BorderBrush = isModernDark ? glassBorder : border;
                     if (borderElement.CornerRadius == new CornerRadius(0))
-                        borderElement.CornerRadius = new CornerRadius(6);
+                        borderElement.CornerRadius = new CornerRadius(isModernDark ? 14 : 6);
                     break;
                 case StatusBar statusBar:
-                    statusBar.Background = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12));
+                    statusBar.Background = isModernDark
+                        ? ThemeService.GetBrush("Theme.Brush.Glass.BarBg", Color.FromRgb(0x14, 0x14, 0x14))
+                        : ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x12, 0x12, 0x12));
                     statusBar.Foreground = secondary;
                     break;
             }
         }
+    }
+
+    private static Style CreateModernDarkButtonStyle()
+    {
+        var style = new Style(typeof(Button));
+        style.Setters.Add(new Setter(Control.BackgroundProperty,
+            new SolidColorBrush(Color.FromArgb(0x2F, 0xFF, 0xFF, 0xFF))));
+        style.Setters.Add(new Setter(Control.ForegroundProperty,
+            ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White)));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty,
+            new SolidColorBrush(Color.FromArgb(0x52, 0xFF, 0xFF, 0xFF))));
+        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(1)));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(12, 7, 12, 7)));
+        style.Setters.Add(new Setter(Control.HorizontalContentAlignmentProperty, HorizontalAlignment.Center));
+        style.Setters.Add(new Setter(Control.VerticalContentAlignmentProperty, VerticalAlignment.Center));
+        style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
+
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.Name = "Root";
+        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(9));
+        root.SetValue(UIElement.SnapsToDevicePixelsProperty, true);
+        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
+        root.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(Control.BorderBrushProperty));
+        root.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(Control.BorderThicknessProperty));
+
+        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
+        presenter.SetValue(ContentPresenter.ContentSourceProperty, "Content");
+        presenter.SetValue(FrameworkElement.MarginProperty, new TemplateBindingExtension(Control.PaddingProperty));
+        presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, new TemplateBindingExtension(Control.HorizontalContentAlignmentProperty));
+        presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, new TemplateBindingExtension(Control.VerticalContentAlignmentProperty));
+        presenter.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
+        root.AppendChild(presenter);
+
+        var template = new ControlTemplate(typeof(Button)) { VisualTree = root };
+        template.Triggers.Add(new Trigger
+        {
+            Property = UIElement.IsMouseOverProperty,
+            Value = true,
+            Setters =
+            {
+                new Setter(Border.BackgroundProperty,
+                    ThemeService.GetBrush("Theme.Brush.Hover", Color.FromRgb(0x22, 0x28, 0x31)),
+                    "Root")
+            }
+        });
+        template.Triggers.Add(new Trigger
+        {
+            Property = ButtonBase.IsPressedProperty,
+            Value = true,
+            Setters =
+            {
+                new Setter(Border.BackgroundProperty,
+                    ThemeService.GetBrush("Theme.Brush.Pressed", Color.FromRgb(0x18, 0x1C, 0x22)),
+                    "Root")
+            }
+        });
+        template.Triggers.Add(new Trigger
+        {
+            Property = UIElement.IsEnabledProperty,
+            Value = false,
+            Setters = { new Setter(UIElement.OpacityProperty, 0.42) }
+        });
+        style.Setters.Add(new Setter(Control.TemplateProperty, template));
+        return style;
+    }
+
+    private static Style CreateModernDarkGroupBoxStyle()
+    {
+        var style = new Style(typeof(GroupBox));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(18)));
+
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(18));
+        root.SetValue(Border.PaddingProperty, new Thickness(18));
+        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
+        root.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(Control.BorderBrushProperty));
+        root.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(Control.BorderThicknessProperty));
+
+        var dock = new FrameworkElementFactory(typeof(DockPanel));
+        var header = new FrameworkElementFactory(typeof(ContentPresenter));
+        header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
+        header.SetValue(DockPanel.DockProperty, Dock.Top);
+        header.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 0, 0, 10));
+        header.SetValue(TextElement.ForegroundProperty, new TemplateBindingExtension(Control.ForegroundProperty));
+        header.SetValue(TextElement.FontWeightProperty, FontWeights.SemiBold);
+        dock.AppendChild(header);
+
+        var content = new FrameworkElementFactory(typeof(ContentPresenter));
+        content.SetValue(ContentPresenter.ContentSourceProperty, "Content");
+        dock.AppendChild(content);
+
+        root.AppendChild(dock);
+        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = root }));
+        return style;
+    }
+
+    private static void ApplyModernDarkButtonVisual(Button button)
+    {
+        var text = ExtractButtonText(button.Content);
+        var role = GetButtonRole(button, text);
+
+        button.BorderThickness = new Thickness(1);
+        button.Padding = new Thickness(12, 7, 12, 7);
+        button.HorizontalContentAlignment = HorizontalAlignment.Center;
+        button.VerticalContentAlignment = VerticalAlignment.Center;
+
+        switch (role)
+        {
+            case ButtonRole.Primary:
+                button.Background = CreateAccentBrush();
+                button.BorderBrush = new SolidColorBrush(Color.FromArgb(0x66, 0xD6, 0xE7, 0xFF));
+                button.Foreground = Brushes.White;
+                break;
+            case ButtonRole.Danger:
+                button.Background = new SolidColorBrush(Color.FromArgb(0x18, 0xEF, 0x44, 0x44));
+                button.BorderBrush = new SolidColorBrush(Color.FromArgb(0x7A, 0xEF, 0x44, 0x44));
+                button.Foreground = new SolidColorBrush(Color.FromRgb(0xFF, 0x7A, 0x86));
+                break;
+            case ButtonRole.Warning:
+                button.Background = new SolidColorBrush(Color.FromArgb(0x16, 0xFB, 0xBF, 0x24));
+                button.BorderBrush = new SolidColorBrush(Color.FromArgb(0x72, 0xFB, 0xBF, 0x24));
+                button.Foreground = new SolidColorBrush(Color.FromRgb(0xF8, 0xD7, 0x7A));
+                break;
+            default:
+                button.Background = new SolidColorBrush(Color.FromArgb(0x2F, 0xFF, 0xFF, 0xFF));
+                button.BorderBrush = new SolidColorBrush(Color.FromArgb(0x52, 0xFF, 0xFF, 0xFF));
+                button.Foreground = ThemeService.GetBrush("Theme.Brush.Text.Primary", Colors.White);
+                break;
+        }
+    }
+
+    private static Brush CreateAccentBrush()
+    {
+        var brush = new LinearGradientBrush
+        {
+            StartPoint = new Point(0, 0),
+            EndPoint = new Point(0, 1)
+        };
+        brush.GradientStops.Add(new GradientStop(Color.FromRgb(0x5A, 0xA1, 0xFF), 0.0));
+        brush.GradientStops.Add(new GradientStop(Color.FromRgb(0x1D, 0x4E, 0xD8), 1.0));
+        return brush;
+    }
+
+    private static string ExtractButtonText(object? content)
+    {
+        return content switch
+        {
+            null => string.Empty,
+            string text => text,
+            TextBlock textBlock => textBlock.Text,
+            AccessText accessText => accessText.Text,
+            _ => content.ToString() ?? string.Empty
+        };
+    }
+
+    private static ButtonRole GetButtonRole(Button button, string text)
+    {
+        var key = $"{button.Name} {text}".ToLowerInvariant();
+        if (ContainsAny(key, "redact", "remove", "delete", "smaz", "stop", "zastavit"))
+            return ButtonRole.Danger;
+        if (ContainsAny(key, "restore", "backup", "zálohovat", "zalohovat", "reset"))
+            return ButtonRole.Warning;
+        if (ContainsAny(key, "verify", "ověřit", "overit", "save", "uložit", "ulozit", "run", "spustit", "yes", "ano", "ok", "live"))
+            return ButtonRole.Primary;
+        return ButtonRole.Neutral;
+    }
+
+    private static bool ContainsAny(string value, params string[] needles)
+    {
+        return needles.Any(value.Contains);
+    }
+
+    private static bool IsLargeTextBox(TextBox textBox)
+    {
+        return textBox.AcceptsReturn || textBox.MinLines > 1 || textBox.Height >= 80;
+    }
+
+    private enum ButtonRole
+    {
+        Neutral,
+        Primary,
+        Danger,
+        Warning
     }
 
     private static bool IsSecondaryText(TextBlock textBlock)

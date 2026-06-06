@@ -28,6 +28,7 @@ public partial class MainWindow
         Style? Style,
         Style? FocusVisualStyle,
         double Height,
+        double Width,
         Thickness Margin,
         HorizontalAlignment HorizontalContentAlignment,
         Thickness Padding,
@@ -52,6 +53,9 @@ public partial class MainWindow
     private static readonly Dictionary<string, ImageSource> _themeIconSourceCache = new();
     private static readonly FontFamily LegacyIconFontFamily = new("Segoe UI Emoji");
     private static readonly FontFamily LegacyPlayIconFontFamily = new("Segoe UI");
+    private static readonly FontFamily ModernDarkUiFontFamily = new("Inter, Segoe UI");
+    private static readonly FontFamily ModernDarkCodeFontFamily = new("Cascadia Mono, Consolas");
+    private double _mainStatusBarBaselineHeight = double.NaN;
     /// <summary>
     /// Cached procedural scanline overlay used by the runtime-generated button feedback styles.
     /// It stays in C# because WPF XAML dictionaries cannot express this DrawingBrush pattern clearly.
@@ -693,6 +697,25 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.BackgroundProperty, brush));
         style.Setters.Add(new Setter(Control.BorderBrushProperty, brush));
         style.Setters.Add(new Setter(UIElement.OpacityProperty, 1.0));
+        return style;
+        });
+    }
+
+    private static Style CreateModernDarkMenuSeparatorStyle()
+    {
+        return GetCachedStyle("separator|modern-dark-menu|555958", () =>
+        {
+        var brush = new SolidColorBrush(Color.FromRgb(0x55, 0x59, 0x58));
+
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.SetValue(FrameworkElement.HeightProperty, 1.0);
+        root.SetValue(FrameworkElement.MarginProperty, new Thickness(12, 6, 12, 6));
+        root.SetValue(Border.BackgroundProperty, brush);
+
+        var style = new Style(typeof(Separator));
+        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(Separator)) { VisualTree = root }));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, brush));
+        style.Setters.Add(new Setter(FrameworkElement.HeightProperty, 13.0));
         return style;
         });
     }
@@ -1714,6 +1737,7 @@ public partial class MainWindow
                 button.Style,
                 button.FocusVisualStyle,
                 button.Height,
+                button.Width,
                 button.Margin,
                 button.HorizontalContentAlignment,
                 button.Padding,
@@ -1752,7 +1776,15 @@ public partial class MainWindow
             BtnGatewayLogLabel,
             BtnCleaningToolLabel,
             BtnTokenManagerLabel,
-            BtnDoctorFixLabel
+            BtnDoctorFixLabel,
+            StatusGatewayPrefix,
+            StatusGatewayText,
+            StatusGatewayPid,
+            StatusGatewayUptime,
+            StatusRam,
+            StatusVram,
+            StatusCpu,
+            StatusAppVersion
         })
         {
             _textBlockForegroundStates[textBlock] = textBlock.Foreground;
@@ -1767,6 +1799,8 @@ public partial class MainWindow
                 control.BorderThickness,
                 control.Style);
         }
+
+        _mainStatusBarBaselineHeight = MainStatusBar.Height;
     }
 
     /// <summary>
@@ -1778,6 +1812,19 @@ public partial class MainWindow
         RestoreToolControlsToActions();
         ApplyWindowCaptionColor(null, null);
         ApplyThemeTitleBarMode(false);
+        RestoreModernDarkTitleBarOverrides();
+        ClearValue(Control.FontFamilyProperty);
+        ClearValue(Control.FontSizeProperty);
+        ClearValue(Control.ForegroundProperty);
+        MainMenu.ClearValue(Control.FontFamilyProperty);
+        MainMenu.ClearValue(Control.FontSizeProperty);
+        MainMenu.ClearValue(Control.FontWeightProperty);
+        MainStatusBar.ClearValue(Control.FontFamilyProperty);
+        MainStatusBar.ClearValue(Control.FontSizeProperty);
+        MainStatusBar.ClearValue(Control.FontWeightProperty);
+        MainStatusBar.ClearValue(Control.PaddingProperty);
+        if (!double.IsNaN(_mainStatusBarBaselineHeight))
+            MainStatusBar.Height = _mainStatusBarBaselineHeight;
         Background = SystemColors.WindowBrush;
         Foreground = SystemColors.ControlTextBrush;
         MainGridSplitter.Background = Brushes.LightGray;
@@ -1792,6 +1839,7 @@ public partial class MainWindow
             button.Style = state.Style;
             button.FocusVisualStyle = state.FocusVisualStyle;
             button.Height = state.Height;
+            button.Width = state.Width;
             button.Margin = state.Margin;
             button.HorizontalContentAlignment = state.HorizontalContentAlignment;
             button.Padding = state.Padding;
@@ -1833,6 +1881,28 @@ public partial class MainWindow
         MainMenu.Resources.Remove(typeof(MenuItem));
         MainMenu.Resources.Remove(typeof(Separator));
         MainStatusBar.Resources.Remove(typeof(Separator));
+        MainStatusBar.Resources.Remove(typeof(StatusBarItem));
+        AppLog.Resources.Remove(typeof(ScrollBar));
+        AppLog.Resources.Remove(typeof(Thumb));
+        foreach (var separator in MnuMenuOpen.Items.OfType<Separator>())
+            separator.ClearValue(FrameworkElement.StyleProperty);
+    }
+
+    private void RestoreModernDarkTitleBarOverrides()
+    {
+        TitleBarHost.Margin = new Thickness(0);
+        TitleBarHost.CornerRadius = new CornerRadius(0);
+        TitleBarHost.BorderThickness = new Thickness(0);
+        TitleBarHost.ClearValue(Border.PaddingProperty);
+        TitleBarHost.ClearValue(Border.BorderBrushProperty);
+
+        CaptionButtons.Margin = new Thickness(0);
+        foreach (var button in new[] { BtnWindowMinimize, BtnWindowMaximize, BtnWindowClose })
+        {
+            button.Margin = new Thickness(0);
+            button.ClearValue(Control.FontFamilyProperty);
+            button.ClearValue(Control.FontSizeProperty);
+        }
     }
 
     /// <summary>
@@ -1921,37 +1991,315 @@ public partial class MainWindow
     // ApplyModernPaletteShell tak, aby panely "pluly" nad BgWallpaper.
     private void ApplyModernDarkGlassShell()
     {
-        var sidebarBg  = ThemeService.GetBrush("Theme.Brush.Glass.SidebarBg",  Color.FromArgb(0x33, 0x08, 0x08, 0x0E));
-        var sectionBg  = ThemeService.GetBrush("Theme.Brush.Glass.SectionBg",  Color.FromArgb(0x0B, 0xFF, 0xFF, 0xFF));
-        var barBg      = ThemeService.GetBrush("Theme.Brush.Glass.BarBg",       Color.FromArgb(0x57, 0x0A, 0x08, 0x12));
-        var glassBorder = ThemeService.GetBrush("Theme.Brush.Glass.GlassBorder", Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF));
-        var statusText = new SolidColorBrush(Color.FromRgb(0x55, 0x59, 0x58));
+        var sidebarBg = CreateModernDarkPanelBrush();
+        var sectionBg = CreateModernDarkPanelBrush();
+        var barBg = ThemeService.GetBrush("Theme.Brush.Glass.BarBg", Color.FromRgb(0x14, 0x14, 0x14));
+        var glassBorder = CreateModernDarkGlassBorderBrush();
+        var chrome = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x0B, 0x0C, 0x10));
         var logBackground = new SolidColorBrush(Color.FromRgb(0x14, 0x14, 0x14));
+
+        BgWallpaper.Visibility = Visibility.Collapsed;
+        BgGlow.Visibility = Visibility.Visible;
+        BgGlow.Background = CreateModernDarkBackdropBrush();
+
+        GrpActions.Style = CreateModernDarkPanelStyle(showHeader: false);
+        GrpLatency.Style = CreateModernDarkPanelStyle(showHeader: true);
+        GrpAppLog.Style = CreateModernDarkPanelStyle(showHeader: true);
 
         // Sidebar (Column 0) průhledné pozadí — "float" over BgWallpaper
         // Levý Grid sdílí background Window; nastavit přímo Background na Window nestačí,
         // ale GrpActions a status bar jsou hlavní plochy.
         GrpActions.Background = sidebarBg;
+        GrpActions.BorderBrush = glassBorder;
+        GrpActions.BorderThickness = new Thickness(1);
         GrpLatency.Background = sectionBg;
+        GrpLatency.BorderBrush = glassBorder;
+        GrpLatency.BorderThickness = new Thickness(1);
         GrpAppLog.Background  = sectionBg;
+        GrpAppLog.BorderBrush = glassBorder;
+        GrpAppLog.BorderThickness = new Thickness(1);
         AppLog.Background     = logBackground;
-        AppLog.Foreground     = statusText;
+        AppLog.Foreground     = new SolidColorBrush(Color.FromRgb(0x55, 0x59, 0x58));
+        AppLog.BorderBrush = Brushes.Transparent;
+        AppLog.BorderThickness = new Thickness(0);
+        AppLog.Resources[typeof(ScrollBar)] = CreateModernDarkScrollBarStyle();
+        AppLog.Resources[typeof(Thumb)] = CreateModernDarkScrollThumbStyle();
 
         // Title bar + status bar — tmavý glass pruh
-        TitleBarHost.Background  = barBg;
         MainStatusBar.Background = barBg;
-        MainStatusBar.Foreground = statusText;
-        MainMenu.Background      = Brushes.Transparent;
-        MainMenu.Resources[typeof(MenuItem)] = FindThemeStyle("Theme.Style.MainMenuButton");
-        ApplyModernDarkCaptionButtonVisuals();
+        ApplyModernDarkTitleBar(barBg, glassBorder);
 
         // Jemný glassborder pro GroupBoxy
         GrpLatency.BorderBrush    = glassBorder;
         GrpLatency.BorderThickness = new Thickness(1);
         GrpAppLog.BorderBrush     = glassBorder;
         GrpAppLog.BorderThickness  = new Thickness(1);
+        MainGridSplitter.Background = glassBorder;
+        RightPanel.Background = new SolidColorBrush(Color.FromArgb(0xD9, 0x05, 0x06, 0x0C));
+        SplashOverlay.Background = CreateModernDarkBackdropBrush();
+        SplashImage.Opacity = 1.0;
+        SplashMedia.Opacity = 1.0;
+        Terminal.SetShellBackground(chrome);
+        ApplyModernDarkTypography();
+        ApplyModernDarkMainButtons();
 
         // Okno samotné — průhledné, aby BgWallpaper prosvítal
         Background = Brushes.Transparent;
+    }
+
+    private void ApplyModernDarkMainButtons()
+    {
+        SetModernVariantButtonImage(BtnGatewayStart, "start", 44, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnGatewayStop, "stop", 44, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnGatewayRestart, "restart", 44, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnOpenPowerShell, "powershell", 56, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnOpenGatewayLog, "gateway-log", 56, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnCleaningTool, "cleaning-tool", 56, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnTokenManager, "token-manager", 56, HorizontalAlignment.Center);
+        SetModernVariantButtonImage(BtnDoctorFix, "doctor-fix", 56, HorizontalAlignment.Center);
+        UpdateStartTuiButton(Terminal.IsTuiRunning);
+    }
+
+    private void ApplyModernDarkTitleBar(Brush barBackground, Brush borderBrush)
+    {
+        TitleBarHost.Height = 46;
+        TitleBarHost.Margin = new Thickness(0);
+        TitleBarHost.CornerRadius = new CornerRadius(0);
+        TitleBarHost.BorderThickness = new Thickness(1);
+        TitleBarHost.BorderBrush = borderBrush;
+        TitleBarHost.Background = barBackground;
+        TitleBarHost.Padding = new Thickness(16, 0, 16, 0);
+
+        MainMenu.Background = Brushes.Transparent;
+        MainMenu.Foreground = new SolidColorBrush(Color.FromRgb(0x55, 0x59, 0x58));
+        MainMenu.FontFamily = ModernDarkUiFontFamily;
+        MainMenu.FontSize = 12;
+        MainMenu.FontWeight = FontWeights.Bold;
+        MainMenu.VerticalAlignment = VerticalAlignment.Center;
+        MainMenu.Margin = new Thickness(0);
+        MainMenu.Padding = new Thickness(0);
+        MainMenu.Resources[typeof(MenuItem)] = FindThemeStyle("Theme.Style.MainMenuButton");
+        MainMenu.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
+        ApplyModernDarkMenuSeparator();
+
+        foreach (var item in EnumerateVisualChildren(MainMenu).OfType<MenuItem>())
+            item.Icon = null;
+
+        CaptionButtons.Margin = new Thickness(0, 0, 4, 0);
+        foreach (var button in new[] { BtnWindowMinimize, BtnWindowMaximize, BtnWindowClose })
+        {
+            button.Width = 44;
+            button.Height = 30;
+            button.Margin = new Thickness(0, 0, 6, 0);
+            button.Padding = new Thickness(0);
+            button.Foreground = new SolidColorBrush(Color.FromRgb(0xC2, 0xC6, 0xD4));
+            button.FontFamily = ModernDarkUiFontFamily;
+            button.FontSize = 13;
+            button.Background = Brushes.Transparent;
+            button.BorderBrush = Brushes.Transparent;
+            button.BorderThickness = new Thickness(0);
+            button.FocusVisualStyle = null;
+        }
+        BtnWindowClose.Margin = new Thickness(0);
+        ApplyModernDarkCaptionButtonVisuals();
+    }
+
+    private void ApplyModernDarkTypography()
+    {
+        var mainText = new SolidColorBrush(Color.FromRgb(0x55, 0x59, 0x58));
+
+        FontFamily = ModernDarkUiFontFamily;
+        FontSize = 12;
+        Foreground = mainText;
+        MainMenu.FontFamily = ModernDarkUiFontFamily;
+        MainMenu.FontSize = 12;
+        MainMenu.FontWeight = FontWeights.Bold;
+        MainMenu.Foreground = mainText;
+
+        ApplyModernDarkStatusBarTypography(mainText);
+
+        foreach (var textBlock in new[]
+        {
+            BtnStartTuiLabel,
+            BtnStartTuiSubLabel,
+            BtnGatewayStartLabel,
+            BtnGatewayStopLabel,
+            BtnGatewayRestartLabel,
+            BtnPowerShellLabel,
+            BtnGatewayLogLabel,
+            BtnCleaningToolLabel,
+            BtnTokenManagerLabel,
+            BtnDoctorFixLabel
+        })
+        {
+            textBlock.FontFamily = ModernDarkUiFontFamily;
+            textBlock.FontSize = 12;
+            textBlock.FontWeight = FontWeights.Normal;
+            textBlock.Foreground = mainText;
+        }
+
+        GrpActions.FontFamily = ModernDarkUiFontFamily;
+        GrpLatency.FontFamily = ModernDarkUiFontFamily;
+        GrpAppLog.FontFamily = ModernDarkUiFontFamily;
+        GrpAppLog.FontSize = 12;
+        GrpAppLog.FontWeight = FontWeights.Normal;
+        GrpAppLog.Foreground = mainText;
+        AppLog.FontFamily = ModernDarkCodeFontFamily;
+        AppLog.Foreground = mainText;
+    }
+
+    private static Style CreateModernDarkStatusBarItemStyle(Brush foreground)
+    {
+        return GetCachedStyle($"statusbaritem|modern-dark|{BrushCacheKey(foreground)}", () =>
+        {
+        var style = new Style(typeof(StatusBarItem));
+        style.Setters.Add(new Setter(Control.FontFamilyProperty, ModernDarkUiFontFamily));
+        style.Setters.Add(new Setter(Control.FontSizeProperty, 12.0));
+        style.Setters.Add(new Setter(Control.FontWeightProperty, FontWeights.Normal));
+        style.Setters.Add(new Setter(Control.ForegroundProperty, foreground));
+        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
+        return style;
+        });
+    }
+
+    private void ApplyModernDarkStatusBarTypography(Brush foreground)
+    {
+        MainStatusBar.FontFamily = ModernDarkUiFontFamily;
+        MainStatusBar.FontSize = 12;
+        MainStatusBar.FontWeight = FontWeights.Normal;
+        MainStatusBar.Height = 36;
+        MainStatusBar.Foreground = foreground;
+        MainStatusBar.Padding = new Thickness(16, 0, 16, 0);
+        MainStatusBar.Resources[typeof(StatusBarItem)] = CreateModernDarkStatusBarItemStyle(foreground);
+        MainStatusBar.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
+
+        foreach (var textBlock in new[]
+        {
+            StatusGatewayPrefix,
+            StatusGatewayText,
+            StatusGatewayPid,
+            StatusGatewayUptime,
+            StatusRam,
+            StatusVram,
+            StatusCpu,
+            StatusAppVersion
+        })
+        {
+            textBlock.FontFamily = ModernDarkUiFontFamily;
+            textBlock.FontSize = 12;
+            textBlock.FontWeight = FontWeights.Normal;
+            textBlock.Foreground = foreground;
+        }
+    }
+
+    private void ApplyModernDarkMenuSeparator()
+    {
+        foreach (var separator in MnuMenuOpen.Items.OfType<Separator>())
+            separator.Style = CreateModernDarkMenuSeparatorStyle();
+    }
+
+    private static Style CreateModernDarkPanelStyle(bool showHeader)
+    {
+        return GetCachedStyle($"groupbox|modern-dark-panel|{showHeader}", () =>
+        {
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.Name = "Root";
+        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(16));
+        root.SetValue(Border.PaddingProperty, new Thickness(14));
+        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
+        root.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(Control.BorderBrushProperty));
+        root.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(Control.BorderThicknessProperty));
+
+        var dock = new FrameworkElementFactory(typeof(DockPanel));
+        if (showHeader)
+        {
+            var header = new FrameworkElementFactory(typeof(ContentPresenter));
+            header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
+            header.SetValue(DockPanel.DockProperty, Dock.Top);
+            header.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 0, 0, 8));
+            header.SetValue(TextElement.ForegroundProperty, new TemplateBindingExtension(Control.ForegroundProperty));
+            header.SetValue(TextElement.FontWeightProperty, FontWeights.Normal);
+            dock.AppendChild(header);
+        }
+
+        var content = new FrameworkElementFactory(typeof(ContentPresenter));
+        content.SetValue(ContentPresenter.ContentSourceProperty, "Content");
+        dock.AppendChild(content);
+        root.AppendChild(dock);
+
+        var style = new Style(typeof(GroupBox));
+        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = root }));
+        return style;
+        });
+    }
+
+    private static Brush CreateModernDarkPanelBrush()
+    {
+        return new LinearGradientBrush
+        {
+            StartPoint = new Point(0, 0),
+            EndPoint = new Point(1, 1),
+            GradientStops =
+            {
+                new GradientStop(Color.FromArgb(0x2A, 0xFF, 0xFF, 0xFF), 0.0),
+                new GradientStop(Color.FromArgb(0x12, 0xFF, 0xFF, 0xFF), 1.0)
+            }
+        };
+    }
+
+    private static Brush CreateModernDarkGlassBorderBrush()
+    {
+        return new LinearGradientBrush
+        {
+            StartPoint = new Point(0, 0),
+            EndPoint = new Point(1, 1),
+            GradientStops =
+            {
+                new GradientStop(Color.FromArgb(0x52, 0xFF, 0xFF, 0xFF), 0.0),
+                new GradientStop(Color.FromArgb(0x18, 0xFF, 0xFF, 0xFF), 1.0)
+            }
+        };
+    }
+
+    private static Style CreateModernDarkScrollBarStyle()
+    {
+        return GetCachedStyle("scrollbar|modern-dark-app-log", () =>
+        {
+        var style = new Style(typeof(ScrollBar));
+        style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
+        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
+        return style;
+        });
+    }
+
+    private static Style CreateModernDarkScrollThumbStyle()
+    {
+        return GetCachedStyle("thumb|modern-dark-app-log", () =>
+        {
+        var root = new FrameworkElementFactory(typeof(Border));
+        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
+        root.SetValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromArgb(0x44, 0xFF, 0xFF, 0xFF)));
+        root.SetValue(Border.BorderBrushProperty, new SolidColorBrush(Color.FromArgb(0x20, 0xFF, 0xFF, 0xFF)));
+        root.SetValue(Border.BorderThicknessProperty, new Thickness(1));
+
+        var style = new Style(typeof(Thumb));
+        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(Thumb)) { VisualTree = root }));
+        return style;
+        });
+    }
+
+    private static Brush CreateModernDarkBackdropBrush()
+    {
+        return new LinearGradientBrush
+        {
+            StartPoint = new Point(0, 0),
+            EndPoint = new Point(1, 1),
+            GradientStops =
+            {
+                new GradientStop(Color.FromArgb(0xF7, 0x05, 0x06, 0x0C), 0.0),
+                new GradientStop(Color.FromArgb(0xEA, 0x0F, 0x11, 0x15), 0.55),
+                new GradientStop(Color.FromArgb(0xF5, 0x05, 0x06, 0x0C), 1.0)
+            }
+        };
     }
 }
