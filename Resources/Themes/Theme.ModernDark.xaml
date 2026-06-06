@@ -118,6 +118,14 @@
     <SolidColorBrush x:Key="Theme.Brush.CloseHoverBg"       Color="#EF4444" />
     <SolidColorBrush x:Key="Theme.Brush.StatusBarBg"        Color="#141414" />
     <SolidColorBrush x:Key="Theme.Brush.StatusBarText"      Color="#555958" />
+    <SolidColorBrush x:Key="Theme.Brush.GlassPanelBg"       Color="#14171C" />
+    <SolidColorBrush x:Key="Theme.Brush.GlassPanelBorder"   Color="#23272F" />
+    <SolidColorBrush x:Key="Theme.Brush.AppLogBg"           Color="#141414" />
+    <SolidColorBrush x:Key="Theme.Brush.AppLogText"         Color="#555958" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollThumb"        Color="#2A2E36" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollThumbHover"   Color="#3A3F49" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollTrack"        Color="Transparent" />
+    <FontFamily x:Key="Theme.Font.Mono">Cascadia Mono, Consolas</FontFamily>
 
     <!-- Named styles for secondary windows. Runtime wiring is handled by
          ModernPaletteRuntimeStyles.cs through window.Resources entries. -->
@@ -355,6 +363,133 @@
         <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.UI}" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.StatusBarText}" />
+    </Style>
+
+    <Style x:Key="Theme.Style.GlassPanel" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.GlassPanelBg}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.GlassPanelBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+
+    <Style x:Key="Theme.Style.GlassPanelGroupBox" TargetType="{x:Type GroupBox}">
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.UI}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.StatusBarText}" />
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.GlassPanelBg}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.GlassPanelBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="14" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type GroupBox}">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="16"
+                            Padding="{TemplateBinding Padding}">
+                        <DockPanel>
+                            <ContentPresenter ContentSource="Header"
+                                              DockPanel.Dock="Top"
+                                              Margin="0,0,0,8"
+                                              RecognizesAccessKey="True"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"
+                                              TextElement.FontWeight="Normal" />
+                            <ContentPresenter ContentSource="Content" />
+                        </DockPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.GlassPanelGroupBox.NoHeader"
+           TargetType="{x:Type GroupBox}"
+           BasedOn="{StaticResource Theme.Style.GlassPanelGroupBox}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type GroupBox}">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="16"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter ContentSource="Content" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.ActionImageButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="10">
+                        <ContentPresenter HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.90" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.80" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.AppLog" TargetType="{x:Type ListBox}">
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.AppLogBg}" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.AppLogText}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.Mono}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style x:Key="Theme.Style.DarkScrollBar" TargetType="{x:Type ScrollBar}">
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.ScrollTrack}" />
+        <Setter Property="Width" Value="10" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+
+    <Style x:Key="Theme.Style.DarkScrollThumb" TargetType="{x:Type Thumb}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border x:Name="Th"
+                            CornerRadius="5"
+                            Background="{DynamicResource Theme.Brush.ScrollThumb}" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Th"
+                                    Property="Background"
+                                    Value="{DynamicResource Theme.Brush.ScrollThumbHover}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
 </ResourceDictionary>

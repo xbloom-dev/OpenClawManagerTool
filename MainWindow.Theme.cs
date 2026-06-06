@@ -1128,9 +1128,11 @@ public partial class MainWindow
         image.HorizontalAlignment = alignment;
 
         btn.Content = image;
-        btn.Style = BuildModernVariantImageButtonFeedbackStyle(
-            OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect,
-            ThemeService.GetCurrentButtonInteraction().Equals("PressScanline", StringComparison.OrdinalIgnoreCase));
+        btn.Style = _activeTheme == AppTheme.ModernDark
+            ? FindThemeStyle("Theme.Style.ActionImageButton")
+            : BuildModernVariantImageButtonFeedbackStyle(
+                OpenClawManager.App.GetService<ISettingsService>().Settings.UseButtonScanlineEffect,
+                ThemeService.GetCurrentButtonInteraction().Equals("PressScanline", StringComparison.OrdinalIgnoreCase));
         btn.Height = height;
         btn.Padding = new Thickness(0);
         btn.BorderThickness = new Thickness(0);
@@ -1933,39 +1935,34 @@ public partial class MainWindow
     // ApplyModernPaletteShell tak, aby panely "pluly" nad BgWallpaper.
     private void ApplyModernDarkGlassShell()
     {
-        var sidebarBg = CreateModernDarkPanelBrush();
-        var sectionBg = CreateModernDarkPanelBrush();
         var barBg = ThemeService.GetBrush("Theme.Brush.TopBarBg", Color.FromRgb(0x14, 0x14, 0x14));
-        var glassBorder = CreateModernDarkGlassBorderBrush();
+        var panelBg = ThemeService.GetBrush("Theme.Brush.GlassPanelBg", Color.FromRgb(0x14, 0x17, 0x1C));
+        var glassBorder = ThemeService.GetBrush("Theme.Brush.GlassPanelBorder", Color.FromRgb(0x23, 0x27, 0x2F));
         var chrome = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x0B, 0x0C, 0x10));
-        var logBackground = new SolidColorBrush(Color.FromRgb(0x14, 0x14, 0x14));
 
         BgWallpaper.Visibility = Visibility.Collapsed;
         BgGlow.Visibility = Visibility.Visible;
         BgGlow.Background = CreateModernDarkBackdropBrush();
 
-        GrpActions.Style = CreateModernDarkPanelStyle(showHeader: false);
-        GrpLatency.Style = CreateModernDarkPanelStyle(showHeader: true);
-        GrpAppLog.Style = CreateModernDarkPanelStyle(showHeader: true);
+        GrpActions.Style = FindThemeStyle("Theme.Style.GlassPanelGroupBox.NoHeader");
+        GrpLatency.Style = FindThemeStyle("Theme.Style.GlassPanelGroupBox");
+        GrpAppLog.Style = FindThemeStyle("Theme.Style.GlassPanelGroupBox");
 
         // Sidebar (Column 0) průhledné pozadí — "float" over BgWallpaper
         // Levý Grid sdílí background Window; nastavit přímo Background na Window nestačí,
         // ale GrpActions a status bar jsou hlavní plochy.
-        GrpActions.Background = sidebarBg;
+        GrpActions.Background = panelBg;
         GrpActions.BorderBrush = glassBorder;
         GrpActions.BorderThickness = new Thickness(1);
-        GrpLatency.Background = sectionBg;
+        GrpLatency.Background = panelBg;
         GrpLatency.BorderBrush = glassBorder;
         GrpLatency.BorderThickness = new Thickness(1);
-        GrpAppLog.Background  = sectionBg;
+        GrpAppLog.Background  = panelBg;
         GrpAppLog.BorderBrush = glassBorder;
         GrpAppLog.BorderThickness = new Thickness(1);
-        AppLog.Background     = logBackground;
-        AppLog.Foreground = ThemeService.GetBrush("Theme.Brush.StatusBarText", Color.FromRgb(0x55, 0x59, 0x58));
-        AppLog.BorderBrush = Brushes.Transparent;
-        AppLog.BorderThickness = new Thickness(0);
-        AppLog.Resources[typeof(ScrollBar)] = CreateModernDarkScrollBarStyle();
-        AppLog.Resources[typeof(Thumb)] = CreateModernDarkScrollThumbStyle();
+        AppLog.Style = FindThemeStyle("Theme.Style.AppLog");
+        AppLog.Resources[typeof(ScrollBar)] = FindThemeStyle("Theme.Style.DarkScrollBar");
+        AppLog.Resources[typeof(Thumb)] = FindThemeStyle("Theme.Style.DarkScrollThumb");
 
         // Title bar + status bar — tmavý glass pruh
         MainStatusBar.Background = barBg;
@@ -2139,96 +2136,6 @@ public partial class MainWindow
     {
         foreach (var separator in MnuMenuOpen.Items.OfType<Separator>())
             separator.Style = CreateModernDarkMenuSeparatorStyle();
-    }
-
-    private static Style CreateModernDarkPanelStyle(bool showHeader)
-    {
-        return GetCachedStyle($"groupbox|modern-dark-panel|{showHeader}", () =>
-        {
-        var root = new FrameworkElementFactory(typeof(Border));
-        root.Name = "Root";
-        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(16));
-        root.SetValue(Border.PaddingProperty, new Thickness(14));
-        root.SetValue(Border.BackgroundProperty, new TemplateBindingExtension(Control.BackgroundProperty));
-        root.SetValue(Border.BorderBrushProperty, new TemplateBindingExtension(Control.BorderBrushProperty));
-        root.SetValue(Border.BorderThicknessProperty, new TemplateBindingExtension(Control.BorderThicknessProperty));
-
-        var dock = new FrameworkElementFactory(typeof(DockPanel));
-        if (showHeader)
-        {
-            var header = new FrameworkElementFactory(typeof(ContentPresenter));
-            header.SetValue(ContentPresenter.ContentSourceProperty, "Header");
-            header.SetValue(DockPanel.DockProperty, Dock.Top);
-            header.SetValue(FrameworkElement.MarginProperty, new Thickness(0, 0, 0, 8));
-            header.SetValue(TextElement.ForegroundProperty, new TemplateBindingExtension(Control.ForegroundProperty));
-            header.SetValue(TextElement.FontWeightProperty, FontWeights.Normal);
-            dock.AppendChild(header);
-        }
-
-        var content = new FrameworkElementFactory(typeof(ContentPresenter));
-        content.SetValue(ContentPresenter.ContentSourceProperty, "Content");
-        dock.AppendChild(content);
-        root.AppendChild(dock);
-
-        var style = new Style(typeof(GroupBox));
-        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(GroupBox)) { VisualTree = root }));
-        return style;
-        });
-    }
-
-    private static Brush CreateModernDarkPanelBrush()
-    {
-        return new LinearGradientBrush
-        {
-            StartPoint = new Point(0, 0),
-            EndPoint = new Point(1, 1),
-            GradientStops =
-            {
-                new GradientStop(Color.FromArgb(0x2A, 0xFF, 0xFF, 0xFF), 0.0),
-                new GradientStop(Color.FromArgb(0x12, 0xFF, 0xFF, 0xFF), 1.0)
-            }
-        };
-    }
-
-    private static Brush CreateModernDarkGlassBorderBrush()
-    {
-        return new LinearGradientBrush
-        {
-            StartPoint = new Point(0, 0),
-            EndPoint = new Point(1, 1),
-            GradientStops =
-            {
-                new GradientStop(Color.FromArgb(0x52, 0xFF, 0xFF, 0xFF), 0.0),
-                new GradientStop(Color.FromArgb(0x18, 0xFF, 0xFF, 0xFF), 1.0)
-            }
-        };
-    }
-
-    private static Style CreateModernDarkScrollBarStyle()
-    {
-        return GetCachedStyle("scrollbar|modern-dark-app-log", () =>
-        {
-        var style = new Style(typeof(ScrollBar));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-        return style;
-        });
-    }
-
-    private static Style CreateModernDarkScrollThumbStyle()
-    {
-        return GetCachedStyle("thumb|modern-dark-app-log", () =>
-        {
-        var root = new FrameworkElementFactory(typeof(Border));
-        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(4));
-        root.SetValue(Border.BackgroundProperty, new SolidColorBrush(Color.FromArgb(0x44, 0xFF, 0xFF, 0xFF)));
-        root.SetValue(Border.BorderBrushProperty, new SolidColorBrush(Color.FromArgb(0x20, 0xFF, 0xFF, 0xFF)));
-        root.SetValue(Border.BorderThicknessProperty, new Thickness(1));
-
-        var style = new Style(typeof(Thumb));
-        style.Setters.Add(new Setter(Control.TemplateProperty, new ControlTemplate(typeof(Thumb)) { VisualTree = root }));
-        return style;
-        });
     }
 
     private static Brush CreateModernDarkBackdropBrush()
