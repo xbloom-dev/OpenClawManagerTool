@@ -566,16 +566,16 @@ public partial class MainWindow
 
     private void ApplyModernDarkCaptionButtonVisuals()
     {
-        var foreground = new SolidColorBrush(Color.FromRgb(0xC2, 0xC6, 0xD4));
+        var captionStyle = FindThemeStyle("Theme.Style.CaptionButton");
+        var closeStyle = FindThemeStyle("Theme.Style.CaptionButton.Close");
 
-        BtnWindowMinimize.Style = CreateModernDarkCaptionButtonStyle(isCloseButton: false);
-        BtnWindowMaximize.Style = CreateModernDarkCaptionButtonStyle(isCloseButton: false);
-        BtnWindowClose.Style = CreateModernDarkCaptionButtonStyle(isCloseButton: true);
+        BtnWindowMinimize.Style = captionStyle;
+        BtnWindowMaximize.Style = captionStyle;
+        BtnWindowClose.Style = closeStyle;
 
         foreach (var button in new[] { BtnWindowMinimize, BtnWindowMaximize, BtnWindowClose })
         {
             button.Background = Brushes.Transparent;
-            button.Foreground = foreground;
             button.BorderBrush = Brushes.Transparent;
             button.BorderThickness = new Thickness(0);
             button.Padding = new Thickness(0);
@@ -616,64 +616,6 @@ public partial class MainWindow
         style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
         style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
         style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
-        return style;
-        });
-    }
-
-    private static Style CreateModernDarkCaptionButtonStyle(bool isCloseButton)
-    {
-        var cacheKey = $"caption|modern-dark|{isCloseButton}";
-        return GetCachedStyle(cacheKey, () =>
-        {
-        var hoverBrush = isCloseButton
-            ? new SolidColorBrush(Color.FromArgb(0xE6, 0xEF, 0x44, 0x44))
-            : new SolidColorBrush(Color.FromArgb(0x24, 0xFF, 0xFF, 0xFF));
-        var pressedBrush = isCloseButton
-            ? new SolidColorBrush(Color.FromArgb(0xF0, 0xB9, 0x1C, 0x1C))
-            : new SolidColorBrush(Color.FromArgb(0x20, 0x5A, 0xA1, 0xFF));
-
-        var root = new FrameworkElementFactory(typeof(Border));
-        root.Name = "Root";
-        root.SetValue(Border.BackgroundProperty, Brushes.Transparent);
-        root.SetValue(Border.BorderBrushProperty, Brushes.Transparent);
-        root.SetValue(Border.BorderThicknessProperty, new Thickness(1));
-        root.SetValue(Border.CornerRadiusProperty, new CornerRadius(9));
-
-        var presenter = new FrameworkElementFactory(typeof(ContentPresenter));
-        presenter.SetValue(ContentPresenter.HorizontalAlignmentProperty, HorizontalAlignment.Center);
-        presenter.SetValue(ContentPresenter.VerticalAlignmentProperty, VerticalAlignment.Center);
-        presenter.SetValue(ContentPresenter.RecognizesAccessKeyProperty, true);
-        root.AppendChild(presenter);
-
-        var template = new ControlTemplate(typeof(Button)) { VisualTree = root };
-        template.Triggers.Add(new Trigger
-        {
-            Property = UIElement.IsMouseOverProperty,
-            Value = true,
-            Setters =
-            {
-                new Setter(Border.BackgroundProperty, hoverBrush, "Root"),
-                new Setter(Control.ForegroundProperty, Brushes.White)
-            }
-        });
-        template.Triggers.Add(new Trigger
-        {
-            Property = ButtonBase.IsPressedProperty,
-            Value = true,
-            Setters =
-            {
-                new Setter(Border.BackgroundProperty, pressedBrush, "Root"),
-                new Setter(Control.ForegroundProperty, Brushes.White)
-            }
-        });
-
-        var style = new Style(typeof(Button));
-        style.Setters.Add(new Setter(Control.BackgroundProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderBrushProperty, Brushes.Transparent));
-        style.Setters.Add(new Setter(Control.BorderThicknessProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.PaddingProperty, new Thickness(0)));
-        style.Setters.Add(new Setter(Control.TemplateProperty, template));
-        style.Setters.Add(new Setter(Control.FocusVisualStyleProperty, null));
         return style;
         });
     }
@@ -1993,7 +1935,7 @@ public partial class MainWindow
     {
         var sidebarBg = CreateModernDarkPanelBrush();
         var sectionBg = CreateModernDarkPanelBrush();
-        var barBg = ThemeService.GetBrush("Theme.Brush.Glass.BarBg", Color.FromRgb(0x14, 0x14, 0x14));
+        var barBg = ThemeService.GetBrush("Theme.Brush.TopBarBg", Color.FromRgb(0x14, 0x14, 0x14));
         var glassBorder = CreateModernDarkGlassBorderBrush();
         var chrome = ThemeService.GetBrush("Theme.Brush.Chrome", Color.FromRgb(0x0B, 0x0C, 0x10));
         var logBackground = new SolidColorBrush(Color.FromRgb(0x14, 0x14, 0x14));
@@ -2019,7 +1961,7 @@ public partial class MainWindow
         GrpAppLog.BorderBrush = glassBorder;
         GrpAppLog.BorderThickness = new Thickness(1);
         AppLog.Background     = logBackground;
-        AppLog.Foreground     = new SolidColorBrush(Color.FromRgb(0x55, 0x59, 0x58));
+        AppLog.Foreground = ThemeService.GetBrush("Theme.Brush.StatusBarText", Color.FromRgb(0x55, 0x59, 0x58));
         AppLog.BorderBrush = Brushes.Transparent;
         AppLog.BorderThickness = new Thickness(0);
         AppLog.Resources[typeof(ScrollBar)] = CreateModernDarkScrollBarStyle();
@@ -2066,12 +2008,12 @@ public partial class MainWindow
         TitleBarHost.Margin = new Thickness(0);
         TitleBarHost.CornerRadius = new CornerRadius(0);
         TitleBarHost.BorderThickness = new Thickness(1);
-        TitleBarHost.BorderBrush = borderBrush;
+        TitleBarHost.BorderBrush = ThemeService.GetBrush("Theme.Brush.TopBarBorder", GetBrushColor(borderBrush, Color.FromRgb(0x23, 0x27, 0x2F)));
         TitleBarHost.Background = barBackground;
         TitleBarHost.Padding = new Thickness(16, 0, 16, 0);
 
         MainMenu.Background = Brushes.Transparent;
-        MainMenu.Foreground = new SolidColorBrush(Color.FromRgb(0x55, 0x59, 0x58));
+        MainMenu.Foreground = ThemeService.GetBrush("Theme.Brush.MenuText", Color.FromRgb(0x55, 0x59, 0x58));
         MainMenu.FontFamily = ModernDarkUiFontFamily;
         MainMenu.FontSize = 12;
         MainMenu.FontWeight = FontWeights.Bold;
@@ -2185,6 +2127,7 @@ public partial class MainWindow
             StatusAppVersion
         })
         {
+            textBlock.Style = FindThemeStyle("Theme.Style.StatusBarText");
             textBlock.FontFamily = ModernDarkUiFontFamily;
             textBlock.FontSize = 12;
             textBlock.FontWeight = FontWeights.Normal;

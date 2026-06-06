@@ -29,6 +29,9 @@
     <sys:String x:Key="Theme.Meta.PaletteFamily">ModernPalette</sys:String>
     <sys:String x:Key="Theme.Meta.ButtonInteraction">HoverScanline</sys:String>
 
+    <!-- Fonts -->
+    <FontFamily x:Key="Theme.Font.UI">Inter, Segoe UI</FontFamily>
+
     <!-- Colors -->
     <Color x:Key="Theme.Color.Background">#0F1115</Color>
     <Color x:Key="Theme.Color.Surface">#14171C</Color>
@@ -103,6 +106,18 @@
     <SolidColorBrush x:Key="Theme.Brush.ShortcutBackground" Color="{StaticResource Theme.Color.Surface}" />
     <SolidColorBrush x:Key="Theme.Brush.ShortcutBorder"     Color="{StaticResource Theme.Color.Border}" />
     <SolidColorBrush x:Key="Theme.Brush.ShortcutKeyText"    Color="{StaticResource Theme.Color.Text.Primary}" />
+    <SolidColorBrush x:Key="Theme.Brush.TopBarBg"           Color="#141414" />
+    <SolidColorBrush x:Key="Theme.Brush.TopBarBorder"       Color="#23272F" />
+    <SolidColorBrush x:Key="Theme.Brush.MenuText"           Color="#555958" />
+    <SolidColorBrush x:Key="Theme.Brush.MenuTextActive"     Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.DropdownBg"         Color="#14171C" />
+    <SolidColorBrush x:Key="Theme.Brush.DropdownItemText"   Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutText"       Color="#555958" />
+    <SolidColorBrush x:Key="Theme.Brush.CaptionFg"          Color="#C2C6D4" />
+    <SolidColorBrush x:Key="Theme.Brush.CaptionHoverBg"     Color="#24FFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.CloseHoverBg"       Color="#EF4444" />
+    <SolidColorBrush x:Key="Theme.Brush.StatusBarBg"        Color="#141414" />
+    <SolidColorBrush x:Key="Theme.Brush.StatusBarText"      Color="#555958" />
 
     <!-- Named styles for secondary windows. Runtime wiring is handled by
          ModernPaletteRuntimeStyles.cs through window.Resources entries. -->
@@ -201,13 +216,13 @@
     </Style>
 
     <Style x:Key="Theme.Style.MainMenuButton" TargetType="{x:Type MenuItem}">
-        <Setter Property="Foreground" Value="#555958" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.MenuText}" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="13,0" />
         <Setter Property="Height" Value="30" />
-        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.UI}" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="Template">
@@ -229,7 +244,7 @@
                                            Visibility="Collapsed" />
                                 <TextBlock x:Name="Gesture"
                                            Text="{TemplateBinding InputGestureText}"
-                                           Foreground="#555958"
+                                           Foreground="{DynamicResource Theme.Brush.ShortcutText}"
                                            Margin="24,0,0,0"
                                            DockPanel.Dock="Right" />
                                 <ContentPresenter x:Name="HeaderHost"
@@ -246,7 +261,7 @@
                                IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
                                Placement="Bottom"
                                PopupAnimation="Fade">
-                            <Border Background="#E80A0B10"
+                            <Border Background="{DynamicResource Theme.Brush.DropdownBg}"
                                     BorderBrush="{StaticResource Theme.Brush.Glass.GlassBorder}"
                                     BorderThickness="1"
                                     CornerRadius="10"
@@ -267,22 +282,22 @@
                             <Setter TargetName="PART_Popup" Property="Placement" Value="Right" />
                             <Setter Property="FontSize" Value="12" />
                             <Setter Property="FontWeight" Value="Normal" />
-                            <Setter Property="Foreground" Value="#FFFFFF" />
+                            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.DropdownItemText}" />
                         </Trigger>
                         <Trigger Property="Role" Value="SubmenuItem">
                             <Setter Property="FontSize" Value="12" />
                             <Setter Property="FontWeight" Value="Normal" />
                             <Setter Property="Padding" Value="12,7" />
-                            <Setter Property="Foreground" Value="#FFFFFF" />
+                            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.DropdownItemText}" />
                         </Trigger>
                         <Trigger Property="IsSubmenuOpen" Value="True">
-                            <Setter Property="Foreground" Value="#FFFFFF" />
+                            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.MenuTextActive}" />
                         </Trigger>
                         <Trigger Property="IsHighlighted" Value="True">
                             <Setter TargetName="Root" Property="Background" Value="#1AFFFFFF" />
                             <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Theme.Brush.Glass.BtnBorder}" />
                             <Setter TargetName="Root" Property="BorderThickness" Value="1" />
-                            <Setter Property="Foreground" Value="#FFFFFF" />
+                            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.MenuTextActive}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
                             <Setter Property="Opacity" Value="0.45" />
@@ -291,6 +306,55 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.DropdownItem" TargetType="{x:Type MenuItem}">
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.UI}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.DropdownItemText}" />
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.DropdownBg}" />
+    </Style>
+
+    <Style x:Key="Theme.Style.CaptionButton" TargetType="{x:Type Button}">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.CaptionFg}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Tag" Value="{DynamicResource Theme.Brush.CaptionHoverBg}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Bd"
+                            Background="Transparent"
+                            CornerRadius="9">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd"
+                                    Property="Background"
+                                    Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" />
+                            <Setter Property="Foreground" Value="#FFFFFF" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.CaptionButton.Close"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource Theme.Style.CaptionButton}">
+        <Setter Property="Tag" Value="{DynamicResource Theme.Brush.CloseHoverBg}" />
+    </Style>
+
+    <Style x:Key="Theme.Style.StatusBarText" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.UI}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.StatusBarText}" />
     </Style>
 
 </ResourceDictionary>
