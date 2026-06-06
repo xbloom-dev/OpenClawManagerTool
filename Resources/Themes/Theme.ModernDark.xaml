@@ -130,13 +130,23 @@
     <SolidColorBrush x:Key="Theme.Brush.CloseHoverBg"       Color="#EF4444" />
     <SolidColorBrush x:Key="Theme.Brush.StatusBarBg"        Color="#141414" />
     <SolidColorBrush x:Key="Theme.Brush.StatusBarText"      Color="#555958" />
-    <SolidColorBrush x:Key="Theme.Brush.GlassPanelBg"       Color="#14171C" />
-    <SolidColorBrush x:Key="Theme.Brush.GlassPanelBorder"   Color="#23272F" />
+    <LinearGradientBrush x:Key="Theme.Brush.GlassPanelBg" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#D010121A" Offset="0.00" />
+        <GradientStop Color="#B815102B" Offset="0.56" />
+        <GradientStop Color="#C8260910" Offset="1.00" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Theme.Brush.GlassPanelBorder" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#68FFFFFF" Offset="0.00" />
+        <GradientStop Color="#22FFFFFF" Offset="0.45" />
+        <GradientStop Color="#425AA1FF" Offset="0.72" />
+        <GradientStop Color="#24EF4444" Offset="1.00" />
+    </LinearGradientBrush>
     <SolidColorBrush x:Key="Theme.Brush.AppLogBg"           Color="#141414" />
     <SolidColorBrush x:Key="Theme.Brush.AppLogText"         Color="#555958" />
-    <SolidColorBrush x:Key="Theme.Brush.ScrollThumb"        Color="#2A2E36" />
-    <SolidColorBrush x:Key="Theme.Brush.ScrollThumbHover"   Color="#3A3F49" />
-    <SolidColorBrush x:Key="Theme.Brush.ScrollTrack"        Color="Transparent" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollThumb"        Color="#AA343946" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollThumbHover"   Color="#D03A3F49" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollThumbBorder"  Color="#5AFFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollTrack"        Color="#70080910" />
     <FontFamily x:Key="Theme.Font.Mono">Cascadia Mono, Consolas</FontFamily>
 
     <!-- Named styles for secondary windows. Runtime wiring is handled by
@@ -224,12 +234,12 @@
     </Style>
 
     <Style x:Key="Theme.Style.TextBlock" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas" />
+        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
         <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
     </Style>
 
     <Style x:Key="Theme.Style.ListBox" TargetType="ListBox">
-        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas" />
         <Setter Property="Background"  Value="{StaticResource Theme.Brush.Surface}" />
         <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Border}" />
         <Setter Property="Foreground"  Value="{StaticResource Theme.Brush.Text.Primary}" />
@@ -525,8 +535,9 @@
 
     <Style x:Key="Theme.Style.DarkScrollBar" TargetType="{x:Type ScrollBar}">
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.ScrollTrack}" />
-        <Setter Property="Width" Value="10" />
-        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Width" Value="11" />
+        <Setter Property="BorderBrush" Value="#34FFFFFF" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ScrollBar}">
@@ -567,7 +578,9 @@
                 <ControlTemplate TargetType="{x:Type Thumb}">
                     <Border x:Name="Th"
                             CornerRadius="5"
-                            Background="{DynamicResource Theme.Brush.ScrollThumb}" />
+                            Background="{DynamicResource Theme.Brush.ScrollThumb}"
+                            BorderBrush="{DynamicResource Theme.Brush.ScrollThumbBorder}"
+                            BorderThickness="1" />
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="Th"

@@ -53,13 +53,17 @@ internal static class ModernPaletteRuntimeStyles
         var background = ThemeService.GetBrush("Theme.Brush.Background", Color.FromRgb(0x19, 0x19, 0x19));
         var surface = ThemeService.GetBrush("Theme.Brush.Surface", Color.FromRgb(0x27, 0x27, 0x27));
         var border = ThemeService.GetBrush("Theme.Brush.Border", Color.FromRgb(0x4E, 0x4E, 0x4E));
-        var glassSection = ThemeService.GetBrush("Theme.Brush.Glass.SectionBg", Color.FromArgb(0x0B, 0xFF, 0xFF, 0xFF));
-        var glassBorder = ThemeService.GetBrush("Theme.Brush.Glass.GlassBorder", Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF));
+        var glassSection = isModernDark
+            ? new SolidColorBrush(Color.FromArgb(0x24, 0xFF, 0xFF, 0xFF))
+            : ThemeService.GetBrush("Theme.Brush.Glass.SectionBg", Color.FromArgb(0x0B, 0xFF, 0xFF, 0xFF));
+        var glassBorder = isModernDark
+            ? new SolidColorBrush(Color.FromArgb(0x4A, 0xFF, 0xFF, 0xFF))
+            : ThemeService.GetBrush("Theme.Brush.Glass.GlassBorder", Color.FromArgb(0x38, 0xFF, 0xFF, 0xFF));
         var inputBackground = isModernDark
-            ? ThemeService.GetBrush("Theme.Brush.GlassPanelBg", Color.FromRgb(0x14, 0x17, 0x1C))
+            ? new SolidColorBrush(Color.FromArgb(0xDA, 0x04, 0x04, 0x08))
             : surface;
         var logBackground = isModernDark
-            ? ThemeService.GetBrush("Theme.Brush.AppLogBg", Color.FromRgb(0x14, 0x14, 0x14))
+            ? new SolidColorBrush(Color.FromArgb(0xEA, 0x04, 0x04, 0x08))
             : surface;
 
         foreach (var element in EnumerateVisualChildren(window))
