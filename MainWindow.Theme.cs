@@ -1994,12 +1994,12 @@ public partial class MainWindow
         GrpAppLog.BorderBrush     = glassBorder;
         GrpAppLog.BorderThickness  = new Thickness(1);
         MainGridSplitter.Background = glassBorder;
-        RightPanel.Background = new SolidColorBrush(Color.FromArgb(0xD9, 0x05, 0x06, 0x0C));
-        SplashOverlay.Background = CreateModernDarkBackdropBrush();
-        SplashImage.Opacity = 0.34;
-        SplashImage.Stretch = Stretch.UniformToFill;
-        SplashMedia.Opacity = 0.66;
-        SplashMedia.Stretch = Stretch.UniformToFill;
+        RightPanel.Background = CreateModernDarkRightPanelBrush();
+        SplashOverlay.Background = CreateModernDarkRightPanelBrush();
+        SplashImage.Opacity = 0.92;
+        SplashImage.Stretch = Stretch.Uniform;
+        SplashMedia.Opacity = 0.92;
+        SplashMedia.Stretch = Stretch.Uniform;
         Terminal.SetShellBackground(chrome);
         ApplyModernDarkTypography();
         ApplyModernDarkMainButtons();
@@ -2194,6 +2194,24 @@ public partial class MainWindow
                 new GradientStop(Color.FromArgb(0xF7, 0x05, 0x06, 0x0C), 0.0),
                 new GradientStop(Color.FromArgb(0xEA, 0x0F, 0x11, 0x15), 0.55),
                 new GradientStop(Color.FromArgb(0xF5, 0x05, 0x06, 0x0C), 1.0)
+            }
+        };
+    }
+
+    private static Brush CreateModernDarkRightPanelBrush()
+    {
+        return new RadialGradientBrush
+        {
+            Center = new Point(0.55, 0.42),
+            GradientOrigin = new Point(0.48, 0.34),
+            RadiusX = 1.05,
+            RadiusY = 0.95,
+            GradientStops =
+            {
+                new GradientStop(Color.FromRgb(0x2A, 0x1A, 0x4E), 0.0),
+                new GradientStop(Color.FromRgb(0x18, 0x13, 0x2D), 0.45),
+                new GradientStop(Color.FromRgb(0x08, 0x09, 0x10), 0.78),
+                new GradientStop(Color.FromRgb(0x05, 0x06, 0x0C), 1.0)
             }
         };
     }
