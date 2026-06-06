@@ -49,6 +49,7 @@ public partial class MainWindow
     private readonly Dictionary<FrameworkElement, ElementLayoutState> _layoutElementStates = new();
     private readonly Dictionary<TextBlock, Brush> _textBlockForegroundStates = new();
     private readonly Dictionary<MenuItem, object?> _menuItemIcons = new();
+    private readonly Dictionary<MenuItem, object?> _menuItemHeaders = new();
     private static readonly Dictionary<string, Style> _themeStyleCache = new();
     private static readonly Dictionary<string, ImageSource> _themeIconSourceCache = new();
     private static readonly FontFamily LegacyIconFontFamily = new("Segoe UI Emoji");
@@ -751,7 +752,8 @@ public partial class MainWindow
             TxtGatewayLabel,
             TxtSectionOpen,
             TxtSectionTools,
-            TxtSectionMaintenance
+            TxtSectionMaintenance,
+            StatusAppVersion
         })
         {
             textBlock.Foreground = primaryText;
@@ -1710,6 +1712,11 @@ public partial class MainWindow
             _menuItemIcons[item] = item.Icon;
         }
 
+        foreach (var item in new[] { MnuMenuOpen, MnuMenuSettings, MnuMenuHelp })
+        {
+            _menuItemHeaders[item] = item.Header;
+        }
+
         foreach (var textBlock in new[]
         {
             BtnStartTuiLabel,
@@ -1776,6 +1783,10 @@ public partial class MainWindow
         MainGridSplitter.Background = Brushes.LightGray;
         RightPanel.Background = Brushes.Transparent;
         SplashOverlay.SetResourceReference(Border.BackgroundProperty, "Brush.SplashModernBackground");
+        SplashImage.Opacity = 1.0;
+        SplashImage.Stretch = Stretch.Uniform;
+        SplashMedia.Opacity = 1.0;
+        SplashMedia.Stretch = Stretch.Uniform;
         SplashProgress.ClearValue(Control.ForegroundProperty);
         Terminal.ResetShellBackground();
 
@@ -1797,6 +1808,11 @@ public partial class MainWindow
         foreach (var (item, icon) in _menuItemIcons)
         {
             item.Icon = icon;
+        }
+
+        foreach (var (item, header) in _menuItemHeaders)
+        {
+            item.Header = header;
         }
 
         foreach (var (control, state) in _shellControlStates)
@@ -1980,8 +1996,10 @@ public partial class MainWindow
         MainGridSplitter.Background = glassBorder;
         RightPanel.Background = new SolidColorBrush(Color.FromArgb(0xD9, 0x05, 0x06, 0x0C));
         SplashOverlay.Background = CreateModernDarkBackdropBrush();
-        SplashImage.Opacity = 1.0;
-        SplashMedia.Opacity = 1.0;
+        SplashImage.Opacity = 0.34;
+        SplashImage.Stretch = Stretch.UniformToFill;
+        SplashMedia.Opacity = 0.66;
+        SplashMedia.Stretch = Stretch.UniformToFill;
         Terminal.SetShellBackground(chrome);
         ApplyModernDarkTypography();
         ApplyModernDarkMainButtons();
@@ -2024,6 +2042,7 @@ public partial class MainWindow
         MainMenu.Resources[typeof(MenuItem)] = FindThemeStyle("Theme.Style.MainMenuButton");
         MainMenu.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
         ApplyModernDarkMenuSeparator();
+        ApplyModernDarkTopMenuHeaders();
 
         foreach (var item in EnumerateVisualChildren(MainMenu).OfType<MenuItem>())
             item.Icon = null;
@@ -2124,9 +2143,10 @@ public partial class MainWindow
         MainStatusBar.FontWeight = FontWeights.Normal;
         MainStatusBar.Height = 36;
         MainStatusBar.Foreground = foreground;
-        MainStatusBar.Padding = new Thickness(16, 0, 16, 0);
+        MainStatusBar.Padding = new Thickness(16, 0, 0, 0);
         MainStatusBar.Resources[typeof(StatusBarItem)] = CreateModernDarkStatusBarItemStyle(foreground);
         MainStatusBar.Resources[typeof(Separator)] = CreateHiddenSeparatorStyle();
+        StatusAppVersion.Margin = new Thickness(0, 0, 16, 0);
 
         foreach (var textBlock in new[]
         {
@@ -2152,6 +2172,15 @@ public partial class MainWindow
     {
         foreach (var separator in MnuMenuOpen.Items.OfType<Separator>())
             separator.Style = CreateModernDarkMenuSeparatorStyle();
+    }
+
+    private void ApplyModernDarkTopMenuHeaders()
+    {
+        foreach (var item in new[] { MnuMenuOpen, MnuMenuSettings, MnuMenuHelp })
+        {
+            if (item.Header is string text)
+                item.Header = text.Replace("_", string.Empty);
+        }
     }
 
     private static Brush CreateModernDarkBackdropBrush()
