@@ -56,6 +56,12 @@
     <Color x:Key="Theme.Color.ActionDanger">#3A171B</Color>
     <Color x:Key="Theme.Color.ActionUtility">#1C2026</Color>
     <Color x:Key="Theme.Color.SplashModernBackground">#0B0C10</Color>
+    <Color x:Key="Theme.Color.AccentTop">#2F9BFF</Color>
+    <Color x:Key="Theme.Color.AccentBot">#005AA3</Color>
+    <Color x:Key="Theme.Color.DangerTop">#FF6B7A</Color>
+    <Color x:Key="Theme.Color.DangerBot">#9F2434</Color>
+    <Color x:Key="Theme.Color.WarningTop">#FFD766</Color>
+    <Color x:Key="Theme.Color.WarningBot">#9C6E00</Color>
 
     <!-- Glass / Performance Glass tokens (Phase 4) -->
     <!-- Modern Dark glass surface tokens. -->
@@ -100,6 +106,12 @@
     <SolidColorBrush x:Key="Brush.SplashModernBackground" Color="{StaticResource Theme.Color.SplashModernBackground}" />
     <!-- AccentTop from the ClaudeDesign Modern Dark reference. -->
     <SolidColorBrush x:Key="Theme.Brush.Accent"           Color="#5AA1FF" />
+    <SolidColorBrush x:Key="Theme.Brush.AccentTop"        Color="{StaticResource Theme.Color.AccentTop}" />
+    <SolidColorBrush x:Key="Theme.Brush.AccentBot"        Color="{StaticResource Theme.Color.AccentBot}" />
+    <SolidColorBrush x:Key="Theme.Brush.DangerTop"        Color="{StaticResource Theme.Color.DangerTop}" />
+    <SolidColorBrush x:Key="Theme.Brush.DangerBot"        Color="{StaticResource Theme.Color.DangerBot}" />
+    <SolidColorBrush x:Key="Theme.Brush.WarningTop"       Color="{StaticResource Theme.Color.WarningTop}" />
+    <SolidColorBrush x:Key="Theme.Brush.WarningBot"       Color="{StaticResource Theme.Color.WarningBot}" />
     <SolidColorBrush x:Key="Theme.Brush.OutputBackground" Color="{StaticResource Theme.Color.Chrome}" />
     <SolidColorBrush x:Key="Theme.Brush.OutputText"       Color="{StaticResource Theme.Color.Text.Primary}" />
     <SolidColorBrush x:Key="Theme.Brush.OutputBorder"     Color="{StaticResource Theme.Color.Border}" />
@@ -155,7 +167,7 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="14" />
+                                CornerRadius="18" />
                         <Border Grid.Row="0" Padding="10,6,10,0">
                             <ContentPresenter ContentSource="Header"
                                               RecognizesAccessKey="True"
@@ -171,9 +183,9 @@
     <!-- Rounded button style for secondary windows. -->
     <Style x:Key="Theme.Style.Button" TargetType="Button">
         <Setter Property="FontFamily"               Value="Inter, Segoe UI" />
-        <Setter Property="Background"               Value="{StaticResource Theme.Brush.SecondaryButton}" />
+        <Setter Property="Background"               Value="{StaticResource Theme.Brush.Glass.BtnBg}" />
         <Setter Property="Foreground"               Value="{StaticResource Theme.Brush.Text.Primary}" />
-        <Setter Property="BorderBrush"              Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="BorderBrush"              Value="{StaticResource Theme.Brush.Glass.BtnBorder}" />
         <Setter Property="BorderThickness"          Value="1" />
         <Setter Property="Padding"                  Value="12,6" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
@@ -185,7 +197,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="8"
+                            CornerRadius="10"
                             SnapsToDevicePixels="True">
                         <ContentPresenter
                             HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -212,7 +224,7 @@
     </Style>
 
     <Style x:Key="Theme.Style.TextBlock" TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
+        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas" />
         <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
     </Style>
 
@@ -369,7 +381,7 @@
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.GlassPanelBg}" />
         <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.GlassPanelBorder}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="CornerRadius" Value="18" />
         <Setter Property="Padding" Value="12" />
         <Setter Property="Margin" Value="0,0,0,8" />
     </Style>
@@ -390,7 +402,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="16"
+                            CornerRadius="18"
                             Padding="{TemplateBinding Padding}">
                         <DockPanel>
                             <ContentPresenter ContentSource="Header"
@@ -417,7 +429,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="16"
+                            CornerRadius="18"
                             Padding="{TemplateBinding Padding}">
                         <ContentPresenter ContentSource="Content" />
                     </Border>
@@ -463,14 +475,90 @@
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.AppLogBg}" />
         <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.AppLogText}" />
         <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.Mono}" />
+        <Setter Property="FontSize" Value="11" />
         <Setter Property="BorderBrush" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style x:Key="Theme.Style.AppLogItem" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.AppLogText}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#14FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#0FFFFFFF" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.ScrollRepeatButton" TargetType="{x:Type RepeatButton}">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                    <Border Background="Transparent" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="Theme.Style.DarkScrollBar" TargetType="{x:Type ScrollBar}">
         <Setter Property="Background" Value="{DynamicResource Theme.Brush.ScrollTrack}" />
         <Setter Property="Width" Value="10" />
         <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ScrollBar}">
+                    <Grid x:Name="Root"
+                          Background="{TemplateBinding Background}"
+                          Width="{TemplateBinding Width}">
+                        <Track x:Name="PART_Track"
+                               Focusable="False"
+                               IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static ScrollBar.LineUpCommand}"
+                                              Style="{StaticResource Theme.Style.ScrollRepeatButton}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource Theme.Style.DarkScrollThumb}" />
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static ScrollBar.LineDownCommand}"
+                                              Style="{StaticResource Theme.Style.ScrollRepeatButton}" />
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Orientation" Value="Horizontal">
+                            <Setter TargetName="Root" Property="Width" Value="Auto" />
+                            <Setter TargetName="Root" Property="Height" Value="10" />
+                            <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <Style x:Key="Theme.Style.DarkScrollThumb" TargetType="{x:Type Thumb}">

@@ -56,6 +56,7 @@ public partial class MainWindow
     private static readonly FontFamily ModernDarkUiFontFamily = new("Inter, Segoe UI");
     private static readonly FontFamily ModernDarkCodeFontFamily = new("Cascadia Mono, Consolas");
     private double _mainStatusBarBaselineHeight = double.NaN;
+    private Style? _appLogItemContainerStyleBaseline;
     /// <summary>
     /// Cached procedural scanline overlay used by the runtime-generated button feedback styles.
     /// It stays in C# because WPF XAML dictionaries cannot express this DrawingBrush pattern clearly.
@@ -531,7 +532,7 @@ public partial class MainWindow
             WindowChrome.SetWindowChrome(this, new WindowChrome
             {
                 CaptionHeight = 46,
-                CornerRadius = new CornerRadius(0),
+                CornerRadius = theme == AppTheme.ModernDark ? new CornerRadius(8) : new CornerRadius(0),
                 GlassFrameThickness = new Thickness(0),
                 ResizeBorderThickness = new Thickness(6),
                 UseAeroCaptionButtons = false
@@ -1745,6 +1746,7 @@ public partial class MainWindow
         }
 
         _mainStatusBarBaselineHeight = MainStatusBar.Height;
+        _appLogItemContainerStyleBaseline = AppLog.ItemContainerStyle;
     }
 
     /// <summary>
@@ -1826,6 +1828,7 @@ public partial class MainWindow
         MainMenu.Resources.Remove(typeof(Separator));
         MainStatusBar.Resources.Remove(typeof(Separator));
         MainStatusBar.Resources.Remove(typeof(StatusBarItem));
+        AppLog.ItemContainerStyle = _appLogItemContainerStyleBaseline;
         AppLog.Resources.Remove(typeof(ScrollBar));
         AppLog.Resources.Remove(typeof(Thumb));
         foreach (var separator in MnuMenuOpen.Items.OfType<Separator>())
@@ -1961,6 +1964,7 @@ public partial class MainWindow
         GrpAppLog.BorderBrush = glassBorder;
         GrpAppLog.BorderThickness = new Thickness(1);
         AppLog.Style = FindThemeStyle("Theme.Style.AppLog");
+        AppLog.ItemContainerStyle = FindThemeStyle("Theme.Style.AppLogItem");
         AppLog.Resources[typeof(ScrollBar)] = FindThemeStyle("Theme.Style.DarkScrollBar");
         AppLog.Resources[typeof(Thumb)] = FindThemeStyle("Theme.Style.DarkScrollThumb");
 
@@ -2045,7 +2049,7 @@ public partial class MainWindow
 
     private void ApplyModernDarkTypography()
     {
-        var mainText = new SolidColorBrush(Color.FromRgb(0x55, 0x59, 0x58));
+        var mainText = ThemeService.GetBrush("Theme.Brush.StatusBarText", Color.FromRgb(0x55, 0x59, 0x58));
 
         FontFamily = ModernDarkUiFontFamily;
         FontSize = 12;
@@ -2059,6 +2063,18 @@ public partial class MainWindow
 
         foreach (var textBlock in new[]
         {
+            TxtGatewayLabel,
+            TxtSectionOpen,
+            TxtSectionTools,
+            TxtSectionMaintenance,
+            TxtLatencyLast,
+            TxtLatencyAvg,
+            TxtLatencyMax,
+            TxtLatencyCount,
+            LatencyLast,
+            LatencyAvg,
+            LatencyMax,
+            LatencyCount,
             BtnStartTuiLabel,
             BtnStartTuiSubLabel,
             BtnGatewayStartLabel,
