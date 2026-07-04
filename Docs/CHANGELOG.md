@@ -2,6 +2,22 @@
 
 ---
 
+## v2.0.5 - 4 July 2026
+
+### Modern Dark
+- Completed the focused Modern Dark visual integration pass on top of the stable v2.0.4 window-chrome baseline.
+- Added Modern Dark TopBar, status bar, panel, App Log, splash-panel, and secondary-window visual polish.
+- Restored the Modern Dark secondary-window shell while keeping full secondary-window transparency optional and disabled by default.
+- Added the `UseFullSecondaryWindowTransparency` setting for users who explicitly want full Modern Dark secondary-window transparency.
+- Backported the approved 2026-06-01/02 Modern Dark visual values without reopening the locked Legacy, HighContrast, or CrabCute themes.
+
+### Release
+- User smoke test accepted the v2.0.5 Modern Dark state on 4 July 2026.
+- Remaining visual tweaks are deferred to v2.0.6.
+- Wider StandardLight, StandardDark, and ModernLight redesign work remains deferred to a later release.
+
+---
+
 ## v2.0.4 - 3 June 2026
 
 ### Stability

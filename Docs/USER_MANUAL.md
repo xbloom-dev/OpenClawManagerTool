@@ -2,8 +2,8 @@
 
 English | [Česká verze](USER_MANUAL.cs.md) | [HTML version](USER_MANUAL.html)
 
-**App version:** 2.0.4
-**Updated:** 3 June 2026
+**App version:** 2.0.5
+**Updated:** 4 July 2026
 
 ## Contents
 
