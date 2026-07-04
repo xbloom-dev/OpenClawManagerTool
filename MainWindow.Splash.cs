@@ -25,7 +25,7 @@ public partial class MainWindow
             return;
         }
 
-        // Modern theme — SplashOverlay (video/PNG) překrývá terminál.
+        // Non-Legacy themes — SplashOverlay (video/PNG) překrývá terminál.
         // Schovat ASCII art SplashBorder v TerminalControl — ten patří Legacy.
         SplashOverlay.Visibility = Visibility.Visible;
         Terminal.HideSplashBorder();
@@ -37,7 +37,7 @@ public partial class MainWindow
         if (File.Exists(pathInResources)) splashMp4 = pathInResources;
         else if (File.Exists(pathInRoot)) splashMp4 = pathInRoot;
 
-        Log($"[Splash] Theme=Modern, UseSplashVideo={settings.UseSplashVideo}, " +
+        Log($"[Splash] Theme={settings.Theme}, UseSplashVideo={settings.UseSplashVideo}, " +
             $"mp4={(splashMp4 ?? "(not found)")}");
 
         if (settings.UseSplashVideo && splashMp4 != null)
@@ -132,7 +132,7 @@ public partial class MainWindow
 
     private void DisposeSplash()
     {
-        // Modern theme: zastavit video, skrýt overlay
+        // Non-Legacy themes: zastavit video, skrýt overlay
         StopSplashVideo();
         SplashOverlay.Visibility = Visibility.Collapsed;
 

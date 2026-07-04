@@ -20,6 +20,7 @@ public partial class MainWindow : Window, IMainWindowCallback
     private readonly IGatewayService _gatewayService;
     private readonly IProcessDetector _processDetector;
     private readonly IAppEnvironment _env;
+    private readonly IUpdateCheckService _updateCheckService;
     private readonly MainViewModel _vm;
     private readonly DispatcherTimer _statusTimer;
     private Action<string> Log => _vm.Log;
@@ -50,7 +51,8 @@ public partial class MainWindow : Window, IMainWindowCallback
                 new GatewayService(settingsService, new ProcessDetector()),
                 new ResourceMonitor(),
                 new ProcessDetector(),
-                settingsService))
+                settingsService),
+            new GitHubReleaseUpdateService())
     {
     }
 
@@ -60,15 +62,18 @@ public partial class MainWindow : Window, IMainWindowCallback
         IResourceMonitor resourceMonitor,
         IProcessDetector processDetector,
         IAppEnvironment env,
-        MainViewModel viewModel)
+        MainViewModel viewModel,
+        IUpdateCheckService updateCheckService)
     {
         _settingsService = settingsService;
         _gatewayService = gatewayService;
         _processDetector = processDetector;
         _env = env;
+        _updateCheckService = updateCheckService;
         _vm = viewModel;
 
         InitializeComponent();
+        ConfigureWindowChromeForStartup(ThemeService.CurrentTheme);
         DataContext = _vm;
 
         AppLog.ItemsSource = _vm.AppLogItems;
@@ -100,9 +105,9 @@ public partial class MainWindow : Window, IMainWindowCallback
         MnuOpenLogAll.Click += OpenLogMenuItem_Click;
         MnuSettings.Click += (_, _) => OpenSettings();
         MnuAbout.Click += (_, _) => ShowAbout();
-        MnuOpenClawWeb.Click += (_, _) => OpenUrl("https://docs.openclaw.ai/");
+        MnuOpenClawWeb.Click += (_, _) => OpenUserManual();
+        MnuOpenGitHubRepo.Click += (_, _) => OpenUrl("https://github.com/xbloom-dev/OpenClawManagerTool");
 
-        TitleBarDragSurface.MouseLeftButtonDown += TitleBarDragSurface_MouseLeftButtonDown;
         BtnWindowMinimize.Click += (_, _) => WindowState = WindowState.Minimized;
         BtnWindowMaximize.Click += (_, _) => ToggleWindowMaximized();
         BtnWindowClose.Click += (_, _) => Close();
@@ -116,11 +121,22 @@ public partial class MainWindow : Window, IMainWindowCallback
 
         ApplyLocalization();
         _ = _vm.UpdateStatusAsync();
-        _vm.Log(L10n.Get("Str_Log_AppStarted"));
+        _vm.Log(string.Format(L10n.Get("Str_Log_AppStarted"), AppVersionInfo.Display));
+        StartUpdateCheckIfEnabled();
 
         // v0.5: tema + splash screen (pořadí důležité: theme před splash)
         InitTheme();
         InitSplash();
+    }
+
+    protected override void OnSourceInitialized(EventArgs e)
+    {
+        base.OnSourceInitialized(e);
+        if (IsFramelessTheme(ThemeService.CurrentTheme))
+        {
+            IntPtr hwnd = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            Helpers.DwmHelper.ApplyWin11Styling(hwnd);
+        }
     }
 
     void IMainWindowCallback.StartTui() => Terminal.StartTui();
@@ -147,20 +163,6 @@ public partial class MainWindow : Window, IMainWindowCallback
     private void OnViewModelGatewayStateChanged(object? sender, EventArgs e)
     {
         UpdateStartTuiButton(Terminal.IsTuiRunning);
-    }
-
-    private void TitleBarDragSurface_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-    {
-        if (CaptionButtons.Visibility != Visibility.Visible) return;
-
-        if (e.ClickCount == 2)
-        {
-            ToggleWindowMaximized();
-            return;
-        }
-
-        if (e.ButtonState == MouseButtonState.Pressed)
-            DragMove();
     }
 
     private void ToggleWindowMaximized()
@@ -199,6 +201,7 @@ public partial class MainWindow : Window, IMainWindowCallback
         MnuMenuHelp.Header = L10n.Get("Str_Menu_Help");
         MnuAbout.Header = L10n.Get("Str_Menu_About");
         MnuOpenClawWeb.Header = L10n.Get("Str_Menu_OpenClawWeb");
+        MnuOpenGitHubRepo.Header = L10n.Get("Str_Menu_OpenGitHubRepo");
 
         // TUI tlačítko — popisek + tooltip (volá UpdateStartTuiButton)
         UpdateStartTuiButton(Terminal.IsTuiRunning);
@@ -330,24 +333,21 @@ public partial class MainWindow : Window, IMainWindowCallback
 
         if (tuiRunning)
         {
-            BtnStartTuiSymbol.Text = "■";
-            BtnStartTuiSymbol.Foreground = Brushes.Red;
+            ApplyStopGlyph(BtnStartTuiSymbol);
             BtnStartTuiLabel.Text = L10n.Get("Str_BtnStartTui_Stop");
             BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Stop");
             BtnStartTui.Background = ActionDangerBrush;
         }
         else if (_vm.IsGatewayRunning)
         {
-            BtnStartTuiSymbol.Text = "▶";
-            BtnStartTuiSymbol.Foreground = Brushes.Green;
+            ApplyStartGlyph(BtnStartTuiSymbol);
             BtnStartTuiLabel.Text = L10n.Get("Str_BtnStartTui_Label");
             BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Running");
             BtnStartTui.Background = ActionPositiveBrush;
         }
         else
         {
-            BtnStartTuiSymbol.Text = "▶";
-            BtnStartTuiSymbol.Foreground = Brushes.Green;
+            ApplyStartGlyph(BtnStartTuiSymbol);
             BtnStartTuiLabel.Text = L10n.Get("Str_BtnStartTui_Label");
             BtnStartTuiSubLabel.Text = L10n.Get("Str_BtnStartTui_Sub_Restart");
             BtnStartTui.Background = ActionPositiveBrush;
@@ -451,13 +451,13 @@ public partial class MainWindow : Window, IMainWindowCallback
                 ApplyThemeFromAboutCommand(AppTheme.Legacy);
                 break;
             case "dark":
-                ApplyThemeFromAboutCommand(AppTheme.StandardDark);
+                ApplyThemeFromAboutCommand(AppTheme.ModernDark);
                 break;
             case "light":
                 ApplyThemeFromAboutCommand(AppTheme.ModernLight);
                 break;
             case "modern":
-                ApplyThemeFromAboutCommand(AppTheme.Modern);
+                ApplyThemeFromAboutCommand(AppTheme.StandardLight);
                 break;
             case "crab":
                 ApplyThemeFromAboutCommand(AppTheme.CrabCute);
@@ -525,6 +525,250 @@ public partial class MainWindow : Window, IMainWindowCallback
     {
         try { Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true }); }
         catch { }
+    }
+
+    private void OpenUserManual()
+    {
+        var preferredFiles = L10n.Current == L10n.Language.CS
+            ? new[] { "USER_MANUAL.cs.html", "USER_MANUAL.cs.md", "USER_MANUAL.html", "USER_MANUAL.md" }
+            : new[] { "USER_MANUAL.html", "USER_MANUAL.md", "USER_MANUAL.cs.html", "USER_MANUAL.cs.md" };
+
+        var baseDir = AppContext.BaseDirectory;
+        foreach (var file in preferredFiles)
+        {
+            var candidate = Path.Combine(baseDir, "Docs", file);
+            if (!File.Exists(candidate)) continue;
+
+            try
+            {
+                if (candidate.EndsWith(".md", StringComparison.OrdinalIgnoreCase))
+                    candidate = EnsureLocalHtmlFromMarkdown(candidate, L10n.Current == L10n.Language.CS);
+
+                Process.Start(new ProcessStartInfo { FileName = candidate, UseShellExecute = true });
+                return;
+            }
+            catch
+            {
+                // Zkusíme další kandidát.
+            }
+        }
+
+        var expectedDocsPath = Path.Combine(baseDir, "Docs");
+        var isCzech = L10n.Current == L10n.Language.CS;
+        MessageBox.Show(
+            isCzech
+                ? $"Lokální uživatelský manuál nebyl nalezen.\n\nOčekávaná složka:\n{expectedDocsPath}"
+                : $"Local user manual was not found.\n\nExpected folder:\n{expectedDocsPath}",
+            isCzech ? "Nápověda" : "Help",
+            MessageBoxButton.OK,
+            MessageBoxImage.Warning);
+    }
+
+    private static void ApplyStartGlyph(TextBlock icon)
+    {
+        icon.Text = "▲";
+        icon.Foreground = Brushes.Green;
+        icon.FontFamily = new FontFamily("Segoe UI");
+        icon.RenderTransformOrigin = new Point(0.5, 0.5);
+        icon.RenderTransform = new RotateTransform(90);
+    }
+
+    private static void ApplyStopGlyph(TextBlock icon)
+    {
+        icon.Text = "■";
+        icon.Foreground = Brushes.Red;
+        icon.FontFamily = new FontFamily("Segoe UI");
+        icon.ClearValue(TextBlock.RenderTransformProperty);
+    }
+
+    private static string EnsureLocalHtmlFromMarkdown(string markdownPath, bool isCzech)
+    {
+        var htmlPath = Path.ChangeExtension(markdownPath, ".local.html");
+        if (File.Exists(htmlPath) && File.GetLastWriteTimeUtc(htmlPath) >= File.GetLastWriteTimeUtc(markdownPath))
+            return htmlPath;
+
+        var markdown = File.ReadAllText(markdownPath);
+        var title = isCzech ? "Uživatelský manuál" : "User Manual";
+        var htmlBody = MarkdownToHtml(markdown);
+
+        var fullHtml = $@"<!doctype html>
+<html lang=""{(isCzech ? "cs" : "en")}"">
+<head>
+  <meta charset=""utf-8"" />
+  <meta name=""viewport"" content=""width=device-width, initial-scale=1"" />
+  <title>{title}</title>
+  <style>
+    body {{ margin: 0; background: #101214; color: #e6e8ea; font-family: ""Segoe UI"", system-ui, sans-serif; }}
+    main {{ max-width: 1100px; margin: 0 auto; padding: 24px; line-height: 1.55; }}
+    h1, h2, h3, h4 {{ line-height: 1.25; margin-top: 1.4em; }}
+    h1 {{ margin-top: 0; }}
+    a {{ color: #7cc4ff; }}
+    pre {{ background: #171a1f; border: 1px solid #2b3139; border-radius: 10px; padding: 12px; overflow: auto; }}
+    code {{ background: #1b2027; border-radius: 6px; padding: 1px 5px; }}
+    pre code {{ background: transparent; padding: 0; }}
+    table {{ border-collapse: collapse; width: 100%; margin: 12px 0; }}
+    th, td {{ border: 1px solid #2b3139; padding: 6px 8px; text-align: left; }}
+    blockquote {{ border-left: 3px solid #3a4350; margin: 12px 0; padding: 4px 12px; color: #c6ccd3; }}
+  </style>
+</head>
+<body>
+  <main>
+{htmlBody}
+  </main>
+</body>
+</html>";
+
+        File.WriteAllText(htmlPath, fullHtml);
+        return htmlPath;
+    }
+
+    private static string MarkdownToHtml(string markdown)
+    {
+        var lines = markdown.Replace("\r\n", "\n").Split('\n');
+        var html = new System.Text.StringBuilder();
+        var paragraph = new System.Text.StringBuilder();
+        var inCode = false;
+        var inUl = false;
+        var inOl = false;
+
+        void FlushParagraph()
+        {
+            if (paragraph.Length == 0) return;
+            html.Append("<p>").Append(ParseInline(paragraph.ToString().Trim())).AppendLine("</p>");
+            paragraph.Clear();
+        }
+
+        void CloseLists()
+        {
+            if (inUl) { html.AppendLine("</ul>"); inUl = false; }
+            if (inOl) { html.AppendLine("</ol>"); inOl = false; }
+        }
+
+        foreach (var rawLine in lines)
+        {
+            var line = rawLine ?? string.Empty;
+
+            if (line.TrimStart().StartsWith("```"))
+            {
+                FlushParagraph();
+                CloseLists();
+                if (!inCode) html.AppendLine("<pre><code>");
+                else html.AppendLine("</code></pre>");
+                inCode = !inCode;
+                continue;
+            }
+
+            if (inCode)
+            {
+                html.AppendLine(System.Net.WebUtility.HtmlEncode(line));
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(line))
+            {
+                FlushParagraph();
+                CloseLists();
+                continue;
+            }
+
+            var headingMatch = System.Text.RegularExpressions.Regex.Match(line, @"^(#{1,6})\s+(.+)$");
+            if (headingMatch.Success)
+            {
+                FlushParagraph();
+                CloseLists();
+                var level = headingMatch.Groups[1].Value.Length;
+                html.Append('<').Append('h').Append(level).Append('>')
+                    .Append(ParseInline(headingMatch.Groups[2].Value.Trim()))
+                    .Append("</h").Append(level).AppendLine(">");
+                continue;
+            }
+
+            var ulMatch = System.Text.RegularExpressions.Regex.Match(line, @"^\s*[-*]\s+(.+)$");
+            if (ulMatch.Success)
+            {
+                FlushParagraph();
+                if (inOl) { html.AppendLine("</ol>"); inOl = false; }
+                if (!inUl) { html.AppendLine("<ul>"); inUl = true; }
+                html.Append("<li>").Append(ParseInline(ulMatch.Groups[1].Value.Trim())).AppendLine("</li>");
+                continue;
+            }
+
+            var olMatch = System.Text.RegularExpressions.Regex.Match(line, @"^\s*\d+\.\s+(.+)$");
+            if (olMatch.Success)
+            {
+                FlushParagraph();
+                if (inUl) { html.AppendLine("</ul>"); inUl = false; }
+                if (!inOl) { html.AppendLine("<ol>"); inOl = true; }
+                html.Append("<li>").Append(ParseInline(olMatch.Groups[1].Value.Trim())).AppendLine("</li>");
+                continue;
+            }
+
+            if (paragraph.Length > 0) paragraph.Append(' ');
+            paragraph.Append(line.Trim());
+        }
+
+        FlushParagraph();
+        CloseLists();
+        return html.ToString();
+    }
+
+    private static string ParseInline(string input)
+    {
+        var encoded = System.Net.WebUtility.HtmlEncode(input);
+
+        encoded = System.Text.RegularExpressions.Regex.Replace(
+            encoded,
+            @"\[(.+?)\]\((.+?)\)",
+            m =>
+            {
+                var text = m.Groups[1].Value;
+                var href = m.Groups[2].Value.Trim();
+                return $"<a href=\"{System.Net.WebUtility.HtmlEncode(href)}\">{text}</a>";
+            });
+
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"\*\*(.+?)\*\*", "<strong>$1</strong>");
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"\*(.+?)\*", "<em>$1</em>");
+        encoded = System.Text.RegularExpressions.Regex.Replace(encoded, @"`(.+?)`", "<code>$1</code>");
+
+        return encoded;
+    }
+
+    private async void StartUpdateCheckIfEnabled()
+    {
+        if (!_settingsService.Settings.CheckUpdatesOnStartup)
+        {
+            _vm.Log(L10n.Get("Str_Log_UpdateCheckDisabled"));
+            return;
+        }
+
+        _vm.Log(L10n.Get("Str_Log_UpdateCheckEnabled"));
+        _vm.Log(L10n.Get("Str_Log_UpdateCheckRunning"));
+
+        var result = await _updateCheckService.CheckAsync();
+        if (!result.Success)
+        {
+            _vm.Log(string.Format(
+                L10n.Get("Str_Log_UpdateCheckFailed"),
+                result.ErrorMessage ?? "unknown"));
+            return;
+        }
+
+        if (result.UpdateAvailable)
+        {
+            _vm.Log(string.Format(
+                L10n.Get("Str_Log_UpdateAvailable"),
+                result.LatestVersion ?? "?",
+                result.CurrentVersion));
+
+            if (!string.IsNullOrWhiteSpace(result.ReleaseUrl))
+                _vm.Log(string.Format(L10n.Get("Str_Log_UpdateReleaseUrl"), result.ReleaseUrl));
+
+            return;
+        }
+
+        _vm.Log(string.Format(
+            L10n.Get("Str_Log_UpdateUpToDate"),
+            result.CurrentVersion));
     }
 
     protected override void OnClosing(System.ComponentModel.CancelEventArgs e)

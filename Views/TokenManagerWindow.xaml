@@ -82,13 +82,13 @@
                 Visibility="{Binding IsVaultSafetyWarningVisible, Converter={StaticResource BoolToVisibility}}"
                 Padding="9,6"
                 Margin="0,0,0,8"
-                BorderBrush="#B00020"
+                BorderBrush="{DynamicResource Theme.Brush.Border}"
                 BorderThickness="1"
-                CornerRadius="2"
-                Background="#FFF1F1">
+                CornerRadius="6"
+                Background="{DynamicResource Brush.ActionDanger}">
             <TextBlock x:Name="TxtVaultWarning"
                        Text="{Binding VaultSafetyWarningText}"
-                       Foreground="#8A0018"
+                       Foreground="{DynamicResource Theme.Brush.Text.Primary}"
                        FontWeight="SemiBold"
                        TextWrapping="Wrap" />
         </Border>
@@ -213,13 +213,13 @@
                 <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3"
                         Padding="8,5"
                         Margin="0,0,0,8"
-                        BorderBrush="LightGray"
+                        BorderBrush="{DynamicResource Theme.Brush.Border}"
                         BorderThickness="1"
-                        CornerRadius="2"
-                        Background="#F7F7F7">
+                        CornerRadius="6"
+                        Background="{DynamicResource Theme.Brush.Surface}">
                     <TextBlock x:Name="TxtVerifyStatus"
                                FontWeight="Bold"
-                               Foreground="Gray" />
+                               Foreground="{DynamicResource Theme.Brush.Text.Secondary}" />
                 </Border>
 
                 <TextBox x:Name="TxtOutput" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3"
@@ -227,8 +227,8 @@
                          IsReadOnly="True"
                          FontFamily="Consolas"
                          FontSize="11"
-                         Background="#1E1E1E"
-                         Foreground="#DCDCDC"
+                         Background="{DynamicResource Theme.Brush.OutputBackground}"
+                         Foreground="{DynamicResource Theme.Brush.OutputText}"
                          VerticalScrollBarVisibility="Auto"
                          HorizontalScrollBarVisibility="Auto"
                          TextWrapping="NoWrap"

@@ -1,9 +1,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Windows;
-using System.Windows.Media;
 using Microsoft.Web.WebView2.Core;
 using OpenClawManager.Services;
 using OpenClawManager.ViewModels;
@@ -31,19 +29,20 @@ public partial class AboutWindow : Window
         _ = InitWebViewAsync();
     }
 
-    // ── WebView2 logo ─────────────────────────────────────────────────────────
+    // WebView2 logo
     private async Task InitWebViewAsync()
     {
         try
         {
             await SvgView.EnsureCoreWebView2Async();
+            SvgView.DefaultBackgroundColor = System.Drawing.Color.Transparent;
             SvgView.CoreWebView2.Settings.IsWebMessageEnabled = true;
             SvgView.CoreWebView2.WebMessageReceived += SvgView_WebMessageReceived;
             var svgPath = FindSvgPath();
             var svgContent = svgPath != null
                 ? await File.ReadAllTextAsync(svgPath)
                 : FallbackSvg();
-            SvgView.NavigateToString(BuildHtml(svgContent, GetLogoBackgroundCss()));
+            SvgView.NavigateToString(BuildHtml(svgContent));
         }
         catch { }
     }
@@ -161,31 +160,7 @@ public partial class AboutWindow : Window
         return candidates.FirstOrDefault(File.Exists);
     }
 
-    private string GetLogoBackgroundCss()
-    {
-        if (Background is SolidColorBrush windowBrush)
-            return ToCssColor(windowBrush.Color);
-
-        var themedBrush = ThemeService.GetBrush("Theme.Brush.WindowBackground", Colors.Transparent);
-        if (themedBrush is SolidColorBrush solidBrush)
-            return ToCssColor(solidBrush.Color);
-
-        return "#000000";
-    }
-
-    private static string ToCssColor(Color color)
-    {
-        if (color.A == 0)
-            return "transparent";
-
-        if (color.A == 255)
-            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
-
-        var alpha = (color.A / 255.0).ToString("0.###", CultureInfo.InvariantCulture);
-        return $"rgba({color.R},{color.G},{color.B},{alpha})";
-    }
-
-    private static string BuildHtml(string svgContent, string background)
+    private static string BuildHtml(string svgContent)
     {
         return $@"<!DOCTYPE html>
 <html>
@@ -193,7 +168,7 @@ public partial class AboutWindow : Window
 <style>
   html, body {{
     margin: 0; padding: 0;
-    background: {background};
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;

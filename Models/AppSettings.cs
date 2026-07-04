@@ -7,21 +7,20 @@ namespace OpenClawManager.Models;
 /// <summary>
 /// Vizuální téma aplikace (v0.5+).
 /// Legacy = původní tmavé WPF téma s ASCII ART splashem.
-/// Modern = standardní Modern paleta (C) s video/PNG splash overlay.
+/// StandardLight = standardní světlá paleta s video/PNG splash overlay.
 /// StandardDark = tmavá varianta Standard tématu s původními Modern ikonami.
-/// Dark = moderní tmavé téma.
-/// ModernLight = moderní světlé téma odvozené z Dark layoutu.
+/// ModernDark = moderní tmavé téma.
+/// ModernLight = moderní světlé téma odvozené z ModernDark layoutu.
 /// </summary>
 public enum AppTheme
 {
     Legacy,
-    Modern,
+    StandardLight,
     StandardDark,
-    Dark,
+    ModernDark,
     ModernLight,
     HighContrast,
-    CrabCute,
-    Compact = CrabCute
+    CrabCute
 }
 
 /// <summary>
@@ -29,7 +28,7 @@ public enum AppTheme
 /// </summary>
 public class AppSettings
 {
-    public const int CurrentSchemaVersion = 1;
+    public const int CurrentSchemaVersion = 2;
 
     /// <summary>Verze schématu nastavení pro budoucí migrace.</summary>
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
@@ -64,6 +63,9 @@ public class AppSettings
     /// <summary>Auto-scroll v Log aplikace</summary>
     public bool AutoScrollAppLog { get; set; } = true;
 
+    /// <summary>Opt-in kontrola aktualizaci pri startu aplikace.</summary>
+    public bool CheckUpdatesOnStartup { get; set; } = false;
+
     // ════════════════════════════════════════════════════════════════════════
     // v0.5 — Vzhled
     // ════════════════════════════════════════════════════════════════════════
@@ -71,11 +73,11 @@ public class AppSettings
     /// <summary>
     /// Vizuální téma aplikace. Výchozí: Legacy (zachování původního chování v0.4).
     /// </summary>
-    [JsonConverter(typeof(JsonStringEnumConverter))]
+    [JsonConverter(typeof(AppThemeJsonConverter))]
     public AppTheme Theme { get; set; } = AppTheme.Legacy;
 
     /// <summary>
-    /// Zobrazit splash screen video při startu (jen v Modern theme).
+    /// Zobrazit splash screen video při startu (jen mimo Theme.Legacy).
     /// Pokud false nebo splash.mp4 chybí — zobrazí se splash.png fallback.
     /// </summary>
     public bool UseSplashVideo { get; set; } = true;
@@ -85,6 +87,12 @@ public class AppSettings
     /// Legacy tema zustava bez zasahu.
     /// </summary>
     public bool UseButtonScanlineEffect { get; set; } = false;
+
+    /// <summary>
+    /// Optional full transparent shell for Modern Dark secondary windows.
+    /// Disabled by default because the opaque shell is more stable and cheaper to render.
+    /// </summary>
+    public bool UseFullSecondaryWindowTransparency { get; set; } = false;
 
     // ════════════════════════════════════════════════════════════════════════
 

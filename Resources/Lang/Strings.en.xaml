@@ -56,6 +56,7 @@
     <sys:String x:Key="Str_BtnCancel">Cancel</sys:String>
     <sys:String x:Key="Str_BtnBrowse">Browse...</sys:String>
     <sys:String x:Key="Str_Tip_Save">Saves settings and closes dialog.</sys:String>
+    <sys:String x:Key="Str_Error_SaveSettings">Saving settings failed. Check write permissions for: {0}</sys:String>
     <sys:String x:Key="Str_Tip_Reset">Restores all values to defaults.</sys:String>
     <sys:String x:Key="Str_Tip_Cancel">Closes without saving.</sys:String>
     <sys:String x:Key="Str_Tip_Browse">Selects folder from filesystem.</sys:String>
@@ -63,9 +64,9 @@
     <sys:String x:Key="Str_Theme_Standard">Standard</sys:String>
     <sys:String x:Key="Str_Theme_StandardDark">Standard Dark</sys:String>
     <sys:String x:Key="Str_Theme_ModernDark">Modern Dark</sys:String>
-    <sys:String x:Key="Str_Theme_ModernLight">Modern Light</sys:String>
+    <sys:String x:Key="Str_Theme_ModernLight">Modern</sys:String>
     <sys:String x:Key="Str_Theme_HighContrast">High Contrast</sys:String>
-    <sys:String x:Key="Str_Theme_CrabCute">CrabCute</sys:String>
+    <sys:String x:Key="Str_Theme_CrabCute">Crab Cute</sys:String>
 
     <!-- About -->
     <sys:String x:Key="Str_Tip_AboutClose">Closes dialog.</sys:String>
@@ -96,7 +97,8 @@
     <sys:String x:Key="Str_Menu_Help">_Help</sys:String>
     <sys:String x:Key="Str_Menu_About">_About...</sys:String>
     <sys:String x:Key="Str_Menu_OpenSettings">Open _Settings...</sys:String>
-    <sys:String x:Key="Str_Menu_OpenClawWeb">Open OpenClaw website</sys:String>
+    <sys:String x:Key="Str_Menu_OpenClawWeb">User Manual</sys:String>
+    <sys:String x:Key="Str_Menu_OpenGitHubRepo">Project GitHub</sys:String>
     <sys:String x:Key="Str_Menu_Exit">E_xit</sys:String>
 
     <!-- Status bar -->
@@ -106,7 +108,14 @@
     <sys:String x:Key="Str_Status_Stopped">stopped</sys:String>
 
     <!-- Log zprávy -->
-    <sys:String x:Key="Str_Log_AppStarted">Application started (v1.1).</sys:String>
+    <sys:String x:Key="Str_Log_AppStarted">Application started ({0}).</sys:String>
+    <sys:String x:Key="Str_Log_UpdateCheckEnabled">Startup update check: enabled.</sys:String>
+    <sys:String x:Key="Str_Log_UpdateCheckDisabled">Startup update check: disabled.</sys:String>
+    <sys:String x:Key="Str_Log_UpdateCheckRunning">Checking latest release…</sys:String>
+    <sys:String x:Key="Str_Log_UpdateCheckFailed">Update check failed: {0}</sys:String>
+    <sys:String x:Key="Str_Log_UpdateAvailable">New version available: {0} (current: {1}).</sys:String>
+    <sys:String x:Key="Str_Log_UpdateReleaseUrl">Release: {0}</sys:String>
+    <sys:String x:Key="Str_Log_UpdateUpToDate">Application is up to date ({0}).</sys:String>
     <sys:String x:Key="Str_Log_GatewayStarting">Starting Gateway...</sys:String>
     <sys:String x:Key="Str_Log_GatewayReady">Gateway ready.</sys:String>
     <sys:String x:Key="Str_Log_GatewayStopping">Stopping Gateway...</sys:String>

@@ -27,6 +27,7 @@ public sealed partial class MainViewModel : ObservableObject
     private DateTime? _gatewayStartTime;
     private int? _lastKnownGatewayPid;
     private bool _isStatusUpdateRunning;
+    public string AppVersionText { get; } = AppVersionInfo.Display;
 
     public MainViewModel(
         IGatewayService gatewayService,

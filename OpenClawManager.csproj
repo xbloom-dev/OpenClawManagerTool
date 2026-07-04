@@ -6,10 +6,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>2.0.2.0</AssemblyVersion>
-    <FileVersion>2.0.2.0</FileVersion>
-    <Version>2.0.2</Version>
+    <AssemblyVersion>2.0.5.0</AssemblyVersion>
+    <FileVersion>2.0.5.0</FileVersion>
+    <Version>2.0.5</Version>
     <ApplicationIcon>Resources\app-icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BuildProfile)' == 'Lite'">
+    <DefineConstants>$(DefineConstants);LITE_BUILD</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,25 +37,25 @@
     <!-- v0.5: ResourceDictionary pro témata -->
     <Resource Include="Resources\Themes\CoreStyles.xaml" />
     <Resource Include="Resources\Themes\Theme.Legacy.xaml" />
-    <Resource Include="Resources\Themes\Theme.Modern.xaml" />
-    <Resource Include="Resources\Themes\Theme.StandardDark.xaml" />
-    <Resource Include="Resources\Themes\Theme.Dark.xaml" />
-    <Resource Include="Resources\Themes\Theme.ModernLight.xaml" />
-    <Resource Include="Resources\Themes\Theme.HighContrast.xaml" />
-    <Resource Include="Resources\Themes\Theme.CrabCute.xaml" />
+    <Resource Include="Resources\Themes\Theme.StandardLight.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Themes\Theme.StandardDark.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Themes\Theme.ModernDark.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Themes\Theme.ModernLight.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Themes\Theme.HighContrast.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Themes\Theme.CrabCute.xaml" Condition="'$(BuildProfile)' != 'Lite'" />
 
     <!-- v0.5: Ikony Modern tématu (PNG 48×48, konvertováno ze SVG) -->
-    <Resource Include="Resources\Icons\Modern\start.png" />
-    <Resource Include="Resources\Icons\Modern\stop.png" />
-    <Resource Include="Resources\Icons\Modern\restart.png" />
-    <Resource Include="Resources\Icons\Modern\powershell.png" />
-    <Resource Include="Resources\Icons\Modern\gateway-log.png" />
-    <Resource Include="Resources\Icons\Modern\cleaning-tool.png" />
-    <Resource Include="Resources\Icons\Modern\token-manager.png" />
-    <Resource Include="Resources\Icons\Modern\doctor-fix.png" />
-    <Resource Include="Resources\Icons\ModernLight\*.png" />
-    <Resource Include="Resources\Icons\ModernDark\*.png" />
-    <Resource Include="Resources\Icons\CrabCute\*.png" />
+    <Resource Include="Resources\Icons\Modern\start.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\Modern\stop.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\Modern\restart.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\Modern\powershell.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\Modern\gateway-log.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\Modern\cleaning-tool.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\Modern\token-manager.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\Modern\doctor-fix.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\ModernLight\*.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\ModernDark\*.png" Condition="'$(BuildProfile)' != 'Lite'" />
+    <Resource Include="Resources\Icons\CrabCute\*.png" Condition="'$(BuildProfile)' != 'Lite'" />
 
     <!-- v1.0: Offline xterm.js assets for embedded terminal -->
     <Resource Include="Resources\Terminal\xterm.min.js" />
@@ -62,16 +66,34 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 
+    <!-- Lokalni uzivatelske manualy pro menu Napoveda (preferujeme lokalni otevreni). -->
+    <None Include="Docs\USER_MANUAL*.md">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Docs\%(Filename)%(Extension)</Link>
+    </None>
+    <None Include="Docs\USER_MANUAL*.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Docs\%(Filename)%(Extension)</Link>
+    </None>
+
     <!-- v0.5: Splash PNG fallback — embedded resource (graceful degradation když chybí .mp4) -->
     <Resource Include="Resources\splash.png" />
 
+    <!-- Welcome screen UI assets. -->
+    <Resource Include="Resources\Welcome\*.png" />
+
+    <!-- Welcome screen theme thumbnails copied beside the EXE for live preview. -->
+    <None Include="Resources\ThemePreviews\*.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+
     <!-- v0.5: Splash video — vedle EXE (WMF/MediaElement potřebuje file path) -->
-    <None Include="Resources\splash.mp4">
+    <None Include="Resources\splash.mp4" Condition="'$(BuildProfile)' != 'Lite'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 
     <!-- About EasterEgg tools scripts - copied beside the app for prompt commands. -->
-    <None Include="Scripts\*.ps1">
+    <None Include="Scripts\*.ps1" Condition="'$(BuildProfile)' != 'Lite'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

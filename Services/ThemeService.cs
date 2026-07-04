@@ -1,11 +1,11 @@
-﻿// Services/ThemeService.cs
+// Services/ThemeService.cs
 // Centrální správa vizuálních témat (v0.5+)
 // ═══════════════════════════════════════════════════════════════════════════
 // Architektura pro N témat:
 //
 //   AppTheme enum       → identifikátor tématu (AppSettings.Theme)
 //   ThemeService        → Apply(), ThemeChanged event, ResourceDictionary swap
-//   Resources/Themes/   → Theme.Legacy.xaml, Theme.Modern.xaml, ...
+//   Resources/Themes/   → Theme.Legacy.xaml, Theme.StandardLight.xaml, ...
 //   Resources/Icons/    → Legacy/ (prázdno), Modern/*.png, ...
 //
 // Přidání nového tématu:
@@ -36,15 +36,17 @@ public static class ThemeService
     /// MainWindow se přihlašuje v konstruktoru: ThemeService.ThemeChanged += ApplyThemeToUi
     /// </summary>
     public static event Action<AppTheme>? ThemeChanged;
+    private static AppTheme _currentTheme = AppTheme.Legacy;
+    public static AppTheme CurrentTheme => _currentTheme;
 
     // ── Registr ResourceDictionary cest ──────────────────────────────────────
     // Přidat nové téma sem + vytvořit odpovídající .xaml soubor.
     private static readonly Dictionary<AppTheme, string> _themeResourcePaths = new()
     {
         { AppTheme.Legacy, "/Resources/Themes/Theme.Legacy.xaml" },
-        { AppTheme.Modern, "/Resources/Themes/Theme.Modern.xaml" },
+        { AppTheme.StandardLight, "/Resources/Themes/Theme.StandardLight.xaml" },
         { AppTheme.StandardDark, "/Resources/Themes/Theme.StandardDark.xaml" },
-        { AppTheme.Dark, "/Resources/Themes/Theme.Dark.xaml" },
+        { AppTheme.ModernDark, "/Resources/Themes/Theme.ModernDark.xaml" },
         { AppTheme.ModernLight, "/Resources/Themes/Theme.ModernLight.xaml" },
         { AppTheme.HighContrast, "/Resources/Themes/Theme.HighContrast.xaml" },
         { AppTheme.CrabCute, "/Resources/Themes/Theme.CrabCute.xaml" },
@@ -55,9 +57,9 @@ public static class ThemeService
     private static readonly Dictionary<AppTheme, string> _iconFolderNames = new()
     {
         { AppTheme.Legacy, "" },         // Legacy nemá PNG ikony (používá emoji)
-        { AppTheme.Modern, "Modern" },
+        { AppTheme.StandardLight, "Modern" },
         { AppTheme.StandardDark, "Modern" },
-        { AppTheme.Dark, "ModernDark" },
+        { AppTheme.ModernDark, "ModernDark" },
         { AppTheme.ModernLight, "ModernLight" },
         { AppTheme.HighContrast, "Modern" },
         { AppTheme.CrabCute, "CrabCute" },
@@ -66,7 +68,7 @@ public static class ThemeService
     private static readonly Dictionary<AppTheme, Dictionary<string, string>> _iconFileNames = new()
     {
         {
-            AppTheme.Dark,
+            AppTheme.ModernDark,
             new Dictionary<string, string>
             {
                 { "start", "Start.png" },
@@ -124,17 +126,32 @@ public static class ThemeService
     /// </summary>
     public static void Apply(AppTheme theme)
     {
-        SwapResourceDictionary(theme);
-        ThemeChanged?.Invoke(theme);
+        if (!IsThemeAvailable(theme))
+            theme = AppTheme.Legacy;
+
+        _currentTheme = SwapResourceDictionary(theme);
+        ThemeChanged?.Invoke(_currentTheme);
+    }
+
+    public static bool IsThemeAvailable(AppTheme theme)
+    {
+#if LITE_BUILD
+        return theme == AppTheme.Legacy;
+#else
+        return _themeResourcePaths.ContainsKey(theme);
+#endif
     }
 
     /// <summary>
     /// Vrátí název složky ikon pro dané téma (prázdný string = žádné ikony).
-    /// Příklad: GetIconFolder(AppTheme.Modern) → "Modern"
+    /// Příklad: GetIconFolder(AppTheme.StandardLight) → "Modern"
     /// </summary>
     public static string GetIconFolder(AppTheme theme)
     {
-        if (theme == OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)
+        if (!IsThemeAvailable(theme))
+            theme = AppTheme.Legacy;
+
+        if (theme == _currentTheme)
         {
             var iconSet = GetString("Theme.Meta.IconSet", "");
             if (!string.IsNullOrWhiteSpace(iconSet)) return iconSet;
@@ -145,7 +162,8 @@ public static class ThemeService
 
     public static bool IsModernPaletteTheme(AppTheme theme)
     {
-        return theme is AppTheme.StandardDark or AppTheme.Dark or AppTheme.ModernLight;
+        return IsThemeAvailable(theme) &&
+               theme is AppTheme.StandardDark or AppTheme.ModernDark or AppTheme.ModernLight;
     }
 
     public static ThemeMetadata GetCurrentMetadata()
@@ -153,7 +171,7 @@ public static class ThemeService
         return new ThemeMetadata(
             GetString("Theme.Meta.Name", ""),
             GetString("Theme.Meta.Variant", ""),
-            GetString("Theme.Meta.IconSet", GetIconFolder(OpenClawManager.App.GetService<ISettingsService>().Settings.Theme)),
+            GetString("Theme.Meta.IconSet", GetIconFolder(_currentTheme)),
             GetString("Theme.Meta.PaletteFamily", ""),
             GetString("Theme.Meta.ButtonInteraction", "HoverScanline"));
     }
@@ -164,12 +182,15 @@ public static class ThemeService
 
     /// <summary>
     /// Vrátí pack:// URI pro ikonu daného tématu a jména.
-    /// Příklad: GetIconUri(AppTheme.Modern, "start") →
+    /// Příklad: GetIconUri(AppTheme.StandardLight, "start") →
     ///          "pack://application:,,,/Resources/Icons/Modern/start.png"
     /// Vrátí null pokud téma nemá složku ikon.
     /// </summary>
     public static Uri? GetIconUri(AppTheme theme, string iconName)
     {
+        if (!IsThemeAvailable(theme))
+            return null;
+
         var folder = GetIconFolder(theme);
         if (string.IsNullOrEmpty(folder)) return null;
 
@@ -193,26 +214,35 @@ public static class ThemeService
     }
 
     // ── Interní: swap ResourceDictionary ─────────────────────────────────────
-    private static void SwapResourceDictionary(AppTheme theme)
+    private static AppTheme SwapResourceDictionary(AppTheme theme)
     {
-        if (!_themeResourcePaths.TryGetValue(theme, out var path)) return;
+        if (!_themeResourcePaths.TryGetValue(theme, out var path)) return AppTheme.Legacy;
 
         var app = Application.Current;
-        if (app == null) return;
+        if (app == null) return theme;
 
         var merged = app.Resources.MergedDictionaries;
-
-        // Odebrat existující Theme.*.xaml dictionary
         var toRemove = merged
             .Where(d => d.Source?.OriginalString.Contains("/Resources/Themes/Theme.") == true)
             .ToList();
-        foreach (var d in toRemove) merged.Remove(d);
 
-        // Přidat nový
-        var newDict = new ResourceDictionary
+        try
         {
-            Source = new Uri(path, UriKind.Relative)
-        };
-        merged.Add(newDict);
+            var newDict = new ResourceDictionary
+            {
+                Source = new Uri(path, UriKind.Relative)
+            };
+
+            foreach (var d in toRemove) merged.Remove(d);
+            merged.Add(newDict);
+            return theme;
+        }
+        catch
+        {
+            if (theme == AppTheme.Legacy)
+                return AppTheme.Legacy;
+
+            return SwapResourceDictionary(AppTheme.Legacy);
+        }
     }
 }

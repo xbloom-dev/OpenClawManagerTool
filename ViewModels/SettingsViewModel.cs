@@ -50,6 +50,9 @@ public sealed partial class SettingsViewModel : ObservableObject
     private bool _useButtonScanlineEffect;
 
     [ObservableProperty]
+    private bool _useFullSecondaryWindowTransparency;
+
+    [ObservableProperty]
     private string _settingsFilePath = "";
 
     [ObservableProperty]
@@ -92,13 +95,13 @@ public sealed partial class SettingsViewModel : ObservableObject
     private string _themeLegacyText = "";
 
     [ObservableProperty]
-    private string _themeModernText = "";
+    private string _themeStandardLightText = "";
 
     [ObservableProperty]
     private string _themeStandardDarkText = "";
 
     [ObservableProperty]
-    private string _themeDarkText = "";
+    private string _themeModernDarkText = "";
 
     [ObservableProperty]
     private string _themeModernLightText = "";
@@ -114,6 +117,9 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private string _useButtonScanlineEffectText = "";
+
+    [ObservableProperty]
+    private string _useFullSecondaryWindowTransparencyText = "";
 
     [ObservableProperty]
     private string _themeHint = "";
@@ -188,10 +194,18 @@ public sealed partial class SettingsViewModel : ObservableObject
     }
 
     public bool AreModernThemeOptionsEnabled => Theme != AppTheme.Legacy;
+    public bool AreModernDarkOptionsEnabled => Theme == AppTheme.ModernDark;
+    public bool IsThemeLegacyAvailable => ThemeService.IsThemeAvailable(AppTheme.Legacy);
+    public bool IsThemeStandardLightAvailable => ThemeService.IsThemeAvailable(AppTheme.StandardLight);
+    public bool IsThemeStandardDarkAvailable => ThemeService.IsThemeAvailable(AppTheme.StandardDark);
+    public bool IsThemeModernDarkAvailable => ThemeService.IsThemeAvailable(AppTheme.ModernDark);
+    public bool IsThemeModernLightAvailable => ThemeService.IsThemeAvailable(AppTheme.ModernLight);
+    public bool IsThemeHighContrastAvailable => ThemeService.IsThemeAvailable(AppTheme.HighContrast);
+    public bool IsThemeCrabCuteAvailable => ThemeService.IsThemeAvailable(AppTheme.CrabCute);
     public bool IsThemeLegacy { get => Theme == AppTheme.Legacy; set { if (value) Theme = AppTheme.Legacy; } }
-    public bool IsThemeModern { get => Theme == AppTheme.Modern; set { if (value) Theme = AppTheme.Modern; } }
+    public bool IsThemeStandardLight { get => Theme == AppTheme.StandardLight; set { if (value) Theme = AppTheme.StandardLight; } }
     public bool IsThemeStandardDark { get => Theme == AppTheme.StandardDark; set { if (value) Theme = AppTheme.StandardDark; } }
-    public bool IsThemeDark { get => Theme == AppTheme.Dark; set { if (value) Theme = AppTheme.Dark; } }
+    public bool IsThemeModernDark { get => Theme == AppTheme.ModernDark; set { if (value) Theme = AppTheme.ModernDark; } }
     public bool IsThemeModernLight { get => Theme == AppTheme.ModernLight; set { if (value) Theme = AppTheme.ModernLight; } }
     public bool IsThemeHighContrast { get => Theme == AppTheme.HighContrast; set { if (value) Theme = AppTheme.HighContrast; } }
     public bool IsThemeCrabCute { get => Theme == AppTheme.CrabCute; set { if (value) Theme = AppTheme.CrabCute; } }
@@ -219,14 +233,15 @@ public sealed partial class SettingsViewModel : ObservableObject
         AppearanceTitle = T("Vzhled", "Appearance");
         ThemeLabel = T("Téma aplikace:", "Application theme:");
         ThemeLegacyText = L10n.Get("Str_Theme_Legacy");
-        ThemeModernText = L10n.Get("Str_Theme_Standard");
+        ThemeStandardLightText = L10n.Get("Str_Theme_Standard");
         ThemeStandardDarkText = L10n.Get("Str_Theme_StandardDark");
-        ThemeDarkText = L10n.Get("Str_Theme_ModernDark");
+        ThemeModernDarkText = L10n.Get("Str_Theme_ModernDark");
         ThemeModernLightText = L10n.Get("Str_Theme_ModernLight");
         ThemeHighContrastText = L10n.Get("Str_Theme_HighContrast");
         ThemeCrabCuteText = L10n.Get("Str_Theme_CrabCute");
         UseSplashVideoText = T("SplashScreen animace při startu", "SplashScreen startup animation");
         UseButtonScanlineEffectText = T("Efekt řádkování tlačítek", "Button scanline effect");
+        UseFullSecondaryWindowTransparencyText = T("Úplná průhlednost oken", "Full window transparency");
         ThemeHint = T("Změna tématu se projeví po uložení. Video je aktivní ve všech moderních tématech.", "Theme changes after saving. Video is active in all modern-style themes.");
 
         PathsTitle = T("Cesty", "Paths");
@@ -333,9 +348,10 @@ public sealed partial class SettingsViewModel : ObservableObject
         PowerShellWorkingDir = settings.PowerShellWorkingDir;
         TokenManagerSecretsPath = settings.TokenManagerSecretsPath;
         Language = string.Equals(settings.Language, "EN", StringComparison.OrdinalIgnoreCase) ? "EN" : "CS";
-        Theme = settings.Theme;
+        Theme = NormalizeTheme(settings.Theme);
         UseSplashVideo = settings.UseSplashVideo;
         UseButtonScanlineEffect = settings.UseButtonScanlineEffect;
+        UseFullSecondaryWindowTransparency = settings.UseFullSecondaryWindowTransparency;
     }
 
     private AppSettings BuildSettings()
@@ -352,19 +368,25 @@ public sealed partial class SettingsViewModel : ObservableObject
             TokenManagerSecretsPath = TokenManagerSecretsPath.Trim(),
             Language = IsLanguageEnglish ? "EN" : "CS",
             AutoScrollAppLog = current.AutoScrollAppLog,
-            Theme = Theme,
+            CheckUpdatesOnStartup = current.CheckUpdatesOnStartup,
+            Theme = NormalizeTheme(Theme),
             UseSplashVideo = UseSplashVideo,
-            UseButtonScanlineEffect = UseButtonScanlineEffect
+            UseButtonScanlineEffect = UseButtonScanlineEffect,
+            UseFullSecondaryWindowTransparency = UseFullSecondaryWindowTransparency
         };
     }
+
+    private static AppTheme NormalizeTheme(AppTheme theme) =>
+        ThemeService.IsThemeAvailable(theme) ? theme : AppTheme.Legacy;
 
     private void NotifyThemePropertiesChanged()
     {
         OnPropertyChanged(nameof(AreModernThemeOptionsEnabled));
+        OnPropertyChanged(nameof(AreModernDarkOptionsEnabled));
         OnPropertyChanged(nameof(IsThemeLegacy));
-        OnPropertyChanged(nameof(IsThemeModern));
+        OnPropertyChanged(nameof(IsThemeStandardLight));
         OnPropertyChanged(nameof(IsThemeStandardDark));
-        OnPropertyChanged(nameof(IsThemeDark));
+        OnPropertyChanged(nameof(IsThemeModernDark));
         OnPropertyChanged(nameof(IsThemeModernLight));
         OnPropertyChanged(nameof(IsThemeHighContrast));
         OnPropertyChanged(nameof(IsThemeCrabCute));

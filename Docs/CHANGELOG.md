@@ -2,6 +2,51 @@
 
 ---
 
+## v2.0.5 - 4 July 2026
+
+### Modern Dark
+- Completed the focused Modern Dark visual integration pass on top of the stable v2.0.4 window-chrome baseline.
+- Added Modern Dark TopBar, status bar, panel, App Log, splash-panel, and secondary-window visual polish.
+- Restored the Modern Dark secondary-window shell while keeping full secondary-window transparency optional and disabled by default.
+- Added the `UseFullSecondaryWindowTransparency` setting for users who explicitly want full Modern Dark secondary-window transparency.
+- Backported the approved 2026-06-01/02 Modern Dark visual values without reopening the locked Legacy, HighContrast, or CrabCute themes.
+
+### Release
+- User smoke test accepted the v2.0.5 Modern Dark state on 4 July 2026.
+- Remaining visual tweaks are deferred to v2.0.6.
+- Wider StandardLight, StandardDark, and ModernLight redesign work remains deferred to a later release.
+
+---
+
+## v2.0.4 - 3 June 2026
+
+### Stability
+- Added a startup-only main-window chrome selection so `Legacy` and `StandardDark` keep the native Windows frame while `StandardLight`, `ModernDark`, `ModernLight`, `HighContrast`, and `CrabCute` keep the frameless custom frame from the v2.0.3 baseline.
+- Moved Windows 11 DWM rounded-corner and immersive-dark setup into a narrow helper and apply it only for frameless startup themes.
+- Removed the old live `DragMove()` titlebar handler and stopped live theme switching from mutating `WindowStyle` / `WindowChrome`.
+- Kept `AllowsTransparency=False` so window shadows, resizing, and frame composition stay handled by Windows/DWM.
+
+### Release
+- This is a small stable checkpoint before the v2.0.5 Standard/Modern theme redesign work.
+- `Legacy`, `HighContrast`, and `CrabCute` theme dictionaries were intentionally left unchanged.
+
+---
+
+## v2.0.3 - 3 June 2026
+
+### Bug fixes
+- Fixed WelcomeWindow save-settings failure text to use localized strings with proper Czech diacritics.
+- Removed settings DI access from static theme helpers by tracking the currently applied theme in `ThemeService`.
+- Moved AboutWindow shortcut colors and secondary-window output/log colors to semantic theme resources.
+- Added missing Legacy fallback brushes used by `Style.Button.StandardFlat`.
+- Fixed the AboutWindow logo WebView background so the crab icon remains transparent in all themes.
+
+### Release
+- Kept risky Modern Dark runtime UI work out of this stabilization release.
+- Verified manual smoke test: Settings and tested secondary windows open/close without crashes, and the app exits without zombie processes.
+
+---
+
 ## v2.0.0 — 25 May 2026
 
 ### Architecture

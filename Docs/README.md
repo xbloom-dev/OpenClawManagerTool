@@ -2,6 +2,11 @@
 
 Windows WPF utility for managing an OpenClaw environment: Gateway/TUI control, embedded terminal, logs, cleanup, settings, themes, and Token Manager.
 
+## Encoding Rule
+
+Documentation must be saved as **UTF-8 without BOM** with LF line endings.
+Keep Czech text with valid diacritics and do not commit mojibake.
+
 ## First Run
 
 1. Start `OpenClawManager.exe`.
@@ -17,7 +22,7 @@ Use `%USERPROFILE%\.token-manager\secrets.json` or another private, non-synced f
 
 ## Themes
 
-Seven themes are available: Legacy, Modern, Standard Dark, Modern Dark, Modern Light, High Contrast, and Crab Cute. Language, theme, paths, and Token Manager vault path are saved in `%APPDATA%\OpenClawManager\settings.json`.
+Seven themes are available: Theme.Legacy, Theme.StandardLight, Theme.StandardDark, Theme.ModernDark, Theme.ModernLight, Theme.HighContrast, and Theme.CrabCute. Language, theme, paths, and Token Manager vault path are saved in `%APPDATA%\OpenClawManager\settings.json`.
 
 ## Offline Terminal
 
@@ -45,3 +50,4 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true
 ## Release Notes
 
 See `Docs/CHANGELOG.md` for the current release summary.
+
