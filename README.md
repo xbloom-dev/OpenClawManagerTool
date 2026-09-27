@@ -37,9 +37,8 @@ A Windows desktop app for managing a local [OpenClaw](https://github.com/opencla
 
 1. Go to the [Releases](../../releases) page.
 2. Choose the package that matches how you want to run the app:
-   - `OpenClawManagerTool-vX.Y.Z-win-x64-full-setup.exe` â€” installer with all themes and splash video.
-   - `OpenClawManagerTool-vX.Y.Z-win-x64-lite-setup.exe` â€” installer without the splash video, Legacy-only UI.
-   - `OpenClawManagerTool-vX.Y.Z-win-x64.zip` â€” portable Full package, no installer.
+   - `OpenClawManagerTool-vX.Y.Z-win-x64-setup.exe` â€” installer with a Full/Lite choice. Full includes all themes and the splash video; Lite uses the Legacy-only UI without the splash video.
+   - `OpenClawManagerTool-vX.Y.Z-win-x64-portable-full.zip` â€” portable Full package, no installer.
    - `OpenClawManagerTool-vX.Y.Z-win-x64-lite-portable.zip` â€” portable Lite package, no installer.
 3. (Optional) Verify the download against the published `.sha256` file.
 4. For portable packages, extract anywhere and run `OpenClawManager.exe`.
@@ -144,4 +143,3 @@ This app handles API tokens and secrets. If you discover a vulnerability, **do n
 ## License
 
 This project is released under the terms of the [MIT License](LICENSE).
-
