@@ -3,6 +3,8 @@ using System.Security.Cryptography;
 using System.Text;
 using OpenClawManager.Models;
 using OpenClawManager.Services;
+using OpenClawManager.ViewModels;
+using static OpenClawManager.Services.ResourceMonitor;
 
 var root = Path.Combine(Path.GetTempPath(), "OpenClawManager.TokenService.Tests", Guid.NewGuid().ToString("N"));
 Directory.CreateDirectory(root);
@@ -33,6 +35,14 @@ try
     IsVaultTrackedByGitDetectsRepo();
     OpenClawCommandValidationRejectsShellCharacters();
     AppSettingsMigrationFillsMissingValues();
+    PortableSettingsFileTakesPriority();
+    EmptyPortableSettingsIsFirstRunCandidate();
+    SavedLegacySettingsDoesNotRepeatWelcome();
+    MissingAppDataSettingsIsFirstRunCandidate();
+    MainViewModelLogCapsAtOneHundredItems();
+    MainViewModelStatusUsesInjectedResourceSnapshot();
+    GatewayLogViewModelLoadsTailLines();
+    SettingsViewModelThemeFlagsStayConsistent();
 
     Console.WriteLine("TokenService tests OK.");
     return 0;
@@ -452,6 +462,139 @@ void AppSettingsMigrationFillsMissingValues()
     Assert(migrated.CleanupAgents.Count > 0, "Migration should fill cleanup agents.");
     Assert(!string.IsNullOrWhiteSpace(migrated.TokenManagerSecretsPath), "Migration should fill token vault path.");
     Assert(migrated.Language == "EN", "Migration should normalize language.");
+    Assert(!migrated.UseFullSecondaryWindowTransparency, "Full secondary-window transparency should default to off.");
+}
+
+void PortableSettingsFileTakesPriority()
+{
+    var caseDir = NewCase();
+    var appBase = Path.Combine(caseDir, "app");
+    var appData = Path.Combine(caseDir, "appdata", "settings.json");
+    Directory.CreateDirectory(appBase);
+    Directory.CreateDirectory(Path.GetDirectoryName(appData)!);
+
+    File.WriteAllText(Path.Combine(appBase, "settings.json"), "{}", Encoding.UTF8);
+    File.WriteAllText(appData, "{\"Theme\":\"StandardLight\"}", Encoding.UTF8);
+
+    var service = new SettingsService(new TestEnvironment(appBase, appData));
+
+    Assert(service.IsPortableMode, "SettingsService should prefer settings.json beside the executable.");
+    Assert(service.SettingsFilePath == Path.Combine(appBase, "settings.json"), "Portable settings path should be selected.");
+    Assert(service.IsNewSettingsFile, "Portable {} settings should be treated as new settings.");
+    Assert(service.IsFirstRunCandidate, "Portable {} settings should open WelcomeWindow.");
+}
+
+void EmptyPortableSettingsIsFirstRunCandidate()
+{
+    var caseDir = NewCase();
+    var appBase = Path.Combine(caseDir, "app");
+    var appData = Path.Combine(caseDir, "appdata", "settings.json");
+    Directory.CreateDirectory(appBase);
+    File.WriteAllText(Path.Combine(appBase, "settings.json"), "", Encoding.UTF8);
+
+    var service = new SettingsService(new TestEnvironment(appBase, appData));
+
+    Assert(service.IsPortableMode, "Empty portable settings should still enable portable mode.");
+    Assert(service.IsNewSettingsFile, "Empty portable settings should be treated as new settings.");
+    Assert(service.IsFirstRunCandidate, "Empty portable settings should open WelcomeWindow.");
+}
+
+void SavedLegacySettingsDoesNotRepeatWelcome()
+{
+    var caseDir = NewCase();
+    var appBase = Path.Combine(caseDir, "app");
+    var appData = Path.Combine(caseDir, "appdata", "settings.json");
+    Directory.CreateDirectory(appBase);
+    File.WriteAllText(Path.Combine(appBase, "settings.json"), "{}", Encoding.UTF8);
+
+    var service = new SettingsService(new TestEnvironment(appBase, appData));
+    var saved = service.Save(new AppSettings { Theme = AppTheme.Legacy });
+
+    Assert(saved, "Saving selected Legacy settings should succeed.");
+    Assert(!service.IsNewSettingsFile, "Saved settings should no longer be considered new.");
+    Assert(!service.IsFirstRunCandidate, "Saved Legacy settings should not open WelcomeWindow repeatedly.");
+
+    var restarted = new SettingsService(new TestEnvironment(appBase, appData));
+    Assert(!restarted.IsNewSettingsFile, "Persisted Legacy settings should not be considered new after restart.");
+    Assert(!restarted.IsFirstRunCandidate, "Persisted Legacy settings should not repeat WelcomeWindow after restart.");
+}
+
+void MissingAppDataSettingsIsFirstRunCandidate()
+{
+    var caseDir = NewCase();
+    var appBase = Path.Combine(caseDir, "app");
+    var appData = Path.Combine(caseDir, "appdata", "settings.json");
+    Directory.CreateDirectory(appBase);
+
+    var service = new SettingsService(new TestEnvironment(appBase, appData));
+
+    Assert(!service.IsPortableMode, "Missing portable settings should use AppData settings.");
+    Assert(service.SettingsFilePath == appData, "AppData settings path should be selected when portable file is absent.");
+    Assert(service.IsNewSettingsFile, "Missing AppData settings should be treated as first-run settings.");
+    Assert(service.IsFirstRunCandidate, "Missing AppData settings should open WelcomeWindow.");
+}
+
+void MainViewModelLogCapsAtOneHundredItems()
+{
+    var vm = NewMainViewModel(NewCase());
+    var events = 0;
+    vm.LogAppended += (_, _) => events++;
+
+    for (var i = 0; i < 105; i++)
+        vm.Log($"entry-{i:D3}");
+
+    Assert(vm.AppLogItems.Count == 100, "MainViewModel log should keep only the newest 100 items.");
+    Assert(vm.AppLogItems.First().Contains("entry-005", StringComparison.Ordinal), "MainViewModel log should drop oldest items first.");
+    Assert(events == 105, "MainViewModel should raise LogAppended for every appended item.");
+}
+
+void MainViewModelStatusUsesInjectedResourceSnapshot()
+{
+    var vm = NewMainViewModel(NewCase(), new ResourceSnapshot(1.3, 16.0, 42, null, null));
+
+    vm.UpdateStatusAsync().GetAwaiter().GetResult();
+
+    Assert(
+        (vm.RamText.Contains("1.3", StringComparison.Ordinal) || vm.RamText.Contains("1,3", StringComparison.Ordinal)) &&
+        (vm.RamText.Contains("16.0", StringComparison.Ordinal) || vm.RamText.Contains("16,0", StringComparison.Ordinal)),
+        "MainViewModel should format RAM from IResourceMonitor.");
+    Assert(vm.CpuText == "CPU: 42%", "MainViewModel should format CPU from IResourceMonitor.");
+    Assert(!vm.IsVramVisible, "MainViewModel should hide VRAM when no VRAM data is available.");
+    Assert(vm.BtnGatewayStartEnabled, "MainViewModel should allow Gateway start when no Gateway process is detected.");
+}
+
+void GatewayLogViewModelLoadsTailLines()
+{
+    var caseDir = NewCase();
+    var logPath = Path.Combine(caseDir, "openclaw.log");
+    File.WriteAllText(logPath, "one\ntwo\nthree\nfour\n", new UTF8Encoding(false));
+
+    var vm = new GatewayLogViewModel(logPath);
+    vm.LoadLog(2);
+
+    Assert(!vm.LogContent.Contains("one", StringComparison.Ordinal), "GatewayLogViewModel should omit older lines when tailing.");
+    Assert(vm.LogContent.Contains("three", StringComparison.Ordinal), "GatewayLogViewModel should include requested tail lines.");
+    Assert(vm.LogContent.Contains("four", StringComparison.Ordinal), "GatewayLogViewModel should include the newest line.");
+}
+
+void SettingsViewModelThemeFlagsStayConsistent()
+{
+    var service = new FakeSettingsService(NewCase());
+    var vm = new SettingsViewModel(service, new FakeGatewayService());
+
+    vm.IsThemeModernDark = true;
+    Assert(vm.Theme == AppTheme.ModernDark, "SettingsViewModel should map ModernDark radio flag to AppTheme.ModernDark.");
+    Assert(vm.AreModernThemeOptionsEnabled, "Modern theme options should be enabled outside Legacy.");
+    Assert(vm.AreModernDarkOptionsEnabled, "ModernDark-only options should be enabled for ModernDark.");
+
+    vm.IsThemeLegacy = true;
+    Assert(vm.Theme == AppTheme.Legacy, "SettingsViewModel should map Legacy radio flag to AppTheme.Legacy.");
+    Assert(!vm.AreModernThemeOptionsEnabled, "Modern theme options should be disabled for Legacy.");
+    Assert(!vm.AreModernDarkOptionsEnabled, "ModernDark-only options should be disabled outside ModernDark.");
+
+    vm.UseFullSecondaryWindowTransparency = true;
+    vm.SaveCommand.Execute(null);
+    Assert(service.Settings.UseFullSecondaryWindowTransparency, "SettingsViewModel should persist the full transparency option.");
 }
 
 string NewCase()
@@ -459,6 +602,17 @@ string NewCase()
     var path = Path.Combine(root, Guid.NewGuid().ToString("N"));
     Directory.CreateDirectory(path);
     return path;
+}
+
+MainViewModel NewMainViewModel(string caseDir, ResourceSnapshot? snapshot = null)
+{
+    var settingsService = new FakeSettingsService(caseDir);
+    var resourceMonitor = new FakeResourceMonitor(snapshot ?? new ResourceSnapshot(0.5, 8.0, 12, 1.0, 4.0));
+    return new MainViewModel(
+        new FakeGatewayService(),
+        resourceMonitor,
+        new FakeProcessDetector(),
+        settingsService);
 }
 
 static string Hash(string path)
@@ -532,3 +686,74 @@ static void AssertThrows(Action action, string message)
     throw new Exception(message);
 }
 
+sealed class TestEnvironment(string appBaseDirectory, string settingsFilePath) : IAppEnvironment
+{
+    public string SettingsFilePath { get; } = settingsFilePath;
+    public string WebView2DataRoot { get; } = Path.Combine(appBaseDirectory, "WebView2");
+    public string AppBaseDirectory { get; } = appBaseDirectory;
+}
+
+sealed class FakeSettingsService : ISettingsService
+{
+    public FakeSettingsService(string caseDir)
+    {
+        Directory.CreateDirectory(caseDir);
+        SettingsFilePath = Path.Combine(caseDir, "settings.json");
+        Settings = new AppSettings
+        {
+            TempPath = caseDir,
+            Theme = AppTheme.StandardLight
+        };
+    }
+
+    public string SettingsFilePath { get; }
+    public bool IsPortableMode => false;
+    public bool IsNewSettingsFile => false;
+    public bool IsFirstRunCandidate => false;
+    public AppSettings Settings { get; private set; }
+    public event EventHandler? SettingsChanged;
+
+    public bool Save(AppSettings settings)
+    {
+        Settings = settings;
+        SettingsChanged?.Invoke(this, EventArgs.Empty);
+        return true;
+    }
+
+    public AppSettings MigrateSettings(AppSettings settings, out bool changed)
+    {
+        changed = false;
+        return settings;
+    }
+}
+
+sealed class FakeGatewayService : IGatewayService
+{
+    public Process? Start() => null;
+    public Process? StartTui() => null;
+    public bool Stop() => true;
+    public bool StopAndCloseTui() => true;
+    public bool TryValidateOpenClawCommand(string command, out string error)
+    {
+        error = "";
+        return true;
+    }
+    public string BuildPowerShellArguments(string openClawSubCommand) => openClawSubCommand;
+    public string BuildCmdExeCommand(string openClawSubCommand) => openClawSubCommand;
+    public Task<Process?> RestartAsync() => Task.FromResult<Process?>(null);
+    public Process? RunDoctorFix() => null;
+}
+
+sealed class FakeResourceMonitor(ResourceSnapshot snapshot) : IResourceMonitor
+{
+    public Task<ResourceSnapshot> MeasureAsync(CancellationToken cancellationToken = default) => Task.FromResult(snapshot);
+    public ResourceSnapshot Measure() => snapshot;
+}
+
+sealed class FakeProcessDetector : IProcessDetector
+{
+    public Process? FindGatewayProcess() => null;
+    public bool IsGatewayRunning() => false;
+    public Task<Process?> FindGatewayProcessAsync(CancellationToken ct = default) => Task.FromResult<Process?>(null);
+    public Task<bool> IsGatewayRunningAsync(CancellationToken ct = default) => Task.FromResult(false);
+}

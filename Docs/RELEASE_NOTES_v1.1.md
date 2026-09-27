@@ -1,4 +1,4 @@
-# OpenClaw Manager Tool v1.1 Release Notes
+﻿# OpenClaw Manager Tool v1.1 Release Notes
 
 Release date: 2026-05-23
 
@@ -8,7 +8,7 @@ Release date: 2026-05-23
 - Added PBKDF2-SHA256 key derivation and AES-256-GCM encryption for vault backups.
 - Improved command validation for OpenClaw Gateway startup commands.
 - Finalized the About window Easter Egg prompt for public-safe app commands.
-- Polished Modern Dark, Standard Dark, and secondary window theme behavior.
+- Polished Theme.ModernDark, Theme.StandardDark, and secondary window theme behavior.
 - Updated GitHub Actions CI to Node 24 compatible actions.
 
 ## Security
@@ -22,7 +22,7 @@ Release date: 2026-05-23
 - Local Release/Debug builds pass.
 - TokenService tests pass.
 - GitHub Actions CI passes on the active `codex/phase1-stability-security-performance` branch.
-- Manual UI smoke test is marked OK by Bloom for Dark, StandardDark, and ModernLight coverage.
+- Manual UI smoke test is marked OK by Bloom for Theme.ModernDark, Theme.StandardDark, and Theme.ModernLight coverage.
 
 ## Remaining Public Release Steps
 
@@ -30,3 +30,5 @@ Release date: 2026-05-23
 - Enable branch protection for `master` and `develop`.
 - Run the Gitleaks scan again on the final merged target branch.
 - Create the GitHub Release `v1.1` and upload the prepared runtime ZIP.
+
+

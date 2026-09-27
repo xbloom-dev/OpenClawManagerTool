@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Uživatelský manuál - OpenClaw Manager Tool by Bloom</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101116;
+      --surface: #181a22;
+      --surface-2: #20232d;
+      --border: #343846;
+      --text: #f4f6fb;
+      --muted: #b8bdca;
+      --accent: #19b7aa;
+      --accent-2: #7d65d6;
+      --warn: #ffcf70;
+      --code: #0c0d12;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top left, rgba(125, 101, 214, 0.2), transparent 34rem), var(--bg);
+      color: var(--text);
+      font: 16px/1.6 "Segoe UI", Arial, sans-serif;
+    }
+    main {
+      width: min(1040px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 40px 0 56px;
+    }
+    header, section {
+      background: color-mix(in srgb, var(--surface) 92%, transparent);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      margin: 0 0 18px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.24);
+    }
+    h1, h2, h3 { line-height: 1.2; margin: 0 0 14px; }
+    h1 { font-size: 34px; }
+    h2 { font-size: 24px; padding-top: 4px; }
+    h3 { font-size: 18px; color: var(--text); }
+    p { margin: 0 0 14px; }
+    a { color: #8be9df; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .meta, .muted { color: var(--muted); }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+    }
+    nav {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 8px 18px;
+      margin-top: 18px;
+    }
+    nav a {
+      display: block;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0 18px;
+      overflow: hidden;
+      border-radius: 12px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      vertical-align: top;
+    }
+    th {
+      background: var(--surface-2);
+      text-align: left;
+    }
+    code, pre {
+      font-family: "Cascadia Mono", Consolas, monospace;
+      background: var(--code);
+      color: #e8ecf7;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    code { padding: 2px 5px; }
+    pre { padding: 14px; overflow: auto; }
+    .note {
+      border-left: 4px solid var(--accent);
+      background: rgba(25, 183, 170, 0.1);
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin: 12px 0 18px;
+    }
+    .warn {
+      border-left-color: var(--warn);
+      background: rgba(255, 207, 112, 0.1);
+    }
+    ul { padding-left: 24px; }
+    li { margin: 4px 0; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <span class="pill">Lokální nápověda</span>
+    <h1>OpenClaw Manager Tool by Bloom</h1>
+    <p class="meta">Uživatelský manuál pro verzi aplikace 2.0.5, aktualizováno 4. července 2026. <a href="USER_MANUAL.html">English version</a></p>
+    <nav aria-label="Obsah">
+      <a href="#overview">1. Přehled</a>
+      <a href="#install">2. Instalace a spuštění</a>
+      <a href="#themes">3. Témata</a>
+      <a href="#main-window">4. Hlavní okno</a>
+      <a href="#gateway">5. Ovládání Gateway</a>
+      <a href="#tokens">6. Token Manager</a>
+      <a href="#cleaning">7. Cleaning Tool</a>
+      <a href="#settings">8. Nastavení</a>
+      <a href="#troubleshooting">9. Řešení potíží</a>
+    </nav>
+  </header>
+
+  <section id="overview">
+    <h2>1. Přehled</h2>
+    <p>OpenClaw Manager je desktopový nástroj pro Windows, který pomáhá spravovat a diagnostikovat lokální prostředí OpenClaw. Umí spustit TUI, ovládat Gateway, zobrazit logy, měřit latenci, čistit dočasné soubory a spravovat lokální tokeny.</p>
+    <p>Nástroj slouží pro lokální údržbu. Nenahrazuje samotný OpenClaw a pro otevření této nápovědy nepotřebuje internet.</p>
+  </section>
+
+  <section id="install">
+    <h2>2. Instalace a spuštění</h2>
+    <h3>Instalovaná verze</h3>
+    <p>Použij instalátor a spusť aplikaci ze Start menu nebo ze zástupce na ploše. Instalovaná verze ukládá nastavení do standardního umístění aplikací ve Windows.</p>
+    <h3>Přenosná verze</h3>
+    <p>Rozbal portable ZIP do zapisovatelné složky. Přenosná verze používá lokální <code>settings.json</code> vedle spustitelného souboru, takže nastavení zůstává v rozbalené složce.</p>
+    <h3>První spuštění</h3>
+    <p>Uvítací obrazovka umožní zvolit jazyk, téma a kontrolu aktualizací při startu. Zavření uvítací obrazovky před dokončením ukončí celou aplikaci.</p>
+  </section>
+
+  <section id="themes">
+    <h2>3. Témata</h2>
+    <p>Aplikace používá sedm interních identifikátorů témat. V uživatelském rozhraní se zobrazují lokalizované názvy.</p>
+    <table>
+      <thead><tr><th>Interní ID</th><th>Český název</th><th>Poznámka</th></tr></thead>
+      <tbody>
+        <tr><td><code>Legacy</code></td><td>Legacy (výchozí)</td><td>Klasický výchozí vzhled. Toto téma neměnit bez výslovného schválení.</td></tr>
+        <tr><td><code>StandardLight</code></td><td>Standardní</td><td>Světlé standardní rozhraní.</td></tr>
+        <tr><td><code>StandardDark</code></td><td>Standardní tmavé</td><td>Tmavé standardní rozhraní.</td></tr>
+        <tr><td><code>ModernDark</code></td><td>Moderní tmavé</td><td>Moderní tmavé rozhraní se skleněným stylem.</td></tr>
+        <tr><td><code>ModernLight</code></td><td>Moderní</td><td>Moderní světlé rozhraní.</td></tr>
+        <tr><td><code>HighContrast</code></td><td>Vysoký kontrast</td><td>Vyšší kontrast pro lepší čitelnost.</td></tr>
+        <tr><td><code>CrabCute</code></td><td>Crab Cute</td><td>Hravá vizuální varianta.</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Lite verze záměrně nabízí pouze téma Legacy a neobsahuje video splash soubor.</p>
+  </section>
+
+  <section id="main-window">
+    <h2>4. Hlavní okno</h2>
+    <p>Hlavní okno je rozdělené na akce, nástroje, informace o latenci, aplikační log a terminálový výstup.</p>
+    <table>
+      <thead><tr><th>Oblast</th><th>Účel</th></tr></thead>
+      <tbody>
+        <tr><td>Akce</td><td>Spuštění OpenClaw TUI a ovládání Gateway.</td></tr>
+        <tr><td>Nástroje</td><td>Otevření PowerShellu, Gateway logu, Cleaning Tool, Token Manageru a Doctor Fix.</td></tr>
+        <tr><td>Latence</td><td>Zobrazuje poslední, průměrnou a maximální hodnotu a počet měření.</td></tr>
+        <tr><td>Log aplikace</td><td>Zobrazuje lokální události a diagnostické zprávy aplikace.</td></tr>
+        <tr><td>Terminál</td><td>Vestavěná plocha pro výstup OpenClaw.</td></tr>
+      </tbody>
+    </table>
+    <h3>Klávesové zkratky</h3>
+    <ul>
+      <li><code>Ctrl+,</code> otevře Nastavení.</li>
+      <li><code>F1</code> otevře tento lokální manuál.</li>
+      <li><code>Alt+F4</code> zavře aktivní okno.</li>
+    </ul>
+  </section>
+
+  <section id="gateway">
+    <h2>5. Ovládání Gateway</h2>
+    <p>Tlačítka Gateway umí spustit, zastavit nebo restartovat lokální Gateway proces. Stavový řádek ukazuje, zda Gateway běží, včetně ID procesu a dostupné doby běhu.</p>
+    <p>Pokud se Gateway nespustí, otevři Nastavení a ověř příkaz OpenClaw, pracovní složku a cestu ke složce logů.</p>
+  </section>
+
+  <section id="tokens">
+    <h2>6. Token Manager</h2>
+    <p>Token Manager ukládá a upravuje lokální tokeny poskytovatelů. Citlivé hodnoty jsou chráněné pomocí ochrany dat Windows, pokud je dostupná. V přenosném režimu se hranice ochrany mohou lišit, protože nastavení je uložené vedle spustitelného souboru.</p>
+    <p class="warn note">Zálohy uchovávej bezpečně. Kdo získá přístup k exportovaným nebo zkopírovaným tokenům, může je zneužít.</p>
+  </section>
+
+  <section id="cleaning">
+    <h2>7. Cleaning Tool</h2>
+    <p>Cleaning Tool odstraňuje vybrané dočasné soubory, logy a zastaralá lokální data. Před spuštěním čištění zkontroluj výběr položek, zejména při práci z portable složky.</p>
+  </section>
+
+  <section id="settings">
+    <h2>8. Nastavení</h2>
+    <p>Nastavení spravuje cesty, téma, jazyk, chování při startu a volbu kontroly aktualizací. Pokud se aplikace po změně tématu nebo cest chová nečekaně, jednou ji restartuj a hodnoty znovu ověř.</p>
+  </section>
+
+  <section id="troubleshooting">
+    <h2>9. Řešení potíží</h2>
+    <table>
+      <thead><tr><th>Problém</th><th>Co zkusit</th></tr></thead>
+      <tbody>
+        <tr><td>Uvítací obrazovka nezobrazuje video</td><td>Lite verze video záměrně neobsahuje. Full verze při chybě načtení videa přejde na statický obrázek.</td></tr>
+        <tr><td>Nápověda se neotevře</td><td>Zkontroluj, že vedle aplikace existuje složka <code>Docs</code> a obsahuje <code>USER_MANUAL.cs.html</code>.</td></tr>
+        <tr><td>Gateway zůstává offline</td><td>Ověř příkaz Gateway a otevři Gateway log v části Nástroje.</td></tr>
+        <tr><td>Nastavení se neukládá</td><td>Instalovaná verze potřebuje přístup k aplikačním datům. Portable verze potřebuje zápis do rozbalené složky.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+</body>
+</html>

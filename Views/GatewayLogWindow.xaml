@@ -106,14 +106,14 @@
                     IsCancel="True" />
         </Grid>
 
-        <Border BorderBrush="Gray" BorderThickness="1">
+        <Border BorderBrush="{DynamicResource Theme.Brush.OutputBorder}" BorderThickness="1">
             <TextBox x:Name="TxtLogContent"
                      Text="{Binding LogContent, Mode=OneWay}"
                      IsReadOnly="True"
                      FontFamily="Consolas"
                      FontSize="11"
-                     Background="#1E1E1E"
-                     Foreground="#DCDCDC"
+                     Background="{DynamicResource Theme.Brush.OutputBackground}"
+                     Foreground="{DynamicResource Theme.Brush.OutputText}"
                      VerticalScrollBarVisibility="Auto"
                      HorizontalScrollBarVisibility="Auto"
                      TextWrapping="NoWrap"

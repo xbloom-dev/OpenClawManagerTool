@@ -1,4 +1,4 @@
-﻿bin/
+bin/
 obj/
 .vs/
 *.user
@@ -15,6 +15,10 @@ WebView2Data/
 **/secrets.json
 PROJECT_FILE_LIST.txt
 handoff/
+
+# Local-only agent/workflow instructions
+AGENTS.md
+CLAUDE.md
 
 # Claude Code — lokální nastavení (nepatří do repo)
 .claude/settings.local.json

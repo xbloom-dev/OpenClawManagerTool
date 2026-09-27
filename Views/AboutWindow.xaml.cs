@@ -1,7 +1,7 @@
-using System.Globalization;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
-using System.Windows.Media;
 using Microsoft.Web.WebView2.Core;
 using OpenClawManager.Services;
 using OpenClawManager.ViewModels;
@@ -11,6 +11,7 @@ namespace OpenClawManager.Views;
 public partial class AboutWindow : Window
 {
     private const string CommandPrefix = "command:";
+    private const string ToolsScriptName = "OpenClaw-Tools.ps1";
     private readonly IAppEnvironment _env;
 
     public AboutWindow()
@@ -28,18 +29,20 @@ public partial class AboutWindow : Window
         _ = InitWebViewAsync();
     }
 
-    // ── WebView2 logo ─────────────────────────────────────────────────────────
+    // WebView2 logo
     private async Task InitWebViewAsync()
     {
         try
         {
             await SvgView.EnsureCoreWebView2Async();
+            SvgView.DefaultBackgroundColor = System.Drawing.Color.Transparent;
+            SvgView.CoreWebView2.Settings.IsWebMessageEnabled = true;
             SvgView.CoreWebView2.WebMessageReceived += SvgView_WebMessageReceived;
             var svgPath = FindSvgPath();
             var svgContent = svgPath != null
                 ? await File.ReadAllTextAsync(svgPath)
                 : FallbackSvg();
-            SvgView.NavigateToString(BuildHtml(svgContent, GetLogoBackgroundCss()));
+            SvgView.NavigateToString(BuildHtml(svgContent));
         }
         catch { }
     }
@@ -47,13 +50,104 @@ public partial class AboutWindow : Window
     private void SvgView_WebMessageReceived(object? sender, CoreWebView2WebMessageReceivedEventArgs e)
     {
         var message = e.TryGetWebMessageAsString();
-        if (!message.StartsWith(CommandPrefix, StringComparison.Ordinal))
+        if (string.IsNullOrWhiteSpace(message) ||
+            !message.StartsWith(CommandPrefix, StringComparison.Ordinal))
             return;
 
         var command = message[CommandPrefix.Length..].Trim().ToLowerInvariant();
-        if (Owner is MainWindow mainWindow)
-            mainWindow.ExecuteAboutCommand(command);
+        if (ExecuteToolsCommand(command))
+            return;
+
+        var mainWindow = Owner as MainWindow ?? Application.Current.MainWindow as MainWindow;
+        if (mainWindow == null)
+            return;
+
+        Dispatcher.BeginInvoke(new Action(() => mainWindow.ExecuteAboutCommand(command)));
     }
+
+    private bool ExecuteToolsCommand(string command)
+    {
+        switch (command)
+        {
+            case "admin":
+            case "root":
+                LaunchOpenClawTools();
+                return true;
+            case "sync":
+                LaunchOpenClawTools("sync");
+                return true;
+            case "diag":
+            case "status":
+                LaunchOpenClawTools("diag");
+                return true;
+            case "acl":
+            case "build":
+            case "test":
+            case "check":
+                LaunchOpenClawTools(command);
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private void LaunchOpenClawTools(string action = "")
+    {
+        try
+        {
+            var scriptPath = FindToolsScriptPath();
+            if (scriptPath == null)
+            {
+                MessageBox.Show(
+                    L10n.Format("Str_About_ToolsScriptMissing", ToolsScriptName),
+                    L10n.Get("Str_About_ToolsTitle"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+
+            var actionArgs = string.IsNullOrWhiteSpace(action) ? "" : $" -Action {QuoteArgument(action)}";
+            var psArguments = $"-NoProfile -ExecutionPolicy Bypass -File {QuoteArgument(scriptPath)} -NoAdminPrompt{actionArgs}";
+            var scriptDirectory = Path.GetDirectoryName(scriptPath) ?? _env.AppBaseDirectory;
+
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = psArguments,
+                Verb = "runas",
+                UseShellExecute = true,
+                WorkingDirectory = scriptDirectory,
+                WindowStyle = ProcessWindowStyle.Normal,
+            });
+        }
+        catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
+        {
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show(
+                L10n.Format("Str_About_ToolsStartError", ex.Message),
+                L10n.Get("Str_About_ToolsTitle"),
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+    }
+
+    private string? FindToolsScriptPath()
+    {
+        var exeDir = _env.AppBaseDirectory;
+        var candidates = new[]
+        {
+            Path.Combine(exeDir, "Scripts", ToolsScriptName),
+            Path.Combine(exeDir, ToolsScriptName),
+            Path.GetFullPath(Path.Combine(exeDir, "..", "..", "..", "Scripts", ToolsScriptName)),
+            Path.GetFullPath(Path.Combine(exeDir, "..", "..", "..", "..", "Scripts", ToolsScriptName))
+        };
+
+        return candidates.FirstOrDefault(File.Exists);
+    }
+
+    private static string QuoteArgument(string value) => "\"" + value.Replace("\"", "\\\"") + "\"";
 
     private string? FindSvgPath()
     {
@@ -66,31 +160,7 @@ public partial class AboutWindow : Window
         return candidates.FirstOrDefault(File.Exists);
     }
 
-    private string GetLogoBackgroundCss()
-    {
-        if (Background is SolidColorBrush windowBrush)
-            return ToCssColor(windowBrush.Color);
-
-        var themedBrush = ThemeService.GetBrush("Theme.Brush.WindowBackground", Colors.Transparent);
-        if (themedBrush is SolidColorBrush solidBrush)
-            return ToCssColor(solidBrush.Color);
-
-        return "#000000";
-    }
-
-    private static string ToCssColor(Color color)
-    {
-        if (color.A == 0)
-            return "transparent";
-
-        if (color.A == 255)
-            return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
-
-        var alpha = (color.A / 255.0).ToString("0.###", CultureInfo.InvariantCulture);
-        return $"rgba({color.R},{color.G},{color.B},{alpha})";
-    }
-
-    private static string BuildHtml(string svgContent, string background)
+    private static string BuildHtml(string svgContent)
     {
         return $@"<!DOCTYPE html>
 <html>
@@ -98,7 +168,7 @@ public partial class AboutWindow : Window
 <style>
   html, body {{
     margin: 0; padding: 0;
-    background: {background};
+    background: transparent;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -118,10 +188,17 @@ public partial class AboutWindow : Window
 </style>
 <script>
   const commands = new Set([
+    'admin', 'root', 'sync', 'diag', 'status', 'acl', 'build', 'test', 'check',
     'replay', 'exit', 'legacy', 'dark', 'light', 'modern', 'crab', 'logs',
     'tokens', 'settings', 'help'
   ]);
-  const maxCommandLength = Math.max(...Array.from(commands).map(command => command.length));
+  const aliases = new Map([
+    ['easteregg', 'help'],
+    ['egg', 'help'],
+    ['about', 'help']
+  ]);
+  const acceptedInputs = new Set([...commands, ...aliases.keys()]);
+  const maxCommandLength = Math.max(...Array.from(acceptedInputs).map(command => command.length));
   let buffer = '';
   let resetTimer = null;
 
@@ -177,7 +254,14 @@ public partial class AboutWindow : Window
 
   function executeCommand(command) {{
     command = (command || '').trim().toLowerCase();
-    if (!commands.has(command)) return;
+    command = aliases.get(command) || command;
+    if (!commands.has(command)) {{
+      renderPrompt('unknown');
+      buffer = '';
+      resetPromptSoon(1200);
+      return;
+    }}
+
     renderPrompt(command);
     window.chrome.webview.postMessage('{CommandPrefix}' + command);
     buffer = '';

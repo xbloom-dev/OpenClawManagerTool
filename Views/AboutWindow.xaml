@@ -39,7 +39,9 @@
             </StackPanel>
 
             <Border x:Name="ShortcutFrame"
-                    Background="#F5F5F5" BorderBrush="#E0E0E0" BorderThickness="1"
+                    Background="{DynamicResource Theme.Brush.ShortcutBackground}"
+                    BorderBrush="{DynamicResource Theme.Brush.ShortcutBorder}"
+                    BorderThickness="1"
                     CornerRadius="4" Padding="12,8" Margin="0,0,0,8">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -53,28 +55,28 @@
                         <RowDefinition /> <RowDefinition />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Ctrl+T" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Ctrl+T" FontFamily="Consolas" Foreground="{DynamicResource Theme.Brush.ShortcutKeyText}" FontSize="11" />
                     <TextBlock Grid.Row="0" Grid.Column="2" Text="{Binding StartTuiShortcut}" FontSize="11" />
 
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Ctrl+G" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Ctrl+G" FontFamily="Consolas" Foreground="{DynamicResource Theme.Brush.ShortcutKeyText}" FontSize="11" />
                     <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding GatewayShortcut}" FontSize="11" />
 
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Ctrl+R" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Ctrl+R" FontFamily="Consolas" Foreground="{DynamicResource Theme.Brush.ShortcutKeyText}" FontSize="11" />
                     <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding RestartGatewayShortcut}" FontSize="11" />
 
-                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Ctrl+Shift+C" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="3" Grid.Column="0" Text="Ctrl+Shift+C" FontFamily="Consolas" Foreground="{DynamicResource Theme.Brush.ShortcutKeyText}" FontSize="11" />
                     <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding CleaningToolShortcut}" FontSize="11" />
 
-                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Ctrl+," FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Ctrl+," FontFamily="Consolas" Foreground="{DynamicResource Theme.Brush.ShortcutKeyText}" FontSize="11" />
                     <TextBlock Grid.Row="4" Grid.Column="2" Text="{Binding SettingsShortcut}" FontSize="11" />
 
-                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Ctrl+L" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="5" Grid.Column="0" Text="Ctrl+L" FontFamily="Consolas" Foreground="{DynamicResource Theme.Brush.ShortcutKeyText}" FontSize="11" />
                     <TextBlock Grid.Row="5" Grid.Column="2" Text="{Binding GatewayLiveLogShortcut}" FontSize="11" />
 
-                    <TextBlock Grid.Row="6" Grid.Column="0" Text="F1" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="6" Grid.Column="0" Text="F1" FontFamily="Consolas" Foreground="{DynamicResource Theme.Brush.ShortcutKeyText}" FontSize="11" />
                     <TextBlock Grid.Row="6" Grid.Column="2" Text="{Binding AboutShortcut}" FontSize="11" />
 
-                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Alt+F4" FontFamily="Consolas" Foreground="#0066CC" FontSize="11" />
+                    <TextBlock Grid.Row="7" Grid.Column="0" Text="Alt+F4" FontFamily="Consolas" Foreground="{DynamicResource Theme.Brush.ShortcutKeyText}" FontSize="11" />
                     <TextBlock Grid.Row="7" Grid.Column="2" Text="{Binding CloseApplicationShortcut}" FontSize="11" />
                 </Grid>
             </Border>

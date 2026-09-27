@@ -1,4 +1,4 @@
-# SplashScreen a WebView2 - bezpecnostni pravidla v1.0
+﻿# SplashScreen a WebView2 - bezpecnostni pravidla v1.0
 
 ## Proc je tato cast kriticka
 
@@ -7,9 +7,9 @@ SplashScreen a WebView2 byly nejcitlivejsi casti ladeni v1.0. Problem se SplashS
 ## Aktualni architektura
 
 - `SplashBorder` = Legacy ASCII art uvnitr `TerminalControl`
-- `SplashOverlay` = Modern splash vrstva v `MainWindow`
-- Modern rezim pouziva video `splash.mp4` a nasledny PNG freeze frame
-- Legacy rezim pouziva ASCII art
+- `SplashOverlay` = Theme.StandardLight splash vrstva v `MainWindow`
+- Theme.StandardLight rezim pouziva video `splash.mp4` a nasledny PNG freeze frame
+- Theme.Legacy rezim pouziva ASCII art
 - TUI terminal bezi ve WebView2
 
 ## Zasadni pravidla pro SplashScreen
@@ -18,13 +18,13 @@ SplashScreen a WebView2 byly nejcitlivejsi casti ladeni v1.0. Problem se SplashS
 2. `MediaEnded` nesmi kompletne zavrit splash.
 3. Po dobehnuti videa se ma zobrazit PNG freeze frame.
 4. Splash mizi az pri kliknuti na OpenClaw TUI.
-5. Pri Modern -> Legacy:
+5. Pri Theme.StandardLight -> Theme.Legacy:
    - zastavit video
-   - skryt Modern overlay
+   - skryt Theme.StandardLight overlay
    - zobrazit ASCII art
-6. Pri Legacy -> Modern:
+6. Pri Theme.Legacy -> Theme.StandardLight:
    - skryt ASCII art
-   - zobrazit Modern overlay nebo PNG
+   - zobrazit Theme.StandardLight overlay nebo PNG
 7. `OnThemeChanged` musi respektovat `IsTuiRunning`.
 8. Pokud chybi `splash.mp4` nebo PNG fallback selze, zobrazit ASCII art.
 9. `MediaElement.Source = null` a `UnloadedBehavior="Stop"` jsou dulezite pro uvolneni videa.
@@ -60,15 +60,16 @@ Bezpecne postupy:
 
 Minimalni test:
 
-1. Start v Modern theme.
+1. Start v Theme.StandardLight.
 2. Overit prehrani `splash.mp4`.
 3. Overit PNG freeze frame po konci videa.
 4. Kliknout na OpenClaw TUI.
 5. Overit, ze se zobrazi terminal.
-6. Start v Legacy theme.
+6. Start v Theme.Legacy.
 7. Overit ASCII art.
-8. Prepnout Modern -> Legacy pred spustenim TUI.
-9. Prepnout Legacy -> Modern pred spustenim TUI.
+8. Prepnout Theme.StandardLight -> Theme.Legacy pred spustenim TUI.
+9. Prepnout Theme.Legacy -> Theme.StandardLight pred spustenim TUI.
 10. Overit fallback pri chybejicim `splash.mp4`.
 11. Overit fallback pri chybejicim/poskozenem PNG.
+
 

@@ -1,4 +1,3 @@
-using System.Reflection;
 using CommunityToolkit.Mvvm.ComponentModel;
 using OpenClawManager.Services;
 
@@ -8,14 +7,7 @@ public sealed partial class AboutViewModel : ObservableObject
 {
     public AboutViewModel()
     {
-        var version = Assembly.GetExecutingAssembly()
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()
-            ?.InformationalVersion;
-
-        AppVersion = string.IsNullOrWhiteSpace(version)
-            ? "v2.0"
-            : $"v{version.Split('+')[0]}";
-
+        AppVersion = AppVersionInfo.Display;
         RefreshLocalization();
     }
 

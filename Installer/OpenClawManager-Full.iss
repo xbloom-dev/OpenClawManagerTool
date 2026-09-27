@@ -1,9 +1,12 @@
 #define AppName "OpenClaw Manager Tool"
 #ifndef AppVersion
-#define AppVersion "2.0.2"
+#define AppVersion "2.0.3"
 #endif
-#ifndef SourceDir
-#define SourceDir "..\dist\installer\full"
+#ifndef FullSourceDir
+#define FullSourceDir "..\dist\installer\full"
+#endif
+#ifndef LiteSourceDir
+#define LiteSourceDir "..\dist\installer\lite"
 #endif
 #define Publisher "OpenClaw"
 #define ExeName "OpenClawManager.exe"
@@ -16,7 +19,7 @@ AppVersion={#AppVersion}
 AppPublisher={#Publisher}
 DefaultDirName={localappdata}\Programs\OpenClawManager
 DefaultGroupName={#AppName}
-OutputBaseFilename=OpenClawManagerTool-v{#AppVersion}-win-x64-full-setup
+OutputBaseFilename=OpenClawManagerTool-v{#AppVersion}-win-x64-setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
@@ -28,23 +31,25 @@ SetupIconFile=..\Resources\app-icon.ico
 UninstallDisplayIcon={app}\{#ExeName}
 
 [Types]
-Name: "full"; Description: "Full installation"
-Name: "compact"; Description: "Lite-style shortcuts only"
-Name: "custom"; Description: "Custom installation"; Flags: iscustom
+Name: "full"; Description: "Full Install (all themes + splash video)"
+Name: "lite"; Description: "Lite Install (Legacy theme only, no splash video)"
 
 [Components]
-Name: "edition_full"; Description: "Full assets: themes, icons, splash video, and scripts"; Types: full custom; Flags: fixed
-Name: "shortcut_startmenu"; Description: "Start menu shortcut"; Types: full compact custom; Flags: fixed
-Name: "shortcut_desktop"; Description: "Desktop shortcut"; Types: full custom
-Name: "help_webview2"; Description: "Add WebView2 Runtime download shortcut"; Types: custom
+Name: "edition_full"; Description: "Install Full edition"; Types: full; Flags: fixed exclusive
+Name: "edition_lite"; Description: "Install Lite edition (Legacy only, no splash video)"; Types: lite; Flags: fixed exclusive
 
 [Files]
-Source: "{#SourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "settings.json,*.pdb"; Components: edition_full
+Source: "{#FullSourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "settings.json,*.pdb"; Components: edition_full
+Source: "{#LiteSourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs; Excludes: "settings.json,*.pdb,Resources\splash.mp4"; Components: edition_lite
+
+[Tasks]
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "webview2shortcut"; Description: "Create WebView2 Runtime download shortcut in Start menu"; Flags: unchecked
 
 [Icons]
-Name: "{group}\{#AppName}"; Filename: "{app}\{#ExeName}"; Components: shortcut_startmenu
-Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#ExeName}"; Components: shortcut_desktop
-Name: "{group}\Install Microsoft Edge WebView2 Runtime"; Filename: "{#WebView2Url}"; Components: help_webview2
+Name: "{group}\{#AppName}"; Filename: "{app}\{#ExeName}"
+Name: "{autodesktop}\{#AppName}"; Filename: "{app}\{#ExeName}"; Tasks: desktopicon
+Name: "{group}\Install Microsoft Edge WebView2 Runtime"; Filename: "{#WebView2Url}"; Tasks: webview2shortcut
 
 [Run]
 Filename: "{app}\{#ExeName}"; Description: "Launch {#AppName}"; Flags: nowait postinstall skipifsilent

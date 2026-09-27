@@ -64,7 +64,17 @@ public partial class App : Application
             // Pokud favicon chybí, okna použijí výchozí ikonu — aplikace funguje dál.
         }
 
-        Services.GetRequiredService<MainWindow>().Show();
+        if (settingsService.IsFirstRunCandidate)
+        {
+            var welcome = Services.GetRequiredService<WelcomeWindow>();
+            MainWindow = welcome;
+            welcome.Show();
+            return;
+        }
+
+        var main = Services.GetRequiredService<MainWindow>();
+        MainWindow = main;
+        main.Show();
     }
 
     protected override async void OnExit(ExitEventArgs e)

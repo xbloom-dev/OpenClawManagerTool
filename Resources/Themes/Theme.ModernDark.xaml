@@ -1,0 +1,607 @@
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!--
+        Theme: Modern Dark - ClaudeDesign reference pass
+        Background:       #0F1115    main window surface
+        Surface:          #14171C    panels and GroupBox surfaces
+        Chrome:           #0B0C10    TUI shell background
+        TitleBar:         #12141A    top and bottom bars
+        MenuBackground:   #12141A    menu and splash background
+        MenuHover:        #222831    menu item highlight
+        SecondaryButton:  #1C2026    secondary window button idle state
+        Hover:            #222831    hover state
+        Pressed:          #181C22    pressed state
+        Disabled:         #16191E    disabled/tool button idle state
+        Text Primary:     #F4F4F5    primary text
+        Text Secondary:   #A1A1AA    secondary text
+        ButtonText:       #F4F4F5    button captions
+        Border:           #23272F    borders
+        Corner radius:    8px        named styles for secondary windows
+    -->
+
+    <!-- Metadata -->
+    <sys:String x:Key="Theme.Meta.Name">Theme.ModernDark</sys:String>
+    <sys:String x:Key="Theme.Meta.Variant">Dark</sys:String>
+    <sys:String x:Key="Theme.Meta.IconSet">ModernDark</sys:String>
+    <sys:String x:Key="Theme.Meta.PaletteFamily">ModernPalette</sys:String>
+    <sys:String x:Key="Theme.Meta.ButtonInteraction">HoverScanline</sys:String>
+
+    <!-- Fonts -->
+    <FontFamily x:Key="Theme.Font.UI">Inter, Segoe UI</FontFamily>
+
+    <!-- Colors -->
+    <Color x:Key="Theme.Color.Background">#0F1115</Color>
+    <Color x:Key="Theme.Color.Surface">#14171C</Color>
+    <Color x:Key="Theme.Color.Chrome">#0B0C10</Color>
+    <Color x:Key="Theme.Color.TitleBar">#12141A</Color>
+    <Color x:Key="Theme.Color.MenuBackground">#12141A</Color>
+    <Color x:Key="Theme.Color.MenuHover">#222831</Color>
+    <Color x:Key="Theme.Color.SecondaryButton">#1C2026</Color>
+    <Color x:Key="Theme.Color.Disabled">#16191E</Color>
+    <Color x:Key="Theme.Color.Hover">#222831</Color>
+    <Color x:Key="Theme.Color.Pressed">#181C22</Color>
+    <Color x:Key="Theme.Color.Menu.Hover">#222831</Color>
+    <Color x:Key="Theme.Color.Text.Primary">#F4F4F5</Color>
+    <Color x:Key="Theme.Color.Text.Secondary">#A1A1AA</Color>
+    <Color x:Key="Theme.Color.ButtonText">#F4F4F5</Color>
+    <Color x:Key="Theme.Color.Border">#23272F</Color>
+    <Color x:Key="Theme.Color.WindowBackground">#0F1115</Color>
+    <Color x:Key="Theme.Color.Success">#34D399</Color>
+    <Color x:Key="Theme.Color.Danger">#EF4444</Color>
+    <Color x:Key="Theme.Color.Warning">#FBBF24</Color>
+    <Color x:Key="Theme.Color.ActionPositive">#1D4ED8</Color>
+    <Color x:Key="Theme.Color.ActionDanger">#3A171B</Color>
+    <Color x:Key="Theme.Color.ActionUtility">#1C2026</Color>
+    <Color x:Key="Theme.Color.SplashModernBackground">#0B0C10</Color>
+    <Color x:Key="Theme.Color.AccentTop">#2F9BFF</Color>
+    <Color x:Key="Theme.Color.AccentBot">#005AA3</Color>
+    <Color x:Key="Theme.Color.DangerTop">#FF6B7A</Color>
+    <Color x:Key="Theme.Color.DangerBot">#9F2434</Color>
+    <Color x:Key="Theme.Color.WarningTop">#FFD766</Color>
+    <Color x:Key="Theme.Color.WarningBot">#9C6E00</Color>
+
+    <!-- Glass / Performance Glass tokens (Phase 4) -->
+    <!-- Modern Dark glass surface tokens. -->
+    <Color x:Key="Theme.Color.Glass.SectionBg">#0BFFFFFF</Color>      <!-- rgba(255,255,255,.045) -->
+    <Color x:Key="Theme.Color.Glass.SectionBorder">#1FFFFFFF</Color>  <!-- rgba(255,255,255,.12) -->
+    <Color x:Key="Theme.Color.Glass.BtnBg">#14FFFFFF</Color>          <!-- rgba(255,255,255,.08) -->
+    <Color x:Key="Theme.Color.Glass.BtnBorder">#33FFFFFF</Color>      <!-- rgba(255,255,255,.20) -->
+    <Color x:Key="Theme.Color.Glass.BarBg">#FF141414</Color>          <!-- Top/status bar #141414 -->
+    <Color x:Key="Theme.Color.Glass.SidebarBg">#3308080E</Color>      <!-- rgba(8,8,14,.20) -->
+    <Color x:Key="Theme.Color.Glass.Divider">#1FFFFFFF</Color>        <!-- rgba(255,255,255,.12) -->
+    <Color x:Key="Theme.Color.Glass.GlassBorder">#38FFFFFF</Color>    <!-- rgba(255,255,255,.22) -->
+
+    <SolidColorBrush x:Key="Theme.Brush.Glass.SectionBg"     Color="{StaticResource Theme.Color.Glass.SectionBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.SectionBorder" Color="{StaticResource Theme.Color.Glass.SectionBorder}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.BtnBg"         Color="{StaticResource Theme.Color.Glass.BtnBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.BtnBorder"     Color="{StaticResource Theme.Color.Glass.BtnBorder}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.BarBg"         Color="{StaticResource Theme.Color.Glass.BarBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.SidebarBg"     Color="{StaticResource Theme.Color.Glass.SidebarBg}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.Divider"       Color="{StaticResource Theme.Color.Glass.Divider}" />
+    <SolidColorBrush x:Key="Theme.Brush.Glass.GlassBorder"   Color="{StaticResource Theme.Color.Glass.GlassBorder}" />
+
+    <!-- Brushes -->
+    <SolidColorBrush x:Key="Theme.Brush.Background"       Color="{StaticResource Theme.Color.Background}" />
+    <SolidColorBrush x:Key="Theme.Brush.Surface"          Color="{StaticResource Theme.Color.Surface}" />
+    <SolidColorBrush x:Key="Theme.Brush.Chrome"           Color="{StaticResource Theme.Color.Chrome}" />
+    <SolidColorBrush x:Key="Theme.Brush.TitleBar"         Color="{StaticResource Theme.Color.TitleBar}" />
+    <SolidColorBrush x:Key="Theme.Brush.MenuBackground"   Color="{StaticResource Theme.Color.MenuBackground}" />
+    <SolidColorBrush x:Key="Theme.Brush.MenuHover"        Color="{StaticResource Theme.Color.MenuHover}" />
+    <SolidColorBrush x:Key="Theme.Brush.SecondaryButton"  Color="{StaticResource Theme.Color.SecondaryButton}" />
+    <SolidColorBrush x:Key="Theme.Brush.Disabled"         Color="{StaticResource Theme.Color.Disabled}" />
+    <SolidColorBrush x:Key="Theme.Brush.Hover"            Color="{StaticResource Theme.Color.Hover}" />
+    <SolidColorBrush x:Key="Theme.Brush.Pressed"          Color="{StaticResource Theme.Color.Pressed}" />
+    <SolidColorBrush x:Key="Theme.Brush.Menu.Hover"       Color="{StaticResource Theme.Color.Menu.Hover}" />
+    <SolidColorBrush x:Key="Theme.Brush.Text.Primary"     Color="{StaticResource Theme.Color.Text.Primary}" />
+    <SolidColorBrush x:Key="Theme.Brush.Text.Secondary"   Color="{StaticResource Theme.Color.Text.Secondary}" />
+    <SolidColorBrush x:Key="Theme.Brush.ButtonText"       Color="{StaticResource Theme.Color.ButtonText}" />
+    <SolidColorBrush x:Key="Theme.Brush.Border"           Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.WindowBackground" Color="{StaticResource Theme.Color.WindowBackground}" />
+    <SolidColorBrush x:Key="Brush.ActionPositive"         Color="{StaticResource Theme.Color.ActionPositive}" />
+    <SolidColorBrush x:Key="Brush.ActionDanger"           Color="{StaticResource Theme.Color.ActionDanger}" />
+    <SolidColorBrush x:Key="Brush.ActionUtility"          Color="{StaticResource Theme.Color.ActionUtility}" />
+    <SolidColorBrush x:Key="Brush.SplashModernBackground" Color="{StaticResource Theme.Color.SplashModernBackground}" />
+    <!-- AccentTop from the ClaudeDesign Modern Dark reference. -->
+    <SolidColorBrush x:Key="Theme.Brush.Accent"           Color="#5AA1FF" />
+    <SolidColorBrush x:Key="Theme.Brush.AccentTop"        Color="{StaticResource Theme.Color.AccentTop}" />
+    <SolidColorBrush x:Key="Theme.Brush.AccentBot"        Color="{StaticResource Theme.Color.AccentBot}" />
+    <SolidColorBrush x:Key="Theme.Brush.DangerTop"        Color="{StaticResource Theme.Color.DangerTop}" />
+    <SolidColorBrush x:Key="Theme.Brush.DangerBot"        Color="{StaticResource Theme.Color.DangerBot}" />
+    <SolidColorBrush x:Key="Theme.Brush.WarningTop"       Color="{StaticResource Theme.Color.WarningTop}" />
+    <SolidColorBrush x:Key="Theme.Brush.WarningBot"       Color="{StaticResource Theme.Color.WarningBot}" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputBackground" Color="{StaticResource Theme.Color.Chrome}" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputText"       Color="{StaticResource Theme.Color.Text.Primary}" />
+    <SolidColorBrush x:Key="Theme.Brush.OutputBorder"     Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutBackground" Color="{StaticResource Theme.Color.Surface}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutBorder"     Color="{StaticResource Theme.Color.Border}" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutKeyText"    Color="{StaticResource Theme.Color.Text.Primary}" />
+    <SolidColorBrush x:Key="Theme.Brush.TopBarBg"           Color="#141414" />
+    <SolidColorBrush x:Key="Theme.Brush.TopBarBorder"       Color="#23272F" />
+    <SolidColorBrush x:Key="Theme.Brush.MenuText"           Color="#555958" />
+    <SolidColorBrush x:Key="Theme.Brush.MenuTextActive"     Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.DropdownBg"         Color="#14171C" />
+    <SolidColorBrush x:Key="Theme.Brush.DropdownItemText"   Color="#FFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.ShortcutText"       Color="#555958" />
+    <SolidColorBrush x:Key="Theme.Brush.CaptionFg"          Color="#C2C6D4" />
+    <SolidColorBrush x:Key="Theme.Brush.CaptionHoverBg"     Color="#24FFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.CloseHoverBg"       Color="#EF4444" />
+    <SolidColorBrush x:Key="Theme.Brush.StatusBarBg"        Color="#141414" />
+    <SolidColorBrush x:Key="Theme.Brush.StatusBarText"      Color="#555958" />
+    <LinearGradientBrush x:Key="Theme.Brush.GlassPanelBg" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#D010121A" Offset="0.00" />
+        <GradientStop Color="#B815102B" Offset="0.56" />
+        <GradientStop Color="#C8260910" Offset="1.00" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Theme.Brush.GlassPanelBorder" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#68FFFFFF" Offset="0.00" />
+        <GradientStop Color="#22FFFFFF" Offset="0.45" />
+        <GradientStop Color="#425AA1FF" Offset="0.72" />
+        <GradientStop Color="#24EF4444" Offset="1.00" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Theme.Brush.SecondaryWindowBg" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#FF05060C" Offset="0.00" />
+        <GradientStop Color="#FF0D0B22" Offset="0.56" />
+        <GradientStop Color="#FF27070F" Offset="1.00" />
+    </LinearGradientBrush>
+    <LinearGradientBrush x:Key="Theme.Brush.SecondaryWindowBorder" StartPoint="0,0" EndPoint="1,1">
+        <GradientStop Color="#70FFFFFF" Offset="0.00" />
+        <GradientStop Color="#28FFFFFF" Offset="0.42" />
+        <GradientStop Color="#3A5AA1FF" Offset="0.72" />
+        <GradientStop Color="#30EF4444" Offset="1.00" />
+    </LinearGradientBrush>
+    <SolidColorBrush x:Key="Theme.Brush.AppLogBg"           Color="#141414" />
+    <SolidColorBrush x:Key="Theme.Brush.AppLogText"         Color="#555958" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollThumb"        Color="#AA343946" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollThumbHover"   Color="#D03A3F49" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollThumbBorder"  Color="#5AFFFFFF" />
+    <SolidColorBrush x:Key="Theme.Brush.ScrollTrack"        Color="#70080910" />
+    <FontFamily x:Key="Theme.Font.Mono">Cascadia Mono, Consolas</FontFamily>
+
+    <!-- Named styles for secondary windows. Runtime wiring is handled by
+         ModernPaletteRuntimeStyles.cs through window.Resources entries. -->
+
+    <Style x:Key="Theme.Style.Window" TargetType="Window">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
+        <Setter Property="Background" Value="{StaticResource Theme.Brush.Background}" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+    </Style>
+
+    <!-- Rounded GroupBox style for secondary windows. -->
+    <Style x:Key="Theme.Style.GroupBox" TargetType="GroupBox">
+        <Setter Property="FontFamily"      Value="Inter, Segoe UI" />
+        <Setter Property="Background"      Value="{StaticResource Theme.Brush.Surface}" />
+        <Setter Property="BorderBrush"     Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="Foreground"      Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="GroupBox">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Border Grid.Row="0" Grid.RowSpan="2"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="18" />
+                        <Border Grid.Row="0" Padding="10,6,10,0">
+                            <ContentPresenter ContentSource="Header"
+                                              RecognizesAccessKey="True"
+                                              TextElement.Foreground="{TemplateBinding Foreground}" />
+                        </Border>
+                        <ContentPresenter Grid.Row="1" Margin="6,4,6,6" />
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Rounded button style for secondary windows. -->
+    <Style x:Key="Theme.Style.Button" TargetType="Button">
+        <Setter Property="FontFamily"               Value="Inter, Segoe UI" />
+        <Setter Property="Background"               Value="{StaticResource Theme.Brush.Glass.BtnBg}" />
+        <Setter Property="Foreground"               Value="{StaticResource Theme.Brush.Text.Primary}" />
+        <Setter Property="BorderBrush"              Value="{StaticResource Theme.Brush.Glass.BtnBorder}" />
+        <Setter Property="BorderThickness"          Value="1" />
+        <Setter Property="Padding"                  Value="12,6" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment"   Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="10"
+                            SnapsToDevicePixels="True">
+                        <ContentPresenter
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                            Margin="{TemplateBinding Padding}"
+                            RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Root" Property="Background"
+                                    Value="{StaticResource Theme.Brush.Hover}" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Root" Property="Background"
+                                    Value="{StaticResource Theme.Brush.Pressed}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Root" Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.TextBlock" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Inter, Segoe UI" />
+        <Setter Property="Foreground" Value="{StaticResource Theme.Brush.Text.Primary}" />
+    </Style>
+
+    <Style x:Key="Theme.Style.ListBox" TargetType="ListBox">
+        <Setter Property="FontFamily" Value="Cascadia Mono, Consolas" />
+        <Setter Property="Background"  Value="{StaticResource Theme.Brush.Surface}" />
+        <Setter Property="BorderBrush" Value="{StaticResource Theme.Brush.Border}" />
+        <Setter Property="Foreground"  Value="{StaticResource Theme.Brush.Text.Primary}" />
+    </Style>
+
+    <Style x:Key="Theme.Style.MainMenuButton" TargetType="{x:Type MenuItem}">
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.MenuText}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="13,0" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.UI}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type MenuItem}">
+                    <Grid>
+                        <Border x:Name="Root"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8"
+                                Margin="2,0">
+                            <DockPanel x:Name="Dock" MinWidth="170">
+                                <TextBlock x:Name="Arrow"
+                                           Text=">"
+                                           Foreground="{TemplateBinding Foreground}"
+                                           Margin="16,0,0,0"
+                                           DockPanel.Dock="Right"
+                                           Visibility="Collapsed" />
+                                <TextBlock x:Name="Gesture"
+                                           Text="{TemplateBinding InputGestureText}"
+                                           Foreground="{DynamicResource Theme.Brush.ShortcutText}"
+                                           Margin="24,0,0,0"
+                                           DockPanel.Dock="Right" />
+                                <ContentPresenter x:Name="HeaderHost"
+                                                  ContentSource="Header"
+                                                  RecognizesAccessKey="True"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  VerticalAlignment="Center"
+                                                  TextElement.Foreground="{TemplateBinding Foreground}" />
+                            </DockPanel>
+                        </Border>
+                        <Popup x:Name="PART_Popup"
+                               AllowsTransparency="True"
+                               Focusable="False"
+                               IsOpen="{Binding IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                               Placement="Bottom"
+                               PopupAnimation="Fade">
+                            <Border Background="{DynamicResource Theme.Brush.DropdownBg}"
+                                    BorderBrush="{StaticResource Theme.Brush.Glass.GlassBorder}"
+                                    BorderThickness="1"
+                                    CornerRadius="10"
+                                    Padding="4">
+                                <StackPanel IsItemsHost="True"
+                                            KeyboardNavigation.DirectionalNavigation="Cycle" />
+                            </Border>
+                        </Popup>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Role" Value="TopLevelHeader">
+                            <Setter TargetName="Dock" Property="MinWidth" Value="0" />
+                            <Setter TargetName="Gesture" Property="Visibility" Value="Collapsed" />
+                            <Setter TargetName="Root" Property="Margin" Value="0" />
+                        </Trigger>
+                        <Trigger Property="Role" Value="SubmenuHeader">
+                            <Setter TargetName="Arrow" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="PART_Popup" Property="Placement" Value="Right" />
+                            <Setter Property="FontSize" Value="12" />
+                            <Setter Property="FontWeight" Value="Normal" />
+                            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.DropdownItemText}" />
+                        </Trigger>
+                        <Trigger Property="Role" Value="SubmenuItem">
+                            <Setter Property="FontSize" Value="12" />
+                            <Setter Property="FontWeight" Value="Normal" />
+                            <Setter Property="Padding" Value="12,7" />
+                            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.DropdownItemText}" />
+                        </Trigger>
+                        <Trigger Property="IsSubmenuOpen" Value="True">
+                            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.MenuTextActive}" />
+                        </Trigger>
+                        <Trigger Property="IsHighlighted" Value="True">
+                            <Setter TargetName="Root" Property="Background" Value="#1AFFFFFF" />
+                            <Setter TargetName="Root" Property="BorderBrush" Value="{StaticResource Theme.Brush.Glass.BtnBorder}" />
+                            <Setter TargetName="Root" Property="BorderThickness" Value="1" />
+                            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.MenuTextActive}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.DropdownItem" TargetType="{x:Type MenuItem}">
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.UI}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.DropdownItemText}" />
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.DropdownBg}" />
+    </Style>
+
+    <Style x:Key="Theme.Style.CaptionButton" TargetType="{x:Type Button}">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.CaptionFg}" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Tag" Value="{DynamicResource Theme.Brush.CaptionHoverBg}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Bd"
+                            Background="Transparent"
+                            CornerRadius="9">
+                        <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd"
+                                    Property="Background"
+                                    Value="{Binding RelativeSource={RelativeSource TemplatedParent}, Path=Tag}" />
+                            <Setter Property="Foreground" Value="#FFFFFF" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.CaptionButton.Close"
+           TargetType="{x:Type Button}"
+           BasedOn="{StaticResource Theme.Style.CaptionButton}">
+        <Setter Property="Tag" Value="{DynamicResource Theme.Brush.CloseHoverBg}" />
+    </Style>
+
+    <Style x:Key="Theme.Style.StatusBarText" TargetType="{x:Type TextBlock}">
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.UI}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.StatusBarText}" />
+    </Style>
+
+    <Style x:Key="Theme.Style.GlassPanel" TargetType="{x:Type Border}">
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.GlassPanelBg}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.GlassPanelBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Padding" Value="12" />
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+
+    <Style x:Key="Theme.Style.GlassPanelGroupBox" TargetType="{x:Type GroupBox}">
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.UI}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.StatusBarText}" />
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.GlassPanelBg}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.GlassPanelBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="14" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type GroupBox}">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="18"
+                            Padding="{TemplateBinding Padding}">
+                        <DockPanel>
+                            <ContentPresenter ContentSource="Header"
+                                              DockPanel.Dock="Top"
+                                              Margin="0,0,0,8"
+                                              RecognizesAccessKey="True"
+                                              TextElement.Foreground="{TemplateBinding Foreground}"
+                                              TextElement.FontWeight="Normal" />
+                            <ContentPresenter ContentSource="Content" />
+                        </DockPanel>
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.GlassPanelGroupBox.NoHeader"
+           TargetType="{x:Type GroupBox}"
+           BasedOn="{StaticResource Theme.Style.GlassPanelGroupBox}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type GroupBox}">
+                    <Border x:Name="Root"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="18"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter ContentSource="Content" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.ActionImageButton" TargetType="{x:Type Button}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Button}">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="10">
+                        <ContentPresenter HorizontalAlignment="Stretch"
+                                          VerticalAlignment="Stretch"
+                                          RecognizesAccessKey="True" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.90" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.80" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="Bd" Property="Opacity" Value="0.45" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.AppLog" TargetType="{x:Type ListBox}">
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.AppLogBg}" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.AppLogText}" />
+        <Setter Property="FontFamily" Value="{DynamicResource Theme.Font.Mono}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style x:Key="Theme.Style.AppLogItem" TargetType="{x:Type ListBoxItem}">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.AppLogText}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ListBoxItem}">
+                    <Border x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            Padding="{TemplateBinding Padding}">
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#14FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Bd" Property="Background" Value="#0FFFFFFF" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.ScrollRepeatButton" TargetType="{x:Type RepeatButton}">
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type RepeatButton}">
+                    <Border Background="Transparent" />
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.DarkScrollBar" TargetType="{x:Type ScrollBar}">
+        <Setter Property="Background" Value="{DynamicResource Theme.Brush.ScrollTrack}" />
+        <Setter Property="Width" Value="11" />
+        <Setter Property="BorderBrush" Value="#34FFFFFF" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type ScrollBar}">
+                    <Grid x:Name="Root"
+                          Background="{TemplateBinding Background}"
+                          Width="{TemplateBinding Width}">
+                        <Track x:Name="PART_Track"
+                               Focusable="False"
+                               IsDirectionReversed="True">
+                            <Track.DecreaseRepeatButton>
+                                <RepeatButton Command="{x:Static ScrollBar.LineUpCommand}"
+                                              Style="{StaticResource Theme.Style.ScrollRepeatButton}" />
+                            </Track.DecreaseRepeatButton>
+                            <Track.Thumb>
+                                <Thumb Style="{StaticResource Theme.Style.DarkScrollThumb}" />
+                            </Track.Thumb>
+                            <Track.IncreaseRepeatButton>
+                                <RepeatButton Command="{x:Static ScrollBar.LineDownCommand}"
+                                              Style="{StaticResource Theme.Style.ScrollRepeatButton}" />
+                            </Track.IncreaseRepeatButton>
+                        </Track>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Orientation" Value="Horizontal">
+                            <Setter TargetName="Root" Property="Width" Value="Auto" />
+                            <Setter TargetName="Root" Property="Height" Value="10" />
+                            <Setter TargetName="PART_Track" Property="IsDirectionReversed" Value="False" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="Theme.Style.DarkScrollThumb" TargetType="{x:Type Thumb}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Thumb}">
+                    <Border x:Name="Th"
+                            CornerRadius="5"
+                            Background="{DynamicResource Theme.Brush.ScrollThumb}"
+                            BorderBrush="{DynamicResource Theme.Brush.ScrollThumbBorder}"
+                            BorderThickness="1" />
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="Th"
+                                    Property="Background"
+                                    Value="{DynamicResource Theme.Brush.ScrollThumbHover}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+</ResourceDictionary>

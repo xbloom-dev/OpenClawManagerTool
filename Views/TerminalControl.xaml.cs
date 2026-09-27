@@ -45,7 +45,7 @@ public partial class TerminalControl : UserControl
     public bool IsTuiRunning => _conpty != null && _conpty.IsRunning;
 
     /// <summary>
-    /// Skryje ASCII art SplashBorder. Volá MainWindow v Modern theme kde
+    /// Skryje ASCII art SplashBorder. Volá MainWindow v non-Legacy themes kde
     /// SplashOverlay přebírá roli splash screenu.
     /// </summary>
     public void HideSplashBorder()
