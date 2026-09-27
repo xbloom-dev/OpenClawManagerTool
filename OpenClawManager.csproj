@@ -83,7 +83,11 @@
     <Resource Include="Resources\Welcome\*.png" />
 
     <!-- Welcome screen theme thumbnails copied beside the EXE for live preview. -->
-    <None Include="Resources\ThemePreviews\*.png">
+    <!-- Lite nabízí jen Legacy, ostatní náhledy by se nikdy nezobrazily. -->
+    <None Include="Resources\ThemePreviews\*.png" Condition="'$(BuildProfile)' != 'Lite'">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\ThemePreviews\Legacy.png" Condition="'$(BuildProfile)' == 'Lite'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 
