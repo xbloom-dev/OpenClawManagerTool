@@ -136,6 +136,12 @@ public sealed class SettingsService : ISettingsService
             changed = true;
         }
 
+        if (string.IsNullOrWhiteSpace(settings.MailRootPath))
+        {
+            settings.MailRootPath = defaults.MailRootPath;
+            changed = true;
+        }
+
         if (!string.Equals(settings.Language, "CS", StringComparison.OrdinalIgnoreCase) &&
             !string.Equals(settings.Language, "EN", StringComparison.OrdinalIgnoreCase))
         {

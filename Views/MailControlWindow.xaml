@@ -1,0 +1,748 @@
+<Window x:Class="OpenClawManager.Views.MailControlWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:OpenClawManager.Views"
+        Title="{DynamicResource Str_MailControl_Title}"
+        Height="800" Width="1180"
+        MinHeight="620" MinWidth="940"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Style="{DynamicResource Theme.Style.Window}">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+        <views:BoolToYesNoConverter x:Key="BoolToYesNo" />
+        <views:InverseBoolToVisibilityConverter x:Key="InverseBoolToVisibility" />
+
+        <!-- Stálý pruh se stavem odesílání. Barvy tokenů Action* se v některých tématech neliší, proto výrazný
+             stav nespoléhá jen na barvu: tlustý okraj v barvě textu, větší písmo a znak varování v textu. -->
+        <Style x:Key="StatusBannerStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource Brush.ActionPositive}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Border}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Padding" Value="12,8" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusIsAlert}" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Brush.ActionDanger}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Text.Primary}" />
+                    <Setter Property="BorderThickness" Value="0,0,0,6" />
+                    <Setter Property="Padding" Value="12,10,12,8" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="StatusHeadlineStyle" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Text.Primary}" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusIsAlert}" Value="True">
+                    <Setter Property="FontSize" Value="20" />
+                    <Setter Property="FontWeight" Value="ExtraBold" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NoteBannerStyle" TargetType="Border">
+            <Setter Property="Background" Value="{DynamicResource Theme.Brush.Surface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="9,6" />
+            <Setter Property="Margin" Value="0,0,0,6" />
+        </Style>
+
+        <Style x:Key="DangerBannerStyle" TargetType="Border" BasedOn="{StaticResource NoteBannerStyle}">
+            <Setter Property="Background" Value="{DynamicResource Brush.ActionDanger}" />
+        </Style>
+
+        <Style x:Key="SecondaryText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Text.Secondary}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+
+        <!-- Seznamy a tabulky: barvy jen z theme tokenů (v Legacy tokeny nejsou, platí výchozí vzhled WPF). -->
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="{DynamicResource Theme.Brush.Surface}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Border}" />
+            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Text.Primary}" />
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="{DynamicResource Theme.Brush.Surface}" />
+            <Setter Property="RowBackground" Value="{DynamicResource Theme.Brush.Surface}" />
+            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Text.Primary}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Border}" />
+            <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource Theme.Brush.Border}" />
+            <Setter Property="VerticalGridLinesBrush" Value="{DynamicResource Theme.Brush.Border}" />
+        </Style>
+
+        <Style TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="{DynamicResource Theme.Brush.Surface}" />
+            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Text.Primary}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource Theme.Brush.Border}" />
+            <Setter Property="BorderThickness" Value="0,0,1,1" />
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+        </Style>
+
+        <Style TargetType="DataGridCell">
+            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Text.Primary}" />
+            <Style.Triggers>
+                <Trigger Property="IsSelected" Value="True">
+                    <Setter Property="Background" Value="{DynamicResource Theme.Brush.Text.Primary}" />
+                    <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.Surface}" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="PlainTextBox" TargetType="TextBox">
+            <Setter Property="IsReadOnly" Value="True" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
+            <Setter Property="Background" Value="{DynamicResource Theme.Brush.OutputBackground}" />
+            <Setter Property="Foreground" Value="{DynamicResource Theme.Brush.OutputText}" />
+            <Setter Property="Padding" Value="6" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- 0: stav odesílání (vždy viditelný) -->
+        <Border x:Name="StatusBanner" Grid.Row="0" Style="{StaticResource StatusBannerStyle}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0">
+                    <TextBlock x:Name="TxtStatusHeadline"
+                               Text="{Binding StatusHeadline}"
+                               Style="{StaticResource StatusHeadlineStyle}" />
+                    <TextBlock x:Name="TxtStatusDetail"
+                               Text="{Binding StatusDetail}"
+                               Foreground="{DynamicResource Theme.Brush.Text.Primary}"
+                               FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,2,0,0" />
+                </StackPanel>
+                <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" x:Name="BtnRefresh" Grid.Column="1"
+                        Content="{DynamicResource Str_MailControl_BtnRefresh}"
+                        Background="{DynamicResource Brush.ActionUtility}"
+                        Command="{Binding RefreshCommand}"
+                        Width="100" Height="28" Margin="12,0,0,0" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <!-- 1: upozornění (simulátor, verze kontraktu, nedostupný backend) -->
+        <StackPanel Grid.Row="1" Margin="12,8,12,0">
+            <Border Style="{StaticResource DangerBannerStyle}"
+                    Visibility="{Binding IsSimulated, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding SimulatedBanner}" FontWeight="SemiBold" TextWrapping="Wrap"
+                           Foreground="{DynamicResource Theme.Brush.Text.Primary}" />
+            </Border>
+            <Border Style="{StaticResource DangerBannerStyle}"
+                    Visibility="{Binding HasContractWarning, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock Text="{Binding ContractWarning}" FontWeight="SemiBold" TextWrapping="Wrap"
+                           Foreground="{DynamicResource Theme.Brush.Text.Primary}" />
+            </Border>
+            <Border Style="{StaticResource DangerBannerStyle}"
+                    Visibility="{Binding BackendUnavailable, Converter={StaticResource BoolToVisibility}}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding ConnectionText}" TextWrapping="Wrap"
+                               Foreground="{DynamicResource Theme.Brush.Text.Primary}" VerticalAlignment="Center" />
+                    <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" x:Name="BtnChooseFolder" Grid.Column="1"
+                            Content="{DynamicResource Str_MailControl_BtnChooseFolder}"
+                            Background="{DynamicResource Brush.ActionUtility}"
+                            Height="26" Padding="10,0" Margin="10,0,0,0" />
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <!-- 2: navigace + obsah -->
+        <Grid Grid.Row="2" Margin="12,8,12,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="210" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ListBox x:Name="NavList" Grid.Column="0"
+                     ItemsSource="{Binding NavItems}"
+                     SelectedIndex="{Binding SelectedNavIndex, Mode=TwoWay}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid IsEnabled="{Binding IsAvailable}" Margin="2,3">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{Binding Badge}" FontWeight="Bold" Margin="8,0,0,0" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+
+            <Grid Grid.Column="2">
+
+                <!-- ── Přehled ─────────────────────────────────────── -->
+                <ScrollViewer x:Name="SecOverview" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <GroupBox Header="{DynamicResource Str_MailControl_Ov_GroupMailbox}" Padding="8" Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock Text="{Binding OverviewMailbox}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding OverviewCounts}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding OverviewPrivacy}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding OverviewLocked}" Margin="0,6,0,0" TextWrapping="Wrap"
+                                           Style="{StaticResource SecondaryText}" />
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="{DynamicResource Str_MailControl_Ov_GroupStats}" Padding="8" Margin="0,0,0,8">
+                            <TextBlock Text="{Binding OverviewStats}" TextWrapping="Wrap" />
+                        </GroupBox>
+                        <GroupBox Header="{DynamicResource Str_MailControl_Ov_GroupRecent}" Padding="8">
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource Str_MailControl_UntrustedNote}"
+                                           Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                                <DataGrid x:Name="GridRecent" ItemsSource="{Binding RecentMails}"
+                                          AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                                          HeadersVisibility="Column" GridLinesVisibility="Horizontal"
+                                          MaxHeight="320">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Str_MailControl_Col_at" Binding="{Binding [at]}" Width="190" />
+                                        <DataGridTextColumn Header="Str_MailControl_Col_from" Binding="{Binding [from]}" Width="190" />
+                                        <DataGridTextColumn Header="Str_MailControl_Col_subject" Binding="{Binding [subject]}" Width="*" />
+                                        <DataGridTextColumn Header="Str_MailControl_Col_category_label" Binding="{Binding [category_label]}" Width="170" />
+                                        <DataGridTextColumn Header="Str_MailControl_Col_state" Binding="{Binding [state]}" Width="90" />
+                                        <DataGridTextColumn Header="Str_MailControl_Col_outcome" Binding="{Binding [outcome]}" Width="110" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ── Nastavení (formulář ze schématu) ────────────── -->
+                <ScrollViewer x:Name="SecSettings" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                    <ItemsControl ItemsSource="{Binding SettingGroups}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <GroupBox Header="{Binding Name}" Padding="8" Margin="0,0,0,10">
+                                    <ItemsControl ItemsSource="{Binding Fields}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,12">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="300" />
+                                                        <ColumnDefinition Width="Auto" />
+                                                    </Grid.ColumnDefinitions>
+
+                                                    <StackPanel Grid.Column="0" Margin="0,0,12,0">
+                                                        <TextBlock Text="{Binding Label}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                                                        <TextBlock Text="{Binding Description}" Style="{StaticResource SecondaryText}"
+                                                                   Margin="0,2,0,0"
+                                                                   Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibility}}" />
+                                                        <TextBlock Style="{StaticResource SecondaryText}" Margin="0,2,0,0">
+                                                            <Run Text="{DynamicResource Str_MailControl_Field_Current}" />
+                                                            <Run Text="{Binding CurrentText, Mode=OneWay}" FontWeight="SemiBold" />
+                                                            <Run Text="{Binding Unit, Mode=OneWay}" />
+                                                            <Run Text="·" />
+                                                            <Run Text="{Binding SourceText, Mode=OneWay}" />
+                                                        </TextBlock>
+                                                        <Border Style="{StaticResource NoteBannerStyle}" Margin="0,6,0,0"
+                                                                Visibility="{Binding IsLocked, Converter={StaticResource BoolToVisibility}}">
+                                                            <TextBlock Text="{DynamicResource Str_MailControl_Field_Locked}" TextWrapping="Wrap" />
+                                                        </Border>
+                                                        <Border Style="{StaticResource DangerBannerStyle}" Margin="0,6,0,0"
+                                                                Visibility="{Binding MovesAwayFromSafe, Converter={StaticResource BoolToVisibility}}">
+                                                            <TextBlock Text="{DynamicResource Str_MailControl_Field_AwayFromSafe}" TextWrapping="Wrap"
+                                                                       FontWeight="SemiBold" Foreground="{DynamicResource Theme.Brush.Text.Primary}" />
+                                                        </Border>
+                                                        <TextBlock Text="{Binding ErrorText}" FontWeight="SemiBold" Margin="0,4,0,0" TextWrapping="Wrap"
+                                                                   Foreground="{DynamicResource Theme.Brush.Text.Primary}"
+                                                                   Visibility="{Binding HasError, Converter={StaticResource BoolToVisibility}}" />
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Top">
+                                                        <CheckBox Foreground="{DynamicResource Theme.Brush.Text.Primary}" IsChecked="{Binding EditBool}"
+                                                                  IsEnabled="{Binding IsEditable}"
+                                                                  Content="{DynamicResource Str_MailControl_Field_Enabled}"
+                                                                  Visibility="{Binding IsToggle, Converter={StaticResource BoolToVisibility}}" />
+                                                        <TextBox Text="{Binding EditText, UpdateSourceTrigger=PropertyChanged}"
+                                                                 IsEnabled="{Binding IsEditable}"
+                                                                 Height="26" VerticalContentAlignment="Center"
+                                                                 Visibility="{Binding IsTextual, Converter={StaticResource BoolToVisibility}}" />
+                                                        <ComboBox ItemsSource="{Binding Choices}"
+                                                                  SelectedItem="{Binding EditChoice}"
+                                                                  IsEnabled="{Binding IsEditable}"
+                                                                  Height="26"
+                                                                  Visibility="{Binding IsChoice, Converter={StaticResource BoolToVisibility}}" />
+                                                        <TextBlock Text="{Binding RangeText}" Style="{StaticResource SecondaryText}" Margin="0,2,0,0"
+                                                                   Visibility="{Binding HasRange, Converter={StaticResource BoolToVisibility}}" />
+                                                    </StackPanel>
+
+                                                    <StackPanel Grid.Column="2" Orientation="Vertical" Margin="10,0,0,0" VerticalAlignment="Top">
+                                                        <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_BtnSave}"
+                                                                Background="{DynamicResource Brush.ActionPositive}"
+                                                                IsEnabled="{Binding CanSave}"
+                                                                Command="{Binding DataContext.SaveSettingCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding}"
+                                                                Width="110" Height="26" />
+                                                        <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_BtnCancelEdit}"
+                                                                Background="{DynamicResource Brush.ActionDanger}"
+                                                                IsEnabled="{Binding IsDirty}"
+                                                                Command="{Binding DataContext.ResetSettingEditCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding}"
+                                                                Width="110" Height="26" Margin="0,4,0,0" />
+                                                        <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_BtnSafeValue}"
+                                                                Background="{DynamicResource Brush.ActionUtility}"
+                                                                Command="{Binding DataContext.ResetToSafeCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                CommandParameter="{Binding}"
+                                                                Width="110" Height="26" Margin="0,4,0,0"
+                                                                Visibility="{Binding ShowSafeButton, Converter={StaticResource BoolToVisibility}}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </GroupBox>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- ── Pravidla odesílatelů ───────────────────────── -->
+                <Grid x:Name="SecRules" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Grid.Row="0" Text="{Binding RulesSummary}" Margin="0,0,0,6" TextWrapping="Wrap" />
+                    <DataGrid x:Name="GridRules" Grid.Row="1" ItemsSource="{Binding Rules}"
+                              SelectedItem="{Binding SelectedRule, Mode=TwoWay}"
+                              AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                              SelectionMode="Single" HeadersVisibility="Column" GridLinesVisibility="Horizontal">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Str_MailControl_Col_sender" Binding="{Binding Sender}" Width="200" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_domain" Binding="{Binding Domain}" Width="160" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_category" Binding="{Binding Category}" Width="130" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_route" Binding="{Binding Route}" Width="80" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_autonomy" Binding="{Binding Autonomy}" Width="90" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_note" Binding="{Binding Note}" Width="*" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_id" Binding="{Binding Id}" Width="80" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <GroupBox Grid.Row="2" Header="{DynamicResource Str_MailControl_Rules_AddGroup}" Padding="8" Margin="0,8,0,0">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource Str_MailControl_Col_sender}" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding NewRuleSender, UpdateSourceTrigger=PropertyChanged}" Height="26" Margin="0,0,12,6" />
+                            <TextBlock Grid.Row="0" Grid.Column="2" Text="{DynamicResource Str_MailControl_Col_domain}" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="0" Grid.Column="3" Text="{Binding NewRuleDomain, UpdateSourceTrigger=PropertyChanged}" Height="26" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Str_MailControl_Col_category}" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding CategoryOptions}"
+                                      SelectedItem="{Binding NewRuleCategory}" DisplayMemberPath="Display" Height="26" Margin="0,0,12,6" />
+                            <TextBlock Grid.Row="1" Grid.Column="2" Text="{DynamicResource Str_MailControl_Col_route}" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <ComboBox Grid.Row="1" Grid.Column="3" ItemsSource="{Binding RouteOptions}"
+                                      SelectedItem="{Binding NewRuleRoute}" Height="26" Margin="0,0,0,6" />
+
+                            <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Str_MailControl_Col_autonomy}" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <ComboBox Grid.Row="2" Grid.Column="1" ItemsSource="{Binding AutonomyOptions}"
+                                      SelectedItem="{Binding NewRuleAutonomy}" Height="26" Margin="0,0,12,6" />
+                            <TextBlock Grid.Row="2" Grid.Column="2" Text="{DynamicResource Str_MailControl_Col_note}" Margin="0,0,8,6" VerticalAlignment="Center" />
+                            <TextBox Grid.Row="2" Grid.Column="3" Text="{Binding NewRuleNote, UpdateSourceTrigger=PropertyChanged}" Height="26" MaxLength="80" Margin="0,0,0,6" />
+
+                            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="4" Style="{StaticResource DangerBannerStyle}"
+                                    Visibility="{Binding NewRuleNeedsConfirmation, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{DynamicResource Str_MailControl_Rules_FreeWarning}" TextWrapping="Wrap" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource Theme.Brush.Text.Primary}" />
+                            </Border>
+                        </Grid>
+                    </GroupBox>
+                </Grid>
+
+                <!-- ── Návrhy ─────────────────────────────────────── -->
+                <Grid x:Name="SecProposals" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="1.3*" />
+                    </Grid.ColumnDefinitions>
+                    <DataGrid x:Name="GridProposals" Grid.Column="0" ItemsSource="{Binding Proposals}"
+                              SelectedItem="{Binding SelectedProposal, Mode=TwoWay}"
+                              AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                              SelectionMode="Single" HeadersVisibility="Column" GridLinesVisibility="Horizontal">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Str_MailControl_Col_kind" Binding="{Binding Kind}" Width="110" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_from" Binding="{Binding Sender}" Width="*" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_subject" Binding="{Binding Subject}" Width="*" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Visibility="{Binding HasSelectedProposal, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{DynamicResource Str_MailControl_UntrustedNote}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+
+                            <Border Style="{StaticResource DangerBannerStyle}"
+                                    Visibility="{Binding SelectedNeedsOverride, Converter={StaticResource BoolToVisibility}}">
+                                <StackPanel>
+                                    <TextBlock Text="{DynamicResource Str_MailControl_Prop_FindingTitle}" FontWeight="Bold"
+                                               Foreground="{DynamicResource Theme.Brush.Text.Primary}" />
+                                    <TextBlock Text="{Binding SelectedFindingText}" TextWrapping="Wrap" Margin="0,4,0,0"
+                                               Foreground="{DynamicResource Theme.Brush.Text.Primary}" />
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="{Binding SelectedProposal.Subject}" FontWeight="Bold" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding SelectedProposal.Sender}" Style="{StaticResource SecondaryText}" />
+                            <TextBlock Text="{Binding SelectedProposal.Question}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <TextBlock Text="{Binding SelectedProposal.Details}" TextWrapping="Wrap" Margin="0,8,0,0"
+                                       Style="{StaticResource SecondaryText}" />
+
+                            <TextBlock Text="{DynamicResource Str_MailControl_Prop_Body}" FontWeight="SemiBold" Margin="0,10,0,2"
+                                       Visibility="{Binding SelectedHasBody, Converter={StaticResource BoolToVisibility}}" />
+                            <TextBox Text="{Binding SelectedProposal.Body, Mode=OneWay}" Style="{StaticResource PlainTextBox}" MinHeight="60"
+                                     Visibility="{Binding SelectedHasBody, Converter={StaticResource BoolToVisibility}}" />
+
+                            <StackPanel Visibility="{Binding SelectedIsReplyDraft, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{DynamicResource Str_MailControl_Prop_Draft}" FontWeight="SemiBold" Margin="0,10,0,2" />
+                                <TextBox Text="{Binding ReviseText, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True"
+                                         TextWrapping="Wrap" MinHeight="90" MaxLength="1200" VerticalScrollBarVisibility="Auto" />
+                                <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_Prop_BtnRevise}"
+                                        Background="{DynamicResource Brush.ActionUtility}"
+                                        Command="{Binding ReviseProposalCommand}"
+                                        HorizontalAlignment="Left" Width="170" Height="26" Margin="0,6,0,0" />
+                            </StackPanel>
+
+                            <CheckBox Foreground="{DynamicResource Theme.Brush.Text.Primary}" Margin="0,12,0,0"
+                                      IsChecked="{Binding OverrideAcknowledged}"
+                                      Visibility="{Binding SelectedNeedsOverride, Converter={StaticResource BoolToVisibility}}">
+                                <TextBlock Text="{DynamicResource Str_MailControl_Prop_Ack}" TextWrapping="Wrap" />
+                            </CheckBox>
+
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_Prop_BtnYes}"
+                                        Background="{DynamicResource Brush.ActionPositive}" FontWeight="Bold"
+                                        Command="{Binding DecideProposalCommand}" CommandParameter="yes"
+                                        Width="120" Height="28" Margin="0,0,6,0"
+                                        Visibility="{Binding SelectedNeedsOverride, Converter={StaticResource InverseBoolToVisibility}}" />
+                                <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_Prop_BtnOverride}"
+                                        Background="{DynamicResource Brush.ActionDanger}" FontWeight="Bold"
+                                        Command="{Binding DecideProposalCommand}" CommandParameter="yes"
+                                        IsEnabled="{Binding OverrideAcknowledged}"
+                                        Width="190" Height="28" Margin="0,0,6,0"
+                                        Visibility="{Binding SelectedNeedsOverride, Converter={StaticResource BoolToVisibility}}" />
+                                <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_Prop_BtnNo}"
+                                        Background="{DynamicResource Brush.ActionDanger}"
+                                        Command="{Binding DecideProposalCommand}" CommandParameter="no"
+                                        Width="120" Height="28" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- ── Odchozí ────────────────────────────────────── -->
+                <Grid x:Name="SecOutbox" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="12" />
+                        <ColumnDefinition Width="1.3*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <DataGrid x:Name="GridOutbox" Grid.Row="0" Grid.Column="0" ItemsSource="{Binding OutboxFiles}"
+                              SelectedItem="{Binding SelectedOutboxFile, Mode=TwoWay}"
+                              AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                              SelectionMode="Single" HeadersVisibility="Column" GridLinesVisibility="Horizontal">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Str_MailControl_Col_name" Binding="{Binding Name}" Width="*" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_kind" Binding="{Binding Kind}" Width="70" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_size" Binding="{Binding Size}" Width="70" />
+                            <DataGridTextColumn Header="Str_MailControl_Col_modified" Binding="{Binding Modified}" Width="150" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <Grid Grid.Row="0" Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="{DynamicResource Str_MailControl_Outbox_Note}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding PreviewHeaders}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock TextWrapping="Wrap">
+                                        <Run Text="{Binding Key, Mode=OneWay}" FontWeight="SemiBold" />
+                                        <Run Text=":" />
+                                        <Run Text="{Binding Value, Mode=OneWay}" />
+                                    </TextBlock>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBox Grid.Row="2" Text="{Binding PreviewText, Mode=OneWay}" Style="{StaticResource PlainTextBox}" Margin="0,8,0,0" />
+                        <TextBlock Grid.Row="3" Text="{Binding PreviewAttachments}" Style="{StaticResource SecondaryText}" Margin="0,6,0,0" />
+                    </Grid>
+                    <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,8,0,0">
+                        <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_BtnDelete}"
+                                Background="{DynamicResource Brush.ActionDanger}"
+                                Command="{Binding DeleteOutboxCommand}"
+                                IsEnabled="{Binding CanDeleteSelectedOutbox}"
+                                Width="120" Height="28" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- ── Příjemci a šablony ─────────────────────────── -->
+                <ScrollViewer x:Name="SecPeople" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                    <StackPanel>
+                        <Border Style="{StaticResource NoteBannerStyle}"
+                                Visibility="{Binding PeopleLocked, Converter={StaticResource BoolToVisibility}}">
+                            <TextBlock Text="{DynamicResource Str_MailControl_Field_Locked}" TextWrapping="Wrap" />
+                        </Border>
+
+                        <GroupBox Header="{DynamicResource Str_MailControl_People_Allowlist}" Padding="8" Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource Str_MailControl_People_AllowlistNote}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                                <DataGrid x:Name="GridRecipients" ItemsSource="{Binding Recipients}"
+                                          SelectedItem="{Binding SelectedRecipient, Mode=TwoWay}"
+                                          AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                                          SelectionMode="Single" HeadersVisibility="Column" GridLinesVisibility="Horizontal" MaxHeight="170">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Str_MailControl_Col_alias" Binding="{Binding Alias}" Width="180" />
+                                        <DataGridTextColumn Header="Str_MailControl_Col_address" Binding="{Binding Address}" Width="*" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="170" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding NewRecipientAddress, UpdateSourceTrigger=PropertyChanged}" Height="26" Margin="0,0,6,0" MaxLength="120"
+                                             ToolTip="{DynamicResource Str_MailControl_Col_address}" />
+                                    <TextBox Grid.Column="1" Text="{Binding NewRecipientAlias, UpdateSourceTrigger=PropertyChanged}" Height="26" Margin="0,0,6,0" MaxLength="40"
+                                             ToolTip="{DynamicResource Str_MailControl_Col_alias}" />
+                                    <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Grid.Column="2" Content="{DynamicResource Str_MailControl_BtnAdd}" Command="{Binding AddRecipientCommand}"
+                                            Background="{DynamicResource Brush.ActionPositive}" Width="90" Height="26" Margin="0,0,6,0" />
+                                    <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Grid.Column="3" Content="{DynamicResource Str_MailControl_BtnRemove}" Command="{Binding RemoveRecipientCommand}"
+                                            Background="{DynamicResource Brush.ActionDanger}" Width="90" Height="26" />
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource Str_MailControl_People_Trusted}" Padding="8" Margin="0,0,0,8">
+                            <StackPanel>
+                                <TextBlock Text="{DynamicResource Str_MailControl_People_TrustedNote}" Style="{StaticResource SecondaryText}" Margin="0,0,0,6" />
+                                <ListBox ItemsSource="{Binding TrustedSenders}" SelectedItem="{Binding SelectedTrustedSender, Mode=TwoWay}" MaxHeight="130" />
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Text="{Binding NewTrustedSender, UpdateSourceTrigger=PropertyChanged}" Height="26" Margin="0,0,6,0" MaxLength="120" />
+                                    <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Grid.Column="1" Content="{DynamicResource Str_MailControl_BtnAdd}" Command="{Binding AddTrustedSenderCommand}"
+                                            Background="{DynamicResource Brush.ActionPositive}" Width="90" Height="26" Margin="0,0,6,0" />
+                                    <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Grid.Column="2" Content="{DynamicResource Str_MailControl_BtnRemove}" Command="{Binding RemoveTrustedSenderCommand}"
+                                            Background="{DynamicResource Brush.ActionDanger}" Width="90" Height="26" />
+                                </Grid>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource Str_MailControl_People_Templates}" Padding="8">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="220" />
+                                    <ColumnDefinition Width="12" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <ListBox Grid.Column="0" ItemsSource="{Binding Templates}" SelectedItem="{Binding SelectedTemplate, Mode=TwoWay}"
+                                         DisplayMemberPath="Id" MinHeight="150" MaxHeight="220" />
+                                <StackPanel Grid.Column="2">
+                                    <TextBlock Text="{Binding TemplateFieldsHint}" Style="{StaticResource SecondaryText}" Margin="0,0,0,4" />
+                                    <TextBox Text="{Binding TemplateId, UpdateSourceTrigger=PropertyChanged}" Height="26" MaxLength="40"
+                                             ToolTip="{DynamicResource Str_MailControl_Col_id}" />
+                                    <TextBox Text="{Binding TemplateBody, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap"
+                                             MinHeight="110" MaxLength="4000" Margin="0,6,0,0" VerticalScrollBarVisibility="Auto" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                        <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_BtnSave}" Command="{Binding SaveTemplateCommand}"
+                                                Background="{DynamicResource Brush.ActionPositive}" Width="110" Height="26" Margin="0,0,6,0" />
+                                        <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_BtnRemove}" Command="{Binding RemoveTemplateCommand}"
+                                                Background="{DynamicResource Brush.ActionDanger}" Width="110" Height="26" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ── Zdraví a úlohy ─────────────────────────────── -->
+                <ScrollViewer x:Name="SecHealth" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                    <StackPanel>
+                        <Border Style="{StaticResource NoteBannerStyle}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding HealthSummary}" FontWeight="Bold" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding OllamaText}" Margin="0,4,0,0" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding HealthCheckedAt}" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" />
+                                </StackPanel>
+                                <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Grid.Column="1" Content="{DynamicResource Str_MailControl_Health_BtnRefresh}"
+                                        Command="{Binding RefreshHealthCommand}"
+                                        Background="{DynamicResource Brush.ActionUtility}" Width="130" Height="28" VerticalAlignment="Top" />
+                            </Grid>
+                        </Border>
+                        <ItemsControl ItemsSource="{Binding Problems}" Margin="0,0,0,6">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Style="{StaticResource DangerBannerStyle}">
+                                        <TextBlock Text="{Binding}" TextWrapping="Wrap" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource Theme.Brush.Text.Primary}" />
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <GroupBox Header="{DynamicResource Str_MailControl_Health_Integrity}" Padding="8" Margin="0,0,0,8">
+                            <DataGrid ItemsSource="{Binding IntegrityItems}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Str_MailControl_Col_file" Binding="{Binding File}" Width="160" />
+                                    <DataGridTextColumn Header="Str_MailControl_Col_pinned" Binding="{Binding Pinned, Converter={StaticResource BoolToYesNo}}" Width="80" />
+                                    <DataGridTextColumn Header="Str_MailControl_Col_ok" Binding="{Binding Ok, Converter={StaticResource BoolToYesNo}}" Width="70" />
+                                    <DataGridTextColumn Header="SHA256" Binding="{Binding Sha256}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource Str_MailControl_Health_Plugins}" Padding="8" Margin="0,0,0,8">
+                            <DataGrid ItemsSource="{Binding PluginItems}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Str_MailControl_Col_id" Binding="{Binding Id}" Width="*" />
+                                    <DataGridTextColumn Header="Str_MailControl_Col_ok" Binding="{Binding Ok, Converter={StaticResource BoolToYesNo}}" Width="70" />
+                                    <DataGridTextColumn Header="Str_MailControl_Col_status" Binding="{Binding Status}" Width="140" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource Str_MailControl_Health_Jobs}" Padding="8" Margin="0,0,0,8">
+                            <DataGrid x:Name="GridJobs" ItemsSource="{Binding JobRows}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" />
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource Str_MailControl_Health_Files}" Padding="8">
+                            <DataGrid ItemsSource="{Binding ConfigFiles}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Str_MailControl_Col_name" Binding="{Binding Name}" Width="170" />
+                                    <DataGridTextColumn Header="Str_MailControl_Col_exists" Binding="{Binding Exists, Converter={StaticResource BoolToYesNo}}" Width="70" />
+                                    <DataGridTextColumn Header="Str_MailControl_Col_locked" Binding="{Binding Locked, Converter={StaticResource BoolToYesNo}}" Width="70" />
+                                    <DataGridTextColumn Header="Str_MailControl_Col_purpose" Binding="{Binding Purpose}" Width="*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ── Historie a audit ───────────────────────────── -->
+                <ScrollViewer x:Name="SecHistory" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                    <StackPanel>
+                        <GroupBox Header="{DynamicResource Str_MailControl_History_Changes}" Padding="8" Margin="0,0,0,8">
+                            <StackPanel>
+                                <DataGrid x:Name="GridHistory" ItemsSource="{Binding HistoryRows}"
+                                          SelectedItem="{Binding SelectedHistoryRow, Mode=TwoWay}"
+                                          AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                                          SelectionMode="Single" HeadersVisibility="Column" GridLinesVisibility="Horizontal" MaxHeight="220" />
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_History_BtnRevert}"
+                                            Command="{Binding RevertHistoryCommand}"
+                                            Background="{DynamicResource Brush.ActionUtility}" Width="170" Height="28" Margin="0,0,8,0" />
+                                    <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" Content="{DynamicResource Str_MailControl_History_BtnRevertForce}"
+                                            Command="{Binding RevertHistoryCommand}" CommandParameter="force"
+                                            Background="{DynamicResource Brush.ActionDanger}" Width="190" Height="28"
+                                            Visibility="{Binding HasPendingForceRevert, Converter={StaticResource BoolToVisibility}}" />
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource Str_MailControl_History_SendLog}" Padding="8" Margin="0,0,0,8">
+                            <DataGrid x:Name="GridSendLog" ItemsSource="{Binding SendLogRows}" AutoGenerateColumns="False" IsReadOnly="True"
+                                      CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" MaxHeight="220" />
+                        </GroupBox>
+
+                        <GroupBox Header="{DynamicResource Str_MailControl_History_Audit}" Padding="8">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
+                                    <TextBlock Text="{DynamicResource Str_MailControl_History_Source}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <ComboBox x:Name="CmbAuditSource" Width="140" Height="26" />
+                                </StackPanel>
+                                <DataGrid x:Name="GridAudit" ItemsSource="{Binding AuditRows}" AutoGenerateColumns="False" IsReadOnly="True"
+                                          CanUserAddRows="False" HeadersVisibility="Column" GridLinesVisibility="Horizontal" MaxHeight="300" />
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+        <!-- 3: průběh a zprávy -->
+        <StackPanel Grid.Row="3" Margin="12,8,12,0">
+            <Border Style="{StaticResource NoteBannerStyle}"
+                    Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
+                <StackPanel>
+                    <TextBlock Text="{Binding BusyText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <ProgressBar IsIndeterminate="True" Height="6" Margin="0,6,0,0" />
+                </StackPanel>
+            </Border>
+            <Border Style="{StaticResource NoteBannerStyle}"
+                    Visibility="{Binding HasInfoMessage, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock x:Name="TxtMessage" Text="{Binding LastMessage}" TextWrapping="Wrap" />
+            </Border>
+            <Border Style="{StaticResource DangerBannerStyle}"
+                    Visibility="{Binding HasErrorMessage, Converter={StaticResource BoolToVisibility}}">
+                <TextBlock x:Name="TxtError" Text="{Binding LastMessage}" TextWrapping="Wrap" FontWeight="SemiBold"
+                           Foreground="{DynamicResource Theme.Brush.Text.Primary}" />
+            </Border>
+        </StackPanel>
+
+        <!-- 4: zavřít -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="12,8,12,12">
+            <Button Foreground="{DynamicResource Theme.Brush.Text.Primary}" x:Name="BtnClose" Content="{DynamicResource Str_MailControl_BtnClose}"
+                    Background="{DynamicResource Brush.ActionDanger}"
+                    Width="100" Height="28" IsCancel="True" />
+        </StackPanel>
+    </Grid>
+</Window>

@@ -43,6 +43,7 @@ try
     MainViewModelStatusUsesInjectedResourceSnapshot();
     GatewayLogViewModelLoadsTailLines();
     SettingsViewModelThemeFlagsStayConsistent();
+    MailControlTests.RunAll();
 
     Console.WriteLine("TokenService tests OK.");
     return 0;

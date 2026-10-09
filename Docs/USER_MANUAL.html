@@ -125,7 +125,8 @@
       <a href="#tokens">6. Token Manager</a>
       <a href="#cleaning">7. Cleaning Tool</a>
       <a href="#settings">8. Settings</a>
-      <a href="#troubleshooting">9. Troubleshooting</a>
+      <a href="#mail">9. Mail and calendar</a>
+      <a href="#troubleshooting">10. Troubleshooting</a>
     </nav>
   </header>
 
@@ -206,8 +207,49 @@
     <p>Settings controls paths, theme, language, startup behavior, and update-check preference. If the app behaves unexpectedly after a theme or path change, restart it once and verify the values again.</p>
   </section>
 
+  <section id="mail">
+    <h2>9. Mail and calendar</h2>
+    <p>Open it from the main menu: <strong>Open &gt; Mail and calendar...</strong>. The window is a control panel for the automatic mail and calendar processing that serves the OpenClaw agents. The app itself enforces <strong>no</strong> rules: every limit, rule and confirmation is enforced by the backend (the <code>control</code> folder of the mail and calendar installation, by default <code>E:\OpenClaw</code>). The window only shows the state and asks the backend to change it.</p>
+    <h3>Sending-state bar</h3>
+    <p>The bar at the top of the window is always visible:</p>
+    <table>
+      <thead><tr><th>Bar</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>Calm: "Nothing leaves - shadow mode"</td><td>Replies are only prepared as <code>.eml</code> files. Nothing is sent.</td></tr>
+        <tr><td>Calm: "Nothing leaves - sending is off"</td><td>Real sending is switched off.</td></tr>
+        <tr><td><strong>Highlighted: "SENDING ENABLED"</strong></td><td>The agent can really send mail.</td></tr>
+        <tr><td>Highlighted: scope "open"</td><td>The agent may reply to any verified sender (not only the allowlist).</td></tr>
+      </tbody>
+    </table>
+    <h3>Sections</h3>
+    <table>
+      <thead><tr><th>Section</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>Overview</td><td>Mailbox, counters, statistics and the latest processed mails.</td></tr>
+        <tr><td>Settings</td><td>A form generated from the backend schema: every setting with its range, unit, default and source. A new backend setting appears without updating the app.</td></tr>
+        <tr><td>Sender rules</td><td>Rules per sender or domain (route and autonomy).</td></tr>
+        <tr><td>Proposals</td><td>Open proposals (past events, payments, reply drafts, scheduled replies). A draft can be edited before approval.</td></tr>
+        <tr><td>Outbox</td><td>Prepared <code>.eml</code> files with a read-only preview; only <code>auto-*.eml</code> and <code>reply-*.eml</code> can be deleted.</td></tr>
+        <tr><td>Recipients and templates</td><td>Allowlist of recipients, trusted event senders and reply templates.</td></tr>
+        <tr><td>Health and jobs</td><td>Script hashes against their pin, Ollama, plugins and scheduler jobs. Slow (tens of seconds), the result is cached for 30 s.</td></tr>
+        <tr><td>History and audit</td><td>Settings change history (with revert), send attempts and audit logs.</td></tr>
+      </tbody>
+    </table>
+    <h3>Confirmations and safety</h3>
+    <ul>
+      <li>A change that widens what the agent may do (real sending, leaving shadow mode, scope "open", free autonomy, a new recipient or trusted sender, a payment with a finding) is confirmed <strong>by the backend in a native Windows dialog</strong>. The app only waits ("Waiting for confirmation in the Windows dialog") and then shows the result: saved, declined, or "could not be confirmed". Nothing changes when you answer No or do not answer within 2 minutes.</li>
+      <li>Before such a change the field shows a warning that it moves away from the <strong>safe value</strong>. Moving back to the safe value never needs a confirmation (button "Safe value").</li>
+      <li>A payment with a finding is shown in red and needs a <strong>second explicit step</strong> (tick the acknowledgement, then "Save anyway").</li>
+      <li>Locked files (<code>gcal-config.json</code>, <code>mail-owner.json</code>, or files locked by <code>pin.ps1</code>) are read-only. They are changed in a terminal via <code>pin.ps1 -Unlock</code>.</li>
+      <li>Subjects, names and drafts come from e-mails or the model. They are displayed as plain text and are never executed. The app never reads the <code>credentials</code> folder and never shows the app password (only whether it is set).</li>
+      <li>Texts of labels and descriptions in the Settings section come from the backend, so they appear in the backend language.</li>
+    </ul>
+    <h3>Backend location and simulator</h3>
+    <p>The installation root is stored in <code>MailRootPath</code> in <code>settings.json</code> (detected automatically). If the backend is not found, the window offers <strong>Choose folder...</strong>. For development without Python, set the environment variable <code>OPENCLAW_MAILCONTROL_FAKE</code> to <code>decline</code>, <code>accept</code> or <code>needs</code> before starting the app: the window then runs against sample data and shows a red "SIMULATOR" banner.</p>
+  </section>
+
   <section id="troubleshooting">
-    <h2>9. Troubleshooting</h2>
+    <h2>10. Troubleshooting</h2>
     <table>
       <thead><tr><th>Problem</th><th>What to try</th></tr></thead>
       <tbody>

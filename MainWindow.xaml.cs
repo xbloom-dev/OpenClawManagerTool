@@ -96,6 +96,7 @@ public partial class MainWindow : Window, IMainWindowCallback
         MnuOpenOpenClawFolder.Click += (_, _) => OpenInExplorer(_settingsService.Settings.OpenClawPath);
         MnuOpenTempFolder.Click += (_, _) => OpenInExplorer(_settingsService.Settings.TempPath);
         MnuOpenPowerShell.Click += (_, _) => OpenPowerShell();
+        MnuOpenMailControl.Click += (_, _) => new MailControlWindow(_settingsService) { Owner = this }.ShowDialog();
         MnuExit.Click += (_, _) => Close();
         MnuOpenLog10.Click += OpenLogMenuItem_Click;
         MnuOpenLog20.Click += OpenLogMenuItem_Click;
@@ -195,6 +196,7 @@ public partial class MainWindow : Window, IMainWindowCallback
         MnuOpenLog100.Header = L10n.Get("Str_Menu_OpenLog100");
         MnuOpenLogAll.Header = L10n.Get("Str_Menu_OpenLogAll");
         MnuOpenPowerShell.Header = L10n.Get("Str_Menu_OpenPowerShell");
+        MnuOpenMailControl.Header = L10n.Get("Str_Menu_MailControl");
         MnuExit.Header = L10n.Get("Str_Menu_Exit");
         MnuMenuSettings.Header = L10n.Get("Str_Menu_Settings");
         MnuSettings.Header = L10n.Get("Str_Menu_OpenSettings");

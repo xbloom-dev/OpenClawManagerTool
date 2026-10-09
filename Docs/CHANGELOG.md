@@ -2,6 +2,20 @@
 
 ---
 
+## Unreleased (v2.0.6)
+
+### Mail and calendar control module
+- Added the **Mail and calendar** window (menu *Open > Mail and calendar...*): a control panel for the automatic mail and calendar processing used by OpenClaw agents (overview, settings, sender rules, proposals, outbox, recipients and templates, health and jobs, history and audit).
+- The settings form is generated from the backend schema (`control_run.py schema`), so a new backend setting appears without an app update.
+- A persistent bar shows the sending state (`Nothing leaves` versus `SENDING ENABLED`, shadow mode and `auto_reply_scope`).
+- The app enforces no rules: risky changes are confirmed by the backend in a native Windows dialog, the window only waits and shows the result (saved / declined / could not be confirmed). Payments with a finding need a second explicit step (`override`).
+- The backend is called as a process (`ArgumentList`, UTF-8, `PYTHONUTF8=1`, 30 s / 150 s timeouts) behind `IMailControlRunner`; `FakeMailControlRunner` simulates it for development and tests (`OPENCLAW_MAILCONTROL_FAKE`).
+- Subjects, names and drafts from e-mails are shown as plain text; the app never reads the `credentials` folder and never shows the app password.
+- New `MailRootPath` setting (settings schema 3) with migration and test; CS/EN strings `Str_MailControl_*`.
+- 28 new console tests (contract parsing, error mapping, form generation, safety behaviour, migration, localization consistency).
+
+---
+
 ## v2.0.5 - 4 July 2026
 
 ### Modern Dark

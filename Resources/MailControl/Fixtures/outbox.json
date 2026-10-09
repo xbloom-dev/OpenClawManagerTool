@@ -1,0 +1,28 @@
+{
+ "ok": true,
+ "result": {
+  "files": [
+   {
+    "name": "auto-3fa91c.eml",
+    "size": 1480,
+    "modified": "2026-10-09T09:02:11+00:00",
+    "kind": "auto",
+    "deletable": true
+   },
+   {
+    "name": "reply-b72e01.eml",
+    "size": 1210,
+    "modified": "2026-10-08T17:30:00+00:00",
+    "kind": "reply",
+    "deletable": true
+   },
+   {
+    "name": "invite-preview.eml",
+    "size": 2330,
+    "modified": "2026-10-07T12:00:00+00:00",
+    "kind": "invite",
+    "deletable": false
+   }
+  ]
+ }
+}

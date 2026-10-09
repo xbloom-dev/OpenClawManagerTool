@@ -1,0 +1,27 @@
+{
+ "ok": true,
+ "result": {
+  "jobs": [
+   {
+    "id": "job-1",
+    "name": "calendar-mail-triage",
+    "enabled": true,
+    "status": "ok",
+    "last_run": "2026-10-09T09:00:00+00:00",
+    "next_run": "2026-10-09T09:30:00+00:00",
+    "every_minutes": 30,
+    "last_error": null
+   },
+   {
+    "id": "job-2",
+    "name": "calendar-mail-summary",
+    "enabled": true,
+    "status": "ok",
+    "last_run": "2026-10-09T08:30:00+00:00",
+    "next_run": "2026-10-09T09:30:00+00:00",
+    "every_minutes": 60,
+    "last_error": null
+   }
+  ]
+ }
+}
