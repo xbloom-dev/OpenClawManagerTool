@@ -47,7 +47,7 @@ Závazný kontrakt: `E:\OpenClaw\Dokumentace\Kalendar-a-posta\API-ovladaci-aplik
 6. **Obecné tabulky** (historie, odeslané, audit, úlohy) nemají pevné sloupce: sloupce se odvodí z klíčů řádků (`BindTableColumns`), takže nová pole backendu se zobrazí sama. Záhlaví se překládá z `Str_MailControl_Col_<klíč>`, jinak se použije klíč.
 7. **Popisky nastavení** (label, description, skupiny, kategorie) dodává backend česky; v EN rozhraní zůstávají v jazyce backendu (viz „Požadavky na backend“ v handoffu).
 8. **Jazyk a téma** se nepřepínají za běhu okna (nastavení je modální), proto stačí lokalizace při vytvoření okna. Záhlaví sloupců zapsaná v XAML jako `Str_…` se nahrazují v `LocalizeColumnHeaders`.
-9. **Přepínání témat za běhu v jednom procesu**: při automatizovaném vykreslování okna (pomocný nástroj, ne součást produktu) skončilo přepnutí na ModernDark po jiných tématech v témže procesu chybou `Theme.Style.DarkScrollThumb` nenalezen. Nezkoumalo se, zda se týká i hlavní aplikace; pro vykreslování proto pouštěj každé téma ve vlastním procesu.
+9. **Přepínání témat za běhu:** při automatizovaném vykreslování okna (pomocný nástroj, ne součást produktu) jednou skončilo přepnutí na ModernDark po jiných tématech chybou `Theme.Style.DarkScrollThumb` nenalezen. Pozdější kontrola s holým oknem (ScrollViewer) po přepnutí z každého z ostatních témat na ModernDark chybu **nezopakovala**, takže šlo nejspíš o artefakt pomocného nástroje (zároveň běžel start aplikace s vlastním MainWindow). Při vykreslování přesto pouštěj každé téma ve vlastním procesu.
 
 ### Ověření bez Pythonu a naživo
 
