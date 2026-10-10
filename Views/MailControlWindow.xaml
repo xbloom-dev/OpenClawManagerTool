@@ -209,7 +209,13 @@
                             </StackPanel>
                         </GroupBox>
                         <GroupBox Header="{DynamicResource Str_MailControl_Ov_GroupStats}" Padding="8" Margin="0,0,0,8">
-                            <TextBlock Text="{Binding OverviewStats}" TextWrapping="Wrap" />
+                            <StackPanel>
+                                <TextBlock Text="{Binding OverviewStats}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding OverviewPaused}" TextWrapping="Wrap" Margin="0,6,0,0"
+                                           Visibility="{Binding HasOverviewPaused, Converter={StaticResource BoolToVisibility}}" />
+                                <TextBlock Text="{DynamicResource Str_MailControl_Ov_PausedHint}" Style="{StaticResource SecondaryText}" Margin="0,2,0,0"
+                                           Visibility="{Binding HasOverviewPaused, Converter={StaticResource BoolToVisibility}}" />
+                            </StackPanel>
                         </GroupBox>
                         <GroupBox Header="{DynamicResource Str_MailControl_Ov_GroupRecent}" Padding="8">
                             <StackPanel>

@@ -12,7 +12,8 @@
 - The backend is called as a process (`ArgumentList`, UTF-8, `PYTHONUTF8=1`, 30 s / 150 s timeouts) behind `IMailControlRunner`; `FakeMailControlRunner` simulates it for development and tests (`OPENCLAW_MAILCONTROL_FAKE`).
 - Subjects, names and drafts from e-mails are shown as plain text; the app never reads the `credentials` folder and never shows the app password.
 - New `MailRootPath` setting (settings schema 3) with migration and test; CS/EN strings `Str_MailControl_*`.
-- 28 new console tests (contract parsing, error mapping, form generation, safety behaviour, migration, localization consistency).
+- Overview shows "mail runs skipped in the heavy-task window" when the backend returns `paused_runs` (settings of the window appear automatically from the schema).
+- 30 new console tests (contract parsing, error mapping, form generation, safety behaviour, migration, localization consistency).
 
 ---
 

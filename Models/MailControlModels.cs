@@ -543,4 +543,10 @@ public sealed record HealthResult(
 
 public sealed record ConfigFileInfo(string Name, bool Exists, bool Locked, bool EditableByApp, string Purpose);
 
-public sealed record StatsResult(int Days, int Mails, IReadOnlyList<KeyValuePair<string, string>> ByCategory, int NeedsAttention);
+/// <summary>Statistika třídění. <c>PausedRuns</c> (běhy přeskočené v okně těžkých úloh za 7 dní) je null, dokud ho backend nevrací.</summary>
+public sealed record StatsResult(
+    int Days,
+    int Mails,
+    IReadOnlyList<KeyValuePair<string, string>> ByCategory,
+    int NeedsAttention,
+    int? PausedRuns = null);

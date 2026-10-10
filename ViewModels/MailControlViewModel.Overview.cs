@@ -12,6 +12,11 @@ public sealed partial class MailControlViewModel
     [ObservableProperty] private string _overviewPrivacy = "";
     [ObservableProperty] private string _overviewLocked = "";
     [ObservableProperty] private string _overviewStats = "";
+    [ObservableProperty] private string _overviewPaused = "";
+
+    public bool HasOverviewPaused => OverviewPaused.Length > 0;
+
+    partial void OnOverviewPausedChanged(string value) => OnPropertyChanged(nameof(HasOverviewPaused));
 
     public ObservableCollection<TableRow> RecentMails { get; } = new();
 
@@ -58,6 +63,10 @@ public sealed partial class MailControlViewModel
         {
             var byCategory = string.Join(", ", stats.ByCategory.Select(kv => $"{kv.Key}: {kv.Value}"));
             OverviewStats = L10n.Format("Str_MailControl_Ov_Stats", stats.Days, stats.Mails, stats.NeedsAttention, byCategory);
+            // paused_runs vrací backend až s oknem pro těžké úlohy; bez něj se řádek nezobrazí
+            OverviewPaused = stats.PausedRuns is { } paused
+                ? L10n.Format("Str_MailControl_Ov_Paused", paused)
+                : "";
         }
     }
 }

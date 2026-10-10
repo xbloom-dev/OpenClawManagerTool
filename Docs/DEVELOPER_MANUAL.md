@@ -55,6 +55,10 @@ Závazný kontrakt: `E:\OpenClaw\Dokumentace\Kalendar-a-posta\API-ovladaci-aplik
 - Okno nad simulátorem: nastav `OPENCLAW_MAILCONTROL_FAKE=decline|accept|needs` před spuštěním aplikace (červený pruh „SIMULÁTOR“).
 - Živé čtení: `OPENCLAW_MAILCONTROL_LIVE=1` zapne v testech jen čtecí kontrolu (`schema`, `state`, `settings`, `proposals`) proti skutečnému backendu. **Nikdy** při ověřování naživo nezapínej `send_enabled`, stínový režim `off` ani `auto_reply_scope=open`; to je výhradně rozhodnutí Blooma. Měň jen nastavení typu `free` (např. `sender_name`) a vrať původní hodnotu.
 
+### Okno pro těžké úlohy (`heavy_window_*`)
+
+Klíče `heavy_window_enabled/day/start/end` se v Nastavení objeví automaticky, jakmile je backend přidá do schématu (nic v aplikaci se nemění; formát `HH:MM` kontroluje `pattern` ze schématu před voláním). Aplikace jen v Přehledu ukáže `stats.paused_runs` (běhy pošty přeskočené v okně za 7 dní), a jen když ho backend vrací.
+
 ### Jak přidat příkaz nebo nastavení
 
 - **Nové nastavení v backendu**: v aplikaci nic. Objeví se samo (jen texty z backendu).

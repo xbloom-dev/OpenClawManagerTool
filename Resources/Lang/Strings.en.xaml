@@ -354,6 +354,9 @@
     <sys:String x:Key="Str_MailControl_Ov_NoLocked">No configuration file is locked.</sys:String>
     <sys:String x:Key="Str_MailControl_Ov_Locked">Locked files: {0}</sys:String>
     <sys:String x:Key="Str_MailControl_Ov_Stats">Last {0} days: {1} mails, {2} need attention. By category: {3}</sys:String>
+    <sys:String x:Key="Str_MailControl_Ov_Paused">Mail runs skipped in the heavy-task window: {0} in the last 7 days.</sys:String>
+    <sys:String x:Key="Str_MailControl_Ov_PausedHint">During the window mail is not processed, no "model not responding" alert is sent and nothing is sent out. E-mails are processed after the window ends.</sys:String>
+
     <sys:String x:Key="Str_MailControl_Rules_Summary">Rules: {0} of {1} · shadow mode: {2}</sys:String>
     <sys:String x:Key="Str_MailControl_Rules_AddGroup">Add a rule</sys:String>
     <sys:String x:Key="Str_MailControl_Rules_AllCategories">(all categories)</sys:String>

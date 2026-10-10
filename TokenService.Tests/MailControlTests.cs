@@ -45,6 +45,8 @@ internal static class MailControlTests
             (nameof(BackendUnavailableIsExplained), BackendUnavailableIsExplained),
             (nameof(SecretsAreNeverShown), SecretsAreNeverShown),
             (nameof(ContractVersionMismatchWarns), ContractVersionMismatchWarns),
+            (nameof(HeavyWindowSettingsComeFromSchema), HeavyWindowSettingsComeFromSchema),
+            (nameof(PausedRunsAreShownOnlyWhenReturned), PausedRunsAreShownOnlyWhenReturned),
             (nameof(LiveBackendReadOnly), LiveBackendReadOnly)
         };
 
@@ -796,6 +798,43 @@ internal static class MailControlTests
         Check(vm.HasContractWarning, "newer contract version is announced");
         Check(vm.NavItems.Single(n => n.Section == MailSection.Health).IsAvailable == false, "sections of missing commands are disabled");
         Check(vm.NavItems.Single(n => n.Section == MailSection.Overview).IsAvailable, "state is available");
+    }
+
+    /// <summary>Klíče okna pro těžké úlohy (HANDOFF-okno-pauzy-posty.md) se objeví jen ze schématu, bez změny kódu.</summary>
+    private static void HeavyWindowSettingsComeFromSchema()
+    {
+        var json = Json("""
+            [
+              {"key":"heavy_window_enabled","group":"Okno pro těžké úlohy","type":"bool","label":"Pozastavit poštu v okně","description":"d","tier":"free","default":false,"value":false},
+              {"key":"heavy_window_day","group":"Okno pro těžké úlohy","type":"enum","label":"Den","description":"","tier":"free","default":"sun","enum":["mon","tue","wed","thu","fri","sat","sun","daily"],"value":"sun"},
+              {"key":"heavy_window_start","group":"Okno pro těžké úlohy","type":"text","label":"Začátek","description":"","tier":"free","default":"03:30","max":5,"pattern":"^([01]\\d|2[0-3]):[0-5]\\d$","value":"03:30"},
+              {"key":"heavy_window_end","group":"Okno pro těžké úlohy","type":"text","label":"Konec","description":"","tier":"free","default":"06:30","max":5,"pattern":"^([01]\\d|2[0-3]):[0-5]\\d$","value":"06:30"}
+            ]
+            """);
+        var specs = MailControlForm.BuildGroups(json.EnumerateArray().Select(SettingDefinition.FromJson).ToList())
+            .SelectMany(g => g.Fields).ToList();
+
+        Check(specs.Count == 4, "all four window keys appear");
+        Check(specs[0].Kind == SettingControlKind.Toggle && !specs[0].RequiresConfirmation, "enabled is a free toggle");
+        Check(specs[1].Kind == SettingControlKind.Choice && specs[1].Choices.Contains("daily"), "day is a choice");
+        Check(MailControlForm.Validate(specs[2], "03:30", out _) is null, "valid time");
+        Check(MailControlForm.Validate(specs[2], "25:00", out _) == "Str_MailControl_Val_Pattern", "invalid hour is refused before the call");
+        Check(MailControlForm.Validate(specs[3], "6:30", out _) == "Str_MailControl_Val_Pattern", "HH:MM form is required");
+    }
+
+    private static void PausedRunsAreShownOnlyWhenReturned()
+    {
+        var withPaused = new ScriptedRunner(c => c == "stats"
+            ? "{\"ok\":true,\"result\":{\"days\":30,\"mails\":2,\"by_category\":{},\"needs_attention\":0,\"paused_runs\":3}}"
+            : "{\"ok\":true,\"result\":{\"mails\":[]}}");
+        var vm = new MailControlViewModel(new MailControlClient(withPaused));
+        Wait(vm.LoadSectionAsync(MailSection.Overview));
+        Check(vm.HasOverviewPaused && vm.OverviewPaused == "Str_MailControl_Ov_Paused", "paused line is shown");
+
+        var vmOld = new MailControlViewModel(new MailControlClient(new FakeMailControlRunner()));
+        Wait(vmOld.LoadSectionAsync(MailSection.Overview));
+        Check(!vmOld.HasOverviewPaused, "no paused_runs from the backend: no line");
+        Check(Wait(new MailControlClient(new FakeMailControlRunner()).GetStatsAsync()).Value!.PausedRuns is null, "PausedRuns is null when absent");
     }
 
     /// <summary>Volitelné ověření skutečného backendu, jen čtením (state, settings, proposals).</summary>

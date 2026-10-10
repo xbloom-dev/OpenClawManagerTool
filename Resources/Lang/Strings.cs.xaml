@@ -354,6 +354,9 @@
     <sys:String x:Key="Str_MailControl_Ov_NoLocked">Žádný konfigurační soubor není zamčený.</sys:String>
     <sys:String x:Key="Str_MailControl_Ov_Locked">Zamčené soubory: {0}</sys:String>
     <sys:String x:Key="Str_MailControl_Ov_Stats">Za posledních {0} dní: zpráv {1}, vyžaduje pozornost {2}. Podle kategorií: {3}</sys:String>
+    <sys:String x:Key="Str_MailControl_Ov_Paused">Pošta přeskočena v okně těžkých úloh: {0} běhů za posledních 7 dní.</sys:String>
+    <sys:String x:Key="Str_MailControl_Ov_PausedHint">V okně se pošta nezpracovává, neposílá se hlášení „model neodpovídá“ a nic se neodesílá. E-maily se zpracují po konci okna.</sys:String>
+
     <sys:String x:Key="Str_MailControl_Rules_Summary">Pravidel: {0} z {1} · stínový režim: {2}</sys:String>
     <sys:String x:Key="Str_MailControl_Rules_AddGroup">Přidat pravidlo</sys:String>
     <sys:String x:Key="Str_MailControl_Rules_AllCategories">(všechny kategorie)</sys:String>

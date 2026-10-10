@@ -267,7 +267,8 @@ public sealed class MailControlClient
                 (int)(e.Long("days") ?? days),
                 (int)(e.Long("mails") ?? 0),
                 byCategory,
-                (int)(e.Long("needs_attention") ?? 0));
+                (int)(e.Long("needs_attention") ?? 0),
+                e.Long("paused_runs") is { } paused ? (int)paused : null);
         }, ct);
 
     public Task<MailControlResult<IReadOnlyList<TableRow>>> GetAuditAsync(string source, int n = 50, CancellationToken ct = default) =>
