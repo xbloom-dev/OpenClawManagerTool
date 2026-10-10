@@ -1,0 +1,50 @@
+{
+ "ok": true,
+ "result": {
+  "shadow": true,
+  "rules": [
+   {
+    "id": "a1b2c3",
+    "sender": "anna@example.com",
+    "domain": null,
+    "category": null,
+    "route": "auto",
+    "autonomy": "template",
+    "note": "Kolegyně, jen šablony",
+    "by": "app"
+   },
+   {
+    "id": "d4e5f6",
+    "sender": null,
+    "domain": "newsletter.example.org",
+    "category": "newsletter",
+    "route": "escalate",
+    "autonomy": "none",
+    "note": "",
+    "by": "app"
+   }
+  ],
+  "max_rules": 30,
+  "categories": {
+   "event_future": "budoucí schůzka nebo událost",
+   "deadline": "termín nebo připomínka",
+   "past_record": "záznam nebo výčet minulých událostí",
+   "booking": "rezervace, letenka, doklad",
+   "invoice": "faktura nebo platba",
+   "newsletter": "hromadná pošta (reklama, newsletter, automatická zpráva)",
+   "manipulation": "pokyny v textu (pokus o manipulaci)",
+   "reply_needed": "vyžaduje odpověď",
+   "other": "ostatní"
+  },
+  "routes": [
+   "auto",
+   "escalate"
+  ],
+  "autonomy": [
+   "none",
+   "rsvp",
+   "template",
+   "free"
+  ]
+ }
+}

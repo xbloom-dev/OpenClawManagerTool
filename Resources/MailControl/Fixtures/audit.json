@@ -1,0 +1,29 @@
+{
+ "ok": true,
+ "result": {
+  "source": "control",
+  "entries": [
+   {
+    "ts": "2026-10-09T09:10:00+00:00",
+    "source": "cli",
+    "command": "set",
+    "ok": true,
+    "args": {
+     "key": "sender_name",
+     "value": "OpenClaw"
+    }
+   },
+   {
+    "ts": "2026-10-09T09:11:00+00:00",
+    "source": "cli",
+    "command": "set",
+    "ok": false,
+    "error_code": "declined",
+    "args": {
+     "key": "send_enabled",
+     "value": true
+    }
+   }
+  ]
+ }
+}

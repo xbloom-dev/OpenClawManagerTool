@@ -1,0 +1,21 @@
+{
+ "ok": true,
+ "result": {
+  "templates": [
+   {
+    "id": "podekovat",
+    "body": "Dobrý den,\n\nděkuji za informaci.\n\nS pozdravem"
+   },
+   {
+    "id": "potvrdit_schuzku",
+    "body": "Dobrý den,\n\nděkuji za zprávu, termín {date} v {time} mi vyhovuje.\n\nS pozdravem"
+   }
+  ],
+  "fields": [
+   "date",
+   "time",
+   "summary"
+  ],
+  "locked": false
+ }
+}

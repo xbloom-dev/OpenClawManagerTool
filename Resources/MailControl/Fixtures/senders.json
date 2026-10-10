@@ -1,0 +1,9 @@
+{
+ "ok": true,
+ "result": {
+  "trusted": [
+   "anna@example.com"
+  ],
+  "locked": false
+ }
+}

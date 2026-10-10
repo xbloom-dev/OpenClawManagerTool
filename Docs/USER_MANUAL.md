@@ -15,7 +15,8 @@ English | [Česká verze](USER_MANUAL.cs.md) | [HTML version](USER_MANUAL.html)
 6. [Token Manager](#6-token-manager)
 7. [Cleaning Tool](#7-cleaning-tool)
 8. [Settings](#8-settings)
-9. [Troubleshooting](#9-troubleshooting)
+9. [Mail and calendar](#9-mail-and-calendar)
+10. [Troubleshooting](#10-troubleshooting)
 
 ## 1. Overview
 
@@ -91,7 +92,48 @@ Cleaning Tool removes selected temporary files, logs, and stale local data. Revi
 
 Settings controls paths, theme, language, startup behavior, and update-check preference. If the app behaves unexpectedly after a theme or path change, restart it once and verify the values again.
 
-## 9. Troubleshooting
+## 9. Mail and calendar
+
+Open it from the main menu: **Open > Mail and calendar...**. The window is a control panel for the automatic mail and calendar processing that serves the OpenClaw agents. The app itself enforces **no** rules: every limit, rule and confirmation is enforced by the backend (the `control` folder of the mail and calendar installation, by default `E:\OpenClaw`). The window only shows the state and asks the backend to change it.
+
+### Sending-state bar
+
+The bar at the top of the window is always visible:
+
+| Bar | Meaning |
+|---|---|
+| Calm: "Nothing leaves - shadow mode" | Replies are only prepared as `.eml` files. Nothing is sent. |
+| Calm: "Nothing leaves - sending is off" | Real sending is switched off. |
+| **Highlighted: "SENDING ENABLED"** | The agent can really send mail. |
+| Highlighted: scope "open" | The agent may reply to any verified sender (not only the allowlist). |
+
+### Sections
+
+| Section | What it does |
+|---|---|
+| Overview | Mailbox, counters, statistics and the latest processed mails. |
+| Settings | A form generated from the backend schema: every setting with its range, unit, default and source. A new backend setting appears without updating the app. |
+| Sender rules | Rules per sender or domain (route and autonomy). |
+| Proposals | Open proposals (past events, payments, reply drafts, scheduled replies). A draft can be edited before approval. |
+| Outbox | Prepared `.eml` files with a read-only preview; only `auto-*.eml` and `reply-*.eml` can be deleted. |
+| Recipients and templates | Allowlist of recipients, trusted event senders and reply templates. |
+| Health and jobs | Script hashes against their pin, Ollama, plugins and scheduler jobs. Slow (tens of seconds), the result is cached for 30 s. |
+| History and audit | Settings change history (with revert), send attempts and audit logs. |
+
+### Confirmations and safety
+
+- A change that widens what the agent may do (real sending, leaving shadow mode, scope "open", free autonomy, a new recipient or trusted sender, a payment with a finding) is confirmed **by the backend in a native Windows dialog**. The app only waits ("Waiting for confirmation in the Windows dialog") and then shows the result: saved, declined, or "could not be confirmed". Nothing changes when you answer No or do not answer within 2 minutes.
+- Before such a change the field shows a warning that it moves away from the **safe value**. Moving back to the safe value never needs a confirmation (button "Safe value").
+- A payment with a finding is shown in red and needs a **second explicit step** (tick the acknowledgement, then "Save anyway").
+- Locked files (`gcal-config.json`, `mail-owner.json`, or files locked by `pin.ps1`) are read-only. They are changed in a terminal via `pin.ps1 -Unlock`.
+- Subjects, names and drafts come from e-mails or the model. They are displayed as plain text and are never executed. The app never reads the `credentials` folder and never shows the app password (only whether it is set).
+- Texts of labels and descriptions in the Settings section come from the backend, so they appear in the backend language.
+
+### Backend location and simulator
+
+The installation root is stored in `MailRootPath` in `settings.json` (detected automatically). If the backend is not found, the window offers **Choose folder...**. For development without Python, set the environment variable `OPENCLAW_MAILCONTROL_FAKE` to `decline`, `accept` or `needs` before starting the app: the window then runs against sample data and shows a red "SIMULATOR" banner.
+
+## 10. Troubleshooting
 
 | Problem | What to try |
 |---|---|
