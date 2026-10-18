@@ -39,6 +39,7 @@
                             <MenuItem x:Name="MnuOpenLogAll" Header="Celý log" Tag="0" />
                         </MenuItem>
                         <MenuItem x:Name="MnuOpenPowerShell" Header="_PowerShell" />
+                        <MenuItem x:Name="MnuOpenMailControl" Header="" />
                         <Separator />
                         <MenuItem x:Name="MnuExit" Header="_Konec" InputGestureText="Alt+F4" />
                     </MenuItem>

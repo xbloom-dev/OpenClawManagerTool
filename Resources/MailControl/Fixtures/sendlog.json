@@ -1,0 +1,21 @@
+{
+ "ok": true,
+ "result": {
+  "entries": [
+   {
+    "ts": "2026-10-09T09:02:11+00:00",
+    "to": "anna@example.com",
+    "kind": "template",
+    "result": "shadow",
+    "detail": "auto-3fa91c.eml"
+   },
+   {
+    "ts": "2026-10-08T17:30:00+00:00",
+    "to": "anna@example.com",
+    "kind": "free",
+    "result": "blocked",
+    "detail": "send_enabled=false"
+   }
+  ]
+ }
+}

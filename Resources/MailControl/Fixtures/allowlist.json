@@ -1,0 +1,12 @@
+{
+ "ok": true,
+ "result": {
+  "recipients": [
+   {
+    "alias": "anna",
+    "address": "anna@example.com"
+   }
+  ],
+  "locked": false
+ }
+}
