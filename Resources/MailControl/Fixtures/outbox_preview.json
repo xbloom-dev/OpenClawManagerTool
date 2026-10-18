@@ -1,0 +1,17 @@
+{
+ "ok": true,
+ "result": {
+  "name": "auto-3fa91c.eml",
+  "notice": "The subject may quote third-party text.",
+  "headers": {
+   "From": "OpenClaw <agent@example.com>",
+   "To": "anna@example.com",
+   "Subject": "Re: Schůzka v pátek",
+   "Date": "Fri, 09 Oct 2026 09:02:11 +0000",
+   "Auto-Submitted": "auto-replied",
+   "X-OpenClaw-Auto": "1"
+  },
+  "text": "Dobrý den,\n\nděkuji za zprávu, termín v pátek v 10:00 mi vyhovuje.\n\nS pozdravem",
+  "attachments": []
+ }
+}

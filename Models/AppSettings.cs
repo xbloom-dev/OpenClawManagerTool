@@ -28,7 +28,7 @@ public enum AppTheme
 /// </summary>
 public class AppSettings
 {
-    public const int CurrentSchemaVersion = 2;
+    public const int CurrentSchemaVersion = 3;
 
     /// <summary>Verze schématu nastavení pro budoucí migrace.</summary>
     public int SchemaVersion { get; set; } = CurrentSchemaVersion;
@@ -65,6 +65,12 @@ public class AppSettings
 
     /// <summary>Opt-in kontrola aktualizaci pri startu aplikace.</summary>
     public bool CheckUpdatesOnStartup { get; set; } = false;
+
+    /// <summary>
+    /// Kořen instalace komponenty „pošta a kalendář“ (obsahuje control\control_run.py).
+    /// Výchozí hodnotu zjistí <see cref="MailControlPaths.DetectRoot"/>; od schématu 3.
+    /// </summary>
+    public string MailRootPath { get; set; } = MailControlPaths.DetectRoot();
 
     // ════════════════════════════════════════════════════════════════════════
     // v0.5 — Vzhled

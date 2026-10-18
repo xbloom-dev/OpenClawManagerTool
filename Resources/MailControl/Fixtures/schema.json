@@ -1,0 +1,746 @@
+{
+ "ok": true,
+ "result": {
+  "contract_version": 1,
+  "settings": [
+   {
+    "key": "send_enabled",
+    "group": "Odesílání",
+    "type": "bool",
+    "label": "Skutečné odesílání pošty",
+    "description": "Vypnuto = nic neodejde, připravují se jen soubory .eml. První ze dvou zámků.",
+    "tier": "confirm",
+    "file": "mail",
+    "default": false,
+    "safe_value": false,
+    "confirm_when": "value != safe_value"
+   },
+   {
+    "key": "shadow",
+    "group": "Odesílání",
+    "type": "bool",
+    "label": "Stínový režim",
+    "description": "Zapnuto = automatické odpovědi se jen připravují jako soubory a porovnávají s tím, co byste poslal vy. Druhý zámek.",
+    "tier": "confirm",
+    "file": "policy",
+    "default": true,
+    "safe_value": true,
+    "confirm_when": "value != safe_value"
+   },
+   {
+    "key": "auto_reply_scope",
+    "group": "Odesílání",
+    "type": "enum",
+    "label": "Komu smí agent odpovídat automaticky",
+    "description": "allowlist = jen adresám z allowlistu a jen odesílatelům s pravidlem (výchozí, nejbezpečnější). open = každému ověřenému odesílateli i bez pravidla (volný text); zůstává: odpověď jen původnímu odesílateli, žádná hromadná pošta ani adresy no-reply, limity, eskalace důležité pošty, zámky odesílání. Pravidlo pro konkrétního odesílatele (včetně „nic“ nebo „eskalovat“) má vždy přednost.",
+    "tier": "confirm",
+    "file": "mail",
+    "default": "allowlist",
+    "enum": [
+     "allowlist",
+     "open"
+    ],
+    "safe_value": "allowlist",
+    "confirm_when": "value != safe_value"
+   },
+   {
+    "key": "max_auto_replies_per_day",
+    "group": "Odesílání",
+    "type": "int",
+    "label": "Automatických odpovědí za den",
+    "description": "Nejvýš tolik automatických odpovědí za 24 hodin (počítají se i ty připravené jako soubor).",
+    "tier": "free",
+    "file": "mail",
+    "default": 10,
+    "unit": "za 24 h",
+    "min": 1,
+    "max": 200,
+    "confirm_when": null
+   },
+   {
+    "key": "max_auto_replies_per_recipient_per_day",
+    "group": "Odesílání",
+    "type": "int",
+    "label": "Automatických odpovědí jednomu příjemci za den",
+    "description": "Brzda proti zahlcení jednoho člověka.",
+    "tier": "free",
+    "file": "mail",
+    "default": 3,
+    "unit": "za 24 h",
+    "min": 1,
+    "max": 50,
+    "confirm_when": null
+   },
+   {
+    "key": "max_sends_per_day",
+    "group": "Odesílání",
+    "type": "int",
+    "label": "Odeslaných zpráv celkem za den",
+    "description": "Celkový strop (pozvánky i automatické odpovědi). Musí být alespoň tak velký jako limit automatických odpovědí.",
+    "tier": "free",
+    "file": "mail",
+    "default": 30,
+    "unit": "za 24 h",
+    "min": 1,
+    "max": 300,
+    "confirm_when": null
+   },
+   {
+    "key": "send_delay_minutes",
+    "group": "Odesílání",
+    "type": "int",
+    "label": "Prodleva před odesláním",
+    "description": "Automatická odpověď odejde nejdřív po této době. Má být delší než interval shrnutí (30 min), aby šla včas zrušit.",
+    "tier": "free",
+    "file": "mail",
+    "default": 45,
+    "unit": "min",
+    "min": 5,
+    "max": 720,
+    "confirm_when": null
+   },
+   {
+    "key": "sender_name",
+    "group": "Odesílání",
+    "type": "text",
+    "label": "Jméno odesílatele",
+    "description": "Zobrazované jméno v odchozích zprávách.",
+    "tier": "free",
+    "file": "mail",
+    "default": "OpenClaw",
+    "max": 80,
+    "confirm_when": null
+   },
+   {
+    "key": "signature",
+    "group": "Odesílání",
+    "type": "text",
+    "label": "Podpis",
+    "description": "Věta pod textem odchozích zpráv.",
+    "tier": "free",
+    "file": "mail",
+    "default": "Tuto zprávu odeslal automaticky asistent OpenClaw.",
+    "max": 200,
+    "confirm_when": null
+   },
+   {
+    "key": "chat_agent_raw_mail",
+    "group": "Soukromí a bezpečnost",
+    "type": "bool",
+    "label": "Chat agent smí číst texty e-mailů",
+    "description": "Vypnuto = mailbox_fetch ukáže jen fakta (odesílatel, předmět, kategorie, co se stalo), nikdy text.",
+    "tier": "confirm",
+    "file": "mail",
+    "default": true,
+    "safe_value": false,
+    "confirm_when": "value != safe_value"
+   },
+   {
+    "key": "unclassified_after_hours",
+    "group": "Třídění a shrnutí",
+    "type": "int",
+    "label": "Hlásit neřazený e-mail po",
+    "description": "Zpráva, kterou model do této doby nezařadil, se ve shrnutí objeví jako „čeká na zařazení“.",
+    "tier": "free",
+    "file": "mail",
+    "default": 3,
+    "unit": "h",
+    "min": 1,
+    "max": 48,
+    "confirm_when": null
+   },
+   {
+    "key": "reminder_every_hours",
+    "group": "Třídění a shrnutí",
+    "type": "int",
+    "label": "Připomínat neodsouhlasené návrhy po",
+    "description": "Jak často se v shrnutí znovu objeví návrh, na který nikdo neodpověděl.",
+    "tier": "free",
+    "file": "mail",
+    "default": 24,
+    "unit": "h",
+    "min": 1,
+    "max": 168,
+    "confirm_when": null
+   },
+   {
+    "key": "model_alert_every_hours",
+    "group": "Třídění a shrnutí",
+    "type": "int",
+    "label": "Opakovat výstrahu „model neodpovídá“ po",
+    "description": "Odstup mezi opakovanými výstrahami, když Ollama neodpovídá.",
+    "tier": "free",
+    "file": "mail",
+    "default": 6,
+    "unit": "h",
+    "min": 1,
+    "max": 72,
+    "confirm_when": null
+   },
+   {
+    "key": "big_amount_from",
+    "group": "Třídění a shrnutí",
+    "type": "int",
+    "label": "Částka považovaná za „peníze“ od",
+    "description": "E-mail s touto částkou se eskaluje k vám, ať je kolem jakákoli slova.",
+    "tier": "free",
+    "file": "mail",
+    "default": 20000,
+    "unit": "Kč",
+    "min": 1000,
+    "max": 10000000,
+    "confirm_when": null
+   },
+   {
+    "key": "max_pending_decisions",
+    "group": "Třídění a shrnutí",
+    "type": "int",
+    "label": "Nejvýš otevřených návrhů",
+    "description": "Další návrhy se nevytvoří, dokud některé nevyřídíte (ochrana proti zahlcení).",
+    "tier": "free",
+    "file": "mail",
+    "default": 10,
+    "min": 1,
+    "max": 100,
+    "confirm_when": null
+   },
+   {
+    "key": "ollama_url",
+    "group": "Třídění a shrnutí",
+    "type": "text",
+    "label": "Adresa lokálního modelu (Ollama)",
+    "description": "Jen lokální adresa; používá se ke kontrole, že model odpovídá.",
+    "tier": "free",
+    "file": "mail",
+    "default": "http://127.0.0.1:11434",
+    "max": 80,
+    "pattern": "^http://(127\\.0\\.0\\.1|localhost)(:\\d{2,5})?$",
+    "confirm_when": null
+   },
+   {
+    "key": "backend_mode",
+    "group": "Schránka",
+    "type": "enum",
+    "label": "Způsob čtení pošty",
+    "description": "auto = Gmail API, když existuje token, jinak IMAP.",
+    "tier": "free",
+    "file": "mail",
+    "default": "auto",
+    "enum": [
+     "auto",
+     "api",
+     "imap"
+    ],
+    "confirm_when": null
+   },
+   {
+    "key": "fallback",
+    "group": "Schránka",
+    "type": "bool",
+    "label": "Záložní čtení druhým způsobem",
+    "description": "Když selže hlavní způsob čtení, zkusí se druhý (odesílání se nikdy neopakuje jinou cestou).",
+    "tier": "free",
+    "file": "mail",
+    "default": true,
+    "confirm_when": null
+   }
+  ],
+  "groups": [
+   "Odesílání",
+   "Soukromí a bezpečnost",
+   "Třídění a shrnutí",
+   "Schránka"
+  ],
+  "commands": {
+   "allowlist": {
+    "summary": "Recipients the agent may write to (alias -> address).",
+    "group": "people",
+    "write": false,
+    "confirm": "",
+    "args": {}
+   },
+   "allowlist_add": {
+    "summary": "Add a recipient (the human dialog confirms: this widens who the agent can write to).",
+    "group": "people",
+    "write": true,
+    "confirm": "always",
+    "args": {
+     "address": {
+      "type": "str",
+      "required": true,
+      "max": 120
+     },
+     "alias": {
+      "type": "str",
+      "max": 40
+     }
+    }
+   },
+   "allowlist_remove": {
+    "summary": "Remove a recipient by alias or address (free: it only narrows what the agent may do).",
+    "group": "people",
+    "write": true,
+    "confirm": "",
+    "args": {
+     "alias": {
+      "type": "str",
+      "required": true,
+      "max": 120
+     }
+    }
+   },
+   "audit": {
+    "summary": "Tail of an audit log (secrets are redacted).",
+    "group": "activity",
+    "write": false,
+    "confirm": "",
+    "args": {
+     "source": {
+      "type": "enum",
+      "enum": [
+       "control",
+       "mail",
+       "gcal"
+      ],
+      "default": "control"
+     },
+     "n": {
+      "type": "int",
+      "min": 1,
+      "max": 500,
+      "default": 50
+     }
+    }
+   },
+   "config_file_set": {
+    "summary": "Write to a protected file (gcal-config.json, mail-owner.json). Always refused: locked, or read_only.",
+    "group": "files",
+    "write": true,
+    "confirm": "",
+    "args": {
+     "file": {
+      "type": "str",
+      "required": true,
+      "max": 60
+     },
+     "key": {
+      "type": "str",
+      "required": true,
+      "max": 60
+     },
+     "value": {
+      "type": "any",
+      "required": true
+     }
+    }
+   },
+   "config_files": {
+    "summary": "Configuration files: which exist, which are locked, and the non-secret content of the protected ones.",
+    "group": "files",
+    "write": false,
+    "confirm": "",
+    "args": {}
+   },
+   "health": {
+    "summary": "Integrity hashes, Ollama, plugins and scheduler jobs in one view (slow: runs the OpenClaw CLI; cached 30 s).",
+    "group": "activity",
+    "write": false,
+    "confirm": "",
+    "args": {
+     "refresh": {
+      "type": "bool",
+      "default": false
+     }
+    }
+   },
+   "history": {
+    "summary": "Latest settings changes (newest first).",
+    "group": "settings",
+    "write": false,
+    "confirm": "",
+    "args": {
+     "n": {
+      "type": "int",
+      "min": 1,
+      "max": 200,
+      "default": 30
+     }
+    }
+   },
+   "jobs": {
+    "summary": "Scheduler jobs of the mail pipeline (OpenClaw CLI; cached 30 s).",
+    "group": "activity",
+    "write": false,
+    "confirm": "",
+    "args": {
+     "refresh": {
+      "type": "bool",
+      "default": false
+     }
+    }
+   },
+   "outbox": {
+    "summary": "Prepared mail files (auto-*.eml shadow replies, reply-*.eml drafts, invitation previews).",
+    "group": "outbox",
+    "write": false,
+    "confirm": "",
+    "args": {}
+   },
+   "outbox_delete": {
+    "summary": "Delete a prepared auto-*.eml or reply-*.eml file.",
+    "group": "outbox",
+    "write": true,
+    "confirm": "",
+    "args": {
+     "name": {
+      "type": "str",
+      "required": true,
+      "max": 90
+     }
+    }
+   },
+   "outbox_preview": {
+    "summary": "Headers and text of one prepared mail (nothing is opened or sent).",
+    "group": "outbox",
+    "write": false,
+    "confirm": "",
+    "args": {
+     "name": {
+      "type": "str",
+      "required": true,
+      "max": 90
+     }
+    }
+   },
+   "proposal_decide": {
+    "summary": "Decide one proposal. Same low-risk outcomes as in chat (event records, payment reminder, draft file); nothing is paid.",
+    "group": "proposals",
+    "write": true,
+    "confirm": "a reply that would really leave, or a flagged payment (override)",
+    "args": {
+     "id": {
+      "type": "str",
+      "required": true,
+      "max": 16
+     },
+     "choice": {
+      "type": "enum",
+      "enum": [
+       "yes",
+       "no"
+      ],
+      "required": true
+     },
+     "override": {
+      "type": "bool",
+      "default": false
+     }
+    }
+   },
+   "proposal_revise": {
+    "summary": "Replace the text of an open reply draft (stays open; nothing is saved or sent).",
+    "group": "proposals",
+    "write": true,
+    "confirm": "",
+    "args": {
+     "id": {
+      "type": "str",
+      "required": true,
+      "max": 16
+     },
+     "text": {
+      "type": "str",
+      "required": true,
+      "max": 1200
+     }
+    }
+   },
+   "proposals": {
+    "summary": "Open proposals waiting for a decision (text comes from e-mail or the model: untrusted).",
+    "group": "proposals",
+    "write": false,
+    "confirm": "",
+    "args": {}
+   },
+   "revert": {
+    "summary": "Put a setting back to the value it had before a history entry (same rules as set).",
+    "group": "settings",
+    "write": true,
+    "confirm": "same as set",
+    "args": {
+     "id": {
+      "type": "str",
+      "required": true,
+      "max": 16
+     },
+     "force": {
+      "type": "bool",
+      "default": false
+     }
+    }
+   },
+   "rule_remove": {
+    "summary": "Remove a rule by id (first 4+ characters).",
+    "group": "rules",
+    "write": true,
+    "confirm": "",
+    "args": {
+     "id": {
+      "type": "str",
+      "required": true,
+      "max": 16
+     }
+    }
+   },
+   "rule_set": {
+    "summary": "Add or replace a rule (same sender+domain+category replaces). Autonomy 'free' needs the human dialog.",
+    "group": "rules",
+    "write": true,
+    "confirm": "when autonomy is free",
+    "args": {
+     "sender": {
+      "type": "str",
+      "max": 120
+     },
+     "domain": {
+      "type": "str",
+      "max": 120
+     },
+     "category": {
+      "type": "str",
+      "max": 40
+     },
+     "route": {
+      "type": "enum",
+      "enum": [
+       "auto",
+       "escalate"
+      ],
+      "default": "auto"
+     },
+     "autonomy": {
+      "type": "enum",
+      "enum": [
+       "none",
+       "rsvp",
+       "template",
+       "free"
+      ],
+      "default": "none"
+     },
+     "note": {
+      "type": "str",
+      "max": 80
+     }
+    }
+   },
+   "rules": {
+    "summary": "Sender rules and the shadow switch.",
+    "group": "rules",
+    "write": false,
+    "confirm": "",
+    "args": {}
+   },
+   "schema": {
+    "summary": "The contract: settings, commands, error codes.",
+    "group": "meta",
+    "write": false,
+    "confirm": "",
+    "args": {}
+   },
+   "sender_add": {
+    "summary": "Add a trusted sender (the human dialog confirms).",
+    "group": "people",
+    "write": true,
+    "confirm": "always",
+    "args": {
+     "address": {
+      "type": "str",
+      "required": true,
+      "max": 120
+     }
+    }
+   },
+   "sender_remove": {
+    "summary": "Remove a trusted sender (free).",
+    "group": "people",
+    "write": true,
+    "confirm": "",
+    "args": {
+     "address": {
+      "type": "str",
+      "required": true,
+      "max": 120
+     }
+    }
+   },
+   "senders": {
+    "summary": "Trusted senders of calendar events (with DMARC pass they create normal events).",
+    "group": "people",
+    "write": false,
+    "confirm": "",
+    "args": {}
+   },
+   "sendlog": {
+    "summary": "Latest automatic-reply attempts (sent / preview / shadow / blocked).",
+    "group": "activity",
+    "write": false,
+    "confirm": "",
+    "args": {
+     "n": {
+      "type": "int",
+      "min": 1,
+      "max": 200,
+      "default": 30
+     }
+    }
+   },
+   "set": {
+    "summary": "Change one setting. Checked against the registry; tier 'confirm' moved away from its safe value needs the human dialog.",
+    "group": "settings",
+    "write": true,
+    "confirm": "when tier=confirm and the value is not the safe value",
+    "args": {
+     "key": {
+      "type": "str",
+      "required": true,
+      "max": 80
+     },
+     "value": {
+      "type": "any",
+      "required": true
+     }
+    }
+   },
+   "settings": {
+    "summary": "All settings with current value, default, range and whether the file is locked.",
+    "group": "settings",
+    "write": false,
+    "confirm": "",
+    "args": {
+     "group": {
+      "type": "str",
+      "max": 80,
+      "description": "only this group"
+     }
+    }
+   },
+   "state": {
+    "summary": "One snapshot: values, switches, counts, locked files.",
+    "group": "meta",
+    "write": false,
+    "confirm": "",
+    "args": {}
+   },
+   "stats": {
+    "summary": "Sorting statistics for the last N days.",
+    "group": "activity",
+    "write": false,
+    "confirm": "",
+    "args": {
+     "days": {
+      "type": "int",
+      "min": 1,
+      "max": 365,
+      "default": 30
+     }
+    }
+   },
+   "template_remove": {
+    "summary": "Remove a template.",
+    "group": "templates",
+    "write": true,
+    "confirm": "",
+    "args": {
+     "id": {
+      "type": "str",
+      "required": true,
+      "max": 40
+     }
+    }
+   },
+   "template_set": {
+    "summary": "Add or replace a template: plain text, no links or account numbers, only {date} {time} {summary}.",
+    "group": "templates",
+    "write": true,
+    "confirm": "",
+    "args": {
+     "id": {
+      "type": "str",
+      "required": true,
+      "max": 40
+     },
+     "body": {
+      "type": "str",
+      "required": true,
+      "max": 4000
+     }
+    }
+   },
+   "templates": {
+    "summary": "Reply templates (id -> text). Allowed fields: {date} {time} {summary}.",
+    "group": "templates",
+    "write": false,
+    "confirm": "",
+    "args": {}
+   },
+   "triage": {
+    "summary": "What happened to the latest mails (read from the records; unlike mail_run.py triage it leaves no taint mark).",
+    "group": "activity",
+    "write": false,
+    "confirm": "",
+    "args": {
+     "n": {
+      "type": "int",
+      "min": 1,
+      "max": 30,
+      "default": 10
+     }
+    }
+   }
+  },
+  "errors": {
+   "unknown_command": "the command does not exist",
+   "bad_request": "malformed request or arguments",
+   "invalid_value": "the value is outside the allowed range or form",
+   "locked": "the file is locked (pin.ps1 -Unlock is Bloom's decision)",
+   "read_only": "this file is only displayed by the app",
+   "needs_confirmation": "a human has to confirm and no confirmation could be shown",
+   "declined": "the human said no (or did not answer)",
+   "not_found": "no such item",
+   "conflict": "the current state differs from what the request assumed",
+   "refused": "a rule of the mail module refused it",
+   "busy": "another operation holds the lock, try again",
+   "unauthorized": "missing or wrong token",
+   "forbidden": "wrong Host or Origin",
+   "too_large": "request is too large",
+   "internal": "unexpected error"
+  },
+  "envelope": {
+   "ok": {
+    "ok": true,
+    "result": "..."
+   },
+   "error": {
+    "ok": false,
+    "error": {
+     "code": "...",
+     "message": "...",
+     "hint": "..."
+    }
+   }
+  },
+  "http": {
+   "bind": "127.0.0.1",
+   "default_port": 47615,
+   "auth": "Authorization: Bearer <credentials\\control-token.txt>",
+   "endpoints": [
+    "GET /ping",
+    "GET /schema",
+    "GET /state",
+    "POST /call {command, args}"
+   ],
+   "max_request_bytes": 65536
+  }
+ }
+}

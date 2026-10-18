@@ -1,0 +1,59 @@
+{
+ "ok": true,
+ "result": {
+  "contract_version": 1,
+  "time": "2026-10-09T20:44:53+00:00",
+  "settings": {
+   "send_enabled": false,
+   "shadow": true,
+   "auto_reply_scope": "allowlist",
+   "max_auto_replies_per_day": 10,
+   "max_auto_replies_per_recipient_per_day": 3,
+   "max_sends_per_day": 30,
+   "send_delay_minutes": 45,
+   "sender_name": "OpenClaw",
+   "signature": "Tuto zprávu odeslal automaticky asistent OpenClaw.",
+   "chat_agent_raw_mail": true,
+   "unclassified_after_hours": 3,
+   "reminder_every_hours": 24,
+   "model_alert_every_hours": 6,
+   "big_amount_from": 20000,
+   "max_pending_decisions": 10,
+   "ollama_url": "http://127.0.0.1:11434",
+   "backend_mode": "auto",
+   "fallback": true
+  },
+  "sending": {
+   "send_enabled": false,
+   "shadow": true,
+   "mode": "shadow",
+   "sends_last_24h": 0,
+   "scope": "allowlist"
+  },
+  "privacy": {
+   "chat_agent_raw_mail": true
+  },
+  "mailbox": {
+   "address": "agent@example.com",
+   "backend": "gmail_api",
+   "password_set": true,
+   "gmail_token": true
+  },
+  "counts": {
+   "rules": 2,
+   "proposals": 3,
+   "outbox": 2,
+   "allowlist": 1,
+   "trusted_senders": 1
+  },
+  "locked": {
+   "settings_files": {
+    "mail": false,
+    "policy": false
+   },
+   "gcal-config.json": true,
+   "mail-owner.json": true
+  },
+  "token_exists": false
+ }
+}

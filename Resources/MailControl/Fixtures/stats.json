@@ -1,0 +1,28 @@
+{
+ "ok": true,
+ "result": {
+  "days": 30,
+  "mails": 12,
+  "by_category": {
+   "reply_needed": 4,
+   "invoice": 2,
+   "newsletter": 5,
+   "past_record": 1
+  },
+  "by_state": {
+   "done": 9,
+   "proposed": 3
+  },
+  "needs_attention": 3,
+  "automatic_replies": {
+   "shadow": 2
+  },
+  "unclassified_share": 0.0,
+  "proposals_by_kind_and_status": {
+   "past_events": {
+    "added": 1
+   }
+  },
+  "median_minutes_from_queue_to_verdict": 12.5
+ }
+}

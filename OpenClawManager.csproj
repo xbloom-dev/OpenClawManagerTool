@@ -57,6 +57,11 @@
     <Resource Include="Resources\Icons\ModernDark\*.png" Condition="'$(BuildProfile)' != 'Lite'" />
     <Resource Include="Resources\Icons\CrabCute\*.png" Condition="'$(BuildProfile)' != 'Lite'" />
 
+    <!-- Modul Pošta a kalendář: fixtures kontraktu pro FakeMailControlRunner a testy (nejsou tajné). -->
+    <EmbeddedResource Include="Resources\MailControl\Fixtures\*.json">
+      <LogicalName>OpenClawManager.MailControlFixtures.%(Filename)%(Extension)</LogicalName>
+    </EmbeddedResource>
+
     <!-- v1.0: Offline xterm.js assets for embedded terminal -->
     <Resource Include="Resources\Terminal\xterm.min.js" />
     <Resource Include="Resources\Terminal\xterm.min.css" />

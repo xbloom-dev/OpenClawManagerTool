@@ -1,0 +1,31 @@
+{
+ "ok": true,
+ "result": {
+  "files": [
+   {
+    "name": "gcal-config.json",
+    "exists": true,
+    "locked": true,
+    "editable_by_app": false,
+    "fields": {},
+    "purpose": "Jediný kalendář, který agenti smějí používat."
+   },
+   {
+    "name": "mail-owner.json",
+    "exists": true,
+    "locked": true,
+    "editable_by_app": false,
+    "fields": {},
+    "purpose": "Id majitele, jehož zprávy v chatu platí jako odpověď Blooma."
+   },
+   {
+    "name": "policy.json",
+    "exists": true,
+    "locked": false,
+    "editable_by_app": true,
+    "fields": {},
+    "purpose": "Pravidla odesílatelů a stínový režim."
+   }
+  ]
+ }
+}

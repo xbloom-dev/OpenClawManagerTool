@@ -1,0 +1,71 @@
+{
+ "ok": true,
+ "result": {
+  "integrity": [
+   {
+    "file": "gcal.py",
+    "pinned": true,
+    "ok": true,
+    "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+   },
+   {
+    "file": "mailtool.py",
+    "pinned": true,
+    "ok": true,
+    "sha256": "1111111111111111111111111111111111111111111111111111111111111111"
+   },
+   {
+    "file": "control_api.py",
+    "pinned": true,
+    "ok": true,
+    "sha256": "2222222222222222222222222222222222222222222222222222222222222222"
+   }
+  ],
+  "ollama": {
+   "ok": true,
+   "models": 3,
+   "loaded": [
+    {
+     "name": "gemma4:26b",
+     "expires_at": "2026-10-09T09:45:00+00:00"
+    }
+   ]
+  },
+  "plugins": [
+   {
+    "id": "openclaw-calendar-mail",
+    "ok": true,
+    "status": "enabled"
+   },
+   {
+    "id": "openclaw-mail-decide",
+    "ok": true,
+    "status": "enabled"
+   }
+  ],
+  "jobs": [
+   {
+    "id": "job-1",
+    "name": "calendar-mail-triage",
+    "enabled": true,
+    "status": "ok",
+    "last_run": "2026-10-09T09:00:00+00:00",
+    "next_run": "2026-10-09T09:30:00+00:00",
+    "every_minutes": 30,
+    "last_error": null
+   },
+   {
+    "id": "job-2",
+    "name": "calendar-mail-summary",
+    "enabled": true,
+    "status": "ok",
+    "last_run": "2026-10-09T08:30:00+00:00",
+    "next_run": "2026-10-09T09:30:00+00:00",
+    "every_minutes": 60,
+    "last_error": null
+   }
+  ],
+  "problems": [],
+  "checked": "2026-10-09T09:20:00+00:00"
+ }
+}

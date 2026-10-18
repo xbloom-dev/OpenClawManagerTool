@@ -125,7 +125,8 @@
       <a href="#tokens">6. Token Manager</a>
       <a href="#cleaning">7. Cleaning Tool</a>
       <a href="#settings">8. Nastavení</a>
-      <a href="#troubleshooting">9. Řešení potíží</a>
+      <a href="#mail">9. Pošta a kalendář</a>
+      <a href="#troubleshooting">10. Řešení potíží</a>
     </nav>
   </header>
 
@@ -206,8 +207,49 @@
     <p>Nastavení spravuje cesty, téma, jazyk, chování při startu a volbu kontroly aktualizací. Pokud se aplikace po změně tématu nebo cest chová nečekaně, jednou ji restartuj a hodnoty znovu ověř.</p>
   </section>
 
+  <section id="mail">
+    <h2>9. Pošta a kalendář</h2>
+    <p>Otevře se z hlavního menu: <strong>Otevřít &gt; Pošta a kalendář...</strong>. Okno je ovládací panel automatického zpracování pošty a kalendáře pro agenty OpenClaw. Aplikace sama <strong>žádná</strong> pravidla nevynucuje: všechny limity, pravidla a potvrzování vynucuje backend (složka <code>control</code> v instalaci pošty a kalendáře, výchozí <code>E:\OpenClaw</code>). Okno jen ukazuje stav a žádá backend o změnu.</p>
+    <h3>Pruh se stavem odesílání</h3>
+    <p>Pruh na horním okraji okna je vidět vždy:</p>
+    <table>
+      <thead><tr><th>Pruh</th><th>Význam</th></tr></thead>
+      <tbody>
+        <tr><td>Klidný: „Nic neodchází – stínový režim“</td><td>Odpovědi se jen připravují jako soubory <code>.eml</code>. Nic se neposílá.</td></tr>
+        <tr><td>Klidný: „Nic neodchází – odesílání je vypnuté“</td><td>Skutečné odesílání je vypnuté.</td></tr>
+        <tr><td><strong>Výrazný: „ODESÍLÁNÍ ZAPNUTO“</strong></td><td>Agent může skutečně odesílat poštu.</td></tr>
+        <tr><td>Výrazný: scope „open“</td><td>Agent smí odpovídat každému ověřenému odesílateli (nejen z allowlistu).</td></tr>
+      </tbody>
+    </table>
+    <h3>Oddíly</h3>
+    <table>
+      <thead><tr><th>Oddíl</th><th>K čemu je</th></tr></thead>
+      <tbody>
+        <tr><td>Přehled</td><td>Schránka, počty, statistika a poslední zpracované zprávy.</td></tr>
+        <tr><td>Nastavení</td><td>Formulář generovaný ze schématu backendu: každé nastavení s rozsahem, jednotkou, výchozí hodnotou a zdrojem. Nové nastavení backendu se objeví bez úpravy aplikace.</td></tr>
+        <tr><td>Pravidla odesílatelů</td><td>Pravidla podle odesílatele nebo domény (cesta a autonomie).</td></tr>
+        <tr><td>Návrhy</td><td>Otevřené návrhy (události z minulosti, platby, koncepty odpovědí, naplánované odpovědi). Koncept lze před schválením upravit.</td></tr>
+        <tr><td>Odchozí</td><td>Připravené soubory <code>.eml</code> s náhledem jen pro čtení; smazat jde jen <code>auto-*.eml</code> a <code>reply-*.eml</code>.</td></tr>
+        <tr><td>Příjemci a šablony</td><td>Allowlist příjemců, důvěryhodní odesílatelé událostí a šablony odpovědí.</td></tr>
+        <tr><td>Zdraví a úlohy</td><td>Hashe skriptů proti připnutí, Ollama, pluginy a úlohy plánovače. Pomalé (desítky sekund), výsledek se 30 s drží v paměti.</td></tr>
+        <tr><td>Historie a audit</td><td>Historie změn nastavení (s návratem), pokusy o odeslání a audit.</td></tr>
+      </tbody>
+    </table>
+    <h3>Potvrzování a bezpečnost</h3>
+    <ul>
+      <li>Změnu, která rozšiřuje, co agent smí (skutečné odesílání, vypnutí stínového režimu, scope „open“, autonomie „free“, nový příjemce nebo důvěryhodný odesílatel, platba s nálezem), potvrzuje <strong>backend nativním dialogem Windows</strong>. Aplikace jen čeká („Čeká se na potvrzení v dialogu Windows“) a ukáže výsledek: uloženo, zamítnuto, nebo „nešlo potvrdit“. Když zvolíš Ne nebo do 2 minut neodpovíš, nic se nezmění.</li>
+      <li>Před takovou změnou pole ukáže varování, že se přesouvá od <strong>bezpečné hodnoty</strong>. Návrat na bezpečnou hodnotu potvrzení nikdy nevyžaduje (tlačítko „Bezpečná hodnota“).</li>
+      <li>Platba s nálezem je červeně a vyžaduje <strong>druhý výslovný krok</strong> (zaškrtnout potvrzení, potom „Přesto uložit“).</li>
+      <li>Zamčené soubory (<code>gcal-config.json</code>, <code>mail-owner.json</code> nebo soubory zamčené <code>pin.ps1</code>) jsou jen pro čtení. Mění se v terminálu přes <code>pin.ps1 -Unlock</code>.</li>
+      <li>Předměty, jména a koncepty pocházejí z e-mailů nebo od modelu. Zobrazují se jako prostý text a nikdy se nespouštějí. Aplikace nikdy nečte složku <code>credentials</code> a nezobrazuje heslo aplikace (jen to, zda je nastavené).</li>
+      <li>Popisky a popisy nastavení pocházejí z backendu, proto se zobrazují v jazyce backendu.</li>
+    </ul>
+    <h3>Umístění backendu a simulátor</h3>
+    <p>Kořen instalace je v <code>settings.json</code> jako <code>MailRootPath</code> (zjistí se automaticky). Když se backend nenajde, okno nabídne <strong>Vybrat složku...</strong>. Pro vývoj bez Pythonu nastav před spuštěním aplikace proměnnou prostředí <code>OPENCLAW_MAILCONTROL_FAKE</code> na <code>decline</code>, <code>accept</code> nebo <code>needs</code>: okno pak běží nad ukázkovými daty a ukazuje červený pruh „SIMULÁTOR“.</p>
+  </section>
+
   <section id="troubleshooting">
-    <h2>9. Řešení potíží</h2>
+    <h2>10. Řešení potíží</h2>
     <table>
       <thead><tr><th>Problém</th><th>Co zkusit</th></tr></thead>
       <tbody>
