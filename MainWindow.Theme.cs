@@ -409,16 +409,18 @@ public partial class MainWindow
 
     private void ApplyStandardDarkShell()
     {
-        // Všechny barvy z XAML tokenů — žádné hardcoded hodnoty
+        // Všechny barvy z XAML tokenů — žádné hardcoded hodnoty.
+        // Fallbacky odpovídají hodnotám v Theme.StandardDark.xaml.
         var chrome    = ThemeService.GetBrush("Theme.Brush.Chrome",         Color.FromRgb(0x12, 0x12, 0x12));
         var bg        = ThemeService.GetBrush("Theme.Brush.Background",     Color.FromRgb(0x28, 0x28, 0x28));
-        var active    = ThemeService.GetBrush("Theme.Brush.Active",         Color.FromRgb(0x38, 0x38, 0x38));
-        var hover     = ThemeService.GetBrush("Theme.Brush.Hover",          Color.FromRgb(0x46, 0x46, 0x46));
-        var pressed   = ThemeService.GetBrush("Theme.Brush.Pressed",        Color.FromRgb(0x53, 0x53, 0x53));
+        var tui       = ThemeService.GetBrush("Theme.Brush.TuiBackground",  Color.FromRgb(0x19, 0x19, 0x19));
+        var active    = ThemeService.GetBrush("Theme.Brush.Active",         Color.FromRgb(0x4A, 0x4A, 0x4A));
+        var hover     = ThemeService.GetBrush("Theme.Brush.Hover",          Color.FromRgb(0x5C, 0x5C, 0x5C));
+        var pressed   = ThemeService.GetBrush("Theme.Brush.Pressed",        Color.FromRgb(0x6E, 0x6E, 0x6E));
         var separator = ThemeService.GetBrush("Theme.Brush.Separator",      Color.FromRgb(0x1E, 0x1E, 0x1E));
         var primary   = ThemeService.GetBrush("Theme.Brush.Text.Primary",   Colors.White);
         var secondary = ThemeService.GetBrush("Theme.Brush.Text.Secondary", Color.FromRgb(0x78, 0x78, 0x78));
-        var menuHover = ThemeService.GetBrush("Theme.Brush.Menu.Hover",     Color.FromRgb(0x38, 0x38, 0x38));
+        var menuHover = ThemeService.GetBrush("Theme.Brush.Menu.Hover",     Color.FromRgb(0x4A, 0x4A, 0x4A));
 
         // ── Okno ─────────────────────────────────────────────────────────────
         Background = bg;
@@ -454,7 +456,7 @@ public partial class MainWindow
         GrpTools.BorderBrush    = Brushes.Transparent;
         GrpTools.BorderThickness = new Thickness(0);
 
-        // ── GrpLatency + GrpAppLog — flat Active (#383838), bez headeru ──────
+        // ── GrpLatency + GrpAppLog — flat Active, bez headeru ────────────────
         foreach (var grp in new[] { GrpLatency, GrpAppLog })
         {
             grp.Style          = FindThemeStyle("Style.GroupBox.Hidden");
@@ -469,10 +471,10 @@ public partial class MainWindow
         AppLog.BorderBrush     = Brushes.Transparent;
         AppLog.BorderThickness = new Thickness(0);
 
-        // ── TUI okno — nejtmavší (#121212 = Chrome) ───────────────────────────
-        RightPanel.Background    = chrome;
-        SplashOverlay.Background = chrome;
-        Terminal.SetShellBackground(chrome);
+        // ── TUI okno — světle černé (#191919, mezivrstva Chrome/Background) ──
+        RightPanel.Background    = tui;
+        SplashOverlay.Background = tui;
+        Terminal.SetShellBackground(tui);
         SplashProgress.Foreground = hover;
 
         // ── Akce tlačítka (TUI + Gateway) — výrazná idle ────────────────────
