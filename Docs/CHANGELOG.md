@@ -2,6 +2,15 @@
 
 ---
 
+## v2.0.6 - 19 October 2026
+
+Patch release on top of v2.0.5 (without the Mail and Calendar module, which ships in v3.0.0).
+
+### Fixed
+- The EXE file properties (FileVersion, AssemblyVersion) now match the version shown in the status bar. Both are derived from `Version`, including `-p:Version` in CI, instead of being hardcoded in the project file.
+
+---
+
 ## v2.0.5 - 4 July 2026
 
 ### Modern Dark

@@ -6,10 +6,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-    <AssemblyVersion>2.0.5.0</AssemblyVersion>
-    <FileVersion>2.0.5.0</FileVersion>
-    <Version>2.0.5</Version>
+    <Version>2.0.6</Version>
     <ApplicationIcon>Resources\app-icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <!-- AssemblyVersion/FileVersion se odvozují z Version (i z -p:Version v CI),
+       aby vlastnosti EXE souhlasily s verzí ve stavovém řádku.
+       Přípona za pomlčkou (např. 2.0.6-dev) se do číselné verze nepromítá. -->
+  <PropertyGroup>
+    <VersionNumber>$([System.Text.RegularExpressions.Regex]::Match('$(Version)', '^\d+\.\d+\.\d+').Value)</VersionNumber>
+    <AssemblyVersion Condition="'$(VersionNumber)' != ''">$(VersionNumber).0</AssemblyVersion>
+    <FileVersion Condition="'$(VersionNumber)' != ''">$(VersionNumber).0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(BuildProfile)' == 'Lite'">
