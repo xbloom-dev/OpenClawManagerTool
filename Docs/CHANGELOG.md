@@ -2,7 +2,7 @@
 
 ---
 
-## Unreleased (v2.0.6)
+## v2.0.6 - 19 October 2026
 
 Patch release on top of v2.0.5 (without the Mail and Calendar module, which ships in v3.0.0).
 
