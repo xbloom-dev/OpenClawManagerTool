@@ -2,7 +2,7 @@
 
 ---
 
-## Unreleased (v2.0.6)
+## Unreleased (v3.0.0)
 
 ### Mail and calendar control module
 - Added the **Mail and calendar** window (menu *Open > Mail and calendar...*): a control panel for the automatic mail and calendar processing used by OpenClaw agents (overview, settings, sender rules, proposals, outbox, recipients and templates, health and jobs, history and audit).
@@ -14,6 +14,23 @@
 - New `MailRootPath` setting (settings schema 3) with migration and test; CS/EN strings `Str_MailControl_*`.
 - Overview shows "mail runs skipped in the heavy-task window" when the backend returns `paused_runs` (settings of the window appear automatically from the schema).
 - 30 new console tests (contract parsing, error mapping, form generation, safety behaviour, migration, localization consistency).
+
+### Standard Dark
+- Brighter Active/Hover/Pressed tokens (`#4A4A4A` / `#5C5C5C` / `#6E6E6E`) and a new `Theme.Brush.TuiBackground` (`#191919`) for the TUI panel, splash and terminal.
+- `SystemColors` overrides fix the light border of the system menu popup.
+
+### Packaging
+- The Lite build ships only the Legacy theme preview (the other previews were never shown).
+- Removed the unused `OpenClawManager-Full.iss` and `OpenClawManager-Lite.iss`; CI builds the single Full/Lite setup from `OpenClawManager.iss`.
+
+---
+
+## Unreleased (v2.0.6)
+
+Patch release on top of v2.0.5 (without the Mail and Calendar module, which ships in v3.0.0).
+
+### Fixed
+- The EXE file properties (FileVersion, AssemblyVersion) now match the version shown in the status bar. Both are derived from `Version`, including `-p:Version` in CI, instead of being hardcoded in the project file.
 
 ---
 
